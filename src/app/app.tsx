@@ -1,26 +1,51 @@
-/**
-* Dream Journal App
-*/
+/*\
+|*|  :: Dream Journey ::
+|*|
+|*|  Dream Journal App - Record and Search Daily Dream Entries
+|*|  https://github.com/gitbrent/dream-journal-app
+|*|
+|*|  This library is released under the MIT Public License (MIT)
+|*|
+|*|  Dream Journal App (C) 2019-present Brent Ely (https://github.com/gitbrent)
+|*|
+|*|  Permission is hereby granted, free of charge, to any person obtaining a copy
+|*|  of this software and associated documentation files (the "Software"), to deal
+|*|  in the Software without restriction, including without limitation the rights
+|*|  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+|*|  copies of the Software, and to permit persons to whom the Software is
+|*|  furnished to do so, subject to the following conditions:
+|*|
+|*|  The above copyright notice and this permission notice shall be included in all
+|*|  copies or substantial portions of the Software.
+|*|
+|*|  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+|*|  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+|*|  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+|*|  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+|*|  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+|*|  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+|*|  SOFTWARE.
+\*/
+
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import APP_LOGO_BASE64 from '../img/logo_base64';
-//import Modal from 'react-bootstrap/Button';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 
-/*
 interface IDream {
-	title?: string;
-	notes?: string;
+	dreamTitle: string;
+	dreamDetails?: string;
 	lucidType?: 'dild' | 'mild' | 'wbtb' | 'other';
 }
 interface IDailyEntry {
-	entryDate: string;
-	bedTime?: string;
-	prepNotes?: string;
-	wakeNotes?: string;
+	entryDate: Date;
+	bedTime?: Date;
+	notesPrep?: string;
+	notesWake?: string;
 	dreamSigns?: Array<string>;
 	dreams?: Array<IDream>;
 }
-*/
 
 var dreamsJson = null;
 try {
@@ -34,16 +59,17 @@ catch(ex) {
 // TODO: https://reactjs.org/docs/forms.html
 // FYI: https://stackoverflow.com/questions/24502898/show-or-hide-element-in-react
 
-class AppNavBar extends React.Component {
-	constructor(props) {
+class AppNavBar extends React.Component<{ onChange?: Function }> {
+	constructor(props: Readonly<{ onChange?: Function; }>) {
 		super(props);
-
-		// This binding is necessary to make `this` work in the callback
-	    this.handleClick = this.handleClick.bind(this);
 	}
 
-	handleClick = () => {
-  		console.log('doSomething!');
+	changeHandler = (e) => {
+        if (typeof this.props.onChange === 'function') {
+			//this.props.onChange(e.target.value);
+			//this.props.onChange('TAB1');
+            this.props.onChange(true);
+        }
     }
 
 	render() {
@@ -70,7 +96,7 @@ class AppNavBar extends React.Component {
 					</ul>
 				</div>
 				<form className="form-inline mb-0">
-					<button type="button" onClick={this.handleClick} className="btn btn-outline-primary mr-2">Load Data File</button>
+					<button type="button" onClick={this.changeHandler} className="btn btn-outline-primary mr-2">Load Data File</button>
 					<button className="btn btn-outline-success" type="button" disabled>Save Data File</button>
 				</form>
 			</nav>
@@ -89,14 +115,13 @@ class TabHome extends React.Component {
 				<div className="container mt-5">
 					<div className="jumbotron">
 						<h1 className="display-4 text-primary mb-3">
-							<img src={APP_LOGO_BASE64} width="75" height="75" className="mr-4" alt="" />Dream Journal
+							<img src={APP_LOGO_BASE64} width="150" height="150" className="mr-4" alt="Logo" />Dream Journal App
 						</h1>
 						<p className="lead">Record your daily dream journal entries into well-formatted JSON.</p>
 						<hr className="my-4" />
 						<p>This enables metrics, keyword searches and much more so you can make the best of your dreams.</p>
 						<a className="btn btn-primary btn-lg" href="#" role="button">Get Started</a>
 					</div>
-					<FormNewEntry />
 				</div>
 			);
 		}
@@ -127,52 +152,103 @@ class TabSearch extends React.Component {
 	}
 }
 
-class FormNewEntry extends React.Component {
+class ModalAddNew extends React.Component {
 	constructor(props) {
 		super(props);
 	}
 
 	render() {
 		return (
-			<div>
-				<h5 className="text-primary">Daily Entry</h5>
-				<div className="container bg-light p-3">
-					<div className="row mb-3">
-						<div className="col-12 col-md-6">
-							<label className="text-muted text-uppercase text-sm">Entry Date</label>
-							<input id="entryDate" type="date" className="form-control w-50" />
-						</div>
-						<div className="col-12 col-md-6">
-							<label className="text-muted text-uppercase text-sm">Bed Time</label>
-							<input id="bedTime" type="time" className="form-control w-50" />
-						</div>
-					</div>
-					<div className="row mb-3">
-						<div className="col-12 col-md-6">
-							<label className="text-muted text-uppercase text-sm">Prep Notes</label>
-							<textarea id="notesPrep" className="form-control" style={{ height:"80px" }}></textarea>
-						</div>
-						<div className="col-12 col-md-6">
-							<label className="text-muted text-uppercase text-sm">Wake Notes</label>
-							<textarea id="notesWake" className="form-control" style={{ height:"80px" }}></textarea>
-						</div>
-					</div>
-					<div className="row mb-3">
-						<div className="col">
-							<label className="text-muted text-uppercase text-sm">Dream(s)</label>
-							<div className="row mb-3" data-dreamidx="0">
-								<div className="col-auto">
-									<h5 className="text-primary">1</h5>
-								</div>
-								<div className="col">
-									<label className="text-muted text-uppercase text-sm">Title</label>
-									<input id="title" type="text" className="form-control" />
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+			<Modal.Dialog size="lg">
+			  <Modal.Header className="bg-primary" closeButton>
+			    <Modal.Title>Daily Entry</Modal.Title>
+			  </Modal.Header>
+
+			  <Modal.Body className="bg-light">
+			  <h5 className="text-primary">Daily Entry</h5>
+			  <div className="container p-3">
+				  <div className="row mb-3">
+					  <div className="col-12 col-md-6">
+						  <label className="text-muted text-uppercase text-sm">Entry Date</label>
+						  <input id="entryDate" type="date" className="form-control w-50" />
+					  </div>
+					  <div className="col-12 col-md-6">
+						  <label className="text-muted text-uppercase text-sm">Bed Time</label>
+						  <input id="bedTime" type="time" className="form-control w-50" />
+					  </div>
+				  </div>
+				  <div className="row mb-3">
+					  <div className="col-12 col-md-6">
+						  <label className="text-muted text-uppercase text-sm">Prep Notes</label>
+						  <textarea id="notesPrep" className="form-control" style={{ height:"80px" }}></textarea>
+					  </div>
+					  <div className="col-12 col-md-6">
+						  <label className="text-muted text-uppercase text-sm">Wake Notes</label>
+						  <textarea id="notesWake" className="form-control" style={{ height:"80px" }}></textarea>
+					  </div>
+				  </div>
+				  <div className="row" data-rowdesc="Dream Array">
+					  <div className="col">
+						  <label className="text-muted text-uppercase text-sm">Dream(s)</label>
+						  <div className="row mb-3" data-dreamidx="0">
+							  <div className="col-auto">
+								  <h5 className="text-primary">1</h5>
+							  </div>
+							  <div className="col">
+								  <label className="text-muted text-uppercase text-sm">Title</label>
+								  <input id="title" type="text" className="form-control" />
+							  </div>
+						  </div>
+					  </div>
+				  </div>
+			  </div>
+			  </Modal.Body>
+
+			  <Modal.Footer>
+			    <Button variant="secondary">Close</Button>
+			    <Button variant="primary">Submit</Button>
+			  </Modal.Footer>
+			</Modal.Dialog>
+		);
+	}
+}
+
+class AppMyModal extends React.Component<{ showModal?: boolean }, { show: boolean }> {
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			show: props.showModal
+		};
+	}
+
+	render() {
+		console.log('RENDER: show = '+this.state.show);
+		let modalClose = () => this.setState({ show: false });
+
+		return (
+			<Modal
+	          size="lg"
+			  show={this.state.show || false}
+	          onHide={modalClose}
+	        >
+	          <Modal.Header closeButton>
+	            <Modal.Title id="contained-modal-title-vcenter">
+	              Modal heading
+	            </Modal.Title>
+	          </Modal.Header>
+	          <Modal.Body>
+	            <h4>Centered Modal</h4>
+	            <p>
+	              Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
+	              dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta
+	              ac consectetur ac, vestibulum at eros.
+	            </p>
+	          </Modal.Body>
+	          <Modal.Footer>
+	            <Button onClick={modalClose}>Close</Button>
+	          </Modal.Footer>
+	        </Modal>
 		);
 	}
 }
@@ -189,17 +265,50 @@ function ShowAppTab() {
 	}
 }
 
+//
+// NEW!
+
+class AppUI extends React.Component<{}, { showModal: boolean }> {
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			showModal: props.showModal || false
+		};
+	}
+
+    changeHandler = (value) => {
+		console.log('CHANGE!!!');
+		console.log(value);
+
+        this.setState({
+			showModal: value
+        });
+
+		console.log("this.state.showModal = "+ this.state.showModal);
+    }
+
+    render() {
+		return (
+			<main>
+				<AppNavBar onChange={this.changeHandler} />
+				<ShowAppTab />
+				<AppMyModal showModal={this.state.showModal} />
+			</main>
+		);
+	}
+}
+
+/*
+=======
+*/
+
 // AppMain
 const AppMain: React.SFC<{ compiler: string, framework: string }> = (props) => {
-  return (
-    <main>
-		<AppNavBar />
-		<ShowAppTab />
-	</main>
-  );
+	return (<AppUI />);
 }
 
 ReactDOM.render(
-  <AppMain compiler="TypeScript" framework="React" />,
-  document.getElementById("root")
+	<AppMain compiler="TypeScript" framework="React" />,
+	document.getElementById("root")
 );
