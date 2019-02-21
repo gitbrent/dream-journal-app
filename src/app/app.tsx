@@ -27,6 +27,8 @@
 |*|  SOFTWARE.
 \*/
 
+// TODO: https://github.com/FortAwesome/react-fontawesome
+
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import APP_LOGO_BASE64 from '../img/logo_base64';
@@ -152,107 +154,106 @@ class TabSearch extends React.Component {
 	}
 }
 
-class ModalAddNew extends React.Component {
-	constructor(props) {
-		super(props);
-	}
+class AppModal extends React.Component<{ show?: boolean }, { show: boolean }> {
+	private dreams: [{}];
 
-	render() {
-		return (
-			<Modal.Dialog size="lg">
-			  <Modal.Header className="bg-primary" closeButton>
-			    <Modal.Title>Daily Entry</Modal.Title>
-			  </Modal.Header>
-
-			  <Modal.Body className="bg-light">
-			  <h5 className="text-primary">Daily Entry</h5>
-			  <div className="container p-3">
-				  <div className="row mb-3">
-					  <div className="col-12 col-md-6">
-						  <label className="text-muted text-uppercase text-sm">Entry Date</label>
-						  <input id="entryDate" type="date" className="form-control w-50" />
-					  </div>
-					  <div className="col-12 col-md-6">
-						  <label className="text-muted text-uppercase text-sm">Bed Time</label>
-						  <input id="bedTime" type="time" className="form-control w-50" />
-					  </div>
-				  </div>
-				  <div className="row mb-3">
-					  <div className="col-12 col-md-6">
-						  <label className="text-muted text-uppercase text-sm">Prep Notes</label>
-						  <textarea id="notesPrep" className="form-control" style={{ height:"80px" }}></textarea>
-					  </div>
-					  <div className="col-12 col-md-6">
-						  <label className="text-muted text-uppercase text-sm">Wake Notes</label>
-						  <textarea id="notesWake" className="form-control" style={{ height:"80px" }}></textarea>
-					  </div>
-				  </div>
-				  <div className="row" data-rowdesc="Dream Array">
-					  <div className="col">
-						  <label className="text-muted text-uppercase text-sm">Dream(s)</label>
-						  <div className="row mb-3" data-dreamidx="0">
-							  <div className="col-auto">
-								  <h5 className="text-primary">1</h5>
-							  </div>
-							  <div className="col">
-								  <label className="text-muted text-uppercase text-sm">Title</label>
-								  <input id="title" type="text" className="form-control" />
-							  </div>
-						  </div>
-					  </div>
-				  </div>
-			  </div>
-			  </Modal.Body>
-
-			  <Modal.Footer>
-			    <Button variant="secondary">Close</Button>
-			    <Button variant="primary">Submit</Button>
-			  </Modal.Footer>
-			</Modal.Dialog>
-		);
-	}
-}
-
-class AppMyModal extends React.Component<{ showModal?: boolean }, { show: boolean }> {
-	constructor(props) {
+	constructor(props: Readonly<{ show?: boolean; }>) {
 		super(props);
 
 		this.state = {
-			show: props.showModal
+			show: props.show
 		};
 	}
 
+	// React-Design: Allow `props` changes from other Components to change state/render
+	componentWillReceiveProps(nextProps) {
+		const newName = nextProps.show;
+		if ( this.state.show !== newName ) {
+			this.setState({ show:newName });
+		}
+	}
+
+	// TODO: handle "new dream row" button click
+	changeHandler = (e) => {
+		console.log('click!');
+		// TODO: (here): 1-add node to dreams, 2-render()
+
+		// for `return` below
+		/*
+		<div className="blocks_loop">
+          {this.props.dreams.map(block => (
+            <div className="block" />
+          ))}
+        </div>
+		*/
+	}
+
 	render() {
-		console.log('RENDER: show = '+this.state.show);
-		let modalClose = () => this.setState({ show: false });
+		let modalClose = () => {
+			this.setState({ show: false });
+		}
 
 		return (
-			<Modal
-	          size="lg"
-			  show={this.state.show || false}
-	          onHide={modalClose}
-	        >
-	          <Modal.Header closeButton>
-	            <Modal.Title id="contained-modal-title-vcenter">
-	              Modal heading
-	            </Modal.Title>
-	          </Modal.Header>
-	          <Modal.Body>
-	            <h4>Centered Modal</h4>
-	            <p>
-	              Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
-	              dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta
-	              ac consectetur ac, vestibulum at eros.
-	            </p>
-	          </Modal.Body>
-	          <Modal.Footer>
-	            <Button onClick={modalClose}>Close</Button>
-	          </Modal.Footer>
+			<Modal size="lg" show={ this.state.show } onHide={ modalClose } >
+			  <Modal.Header className="bg-primary" closeButton>
+			  	<Modal.Title className="text-white">Journal Entry</Modal.Title>
+			  </Modal.Header>
+
+			  <Modal.Body className="bg-light">
+				  <div className="container mb-3">
+					  <div className="row mb-3">
+						  <div className="col-12 col-md-6">
+							  <label className="text-muted text-uppercase text-sm">Entry Date</label>
+							  <input id="entryDate" type="date" className="form-control w-50" />
+						  </div>
+						  <div className="col-12 col-md-6">
+							  <label className="text-muted text-uppercase text-sm">Bed Time</label>
+							  <input id="bedTime" type="time" className="form-control w-50" />
+						  </div>
+					  </div>
+					  <div className="row">
+						  <div className="col-12 col-md-6">
+							  <label className="text-muted text-uppercase text-sm">Prep Notes</label>
+							  <textarea id="notesPrep" className="form-control" style={{ height:"80px" }}></textarea>
+						  </div>
+						  <div className="col-12 col-md-6">
+							  <label className="text-muted text-uppercase text-sm">Wake Notes</label>
+							  <textarea id="notesWake" className="form-control" style={{ height:"80px" }}></textarea>
+						  </div>
+					  </div>
+				  </div>
+
+				  <div className="container">
+				  	<h5 className="text-primary">Dream(s)</h5>
+/* start loop over `dreams` */
+					  <div className="row">
+						  <div className="col">
+							  <label className="text-black-50 text-sm">Add new dreams as needed</label>
+							  <div className="row mb-3" data-dreamidx="0">
+								  <div className="col-auto">
+								  	<button className="btn btn-sm btn-outline-info" onClick={this.changeHandler}>Add</button>
+								  </div>
+								  <div className="col">
+									  <label className="text-muted text-uppercase text-sm">Title</label>
+									  <input id="title" type="text" className="form-control" />
+								  </div>
+							  </div>
+						  </div>
+					  </div>
+/* end loop */
+				  </div>
+			  </Modal.Body>
+
+			  <Modal.Footer>
+			    <Button variant="secondary" className="px-4 mr-2" onClick={modalClose}>Close</Button>
+			    <Button variant="primary" className="w-25">Submit</Button>
+			  </Modal.Footer>
 	        </Modal>
 		);
 	}
 }
 
+// TODO: move to Component and accept a PROP for which tab to show!!!
 function ShowAppTab() {
 	if ( window.location.href.toLowerCase().indexOf('#search') > -1 ) {
 		return <TabSearch />;
@@ -265,9 +266,7 @@ function ShowAppTab() {
 	}
 }
 
-//
-// NEW!
-
+// APP UI
 class AppUI extends React.Component<{}, { showModal: boolean }> {
 	constructor(props) {
 		super(props);
@@ -277,31 +276,23 @@ class AppUI extends React.Component<{}, { showModal: boolean }> {
 		};
 	}
 
-    changeHandler = (value) => {
-		console.log('CHANGE!!!');
-		console.log(value);
-
-        this.setState({
+    chgShowModal = (value) => {
+		this.setState({
 			showModal: value
-        });
-
-		console.log("this.state.showModal = "+ this.state.showModal);
+		});
     }
 
     render() {
+		console.log("MAIN-RENDER: this.state.showModal = "+ this.state.showModal);
 		return (
 			<main>
-				<AppNavBar onChange={this.changeHandler} />
+				<AppNavBar onChange={this.chgShowModal} />
 				<ShowAppTab />
-				<AppMyModal showModal={this.state.showModal} />
+				<AppModal show={this.state.showModal} />
 			</main>
 		);
 	}
 }
-
-/*
-=======
-*/
 
 // AppMain
 const AppMain: React.SFC<{ compiler: string, framework: string }> = (props) => {
