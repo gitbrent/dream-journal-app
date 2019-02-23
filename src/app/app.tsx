@@ -182,7 +182,7 @@ class TabSearch extends React.Component {
 	}
 }
 
-class AppModal extends React.Component<{ show?: boolean }, { show: boolean, dailyEntry: IDailyEntry }> {
+class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dailyEntry: IDailyEntry }> {
 	constructor(props: Readonly<{ show?: boolean }>) {
 		super(props)
 
@@ -193,8 +193,8 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean, dail
 				bedTime: null,
 				notesPrep: null,
 				notesWake: null,
-				dreams: [ {title:""} ]
-			}
+				dreams: [{ title: '' }],
+			},
 		}
 	}
 
@@ -203,19 +203,74 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean, dail
 		const newName = nextProps.show
 		if (this.state.show !== newName) {
 			this.setState({ show: newName })
+
+			// NOTE: `constructor` is only called once on app init, so use this to reset state as modal is reused
+			if ( newName == true ) {
+				this.setState({ dailyEntry: {
+					entryDate: null,
+					bedTime: null,
+					notesPrep: null,
+					notesWake: null,
+					dreams: [{ title: '' }],
+				} })
+			}
 		}
 	}
 
 	addRowHandler = e => {
-		this.state.dailyEntry.dreams.push({ title:"" })
-		console.log(this.state.dailyEntry.dreams)
-		this.render() // no affect???
-		console.log('addRowHandler!')
-		// TODO: CURR: the dialog rows just wont re-render once theyre onscreen!!!
+		let dailyEntryNew = this.state.dailyEntry
+		dailyEntryNew.dreams.push({ title: '' })
+		this.setState({ dailyEntry: dailyEntryNew })
 	}
 
 	changeHandler = e => {
 		console.log('form field changed!')
+	}
+
+	renderDreamRow = (dream:IDream, idx:number) => {
+		return (
+			<div className='row mb-3' key={"dreamrow" + idx}>
+				<div className='col-auto border-right'>
+					<h2 className='text-primary font-weight-light'>{idx + 1}</h2>
+				</div>
+				<div className='col'>
+					<div className='row mb-3'>
+						<div className='col'>
+							<label className='text-muted text-uppercase text-sm'>Title</label>
+							<input
+								id='title'
+								type='text'
+								className='form-control'
+								value={dream.title}
+								onChange={this.changeHandler}
+							/>
+						</div>
+						<div className='col-auto'>
+							<label className='text-muted text-uppercase text-sm d-block'>Lucid Dream?</label>
+							<span>TODO-bs4-toggle</span>
+						</div>
+						<div className='col-auto'>
+							<label className='text-muted text-uppercase text-sm d-block'>Lucid Method</label>
+							<select className='form-control'>
+								<option>Select...</option>
+							</select>
+						</div>
+					</div>
+					<div className='row'>
+						<div className='col'>
+							<label className='text-muted text-uppercase text-sm'>Notes</label>
+							<textarea
+								id='notes'
+								className='form-control'
+								rows={5}
+								value={dream.notes}
+								onChange={this.changeHandler}
+							/>
+						</div>
+					</div>
+				</div>
+			</div>
+		)
 	}
 
 	render() {
@@ -224,7 +279,7 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean, dail
 		}
 
 		return (
-			<Modal size='lg' show={this.state.show} onHide={modalClose}>
+			<Modal size='lg' show={this.state.show} onHide={modalClose} backdrop="static">
 				<Modal.Header className='bg-primary' closeButton>
 					<Modal.Title className='text-white'>Journal Entry</Modal.Title>
 				</Modal.Header>
@@ -265,48 +320,7 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean, dail
 								</button>
 							</div>
 						</div>
-						{this.state.dailyEntry.dreams.map((dream, idx) => {
-							console.log(idx)
-							return <div className='row' key={idx}>
-								<div className='col-auto border-right'>
-									<h2 className='text-primary font-weight-light'>{idx + 1}</h2>
-								</div>
-								<div className='col'>
-									<div className='row mb-3'>
-										<div className='col'>
-											<label className='text-muted text-uppercase text-sm'>Title</label>
-											<input
-												id='title'
-												type='text'
-												className='form-control'
-												value={dream.title}
-												onChange={this.changeHandler}
-											/>
-										</div>
-										<div className='col-auto'>
-											<label className='text-muted text-uppercase text-sm d-block'>Lucid Dream?</label>
-											<span>TODO-bs4-toggle</span>
-										</div>
-										<div className='col-auto'>
-											<label className='text-muted text-uppercase text-sm d-block'>Lucid Method</label>
-											<select className='form-control'><option>Select...</option></select>
-										</div>
-									</div>
-									<div className='row'>
-										<div className='col'>
-											<label className='text-muted text-uppercase text-sm'>Notes</label>
-											<textarea
-												id='notes'
-												className='form-control'
-												rows={5}
-												value={dream.notes}
-												onChange={this.changeHandler}
-											/>
-										</div>
-									</div>
-								</div>
-							</div>
-						})}
+						{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamRow(dream, idx))}
 					</div>
 				</Modal.Body>
 
