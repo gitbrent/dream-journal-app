@@ -62,6 +62,8 @@ try {
 	console.log(ex)
 }
 
+// @see: https://flaviocopes.com/react-forms/
+// @see: https://github.com/jaredpalmer/formik
 // TODO: https://reactjs.org/docs/forms.html
 
 class AppNavBar extends React.Component<{ onShowModal?: Function, onShowTab?: Function }, {activeTab: IAppTabs["tabs"] }> {
@@ -136,10 +138,7 @@ class AppNavBar extends React.Component<{ onShowModal?: Function, onShowTab?: Fu
 				</div>
 				<form className='form-inline mb-0'>
 					<button type='button' onClick={this.onShowModalHandler} className='btn btn-outline-primary mr-2'>
-						Load Data File
-					</button>
-					<button className='btn btn-outline-success' type='button' disabled>
-						Save Data File
+						Settings
 					</button>
 				</form>
 			</nav>
@@ -178,27 +177,135 @@ class TabHome extends React.Component {
 class TabSearch extends React.Component {
 	render() {
 		return (
-			<div className='row align-items-end justify-content-between'>
-				<div className='col-auto'>
-					<h1 className='text-primary'>Search</h1>
-				</div>
-				<div className='col-auto'>
-					<h6 id='appVer' className='text-black-50 font-weight-light' />
+			<div className='container mt-3'>
+				<h2 className="text-primary mb-3">Search Dream Journal</h2>
+
+				<div className='row'>
+					<div className='col-auto'>
+						<h1 className='text-primary'>Search</h1>
+					</div>
+					<div className='col-auto'>
+						<h6 id='appVer' className='text-black-50 font-weight-light' />
+					</div>
 				</div>
 			</div>
 		)
 	}
 }
 
-class TabAdd extends React.Component {
-	render() {
+class TabAdd extends React.Component<{}, {dailyEntry: IDailyEntry}> {
+	constructor(props: Readonly<{ show?: boolean }>) {
+		super(props)
+
+		this.state = {
+			dailyEntry: {
+				entryDate: null,
+				bedTime: null,
+				notesPrep: null,
+				notesWake: null,
+				dreams: [{ title: '' }],
+			},
+		}
+	}
+
+	addRowHandler = e => {
+		let dailyEntryNew = this.state.dailyEntry
+		dailyEntryNew.dreams.push({ title: '' })
+		this.setState({ dailyEntry: dailyEntryNew })
+	}
+
+	changeHandler = e => {
+		console.log('form field changed!')
+	}
+
+	renderDreamRow = (dream:IDream, idx:number) => {
 		return (
-			<div className='row align-items-end justify-content-between'>
+			<div className='row p-3 mb-4 bg-light' key={"dreamrow" + idx}>
 				<div className='col-auto'>
-					<h1 className='text-primary'>Add</h1>
+					<h2 className='text-primary font-weight-light'>{idx + 1}</h2>
 				</div>
-				<div className='col-auto'>
-					<h6 id='appVer' className='text-black-50 font-weight-light' />
+				<div className='col'>
+					<div className='row mb-3'>
+						<div className='col'>
+							<label className='text-muted text-uppercase text-sm'>Title</label>
+							<input
+								id='title'
+								type='text'
+								className='form-control'
+								value={dream.title}
+								onChange={this.changeHandler}
+							/>
+						</div>
+						<div className='col-auto'>
+							<label className='text-muted text-uppercase text-sm d-block'>Lucid Dream?</label>
+							<span>TODO-bs4-toggle</span>
+						</div>
+						<div className='col-auto'>
+							<label className='text-muted text-uppercase text-sm d-block'>Lucid Method</label>
+							<select className='form-control'>
+								<option>Select...</option>
+							</select>
+						</div>
+					</div>
+					<div className='row'>
+						<div className='col'>
+							<label className='text-muted text-uppercase text-sm'>Notes</label>
+							<textarea
+								id='notes'
+								className='form-control'
+								rows={5}
+								value={dream.notes}
+								onChange={this.changeHandler}
+							/>
+						</div>
+					</div>
+				</div>
+			</div>
+		)
+	}
+
+	render() {
+//		<button className="btn btn-primary">Save</button>
+
+		return (
+			<div className='container mt-3'>
+				<h2 className="text-primary mb-3">New Journal Entry</h2>
+
+				<div className='container bg-light p-4'>
+					<div className='row mb-4'>
+						<div className='col-12 col-md-6 required'>
+							<label className='text-muted text-uppercase text-sm'>Entry Date</label>
+							<input id='entryDate' type='date' className='form-control w-50' required />
+							<div className='invalid-feedback'>Please provide Entry Date</div>
+						</div>
+						<div className='col-12 col-md-6'>
+							<label className='text-muted text-uppercase text-sm'>Bed Time</label>
+							<input id='bedTime' type='time' className='form-control w-50' />
+						</div>
+					</div>
+					<div className='row'>
+						<div className='col-12 col-md-6'>
+							<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
+							<textarea id='notesPrep' className='form-control' rows={3} />
+						</div>
+						<div className='col-12 col-md-6'>
+							<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
+							<textarea id='notesWake' className='form-control' rows={3} />
+						</div>
+					</div>
+				</div>
+				<div className='container mt-4'>
+					<div className='row mb-3'>
+						<div className='col'>
+							<h4 className='text-primary'>Dreams</h4>
+						</div>
+						<div className='col-auto'>
+							<button className='btn btn-sm btn-outline-info' onClick={this.addRowHandler}>
+								Add Dream Row
+							</button>
+						</div>
+					</div>
+					{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamRow(dream, idx))}
 				</div>
 			</div>
 		)
