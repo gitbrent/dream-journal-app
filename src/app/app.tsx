@@ -49,6 +49,9 @@ interface IDailyEntry {
 	notesWake?: string
 	dreams?: Array<IDream>
 }
+interface IAppTabs {
+	tabs: 'home' | 'search' | 'add'
+}
 
 var dreamsJson = null
 try {
@@ -60,25 +63,38 @@ try {
 }
 
 // TODO: https://reactjs.org/docs/forms.html
-// FYI: https://stackoverflow.com/questions/24502898/show-or-hide-element-in-react
 
-class AppNavBar extends React.Component<{ onChange?: Function }> {
-	constructor(props: Readonly<{ onChange?: Function }>) {
+class AppNavBar extends React.Component<{ onShowModal?: Function, onShowTab?: Function }, {activeTab: IAppTabs["tabs"] }> {
+	constructor(props: Readonly<{ onShowModal?: Function, onShowTab?: Function }>) {
 		super(props)
+
+		this.state = {
+			activeTab: 'home'
+		}
 	}
 
-	changeHandler = e => {
-		if (typeof this.props.onChange === 'function') {
-			//this.props.onChange(e.target.value);
-			//this.props.onChange('TAB1');
-			this.props.onChange(true)
+	onShowModalHandler = e => {
+		if (typeof this.props.onShowModal === 'function') {
+			//this.props.onShowModal(e.target.value);
+			//this.props.onShowModal('TAB1');
+			this.props.onShowModal(true)
 		}
+	}
+
+	onShowTabHandler = e => {
+		let clickedTabName = e.target.getAttribute('data-name')
+
+		this.setState({
+			activeTab: clickedTabName
+		})
+
+		this.props.onShowTab(clickedTabName)
 	}
 
 	render() {
 		return (
 			<nav className='navbar navbar-expand-lg navbar-light bg-light'>
-				<a className='navbar-brand' href='#'>
+				<a className='navbar-brand' href='javascript:void(0)'>
 					<img
 						src={APP_LOGO_BASE64}
 						width='30'
@@ -101,25 +117,25 @@ class AppNavBar extends React.Component<{ onChange?: Function }> {
 				</button>
 				<div className='collapse navbar-collapse' id='navbarNav'>
 					<ul className='navbar-nav'>
-						<li className='nav-item active'>
-							<a className='nav-link' href='#Home'>
+						<li className={ this.state.activeTab == 'home' ? 'nav-item active' : 'nav-item' }>
+							<a className='nav-link' href='javascript:void(0)' data-name="home" onClick={this.onShowTabHandler} >
 								Home <span className='sr-only'>(current)</span>
 							</a>
 						</li>
-						<li className='nav-item'>
-							<a className='nav-link' href='#Search'>
+						<li className={ this.state.activeTab == 'search' ? 'nav-item active' : 'nav-item' }>
+							<a className='nav-link' href='javascript:void(0)' data-name="search" onClick={this.onShowTabHandler} >
 								Search Dreams
 							</a>
 						</li>
-						<li className='nav-item'>
-							<a className='nav-link' href='#Add'>
-								Add New Dreams
+						<li className={ this.state.activeTab == 'add' ? 'nav-item active' : 'nav-item' }>
+							<a className='nav-link' href='javascript:void(0)' data-name="add" onClick={this.onShowTabHandler} >
+								New Journal Entry
 							</a>
 						</li>
 					</ul>
 				</div>
 				<form className='form-inline mb-0'>
-					<button type='button' onClick={this.changeHandler} className='btn btn-outline-primary mr-2'>
+					<button type='button' onClick={this.onShowModalHandler} className='btn btn-outline-primary mr-2'>
 						Load Data File
 					</button>
 					<button className='btn btn-outline-success' type='button' disabled>
@@ -132,10 +148,6 @@ class AppNavBar extends React.Component<{ onChange?: Function }> {
 }
 
 class TabHome extends React.Component {
-	constructor(props) {
-		super(props)
-	}
-
 	render() {
 		if (!dreamsJson) {
 			return (
@@ -164,15 +176,26 @@ class TabHome extends React.Component {
 }
 
 class TabSearch extends React.Component {
-	constructor(props) {
-		super(props)
-	}
-
 	render() {
 		return (
 			<div className='row align-items-end justify-content-between'>
 				<div className='col-auto'>
-					<h1 className='text-primary'>Dream Journal App</h1>
+					<h1 className='text-primary'>Search</h1>
+				</div>
+				<div className='col-auto'>
+					<h6 id='appVer' className='text-black-50 font-weight-light' />
+				</div>
+			</div>
+		)
+	}
+}
+
+class TabAdd extends React.Component {
+	render() {
+		return (
+			<div className='row align-items-end justify-content-between'>
+				<div className='col-auto'>
+					<h1 className='text-primary'>Add</h1>
 				</div>
 				<div className='col-auto'>
 					<h6 id='appVer' className='text-black-50 font-weight-light' />
@@ -229,8 +252,8 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 
 	renderDreamRow = (dream:IDream, idx:number) => {
 		return (
-			<div className='row mb-3' key={"dreamrow" + idx}>
-				<div className='col-auto border-right'>
+			<div className='row pt-3 mb-4 border-top' key={"dreamrow" + idx}>
+				<div className='col-auto'>
 					<h2 className='text-primary font-weight-light'>{idx + 1}</h2>
 				</div>
 				<div className='col'>
@@ -337,30 +360,46 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 	}
 }
 
-// TODO: move to Component and accept a PROP for which tab to show!!!
-function ShowAppTab() {
-	if (window.location.href.toLowerCase().indexOf('#search') > -1) {
-		return <TabSearch />
-	} else if (window.location.href.toLowerCase().indexOf('#new') > -1) {
-		//return <TabNew />;
-	} else {
-		return <TabHome />
+class AppTabs extends React.Component<{ activeTab: IAppTabs["tabs"] }> {
+	constructor(props: Readonly<{ activeTab: IAppTabs["tabs"] }>) {
+		super(props)
+	}
+
+	render() {
+		console.log(this.props.activeTab)
+		switch(this.props.activeTab) {
+			case 'home':
+				return <TabHome />
+			case 'search':
+		  		return <TabSearch />
+			case 'add':
+				return <TabAdd />
+			default:
+				return <TabHome />
+		}
 	}
 }
 
 // APP UI
-class AppUI extends React.Component<{}, { showModal: boolean }> {
+class AppUI extends React.Component<{}, { showModal: boolean, showTab: IAppTabs["tabs"] }> {
 	constructor(props) {
 		super(props)
 
 		this.state = {
 			showModal: props.showModal || false,
+			showTab: 'home'
 		}
 	}
 
 	chgShowModal = value => {
 		this.setState({
-			showModal: value,
+			showModal: value
+		})
+	}
+
+	chgShowTab = value => {
+		this.setState({
+			showTab: value
 		})
 	}
 
@@ -368,8 +407,8 @@ class AppUI extends React.Component<{}, { showModal: boolean }> {
 		console.log('MAIN-RENDER: this.state.showModal = ' + this.state.showModal)
 		return (
 			<main>
-				<AppNavBar onChange={this.chgShowModal} />
-				<ShowAppTab />
+				<AppNavBar onShowModal={this.chgShowModal} onShowTab={this.chgShowTab} />
+				<AppTabs activeTab={this.state.showTab} />
 				<AppModal show={this.state.showModal} />
 			</main>
 		)
