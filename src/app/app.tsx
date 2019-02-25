@@ -31,9 +31,9 @@
 
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import APP_LOGO_BASE64 from '../img/logo_base64'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
+import LogoBase64 from '../img/logo_base64'
 
 interface IDream {
 	title: string
@@ -43,8 +43,8 @@ interface IDream {
 	lucidMethod?: 'dild' | 'mild' | 'wbtb' | 'other'
 }
 interface IDailyEntry {
-	entryDate: Date
-	bedTime?: Date
+	entryDate: string
+	bedTime?: string
 	notesPrep?: string
 	notesWake?: string
 	dreams?: Array<IDream>
@@ -53,25 +53,19 @@ interface IAppTabs {
 	tabs: 'home' | 'search' | 'add'
 }
 
-var dreamsJson = null
-try {
-	// TODO: check for `data` directory
-	dreamsJson = require('../data/dreams.json')
-} catch (ex) {
-	console.log('FYI: Unable to open `dreams.json` data file. (probably okay is this is first run)')
-	console.log(ex)
-}
-
 // @see: https://flaviocopes.com/react-forms/
 // @see: https://github.com/jaredpalmer/formik
 // TODO: https://reactjs.org/docs/forms.html
 
-class AppNavBar extends React.Component<{ onShowModal?: Function, onShowTab?: Function }, {activeTab: IAppTabs["tabs"] }> {
-	constructor(props: Readonly<{ onShowModal?: Function, onShowTab?: Function }>) {
+class AppNavBar extends React.Component<
+	{ appData: Array<IDailyEntry>; onShowModal: Function; onShowTab: Function },
+	{ activeTab: IAppTabs['tabs'] }
+> {
+	constructor(props: Readonly<{ appData: Array<IDailyEntry>; onShowModal: Function; onShowTab: Function }>) {
 		super(props)
 
 		this.state = {
-			activeTab: 'home'
+			activeTab: 'home',
 		}
 	}
 
@@ -82,12 +76,11 @@ class AppNavBar extends React.Component<{ onShowModal?: Function, onShowTab?: Fu
 			this.props.onShowModal(true)
 		}
 	}
-
 	onShowTabHandler = e => {
 		let clickedTabName = e.target.getAttribute('data-name')
 
 		this.setState({
-			activeTab: clickedTabName
+			activeTab: clickedTabName,
 		})
 
 		this.props.onShowTab(clickedTabName)
@@ -97,13 +90,7 @@ class AppNavBar extends React.Component<{ onShowModal?: Function, onShowTab?: Fu
 		return (
 			<nav className='navbar navbar-expand-lg navbar-light bg-light'>
 				<a className='navbar-brand' href='javascript:void(0)'>
-					<img
-						src={APP_LOGO_BASE64}
-						width='30'
-						height='30'
-						className='d-inline-block align-top mr-3'
-						alt=''
-					/>
+					<img src={LogoBase64} width='30' height='30' className='d-inline-block align-top mr-3' alt='' />
 					Dream Journal App
 				</a>
 				<button
@@ -119,22 +106,45 @@ class AppNavBar extends React.Component<{ onShowModal?: Function, onShowTab?: Fu
 				</button>
 				<div className='collapse navbar-collapse' id='navbarNav'>
 					<ul className='navbar-nav'>
-						<li className={ this.state.activeTab == 'home' ? 'nav-item active' : 'nav-item' }>
-							<a className='nav-link' href='javascript:void(0)' data-name="home" onClick={this.onShowTabHandler} >
+						<li className={this.state.activeTab == 'home' ? 'nav-item active' : 'nav-item'}>
+							<a
+								className='nav-link'
+								href='javascript:void(0)'
+								data-name='home'
+								onClick={this.onShowTabHandler}
+							>
 								Home <span className='sr-only'>(current)</span>
 							</a>
 						</li>
-						<li className={ this.state.activeTab == 'search' ? 'nav-item active' : 'nav-item' }>
-							<a className='nav-link' href='javascript:void(0)' data-name="search" onClick={this.onShowTabHandler} >
-								Search Dreams
+						<li className={this.state.activeTab == 'add' ? 'nav-item active' : 'nav-item'}>
+							<a
+								className='nav-link'
+								href='javascript:void(0)'
+								data-name='add'
+								onClick={this.onShowTabHandler}
+							>
+								View Dream Journal
 							</a>
 						</li>
-						<li className={ this.state.activeTab == 'add' ? 'nav-item active' : 'nav-item' }>
-							<a className='nav-link' href='javascript:void(0)' data-name="add" onClick={this.onShowTabHandler} >
-								New Journal Entry
+						<li className={this.state.activeTab == 'search' ? 'nav-item active' : 'nav-item'}>
+							<a
+								className='nav-link'
+								href='javascript:void(0)'
+								data-name='search'
+								onClick={this.onShowTabHandler}
+							>
+								Search Dream Journal
 							</a>
 						</li>
 					</ul>
+				</div>
+				<div className='btn-group mr-3' role='group' aria-label='Journal Stats'>
+					<button type='button' className='btn btn-secondary' disabled>
+						Journal Entries
+					</button>
+					<button type='button' className='btn btn-secondary' disabled>
+						{this.props.appData.length}
+					</button>
 				</div>
 				<form className='form-inline mb-0'>
 					<button type='button' onClick={this.onShowModalHandler} className='btn btn-outline-primary mr-2'>
@@ -146,31 +156,83 @@ class AppNavBar extends React.Component<{ onShowModal?: Function, onShowTab?: Fu
 	}
 }
 
-class TabHome extends React.Component {
+// ============================================================================
+
+class TabHome extends React.Component<{ onChgLoadData: Function }> {
+	constructor(props: Readonly<{ onChgLoadData: Function }>) {
+		super(props)
+		// DOCS: https://reactjs.org/docs/refs-and-the-dom.html
+		// Their own example doesnt work in v16.8
+		// this.myRef = React.createRef(); // FIXME
+	}
+
+	onFileSelectHandler = e => {
+		if (e.target.files.length > 0) {
+			const reader = new FileReader()
+			reader.onload = e => {
+				try {
+					// NOTE: Cannot use `e.target.result` as of Jan-2019
+					// SEE: https://stackoverflow.com/questions/35789498/new-typescript-1-8-4-build-error-build-property-result-does-not-exist-on-t
+					let jsonJournal = JSON.parse(e.target['result'])
+					this.props.onChgLoadData(jsonJournal && jsonJournal.data ? jsonJournal.data : [])
+				} catch (ex) {
+					// TODO: Show errors on screen
+					console.log('ERROR: ' + ex)
+				}
+			}
+			reader.readAsText(e.target.files[0])
+		}
+	}
+
 	render() {
-		if (!dreamsJson) {
-			return (
-				<div className='container mt-5'>
-					<div className='jumbotron'>
-						<h1 className='display-4 text-primary mb-3'>
-							<img src={APP_LOGO_BASE64} width='150' height='150' className='mr-4' alt='Logo' />
-							Dream Journal App
-						</h1>
-						<p className='lead'>Record your daily dream journal entries into well-formatted JSON.</p>
-						<hr className='my-4' />
-						<p>
-							This enables metrics, keyword searches and much more so you can make the best of your
-							dreams.
-						</p>
-						<a className='btn btn-primary btn-lg' href='#' role='button'>
-							Get Started
-						</a>
+		// TODO: FIXME:
+		//let filePicker = <input ref={this.myRef} type="file" className="form-control-file d-none" accept=".json" onChange={this.onFileSelectHandler} />
+		let filePicker = (
+			<input type='file' className='form-control-file' accept='.json' onChange={this.onFileSelectHandler} />
+		)
+		/*
+		TODO: use 2 buttons instead (New and Open)
+		https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications#Using_hidden_file_input_elements_using_the_click()_method
+		*/
+		// HELP: need ref, cant create one
+		// <button className="btn btn-primary w-50" onClick={filePicker.click()}>Open Dream Journal</button>
+
+		return (
+			<div className='container mt-5'>
+				<div className='jumbotron'>
+					<h1 className='display-4 text-primary mb-3 d-none d-md-block'>
+						<img
+							src={LogoBase64}
+							width='150'
+							height='150'
+							className='mr-4 d-none d-lg-inline-block'
+							alt='Logo'
+						/>
+						Dream Journal App
+					</h1>
+					<h2 className='display-5 text-primary mb-3 d-block d-md-none'>Dream Journal App</h2>
+					<p className='lead'>
+						Record your daily dream journal entries into well-formatted JSON, enabling keyword searches,
+						metrics and more.
+					</p>
+					<hr className='my-5' />
+					<div className='row'>
+						<div className='col-12 col-md-6 text-center mb-3'>
+							<button className='btn btn-primary w-50'>Open Dream Journal</button>
+						</div>
+						<div className='col-12 col-md-6 text-center mb-3'>
+							<button className='btn btn-primary w-50'>Create Dream Journal</button>
+						</div>
+					</div>
+
+					<p>Select an exising Dream Journal, or select "New Journal Entry" above to start a new one.</p>
+					<div className='form-group bg-white p-3'>
+						<label className='text-muted text-uppercase'>Open Exising File</label>
+						{filePicker}
 					</div>
 				</div>
-			)
-		} else {
-			return <h1>You Are a Dream God!</h1>
-		}
+			</div>
+		)
 	}
 }
 
@@ -178,11 +240,11 @@ class TabSearch extends React.Component {
 	render() {
 		return (
 			<div className='container mt-3'>
-				<h2 className="text-primary mb-3">Search Dream Journal</h2>
+				<h2 className='text-primary mb-3'>Search Dream Journal</h2>
 
 				<div className='row'>
 					<div className='col-auto'>
-						<h1 className='text-primary'>Search</h1>
+						<h1 className='text-primary'>TODO</h1>
 					</div>
 					<div className='col-auto'>
 						<h6 id='appVer' className='text-black-50 font-weight-light' />
@@ -193,34 +255,58 @@ class TabSearch extends React.Component {
 	}
 }
 
-class TabAdd extends React.Component<{}, {dailyEntry: IDailyEntry}> {
-	constructor(props: Readonly<{ show?: boolean }>) {
+class TabAdd extends React.Component<{ onChgNewEntry: Function }, { dailyEntry: IDailyEntry }> {
+	constructor(props: Readonly<{ show?: boolean; onChgNewEntry: Function }>) {
 		super(props)
 
 		this.state = {
 			dailyEntry: {
-				entryDate: null,
-				bedTime: null,
-				notesPrep: null,
-				notesWake: null,
-				dreams: [{ title: '' }],
+				entryDate: new Date().toISOString().substring(0,10),
+				bedTime: "",
+				notesPrep: "",
+				notesWake: "",
+				dreams: [{ title: "" }],
 			},
 		}
 	}
 
-	addRowHandler = e => {
+	addRowHandler = event => {
 		let dailyEntryNew = this.state.dailyEntry
 		dailyEntryNew.dreams.push({ title: '' })
 		this.setState({ dailyEntry: dailyEntryNew })
 	}
 
-	changeHandler = e => {
+	handleChange = event => {
 		console.log('form field changed!')
+
+		if ( event && event.target && event.target.id ) {
+			let updatedEntry = this.state.dailyEntry
+
+			if ( event.target.id == 'entryDate' ) {
+				updatedEntry.entryDate = event.target.value
+			}
+			else if ( event.target.id == 'bedTime' ) {
+				updatedEntry.bedTime = event.target.value
+			}
+			// TODO: CURR: keep going! add all other fields!!
+			// what to do about DREAM-n rows - they wont have unique ids?
+
+			this.setState({ dailyEntry:updatedEntry })
+		}
+
+		console.log(this.state.dailyEntry)
 	}
 
-	renderDreamRow = (dream:IDream, idx:number) => {
+	handleSubmit = event => {
+		this.props.onChgNewEntry(this.state.dailyEntry)
+		event.preventDefault()
+		console.log('SUBMIT!')
+		console.log(this.state.dailyEntry)
+	}
+
+	renderDreamRow = (dream: IDream, idx: number) => {
 		return (
-			<div className='row p-3 mb-4 bg-light' key={"dreamrow" + idx}>
+			<div className='row p-3 mb-4 bg-light' key={'dreamrow' + idx}>
 				<div className='col-auto'>
 					<h2 className='text-primary font-weight-light'>{idx + 1}</h2>
 				</div>
@@ -233,7 +319,7 @@ class TabAdd extends React.Component<{}, {dailyEntry: IDailyEntry}> {
 								type='text'
 								className='form-control'
 								value={dream.title}
-								onChange={this.changeHandler}
+								onChange={this.handleChange}
 							/>
 						</div>
 						<div className='col-auto'>
@@ -255,7 +341,7 @@ class TabAdd extends React.Component<{}, {dailyEntry: IDailyEntry}> {
 								className='form-control'
 								rows={5}
 								value={dream.notes}
-								onChange={this.changeHandler}
+								onChange={this.handleChange}
 							/>
 						</div>
 					</div>
@@ -265,52 +351,68 @@ class TabAdd extends React.Component<{}, {dailyEntry: IDailyEntry}> {
 	}
 
 	render() {
-//		<button className="btn btn-primary">Save</button>
-
 		return (
-			<div className='container mt-3'>
-				<h2 className="text-primary mb-3">New Journal Entry</h2>
-
-				<div className='container bg-light p-4'>
-					<div className='row mb-4'>
-						<div className='col-12 col-md-6 required'>
-							<label className='text-muted text-uppercase text-sm'>Entry Date</label>
-							<input id='entryDate' type='date' className='form-control w-50' required />
-							<div className='invalid-feedback'>Please provide Entry Date</div>
-						</div>
-						<div className='col-12 col-md-6'>
-							<label className='text-muted text-uppercase text-sm'>Bed Time</label>
-							<input id='bedTime' type='time' className='form-control w-50' />
-						</div>
-					</div>
-					<div className='row'>
-						<div className='col-12 col-md-6'>
-							<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
-							<textarea id='notesPrep' className='form-control' rows={3} />
-						</div>
-						<div className='col-12 col-md-6'>
-							<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
-							<textarea id='notesWake' className='form-control' rows={3} />
-						</div>
-					</div>
-				</div>
-				<div className='container mt-4'>
-					<div className='row mb-3'>
+			<form onSubmit={this.handleSubmit}>
+				<div className='container mt-3'>
+					<div className='row no-gutters'>
 						<div className='col'>
-							<h4 className='text-primary'>Dreams</h4>
+							<h2 className='text-primary mb-3'>New Journal Entry</h2>
 						</div>
 						<div className='col-auto'>
-							<button className='btn btn-sm btn-outline-info' onClick={this.addRowHandler}>
-								Add Dream Row
+							<button type='submit' className='btn btn-primary px-4'>
+								Add to Journal
 							</button>
 						</div>
 					</div>
-					{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamRow(dream, idx))}
+					<div className='container bg-light p-4'>
+						<div className='row mb-4'>
+							<div className='col-12 col-md-6 required'>
+								<label className='text-muted text-uppercase text-sm'>Entry Date</label>
+								<input id='entryDate' type='date' className='form-control w-50' required
+								value={this.state.dailyEntry.entryDate} onChange={this.handleChange} />
+								<div className='invalid-feedback'>Please provide Entry Date</div>
+							</div>
+							<div className='col-12 col-md-6'>
+								<label className='text-muted text-uppercase text-sm'>Bed Time</label>
+								<input id='bedTime' type='time' className='form-control w-50'
+								value={this.state.dailyEntry.bedTime} onChange={this.handleChange} />
+							</div>
+						</div>
+						<div className='row'>
+							<div className='col-12 col-md-6'>
+								<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
+								<textarea id='notesPrep' className='form-control' rows={3} />
+							</div>
+							<div className='col-12 col-md-6'>
+								<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
+								<textarea id='notesWake' className='form-control' rows={3} />
+							</div>
+						</div>
+					</div>
+					<div className='container mt-4'>
+						<div className='row mb-3'>
+							<div className='col'>
+								<h4 className='text-primary'>Dreams</h4>
+							</div>
+							<div className='col-auto'>
+								<button
+									type='button'
+									className='btn btn-sm btn-outline-info'
+									onClick={this.addRowHandler}
+								>
+									Add Dream Row
+								</button>
+							</div>
+						</div>
+						{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamRow(dream, idx))}
+					</div>
 				</div>
-			</div>
+			</form>
 		)
 	}
 }
+
+// ============================================================================
 
 class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dailyEntry: IDailyEntry }> {
 	constructor(props: Readonly<{ show?: boolean }>) {
@@ -335,14 +437,16 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 			this.setState({ show: newName })
 
 			// NOTE: `constructor` is only called once on app init, so use this to reset state as modal is reused
-			if ( newName == true ) {
-				this.setState({ dailyEntry: {
-					entryDate: null,
-					bedTime: null,
-					notesPrep: null,
-					notesWake: null,
-					dreams: [{ title: '' }],
-				} })
+			if (newName == true) {
+				this.setState({
+					dailyEntry: {
+						entryDate: null,
+						bedTime: null,
+						notesPrep: null,
+						notesWake: null,
+						dreams: [{ title: '' }],
+					},
+				})
 			}
 		}
 	}
@@ -357,9 +461,9 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 		console.log('form field changed!')
 	}
 
-	renderDreamRow = (dream:IDream, idx:number) => {
+	renderDreamRow = (dream: IDream, idx: number) => {
 		return (
-			<div className='row pt-3 mb-4 border-top' key={"dreamrow" + idx}>
+			<div className='row pt-3 mb-4 border-top' key={'dreamrow' + idx}>
 				<div className='col-auto'>
 					<h2 className='text-primary font-weight-light'>{idx + 1}</h2>
 				</div>
@@ -409,7 +513,7 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 		}
 
 		return (
-			<Modal size='lg' show={this.state.show} onHide={modalClose} backdrop="static">
+			<Modal size='lg' show={this.state.show} onHide={modalClose} backdrop='static'>
 				<Modal.Header className='bg-primary' closeButton>
 					<Modal.Title className='text-white'>Journal Entry</Modal.Title>
 				</Modal.Header>
@@ -467,55 +571,78 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 	}
 }
 
-class AppTabs extends React.Component<{ activeTab: IAppTabs["tabs"] }> {
-	constructor(props: Readonly<{ activeTab: IAppTabs["tabs"] }>) {
+// ============================================================================
+
+class AppTabs extends React.Component<{
+	activeTab: IAppTabs['tabs']
+	onChgLoadData: Function
+	onChgNewEntry: Function
+}> {
+	constructor(props: Readonly<{ activeTab: IAppTabs['tabs']; onChgLoadData: Function; onChgNewEntry: Function }>) {
 		super(props)
 	}
 
 	render() {
-		console.log(this.props.activeTab)
-		switch(this.props.activeTab) {
-			case 'home':
-				return <TabHome />
+		switch (this.props.activeTab) {
 			case 'search':
-		  		return <TabSearch />
+				return <TabSearch />
 			case 'add':
-				return <TabAdd />
+				return <TabAdd onChgNewEntry={this.props.onChgNewEntry} />
+			case 'home':
 			default:
-				return <TabHome />
+				return <TabHome onChgLoadData={this.props.onChgLoadData} />
 		}
 	}
 }
 
 // APP UI
-class AppUI extends React.Component<{}, { showModal: boolean, showTab: IAppTabs["tabs"] }> {
+class App extends React.Component<{}, { data: Array<IDailyEntry>; showModal: boolean; showTab: IAppTabs['tabs'] }> {
 	constructor(props) {
 		super(props)
 
 		this.state = {
+			data: [],
 			showModal: props.showModal || false,
-			showTab: 'home'
+			showTab: 'home',
 		}
 	}
 
-	chgShowModal = value => {
+	chgShowModal = (value: boolean) => {
 		this.setState({
-			showModal: value
+			showModal: value,
 		})
 	}
-
-	chgShowTab = value => {
+	chgShowTab = (value: IAppTabs['tabs']) => {
 		this.setState({
-			showTab: value
+			showTab: value,
 		})
+	}
+	chgLoadData = (value: Array<IDailyEntry>) => {
+		this.setState({
+			data: value,
+		})
+		console.log('Data updated!')
+		console.log(this.state.data)
+	}
+	chgNewEntry = (value: IDailyEntry) => {
+		let appData = this.state.data
+		appData.push(value)
+		this.setState({
+			data: appData,
+		})
+		console.log('New entry added!')
+		console.log(this.state.data)
 	}
 
 	render() {
-		console.log('MAIN-RENDER: this.state.showModal = ' + this.state.showModal)
 		return (
 			<main>
-				<AppNavBar onShowModal={this.chgShowModal} onShowTab={this.chgShowTab} />
-				<AppTabs activeTab={this.state.showTab} />
+				<AppNavBar appData={this.state.data} onShowModal={this.chgShowModal} onShowTab={this.chgShowTab} />
+				<AppTabs
+					activeTab={this.state.showTab}
+					onChgLoadData={this.chgLoadData}
+					onChgNewEntry={this.chgNewEntry}
+				/>
 				<AppModal show={this.state.showModal} />
 			</main>
 		)
@@ -524,7 +651,7 @@ class AppUI extends React.Component<{}, { showModal: boolean, showTab: IAppTabs[
 
 // AppMain
 const AppMain: React.SFC<{ compiler: string; framework: string }> = props => {
-	return <AppUI />
+	return <App />
 }
 
 ReactDOM.render(<AppMain compiler='TypeScript' framework='React' />, document.getElementById('root'))
