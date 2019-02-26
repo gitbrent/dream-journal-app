@@ -35,6 +35,14 @@ import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import LogoBase64 from '../img/logo_base64'
 
+// TODO: FIXME: https://stackoverflow.com/questions/48699820/how-do-i-hide-api-key-in-create-react-app
+console.log(process.env.REACT_APP_GDRIVE_CLIENT_ID)
+console.log(`${process.env.REACT_APP_GDRIVE_CLIENT_ID}`)
+/*
+const API_KEY = `${process.env.REACT_APP_GDRIVE_API_KEY}`;
+console.log(API_KEY)
+*/
+
 interface IDream {
 	title: string
 	notes?: string
@@ -158,6 +166,56 @@ class AppNavBar extends React.Component<
 
 // ============================================================================
 
+function oauth2SignIn() {
+	// @see: https://developers.google.com/identity/protocols/OAuth2UserAgent
+
+	// Google's OAuth 2.0 endpoint for requesting an access token
+	var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth'
+
+	// Create <form> element to submit parameters to OAuth 2.0 endpoint.
+	var form = document.createElement('form')
+	form.setAttribute('method', 'GET') // Send as a GET request.
+	form.setAttribute('action', oauth2Endpoint)
+
+	// Parameters to pass to OAuth 2.0 endpoint.
+	var params = {
+		client_id: '701167709173-0gp4mi6oi5n4mvqcfqso3uooh9l5o4lt.apps.googleusercontent.com',
+		redirect_uri: 'http://localhost:8080/',
+		response_type: 'token',
+		scope: 'https://www.googleapis.com/auth/drive.appdata',
+		include_granted_scopes: 'true',
+		state: 'pass-through value',
+	}
+
+	// Add form parameters as hidden input values.
+	for (var p in params) {
+		var input = document.createElement('input')
+		input.setAttribute('type', 'hidden')
+		input.setAttribute('name', p)
+		input.setAttribute('value', params[p])
+		form.appendChild(input)
+	}
+
+	// Add form to page and submit it to open the OAuth 2.0 endpoint.
+	document.body.appendChild(form)
+	form.submit()
+}
+
+function parseStoreAccessKey() {
+	var fragmentString = location.hash.substring(1)
+
+	// Parse query string to see if page request is coming from OAuth 2.0 server.
+	var params = {}
+	var regex = /([^&=]+)=([^&]*)/g,
+		m
+	while ((m = regex.exec(fragmentString))) {
+		params[decodeURIComponent(m[1])] = decodeURIComponent(m[2])
+	}
+	if (Object.keys(params).length > 0) {
+		localStorage.setItem('oauth2-test-params', JSON.stringify(params))
+	}
+}
+
 class TabHome extends React.Component<{ onChgLoadData: Function }> {
 	constructor(props: Readonly<{ onChgLoadData: Function }>) {
 		super(props)
@@ -166,29 +224,64 @@ class TabHome extends React.Component<{ onChgLoadData: Function }> {
 		// this.myRef = React.createRef(); // FIXME
 	}
 
-	onFileSelectHandler = e => {
-		if (e.target.files.length > 0) {
+	handleGoogleDrive = e => {
+		parseStoreAccessKey()
+		var params = JSON.parse(localStorage.getItem('oauth2-test-params'))
+		if (!params || !params['access_token']) {
+			oauth2SignIn()
+			return
+		}
+
+		/*
+		Google OAuth2.0
+		Scope: https://www.googleapis.com/auth/drive.appdata
+		"View and manage its own configuration data in your Google Drive"
+		*/
+		// GET https://www.googleapis.com/drive/v3/files/
+		// Authorization: Bearer [YOUR_ACCESS_TOKEN]
+		// Accept: application/json
+		fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder', {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json',
+				Authorization: 'Bearer ' + params['access_token'],
+			},
+		})
+			.then(response => {
+				response.json().then(json => {
+					let data = json
+					console.log(data)
+					console.log(data.files)
+				})
+			})
+			.catch(error => {
+				console.error ? console.error(error) : console.log(error)
+			})
+	}
+
+	handleFileSelect = event => {
+		if (event.target.files.length > 0) {
 			const reader = new FileReader()
-			reader.onload = e => {
+			reader.onload = ev => {
 				try {
 					// NOTE: Cannot use `e.target.result` as of Jan-2019
 					// SEE: https://stackoverflow.com/questions/35789498/new-typescript-1-8-4-build-error-build-property-result-does-not-exist-on-t
-					let jsonJournal = JSON.parse(e.target['result'])
+					let jsonJournal = JSON.parse(ev.target['result'])
 					this.props.onChgLoadData(jsonJournal && jsonJournal.data ? jsonJournal.data : [])
 				} catch (ex) {
 					// TODO: Show errors on screen
 					console.log('ERROR: ' + ex)
 				}
 			}
-			reader.readAsText(e.target.files[0])
+			reader.readAsText(event.target.files[0])
 		}
 	}
 
 	render() {
 		// TODO: FIXME:
-		//let filePicker = <input ref={this.myRef} type="file" className="form-control-file d-none" accept=".json" onChange={this.onFileSelectHandler} />
+		//let filePicker = <input ref={this.myRef} type="file" className="form-control-file d-none" accept=".json" onChange={this.handleFileSelect} />
 		let filePicker = (
-			<input type='file' className='form-control-file' accept='.json' onChange={this.onFileSelectHandler} />
+			<input type='file' className='form-control-file' accept='.json' onChange={this.handleFileSelect} />
 		)
 		/*
 		TODO: use 2 buttons instead (New and Open)
@@ -230,6 +323,9 @@ class TabHome extends React.Component<{ onChgLoadData: Function }> {
 						<label className='text-muted text-uppercase'>Open Exising File</label>
 						{filePicker}
 					</div>
+					<button type='button' className='btn btn-warning' onClick={this.handleGoogleDrive}>
+						Google Drive
+					</button>
 				</div>
 			</div>
 		)
@@ -261,11 +357,11 @@ class TabAdd extends React.Component<{ onChgNewEntry: Function }, { dailyEntry: 
 
 		this.state = {
 			dailyEntry: {
-				entryDate: new Date().toISOString().substring(0,10),
-				bedTime: "",
-				notesPrep: "",
-				notesWake: "",
-				dreams: [{ title: "" }],
+				entryDate: new Date().toISOString().substring(0, 10),
+				bedTime: '',
+				notesPrep: '',
+				notesWake: '',
+				dreams: [{ title: '' }],
 			},
 		}
 	}
@@ -279,19 +375,18 @@ class TabAdd extends React.Component<{ onChgNewEntry: Function }, { dailyEntry: 
 	handleChange = event => {
 		console.log('form field changed!')
 
-		if ( event && event.target && event.target.id ) {
+		if (event && event.target && event.target.id) {
 			let updatedEntry = this.state.dailyEntry
 
-			if ( event.target.id == 'entryDate' ) {
+			if (event.target.id == 'entryDate') {
 				updatedEntry.entryDate = event.target.value
-			}
-			else if ( event.target.id == 'bedTime' ) {
+			} else if (event.target.id == 'bedTime') {
 				updatedEntry.bedTime = event.target.value
 			}
 			// TODO: CURR: keep going! add all other fields!!
 			// what to do about DREAM-n rows - they wont have unique ids?
 
-			this.setState({ dailyEntry:updatedEntry })
+			this.setState({ dailyEntry: updatedEntry })
 		}
 
 		console.log(this.state.dailyEntry)
@@ -368,14 +463,25 @@ class TabAdd extends React.Component<{ onChgNewEntry: Function }, { dailyEntry: 
 						<div className='row mb-4'>
 							<div className='col-12 col-md-6 required'>
 								<label className='text-muted text-uppercase text-sm'>Entry Date</label>
-								<input id='entryDate' type='date' className='form-control w-50' required
-								value={this.state.dailyEntry.entryDate} onChange={this.handleChange} />
+								<input
+									id='entryDate'
+									type='date'
+									className='form-control w-50'
+									required
+									value={this.state.dailyEntry.entryDate}
+									onChange={this.handleChange}
+								/>
 								<div className='invalid-feedback'>Please provide Entry Date</div>
 							</div>
 							<div className='col-12 col-md-6'>
 								<label className='text-muted text-uppercase text-sm'>Bed Time</label>
-								<input id='bedTime' type='time' className='form-control w-50'
-								value={this.state.dailyEntry.bedTime} onChange={this.handleChange} />
+								<input
+									id='bedTime'
+									type='time'
+									className='form-control w-50'
+									value={this.state.dailyEntry.bedTime}
+									onChange={this.handleChange}
+								/>
 							</div>
 						</div>
 						<div className='row'>
