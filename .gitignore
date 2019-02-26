@@ -1,3 +1,5 @@
+### env vars (API Keys, etc.)
+.env
 ### MacOS
 .DS_Store
 ### Node
