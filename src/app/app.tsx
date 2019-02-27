@@ -42,6 +42,10 @@ console.log(`${process.env.REACT_APP_GDRIVE_CLIENT_ID}`)
 const API_KEY = `${process.env.REACT_APP_GDRIVE_API_KEY}`;
 console.log(API_KEY)
 */
+const GITBRENT_CLIENT_ID = '300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com'
+const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
+const FIREBASE_URL = 'https://brain-cloud-dream-journal.firebaseapp.com'
+const LOCALHOST_URL = 'http://localhost:8080'
 
 interface IDream {
 	title: string
@@ -64,6 +68,60 @@ interface IAppTabs {
 // @see: https://flaviocopes.com/react-forms/
 // @see: https://github.com/jaredpalmer/formik
 // TODO: https://reactjs.org/docs/forms.html
+
+// ============================================================================
+
+function oauth2SignIn() {
+	// @see: https://developers.google.com/identity/protocols/OAuth2UserAgent
+
+	// Google's OAuth 2.0 endpoint for requesting an access token
+	var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth'
+
+	// Create <form> element to submit parameters to OAuth 2.0 endpoint.
+	var form = document.createElement('form')
+	form.setAttribute('method', 'GET') // Send as a GET request.
+	form.setAttribute('action', oauth2Endpoint)
+
+	// Parameters to pass to OAuth 2.0 endpoint.
+	var params = {
+		client_id: GITBRENT_CLIENT_ID,
+		scope: GDRIVE_SCOPE,
+		redirect_uri: location.href.indexOf('8080') > -1 ? LOCALHOST_URL : FIREBASE_URL,
+		response_type: 'token',
+		include_granted_scopes: 'true',
+		state: 'pass-through value',
+	}
+
+	// Add form parameters as hidden input values.
+	for (var p in params) {
+		var input = document.createElement('input')
+		input.setAttribute('type', 'hidden')
+		input.setAttribute('name', p)
+		input.setAttribute('value', params[p])
+		form.appendChild(input)
+	}
+
+	// Add form to page and submit it to open the OAuth 2.0 endpoint.
+	document.body.appendChild(form)
+	form.submit()
+}
+
+function parseStoreAccessKey() {
+	var fragmentString = location.hash.substring(1)
+
+	// Parse query string to see if page request is coming from OAuth 2.0 server.
+	var params = {}
+	var regex = /([^&=]+)=([^&]*)/g,
+		m
+	while ((m = regex.exec(fragmentString))) {
+		params[decodeURIComponent(m[1])] = decodeURIComponent(m[2])
+	}
+	if (Object.keys(params).length > 0) {
+		localStorage.setItem('oauth2-test-params', JSON.stringify(params))
+	}
+}
+
+// ============================================================================
 
 class AppNavBar extends React.Component<
 	{ appData: Array<IDailyEntry>; onShowModal: Function; onShowTab: Function },
@@ -97,7 +155,7 @@ class AppNavBar extends React.Component<
 	render() {
 		return (
 			<nav className='navbar navbar-expand-lg navbar-light bg-light'>
-				<a className='navbar-brand' href='javascript:void(0)'>
+				<a className='navbar-brand' href='/'>
 					<img src={LogoBase64} width='30' height='30' className='d-inline-block align-top mr-3' alt='' />
 					Dream Journal App
 				</a>
@@ -164,83 +222,32 @@ class AppNavBar extends React.Component<
 	}
 }
 
-// ============================================================================
-
-function oauth2SignIn() {
-	// @see: https://developers.google.com/identity/protocols/OAuth2UserAgent
-
-	// Google's OAuth 2.0 endpoint for requesting an access token
-	var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth'
-
-	// Create <form> element to submit parameters to OAuth 2.0 endpoint.
-	var form = document.createElement('form')
-	form.setAttribute('method', 'GET') // Send as a GET request.
-	form.setAttribute('action', oauth2Endpoint)
-
-	// Parameters to pass to OAuth 2.0 endpoint.
-	var params = {
-		client_id: '701167709173-0gp4mi6oi5n4mvqcfqso3uooh9l5o4lt.apps.googleusercontent.com',
-		redirect_uri: 'http://localhost:8080/',
-		response_type: 'token',
-		scope: 'https://www.googleapis.com/auth/drive.appdata',
-		include_granted_scopes: 'true',
-		state: 'pass-through value',
-	}
-
-	// Add form parameters as hidden input values.
-	for (var p in params) {
-		var input = document.createElement('input')
-		input.setAttribute('type', 'hidden')
-		input.setAttribute('name', p)
-		input.setAttribute('value', params[p])
-		form.appendChild(input)
-	}
-
-	// Add form to page and submit it to open the OAuth 2.0 endpoint.
-	document.body.appendChild(form)
-	form.submit()
-}
-
-function parseStoreAccessKey() {
-	var fragmentString = location.hash.substring(1)
-
-	// Parse query string to see if page request is coming from OAuth 2.0 server.
-	var params = {}
-	var regex = /([^&=]+)=([^&]*)/g,
-		m
-	while ((m = regex.exec(fragmentString))) {
-		params[decodeURIComponent(m[1])] = decodeURIComponent(m[2])
-	}
-	if (Object.keys(params).length > 0) {
-		localStorage.setItem('oauth2-test-params', JSON.stringify(params))
-	}
-}
-
-class TabHome extends React.Component<{ onChgLoadData: Function }> {
+class TabHome extends React.Component<{ onChgLoadData: Function }, { authState: string; gdriveFiles: Array<string> }> {
 	constructor(props: Readonly<{ onChgLoadData: Function }>) {
 		super(props)
-		// DOCS: https://reactjs.org/docs/refs-and-the-dom.html
-		// Their own example doesnt work in v16.8
-		// this.myRef = React.createRef(); // FIXME
+
+		var params = localStorage.getItem('oauth2-test-params') ? JSON.parse(localStorage.getItem('oauth2-test-params')) : null
+
+		this.state = {
+			authState: params && params['access_token'] ? 'Connected' : 'Not Connected',
+			gdriveFiles: [],
+		}
 	}
 
-	handleGoogleDrive = e => {
+	handleDriveFileList = e => {
 		parseStoreAccessKey()
 		var params = JSON.parse(localStorage.getItem('oauth2-test-params'))
 		if (!params || !params['access_token']) {
 			oauth2SignIn()
 			return
+		} else {
+			this.setState({ authState: 'Connected' })
 		}
 
-		/*
-		Google OAuth2.0
-		Scope: https://www.googleapis.com/auth/drive.appdata
-		"View and manage its own configuration data in your Google Drive"
-		*/
 		// GET https://www.googleapis.com/drive/v3/files/
 		// Authorization: Bearer [YOUR_ACCESS_TOKEN]
 		// Accept: application/json
-		fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder', {
+		fetch('https://www.googleapis.com/drive/v3/files', {
 			method: 'GET',
 			headers: {
 				Accept: 'application/json',
@@ -248,48 +255,92 @@ class TabHome extends React.Component<{ onChgLoadData: Function }> {
 			},
 		})
 			.then(response => {
-				response.json().then(json => {
-					let data = json
-					console.log(data)
-					console.log(data.files)
-				})
+				response
+					.json()
+					.then(json => {
+						let data = json
+						// STEP 1: Check for errors
+						// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
+						if (data && data.error && data.error.code) throw data.error
+
+						// STEP 2: Update data
+						console.log(data.files) // DEBUG:
+						this.setState({ gdriveFiles: data.files })
+					})
+					.catch(error => {
+						if (error.code == '401') {
+							oauth2SignIn()
+						} else {
+							console.error ? console.error(error) : console.log(error)
+						}
+					})
 			})
 			.catch(error => {
-				console.error ? console.error(error) : console.log(error)
+				if (error.code == '401') {
+					oauth2SignIn()
+				} else {
+					console.error ? console.error(error) : console.log(error)
+				}
 			})
 	}
 
-	handleFileSelect = event => {
-		if (event.target.files.length > 0) {
-			const reader = new FileReader()
-			reader.onload = ev => {
-				try {
-					// NOTE: Cannot use `e.target.result` as of Jan-2019
-					// SEE: https://stackoverflow.com/questions/35789498/new-typescript-1-8-4-build-error-build-property-result-does-not-exist-on-t
-					let jsonJournal = JSON.parse(ev.target['result'])
-					this.props.onChgLoadData(jsonJournal && jsonJournal.data ? jsonJournal.data : [])
-				} catch (ex) {
-					// TODO: Show errors on screen
-					console.log('ERROR: ' + ex)
-				}
-			}
-			reader.readAsText(event.target.files[0])
+	/**
+	 * @see: https://developers.google.com/drive/api/v3/simple-upload
+	 */
+	handleDriveFileCreate = e => {
+		let params = JSON.parse(localStorage.getItem('oauth2-test-params'))
+		let jsonData = {
+			name: 'dream-journal.json',
+			description: 'Backup data for my app',
+			mimeType: 'application/json',
 		}
+		// TODO: if (!isUpdate) metaData.parents = ['appDataFolder']
+		let strJson = JSON.stringify(jsonData)
+
+		let requestHeaders: any = {
+			Authorization: 'Bearer ' + params['access_token'],
+			//'Content-Type': 'application/json',
+			//'Content-Length': strJson.length,
+		}
+
+		fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=media', {
+			method: 'POST',
+			headers: requestHeaders,
+			body: strJson,
+		})
+			.then(response => {
+				response
+					.json()
+					.then(json => {
+						let data = json
+						console.log(data)
+					})
+					.catch(error => {
+						if (error.code == '401') {
+							oauth2SignIn()
+						} else {
+							console.error ? console.error(error) : console.log(error)
+						}
+					})
+			})
+			.catch(error => {
+				if (error.code == '401') {
+					oauth2SignIn()
+				} else {
+					console.error ? console.error(error) : console.log(error)
+				}
+			})
 	}
 
-	render() {
-		// TODO: FIXME:
-		//let filePicker = <input ref={this.myRef} type="file" className="form-control-file d-none" accept=".json" onChange={this.handleFileSelect} />
-		let filePicker = (
-			<input type='file' className='form-control-file' accept='.json' onChange={this.handleFileSelect} />
-		)
-		/*
-		TODO: use 2 buttons instead (New and Open)
-		https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications#Using_hidden_file_input_elements_using_the_click()_method
-		*/
-		// HELP: need ref, cant create one
-		// <button className="btn btn-primary w-50" onClick={filePicker.click()}>Open Dream Journal</button>
+	handleDriveLogin = e => {
+		oauth2SignIn()
+	}
 
+	/**
+	 * @see: https://developers.google.com/drive/api/v3/appdata
+	 * @see: https://developers.google.com/drive/api/v3/search-parameters#file_fields
+	 */
+	render() {
 		return (
 			<div className='container mt-5'>
 				<div className='jumbotron'>
@@ -311,21 +362,44 @@ class TabHome extends React.Component<{ onChgLoadData: Function }> {
 					<hr className='my-5' />
 					<div className='row'>
 						<div className='col-12 col-md-6 text-center mb-3'>
-							<button className='btn btn-primary w-50'>Open Dream Journal</button>
+							<button className='btn btn-danger w-50' onClick={this.handleDriveLogin}>
+								Google Drive Login
+							</button>
+
+							<button className='btn btn-warning w-50' onClick={this.handleDriveFileList}>
+								Google Drive Files
+							</button>
 						</div>
 						<div className='col-12 col-md-6 text-center mb-3'>
-							<button className='btn btn-primary w-50'>Create Dream Journal</button>
+							<button className='btn btn-danger w-50' onClick={this.handleDriveFileCreate}>
+								Create New Journal
+							</button>
 						</div>
 					</div>
 
-					<p>Select an exising Dream Journal, or select "New Journal Entry" above to start a new one.</p>
-					<div className='form-group bg-white p-3'>
-						<label className='text-muted text-uppercase'>Open Exising File</label>
-						{filePicker}
+					<div className='alert alert-info mt-4'>
+						<h5>{this.state.authState}</h5>
+						<table className='table'>
+							<thead className='thead light'>
+								<tr>
+									<th>File Name</th>
+									<th>File Size</th>
+									<th>Last Modified</th>
+								</tr>
+							</thead>
+							<tbody>
+								{this.state.gdriveFiles.map(file => {
+									console.log(file)
+									return (
+										<tr>
+											<td>file.name</td>
+											<td>file.modifiedTime.toLocaleString()</td>
+										</tr>
+									)
+								})}
+							</tbody>
+						</table>
 					</div>
-					<button type='button' className='btn btn-warning' onClick={this.handleGoogleDrive}>
-						Google Drive
-					</button>
 				</div>
 			</div>
 		)
