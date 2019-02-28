@@ -64,6 +64,9 @@ interface IDailyEntry {
 interface IAppTabs {
 	tabs: 'home' | 'search' | 'add'
 }
+interface IAppStates {
+	auth: 'Authenticated' | 'Unauthenticated' | 'Expired'
+}
 
 // @see: https://flaviocopes.com/react-forms/
 // @see: https://github.com/jaredpalmer/formik
@@ -71,6 +74,9 @@ interface IAppTabs {
 
 // ============================================================================
 
+/**
+ * @see: https://developers.google.com/identity/protocols/OAuth2UserAgent#example
+ */
 function oauth2SignIn() {
 	// @see: https://developers.google.com/identity/protocols/OAuth2UserAgent
 
@@ -154,7 +160,7 @@ class AppNavBar extends React.Component<
 
 	render() {
 		return (
-			<nav className='navbar navbar-expand-lg navbar-light bg-light'>
+			<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
 				<a className='navbar-brand' href='/'>
 					<img src={LogoBase64} width='30' height='30' className='d-inline-block align-top mr-3' alt='' />
 					Dream Journal App
@@ -166,8 +172,7 @@ class AppNavBar extends React.Component<
 					data-target='#navbarNav'
 					aria-controls='navbarNav'
 					aria-expanded='false'
-					aria-label='Toggle navigation'
-				>
+					aria-label='Toggle navigation'>
 					<span className='navbar-toggler-icon' />
 				</button>
 				<div className='collapse navbar-collapse' id='navbarNav'>
@@ -177,8 +182,7 @@ class AppNavBar extends React.Component<
 								className='nav-link'
 								href='javascript:void(0)'
 								data-name='home'
-								onClick={this.onShowTabHandler}
-							>
+								onClick={this.onShowTabHandler}>
 								Home <span className='sr-only'>(current)</span>
 							</a>
 						</li>
@@ -187,8 +191,7 @@ class AppNavBar extends React.Component<
 								className='nav-link'
 								href='javascript:void(0)'
 								data-name='add'
-								onClick={this.onShowTabHandler}
-							>
+								onClick={this.onShowTabHandler}>
 								View Dream Journal
 							</a>
 						</li>
@@ -197,8 +200,7 @@ class AppNavBar extends React.Component<
 								className='nav-link'
 								href='javascript:void(0)'
 								data-name='search'
-								onClick={this.onShowTabHandler}
-							>
+								onClick={this.onShowTabHandler}>
 								Search Dream Journal
 							</a>
 						</li>
@@ -222,16 +224,57 @@ class AppNavBar extends React.Component<
 	}
 }
 
-class TabHome extends React.Component<{ onChgLoadData: Function }, { authState: string; gdriveFiles: Array<string> }> {
+class TabHome extends React.Component<
+	{ onChgLoadData: Function },
+	{ authState: IAppStates['auth']; userName: string; userPhoto: string; gdriveFiles: Array<string> }
+> {
 	constructor(props: Readonly<{ onChgLoadData: Function }>) {
 		super(props)
 
-		var params = localStorage.getItem('oauth2-test-params') ? JSON.parse(localStorage.getItem('oauth2-test-params')) : null
-
 		this.state = {
-			authState: params && params['access_token'] ? 'Connected' : 'Not Connected',
+			authState: 'Authenticated',
+			userName: '',
+			userPhoto: '',
 			gdriveFiles: [],
 		}
+
+		let params = localStorage.getItem('oauth2-test-params')
+			? JSON.parse(localStorage.getItem('oauth2-test-params'))
+			: null
+		/**
+		 * NOTE: Docs show this: 'https://www.googleapis.com/drive/v3/about?fields=user&access_token=' + params['access_token']);
+		 * But it does not work! "Unauthorized" every time!
+		 * SOLN: Use `headers` for "Bearer" value
+		 */
+		fetch('https://www.googleapis.com/drive/v3/about?fields=user', {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json',
+				Authorization: 'Bearer ' + params['access_token'],
+			},
+		}).then(response => {
+			response
+				.json()
+				.then(json => {
+					console.log(json)
+					if (json && json.error && json.error.code) {
+						// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
+						throw json.error
+					} else if (json && json.user) {
+						this.setState({ authState: 'Authenticated' })
+						this.setState({ userName: json.user.displayName || null })
+						this.setState({ userPhoto: json.user.photoLink || null })
+						this.handleDriveFileList(null)
+					}
+				})
+				.catch(error => {
+					if (error.code == '401') {
+						this.setState({ authState: 'Expired' })
+					} else {
+						console.error ? console.error(error) : console.log(error)
+					}
+				})
+		})
 	}
 
 	handleDriveFileList = e => {
@@ -241,7 +284,7 @@ class TabHome extends React.Component<{ onChgLoadData: Function }, { authState: 
 			oauth2SignIn()
 			return
 		} else {
-			this.setState({ authState: 'Connected' })
+			this.setState({ authState: 'Authenticated' })
 		}
 
 		// GET https://www.googleapis.com/drive/v3/files/
@@ -294,31 +337,35 @@ class TabHome extends React.Component<{ onChgLoadData: Function }, { authState: 
 			description: 'Backup data for my app',
 			mimeType: 'application/json',
 		}
-		// TODO: if (!isUpdate) metaData.parents = ['appDataFolder']
-		let strJson = JSON.stringify(jsonData)
+		let reqBody = "--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n"
+			+ JSON.stringify(jsonData) + "\n"
+			+ "--foo_bar_baz\nContent-Type: image/jpeg\n\n"
+			+ JSON.stringify(jsonData) + "\n"
+			+ "--foo_bar_baz--"
+		let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
 
 		let requestHeaders: any = {
 			Authorization: 'Bearer ' + params['access_token'],
-			//'Content-Type': 'application/json',
-			//'Content-Length': strJson.length,
+			'Content-Type': 'multipart/related; boundary=foo_bar_baz',
+			'Content-Length': (reqBody.length+reqEnd.length),
 		}
 
-		fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=media', {
+		fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
 			method: 'POST',
 			headers: requestHeaders,
-			body: strJson,
+			body: reqBody,
 		})
 			.then(response => {
 				response
 					.json()
 					.then(json => {
-						let data = json
-						console.log(data)
+						this.handleDriveFileList(null)
 					})
 					.catch(error => {
 						if (error.code == '401') {
 							oauth2SignIn()
 						} else {
+							// TODO: Show message onscreen
 							console.error ? console.error(error) : console.log(error)
 						}
 					})
@@ -341,10 +388,41 @@ class TabHome extends React.Component<{ onChgLoadData: Function }, { authState: 
 	 * @see: https://developers.google.com/drive/api/v3/search-parameters#file_fields
 	 */
 	render() {
+		let cardbody
+		if (this.state.authState == 'Authenticated') {
+			cardbody = (
+				<div>
+					<p className='card-text'>
+						<label className='text-muted text-uppercase d-block'>User Name:</label>
+						{this.state.userName}
+					</p>
+					<button className='btn btn-success' onClick={this.handleDriveLogin}>
+						Re-Auth
+					</button>
+				</div>
+			)
+		} else if (this.state.authState == 'Expired') {
+			cardbody = (
+				<div>
+					<p className='card-text'>Your session has expired. Please re-authenticate to continue.</p>
+					<button className='btn btn-success' onClick={this.handleDriveLogin}>
+						Renew
+					</button>
+				</div>
+			)
+		} else {
+			cardbody = (
+				<button className='btn btn-primary' onClick={this.handleDriveLogin}>
+					Sign In/Authorize
+				</button>
+			)
+		}
+
+		/*<td>{file['modifiedTime'].toLocaleString()}</td>*/
 		return (
 			<div className='container mt-5'>
 				<div className='jumbotron'>
-					<h1 className='display-4 text-primary mb-3 d-none d-md-block'>
+					<h1 className='display-4 text-primary d-none d-md-block'>
 						<img
 							src={LogoBase64}
 							width='150'
@@ -352,53 +430,89 @@ class TabHome extends React.Component<{ onChgLoadData: Function }, { authState: 
 							className='mr-4 d-none d-lg-inline-block'
 							alt='Logo'
 						/>
-						Dream Journal App
+						Brain Cloud - Dream Journal
 					</h1>
-					<h2 className='display-5 text-primary mb-3 d-block d-md-none'>Dream Journal App</h2>
+					<h2 className='display-5 text-primary mb-3 d-block d-md-none'>Brain Cloud</h2>
 					<p className='lead'>
 						Record your daily dream journal entries into well-formatted JSON, enabling keyword searches,
 						metrics and more.
 					</p>
-					<hr className='my-5' />
-					<div className='row'>
-						<div className='col-12 col-md-6 text-center mb-3'>
-							<button className='btn btn-danger w-50' onClick={this.handleDriveLogin}>
-								Google Drive Login
-							</button>
+					<hr className='my-4' />
 
-							<button className='btn btn-warning w-50' onClick={this.handleDriveFileList}>
-								Google Drive Files
-							</button>
+					<div className='d-flex mb-4'>
+						<div className='card flex-grow-1 w-75 mr-3'>
+							<div className='card-header bg-info'>
+								<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
+							</div>
+							<div className='card-body bg-light text-dark'>
+								<p className='card-text'>
+									This application uses your Google Drive to store dream journals so they are safe,
+									secure, and accessible on any of your devices.
+								</p>
+								<p className='card-text'>
+									Signing In will request permissions to create and modify
+									<strong> only its own files</strong> on your Google Drive.
+								</p>
+							</div>
 						</div>
-						<div className='col-12 col-md-6 text-center mb-3'>
-							<button className='btn btn-danger w-50' onClick={this.handleDriveFileCreate}>
-								Create New Journal
-							</button>
+						<div className='card flex-grow-1 w-25'>
+							<div
+								className={
+									'card-header' +
+									(this.state.authState == 'Authenticated' ? ' bg-success' : ' bg-warning')
+								}>
+								<h5 className='card-title text-white mb-0'>{this.state.authState}</h5>
+							</div>
+							<div className='card-body bg-light text-dark'>{cardbody}</div>
 						</div>
 					</div>
 
-					<div className='alert alert-info mt-4'>
-						<h5>{this.state.authState}</h5>
-						<table className='table'>
-							<thead className='thead light'>
-								<tr>
-									<th>File Name</th>
-									<th>File Size</th>
-									<th>Last Modified</th>
-								</tr>
-							</thead>
-							<tbody>
-								{this.state.gdriveFiles.map(file => {
-									console.log(file)
-									return (
-										<tr>
-											<td>file.name</td>
-											<td>file.modifiedTime.toLocaleString()</td>
-										</tr>
-									)
-								})}
-							</tbody>
-						</table>
+					<div className='row'>
+						<div className='col-12'>
+							<div className='card'>
+								<div className='card-header bg-primary'>
+									<h5 className='card-title text-white mb-0'>Available Dream Journals</h5>
+								</div>
+								<div className='card-body bg-light text-dark'>
+									<div className='row mb-3'>
+										<div className='col-auto'>
+											<button
+												className='btn btn-outline-primary d-block w-100 mb-2'
+												onClick={this.handleDriveFileCreate}>
+												New Journal
+											</button>
+											<button
+												className='btn btn-outline-primary d-block w-100'
+												onClick={this.handleDriveFileList}>
+												Refresh Files
+											</button>
+										</div>
+										<div className='col'>
+											<table className='table'>
+												<thead className='thead'>
+													<tr>
+														<th>File Name</th>
+														<th>File Size</th>
+														<th>Last Modified</th>
+													</tr>
+												</thead>
+												<tbody>
+													{this.state.gdriveFiles.map((file,idx) => {
+														console.log(file)
+														return (
+															<tr key={'filerow' + idx}>
+																<td>{file['name']}</td>
+																<td>{file['mimeType']}</td>
+															</tr>
+														)
+													})}
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -578,8 +692,7 @@ class TabAdd extends React.Component<{ onChgNewEntry: Function }, { dailyEntry: 
 								<button
 									type='button'
 									className='btn btn-sm btn-outline-info'
-									onClick={this.addRowHandler}
-								>
+									onClick={this.addRowHandler}>
 									Add Dream Row
 								</button>
 							</div>
