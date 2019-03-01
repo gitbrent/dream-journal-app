@@ -123,7 +123,7 @@ function parseStoreAccessKey() {
 		params[decodeURIComponent(m[1])] = decodeURIComponent(m[2])
 	}
 	if (Object.keys(params).length > 0) {
-		localStorage.setItem('oauth2-test-params', JSON.stringify(params))
+		localStorage.setItem('oauth2-params', JSON.stringify(params))
 	}
 }
 
@@ -238,48 +238,58 @@ class TabHome extends React.Component<
 			gdriveFiles: [],
 		}
 
-		let params = localStorage.getItem('oauth2-test-params')
-			? JSON.parse(localStorage.getItem('oauth2-test-params'))
-			: null
-		/**
-		 * NOTE: Docs show this: 'https://www.googleapis.com/drive/v3/about?fields=user&access_token=' + params['access_token']);
-		 * But it does not work! "Unauthorized" every time!
-		 * SOLN: Use `headers` for "Bearer" value
-		 */
-		fetch('https://www.googleapis.com/drive/v3/about?fields=user', {
-			method: 'GET',
-			headers: {
-				Accept: 'application/json',
-				Authorization: 'Bearer ' + params['access_token'],
-			},
-		}).then(response => {
-			response
-				.json()
-				.then(json => {
-					console.log(json)
-					if (json && json.error && json.error.code) {
-						// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
-						throw json.error
-					} else if (json && json.user) {
-						this.setState({ authState: 'Authenticated' })
-						this.setState({ userName: json.user.displayName || null })
-						this.setState({ userPhoto: json.user.photoLink || null })
-						this.handleDriveFileList(null)
-					}
-				})
-				.catch(error => {
-					if (error.code == '401') {
-						this.setState({ authState: 'Expired' })
-					} else {
-						console.error ? console.error(error) : console.log(error)
-					}
-				})
-		})
+		this.updateAuthState()
+	}
+
+	updateAuthState = () => {
+		let params = localStorage.getItem('oauth2-params') ? JSON.parse(localStorage.getItem('oauth2-params')) : null
+
+		if (params) {
+			/**
+			 * NOTE: Docs show this: 'https://www.googleapis.com/drive/v3/about?fields=user&access_token=' + params['access_token']);
+			 * But it does not work! "Unauthorized" every time!
+			 * SOLN: Use `headers` for "Bearer" value
+			 */
+			fetch('https://www.googleapis.com/drive/v3/about?fields=user', {
+				method: 'GET',
+				headers: {
+					Accept: 'application/json',
+					Authorization: 'Bearer ' + params['access_token'],
+				},
+			}).then(response => {
+				response
+					.json()
+					.then(json => {
+						if (json && json.error && json.error.code) {
+							// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
+							throw json.error
+						} else if (json && json.user) {
+							// A: Set user states
+							this.setState({ authState: 'Authenticated' })
+							this.setState({ userName: json.user.displayName || null })
+							this.setState({ userPhoto: json.user.photoLink || null })
+							// B: Update file list
+							this.handleDriveFileList(null)
+						}
+					})
+					.catch(error => {
+						if (error.code == '401') {
+							this.setState({ authState: 'Expired' })
+						} else {
+							console.error ? console.error(error) : console.log(error)
+						}
+					})
+			})
+		}
+	}
+
+	handleDriveLogin = e => {
+		oauth2SignIn()
 	}
 
 	handleDriveFileList = e => {
 		parseStoreAccessKey()
-		var params = JSON.parse(localStorage.getItem('oauth2-test-params'))
+		var params = JSON.parse(localStorage.getItem('oauth2-params'))
 		if (!params || !params['access_token']) {
 			oauth2SignIn()
 			return
@@ -290,7 +300,7 @@ class TabHome extends React.Component<
 		// GET https://www.googleapis.com/drive/v3/files/
 		// Authorization: Bearer [YOUR_ACCESS_TOKEN]
 		// Accept: application/json
-		fetch('https://www.googleapis.com/drive/v3/files', {
+		fetch('https://www.googleapis.com/drive/v3/files?fields=files/id,files/name,files/size,files/modifiedTime', {
 			method: 'GET',
 			headers: {
 				Accept: 'application/json',
@@ -328,26 +338,29 @@ class TabHome extends React.Component<
 	}
 
 	/**
-	 * @see: https://developers.google.com/drive/api/v3/simple-upload
+	 * @see: https://developers.google.com/drive/api/v3/multipart-upload
 	 */
 	handleDriveFileCreate = e => {
-		let params = JSON.parse(localStorage.getItem('oauth2-test-params'))
+		let params = JSON.parse(localStorage.getItem('oauth2-params'))
 		let jsonData = {
 			name: 'dream-journal.json',
 			description: 'Backup data for my app',
 			mimeType: 'application/json',
 		}
-		let reqBody = "--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n"
-			+ JSON.stringify(jsonData) + "\n"
-			+ "--foo_bar_baz\nContent-Type: image/jpeg\n\n"
-			+ JSON.stringify(jsonData) + "\n"
-			+ "--foo_bar_baz--"
+		let reqBody =
+			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
+			JSON.stringify(jsonData) +
+			'\n' +
+			'--foo_bar_baz\nContent-Type: application/json\n\n' +
+			JSON.stringify(jsonData) +
+			'\n' +
+			'--foo_bar_baz--'
 		let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
 
 		let requestHeaders: any = {
 			Authorization: 'Bearer ' + params['access_token'],
 			'Content-Type': 'multipart/related; boundary=foo_bar_baz',
-			'Content-Length': (reqBody.length+reqEnd.length),
+			'Content-Length': reqBody.length + reqEnd.length,
 		}
 
 		fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
@@ -379,8 +392,64 @@ class TabHome extends React.Component<
 			})
 	}
 
-	handleDriveLogin = e => {
-		oauth2SignIn()
+	/**
+	 * @see: https://developers.google.com/drive/api/v3/manage-downloads
+	 */
+	handleDriveFileGet = e => {
+		let fileId = e.target.getAttribute('data-file-id')
+		let params = JSON.parse(localStorage.getItem('oauth2-params'))
+
+		fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', {
+			method: 'GET',
+			headers: {
+				Authorization: 'Bearer ' + params['access_token'],
+			},
+		})
+			.then(response => {
+				response
+					.arrayBuffer()
+					.then(buffer => {
+						let json = JSON.parse(new TextDecoder('utf-8').decode(buffer))
+						console.log(json) // DEBUG
+						if (json) this.props.onChgLoadData(json)
+					})
+					.catch(error => {
+						if (error.code == '401') {
+							oauth2SignIn()
+						} else {
+							// TODO: Show message onscreen
+							console.error ? console.error(error) : console.log(error)
+						}
+					})
+			})
+			.catch(error => {
+				if (error.code == '401') {
+					oauth2SignIn()
+				} else {
+					console.error ? console.error(error) : console.log(error)
+				}
+			})
+	}
+
+	/**
+	 * @see:
+	 */
+	handleDriveFileCopy = e => {
+		// TODO:
+		// POST https://www.googleapis.com/drive/v3/files/fileId/copy
+	}
+
+	/**
+	 * @see: https://developers.google.com/drive/api/v3/reference/files
+	 */
+	handleDriveFileRename = e => {
+		// TODO:
+		// PATCH https://www.googleapis.com/drive/v3/files/fileId
+	}
+
+	handleDriveFileDelete = e => {
+		// TODO:
+		// DELETE https://www.googleapis.com/drive/v3/files/fileId
 	}
 
 	/**
@@ -388,7 +457,7 @@ class TabHome extends React.Component<
 	 * @see: https://developers.google.com/drive/api/v3/search-parameters#file_fields
 	 */
 	render() {
-		let cardbody
+		let cardbody: JSX.Element
 		if (this.state.authState == 'Authenticated') {
 			cardbody = (
 				<div>
@@ -418,7 +487,38 @@ class TabHome extends React.Component<
 			)
 		}
 
-		/*<td>{file['modifiedTime'].toLocaleString()}</td>*/
+		let tableFileList: JSX.Element = (
+			<table className='table'>
+				<thead className='thead'>
+					<tr>
+						<th>File Name</th>
+						<th>File Size</th>
+						<th>Last Modified</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody>
+					{this.state.gdriveFiles.map((file, idx) => {
+						return (
+							<tr key={'filerow' + idx}>
+								<td>{file['name']}</td>
+								<td className='text-center'>{(Number(file['size']) / 1000).toFixed(2) + 'kb'}</td>
+								<td className='text-nowrap'>{new Date(file['modifiedTime']).toLocaleString()}</td>
+								<td>
+									<button
+										className='btn btn-sm btn-primary'
+										data-file-id={file['id']}
+										onClick={this.handleDriveFileGet}>
+										Select
+									</button>
+								</td>
+							</tr>
+						)
+					})}
+				</tbody>
+			</table>
+		)
+
 		return (
 			<div className='container mt-5'>
 				<div className='jumbotron'>
@@ -439,9 +539,9 @@ class TabHome extends React.Component<
 					</p>
 					<hr className='my-4' />
 
-					<div className='d-flex mb-4'>
-						<div className='card flex-grow-1 w-75 mr-3'>
-							<div className='card-header bg-info'>
+					<div className='d-flex mb-5'>
+						<div className='card flex-grow-1 w-75 mr-5'>
+							<div className='card-header bg-primary'>
 								<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
 							</div>
 							<div className='card-body bg-light text-dark'>
@@ -470,44 +570,25 @@ class TabHome extends React.Component<
 					<div className='row'>
 						<div className='col-12'>
 							<div className='card'>
-								<div className='card-header bg-primary'>
+								<div className='card-header bg-info'>
 									<h5 className='card-title text-white mb-0'>Available Dream Journals</h5>
 								</div>
 								<div className='card-body bg-light text-dark'>
-									<div className='row mb-3'>
-										<div className='col-auto'>
+									{tableFileList}
+									<div className='row'>
+										<div className='col-12 col-md-6 text-center'>
 											<button
-												className='btn btn-outline-primary d-block w-100 mb-2'
-												onClick={this.handleDriveFileCreate}>
-												New Journal
-											</button>
-											<button
-												className='btn btn-outline-primary d-block w-100'
+												className='btn btn-outline-primary w-50'
 												onClick={this.handleDriveFileList}>
-												Refresh Files
+												Refresh File List
 											</button>
 										</div>
-										<div className='col'>
-											<table className='table'>
-												<thead className='thead'>
-													<tr>
-														<th>File Name</th>
-														<th>File Size</th>
-														<th>Last Modified</th>
-													</tr>
-												</thead>
-												<tbody>
-													{this.state.gdriveFiles.map((file,idx) => {
-														console.log(file)
-														return (
-															<tr key={'filerow' + idx}>
-																<td>{file['name']}</td>
-																<td>{file['mimeType']}</td>
-															</tr>
-														)
-													})}
-												</tbody>
-											</table>
+										<div className='col-12 col-md-6 text-center'>
+											<button
+												className='btn btn-outline-primary w-50'
+												onClick={this.handleDriveFileCreate}>
+												Create New Dream Journal
+											</button>
 										</div>
 									</div>
 								</div>
