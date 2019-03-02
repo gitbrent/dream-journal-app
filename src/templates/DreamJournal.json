@@ -1,5 +1,4 @@
 {
-	"_meta": { "lastModified":"2019-02-25T04:30:16.820Z" },
 	"data": [
 		{
 			"2019-02-25": {
@@ -10,7 +9,11 @@
 				"dreams": [
 					{
 						"title": "Working at the mall again!",
-						"notes": "It was a dark and stormy night [...1 hour later...], done!"
+						"notes": "It was a dark and stormy night [...1 hour later...], done!",
+						"dreamSigns": ["Mall", "Lost Phone"],
+						"dreamImages": [],
+						"isLucidDream": false,
+						"lucidMethod": null
 					}
 				]
 			}
