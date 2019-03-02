@@ -47,15 +47,24 @@ const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
 const FIREBASE_URL = 'https://brain-cloud-dream-journal.firebaseapp.com'
 const LOCALHOST_URL = 'http://localhost:8080'
 
-enum AppTab {home = 'home', search = 'search', add = 'add'}
-enum AuthState {Authenticated = 'Authenticated', Unauthenticated = 'Unauthenticated', Expired = 'Expired'}
+enum AppTab {
+	home = 'home',
+	view = 'view',
+	search = 'search',
+	add = 'add',
+}
+enum AuthState {
+	Authenticated = 'Authenticated',
+	Unauthenticated = 'Unauthenticated',
+	Expired = 'Expired',
+}
 
 interface IJournalDream {
 	title: string
 	notes?: string
 	dreamSigns?: Array<string>
 	dreamImages?: Array<string>
-	lucidDream?: boolean
+	isLucidDream?: boolean
 	lucidMethod?: 'dild' | 'mild' | 'wbtb' | 'wild' | 'other'
 }
 interface IJournalEntry {
@@ -182,7 +191,6 @@ class AppNavBar extends React.Component<
 	}
 
 	render() {
-		console.log(this.state.activeTab)
 		return (
 			<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
 				<a className='navbar-brand' href='/'>
@@ -210,13 +218,22 @@ class AppNavBar extends React.Component<
 								Home <span className='sr-only'>(current)</span>
 							</a>
 						</li>
+						<li className={this.state.activeTab == AppTab.view ? 'nav-item active' : 'nav-item'}>
+							<a
+								className='nav-link'
+								href='javascript:void(0)'
+								data-name='view'
+								onClick={this.onShowTabHandler}>
+								View Dream Journal
+							</a>
+						</li>
 						<li className={this.state.activeTab == AppTab.add ? 'nav-item active' : 'nav-item'}>
 							<a
 								className='nav-link'
 								href='javascript:void(0)'
 								data-name='add'
 								onClick={this.onShowTabHandler}>
-								View Dream Journal
+								Add Journal Entry
 							</a>
 						</li>
 						<li className={this.state.activeTab == AppTab.search ? 'nav-item active' : 'nav-item'}>
@@ -235,7 +252,9 @@ class AppNavBar extends React.Component<
 						Journal Entries
 					</button>
 					<button type='button' className='btn btn-secondary' disabled>
-						{this.props.appData && this.props.appData.data ? Object.keys(this.props.appData.data).length : 0}
+						{this.props.appData && this.props.appData.data
+							? Object.keys(this.props.appData.data).length
+							: 0}
 					</button>
 				</div>
 				<form className='form-inline mb-0'>
@@ -401,20 +420,19 @@ class TabHome extends React.Component<
 				response
 					.arrayBuffer()
 					.then(buffer => {
-						let decoded:string = new TextDecoder('utf-8').decode(buffer)
-						let json:Object = {}
+						let decoded: string = new TextDecoder('utf-8').decode(buffer)
+						let json: Object = {}
 						if (decoded && decoded.length > 0) {
 							try {
 								json = JSON.parse(decoded)
 								console.log('FYI: Get File results:')
 								console.log(json) // DEBUG
-							}
-							catch (ex){
+							} catch (ex) {
 								// TODO: Show message onscreen
 								console.error ? console.error(ex) : console.log(ex)
 							}
 						}
-						if (json) this.props.onChgLoadFile(json)
+						if (json) this.props.onChgLoadFile(json,fileId)
 					})
 					.catch(error => {
 						if (error.code == '401') {
@@ -561,7 +579,9 @@ class TabHome extends React.Component<
 							<div
 								className={
 									'card-header' +
-									(this.props.authState.status == AuthState.Authenticated ? ' bg-success' : ' bg-warning')
+									(this.props.authState.status == AuthState.Authenticated
+										? ' bg-success'
+										: ' bg-warning')
 								}>
 								<h5 className='card-title text-white mb-0'>{this.props.authState.status}</h5>
 							</div>
@@ -617,6 +637,66 @@ class TabSearch extends React.Component {
 						<h6 id='appVer' className='text-black-50 font-weight-light' />
 					</div>
 				</div>
+			</div>
+		)
+	}
+}
+
+class TabView extends React.Component<
+	{ appData: IDreamJournal; selectedFileId: string }> {
+
+	constructor(props: Readonly<{ appData: IDreamJournal; selectedFileId: string }>) {
+		super(props)
+	}
+
+	render() {
+		let tableFileList: JSX.Element = (
+			<table className='table'>
+				<thead className='thead'>
+					<tr>
+						<th>Entry Date</th>
+						<th>Dream Count</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody>
+					{(this.props.appData && this.props.appData.data ? this.props.appData.data : []).map((entry:IJournalEntry, idx) => {
+						return (
+							<tr key={'journalrow' + idx}>
+								<td>{entry.entryDate}</td>
+								<td>{entry.dreams.length}</td>
+								<td>
+									<button
+										className='btn btn-sm btn-primary'
+										data-entry-key={entry.entryDate}
+										>
+										Edit
+									</button>
+								</td>
+							</tr>
+						)
+					})}
+				</tbody>
+				<tfoot>
+					{(!this.props.appData || !this.props.appData.data) && (
+					    <tr>
+					        <td colSpan={3} className="text-center p-3 text-muted">(No Dream Journal entries found - select "Add Journal Entry" above to create a new one)</td>
+					    </tr>
+					)}
+					{!this.props.selectedFileId && (
+						<tr>
+					        <td colSpan={3} className="text-center p-3 text-muted">(Select a Dream Journal to see entries)</td>
+					    </tr>
+					)}
+				</tfoot>
+			</table>
+		)
+
+		return (
+			<div className='container mt-3'>
+				<h2 className='text-primary mb-3'>View Dream Journal</h2>
+
+				{tableFileList}
 			</div>
 		)
 	}
@@ -951,8 +1031,10 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 
 class AppTabs extends React.Component<{
 	activeTab: AppTab
+	appData: IDreamJournal
 	availFiles: Array<IDriveFile>
 	authState: IAuthState
+	selectedFileId: string
 	onChgAvailFiles: Function
 	onChgLoadFile: Function
 	onChgNewEntry: Function
@@ -960,8 +1042,10 @@ class AppTabs extends React.Component<{
 	constructor(
 		props: Readonly<{
 			activeTab: AppTab
+			appData: IDreamJournal
 			availFiles: Array<IDriveFile>
 			authState: IAuthState
+			selectedFileId: string
 			onChgAvailFiles: Function
 			onChgLoadFile: Function
 			onChgNewEntry: Function
@@ -972,10 +1056,12 @@ class AppTabs extends React.Component<{
 
 	render() {
 		switch (this.props.activeTab) {
-			case AppTab.search:
-				return <TabSearch />
+			case AppTab.view:
+				return <TabView appData={this.props.appData} selectedFileId={this.props.selectedFileId} />
 			case AppTab.add:
 				return <TabAdd onChgNewEntry={this.props.onChgNewEntry} />
+			case AppTab.search:
+				return <TabSearch />
 			case AppTab.home:
 			default:
 				return (
@@ -997,6 +1083,7 @@ class App extends React.Component<
 		availFiles: Array<IDriveFile>
 		auth: IAuthState
 		dreamJournal: IDreamJournal
+		selectedFileId: string
 		showModal: boolean
 		showTab: AppTab
 	}
@@ -1005,13 +1092,14 @@ class App extends React.Component<
 		super(props)
 
 		this.state = {
-			dreamJournal: {data:[]},
-			availFiles: [],
 			auth: {
 				status: AuthState.Unauthenticated,
 				userName: '',
 				userPhoto: '',
 			},
+			availFiles: [],
+			dreamJournal: { data: [] },
+			selectedFileId: "",
 			showModal: props.showModal || false,
 			showTab: AppTab.home,
 		}
@@ -1079,9 +1167,12 @@ class App extends React.Component<
 			showTab: value,
 		})
 	}
-	chgLoadFile = (value: IDreamJournal) => {
+	chgLoadFile = (fileJson: IDreamJournal, fileId:string) => {
 		this.setState({
-			dreamJournal: value,
+			dreamJournal: fileJson,
+		})
+		this.setState({
+			selectedFileId: fileId
 		})
 		console.log('FYI: app.state.data updated')
 		console.log(this.state.dreamJournal)
@@ -1106,11 +1197,17 @@ class App extends React.Component<
 	render() {
 		return (
 			<main>
-				<AppNavBar appData={this.state.dreamJournal} onShowModal={this.chgShowModal} onShowTab={this.chgShowTab} />
+				<AppNavBar
+					appData={this.state.dreamJournal}
+					onShowModal={this.chgShowModal}
+					onShowTab={this.chgShowTab}
+				/>
 				<AppTabs
 					activeTab={this.state.showTab}
+					appData={this.state.dreamJournal}
 					availFiles={this.state.availFiles}
 					authState={this.state.auth}
+					selectedFileId={this.state.selectedFileId}
 					onChgAvailFiles={this.chgAvailFiles}
 					onChgLoadFile={this.chgLoadFile}
 					onChgNewEntry={this.chgNewEntry}
