@@ -47,28 +47,31 @@ const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
 const FIREBASE_URL = 'https://brain-cloud-dream-journal.firebaseapp.com'
 const LOCALHOST_URL = 'http://localhost:8080'
 
-interface IDream {
+enum AppTab {home = 'home', search = 'search', add = 'add'}
+enum AuthState {Authenticated = 'Authenticated', Unauthenticated = 'Unauthenticated', Expired = 'Expired'}
+
+interface IJournalDream {
 	title: string
 	notes?: string
 	dreamSigns?: Array<string>
 	dreamImages?: Array<string>
 	lucidDream?: boolean
-	lucidMethod?: 'dild' | 'mild' | 'wbtb' | 'other'
+	lucidMethod?: 'dild' | 'mild' | 'wbtb' | 'wild' | 'other'
 }
-interface IDailyEntry {
+interface IJournalEntry {
 	entryDate: string
 	bedTime?: string
 	notesPrep?: string
 	notesWake?: string
-	dreams?: Array<IDream>
+	dreams?: Array<IJournalDream>
+}
+interface IDreamJournal {
+	data: Array<IJournalEntry>
 }
 interface IAuthState {
-	status: 'Authenticated' | 'Unauthenticated' | 'Expired'
+	status: AuthState
 	userName: ''
 	userPhoto: ''
-}
-interface IAppTabs {
-	tabs: 'home' | 'search' | 'add'
 }
 interface IDriveFile {
 	id: string
@@ -150,14 +153,14 @@ function getReadableFileSizeString(fileSizeInBytes: number) {
 // ============================================================================
 
 class AppNavBar extends React.Component<
-	{ appData: Array<IDailyEntry>; onShowModal: Function; onShowTab: Function },
-	{ activeTab: IAppTabs['tabs'] }
+	{ appData: IDreamJournal; onShowModal: Function; onShowTab: Function },
+	{ activeTab: AppTab }
 > {
-	constructor(props: Readonly<{ appData: Array<IDailyEntry>; onShowModal: Function; onShowTab: Function }>) {
+	constructor(props: Readonly<{ appData: IDreamJournal; onShowModal: Function; onShowTab: Function }>) {
 		super(props)
 
 		this.state = {
-			activeTab: 'home',
+			activeTab: AppTab.home,
 		}
 	}
 
@@ -179,6 +182,7 @@ class AppNavBar extends React.Component<
 	}
 
 	render() {
+		console.log(this.state.activeTab)
 		return (
 			<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
 				<a className='navbar-brand' href='/'>
@@ -197,7 +201,7 @@ class AppNavBar extends React.Component<
 				</button>
 				<div className='collapse navbar-collapse' id='navbarNav'>
 					<ul className='navbar-nav'>
-						<li className={this.state.activeTab == 'home' ? 'nav-item active' : 'nav-item'}>
+						<li className={this.state.activeTab == AppTab.home ? 'nav-item active' : 'nav-item'}>
 							<a
 								className='nav-link'
 								href='javascript:void(0)'
@@ -206,7 +210,7 @@ class AppNavBar extends React.Component<
 								Home <span className='sr-only'>(current)</span>
 							</a>
 						</li>
-						<li className={this.state.activeTab == 'add' ? 'nav-item active' : 'nav-item'}>
+						<li className={this.state.activeTab == AppTab.add ? 'nav-item active' : 'nav-item'}>
 							<a
 								className='nav-link'
 								href='javascript:void(0)'
@@ -215,7 +219,7 @@ class AppNavBar extends React.Component<
 								View Dream Journal
 							</a>
 						</li>
-						<li className={this.state.activeTab == 'search' ? 'nav-item active' : 'nav-item'}>
+						<li className={this.state.activeTab == AppTab.search ? 'nav-item active' : 'nav-item'}>
 							<a
 								className='nav-link'
 								href='javascript:void(0)'
@@ -231,7 +235,7 @@ class AppNavBar extends React.Component<
 						Journal Entries
 					</button>
 					<button type='button' className='btn btn-secondary' disabled>
-						{this.props.appData.length}
+						{this.props.appData && this.props.appData.data ? Object.keys(this.props.appData.data).length : 0}
 					</button>
 				</div>
 				<form className='form-inline mb-0'>
@@ -397,9 +401,19 @@ class TabHome extends React.Component<
 				response
 					.arrayBuffer()
 					.then(buffer => {
-						let json = JSON.parse(new TextDecoder('utf-8').decode(buffer))
-						console.log('FYI: Get File results:')
-						console.log(json) // DEBUG
+						let decoded:string = new TextDecoder('utf-8').decode(buffer)
+						let json:Object = {}
+						if (decoded && decoded.length > 0) {
+							try {
+								json = JSON.parse(decoded)
+								console.log('FYI: Get File results:')
+								console.log(json) // DEBUG
+							}
+							catch (ex){
+								// TODO: Show message onscreen
+								console.error ? console.error(ex) : console.log(ex)
+							}
+						}
 						if (json) this.props.onChgLoadFile(json)
 					})
 					.catch(error => {
@@ -443,7 +457,7 @@ class TabHome extends React.Component<
 	 */
 	render() {
 		let cardbody: JSX.Element
-		if (this.props.authState.status == 'Authenticated') {
+		if (this.props.authState.status == AuthState.Authenticated) {
 			cardbody = (
 				<div>
 					<p className='card-text'>
@@ -455,7 +469,7 @@ class TabHome extends React.Component<
 					</button>
 				</div>
 			)
-		} else if (this.props.authState.status == 'Expired') {
+		} else if (this.props.authState.status == AuthState.Expired) {
 			cardbody = (
 				<div>
 					<p className='card-text'>Your session has expired. Please re-authenticate to continue.</p>
@@ -466,9 +480,12 @@ class TabHome extends React.Component<
 			)
 		} else {
 			cardbody = (
-				<button className='btn btn-primary' onClick={this.handleDriveLogin}>
-					Sign In/Authorize
-				</button>
+				<div>
+					<p className='card-text'>Please sign-in to allow access to Google Drive space.</p>
+					<button className='btn btn-primary' onClick={this.handleDriveLogin}>
+						Sign In/Authorize
+					</button>
+				</div>
 			)
 		}
 
@@ -544,7 +561,7 @@ class TabHome extends React.Component<
 							<div
 								className={
 									'card-header' +
-									(this.props.authState.status == 'Authenticated' ? ' bg-success' : ' bg-warning')
+									(this.props.authState.status == AuthState.Authenticated ? ' bg-success' : ' bg-warning')
 								}>
 								<h5 className='card-title text-white mb-0'>{this.props.authState.status}</h5>
 							</div>
@@ -605,7 +622,7 @@ class TabSearch extends React.Component {
 	}
 }
 
-class TabAdd extends React.Component<{ onChgNewEntry: Function }, { dailyEntry: IDailyEntry }> {
+class TabAdd extends React.Component<{ onChgNewEntry: Function }, { dailyEntry: IJournalEntry }> {
 	constructor(props: Readonly<{ show?: boolean; onChgNewEntry: Function }>) {
 		super(props)
 
@@ -653,7 +670,7 @@ class TabAdd extends React.Component<{ onChgNewEntry: Function }, { dailyEntry: 
 		console.log(this.state.dailyEntry)
 	}
 
-	renderDreamRow = (dream: IDream, idx: number) => {
+	renderDreamRow = (dream: IJournalDream, idx: number) => {
 		return (
 			<div className='row p-3 mb-4 bg-light' key={'dreamrow' + idx}>
 				<div className='col-auto'>
@@ -773,7 +790,7 @@ class TabAdd extends React.Component<{ onChgNewEntry: Function }, { dailyEntry: 
 
 // ============================================================================
 
-class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dailyEntry: IDailyEntry }> {
+class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dailyEntry: IJournalEntry }> {
 	constructor(props: Readonly<{ show?: boolean }>) {
 		super(props)
 
@@ -820,7 +837,7 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 		console.log('form field changed!')
 	}
 
-	renderDreamRow = (dream: IDream, idx: number) => {
+	renderDreamRow = (dream: IJournalDream, idx: number) => {
 		return (
 			<div className='row pt-3 mb-4 border-top' key={'dreamrow' + idx}>
 				<div className='col-auto'>
@@ -933,7 +950,7 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 // ============================================================================
 
 class AppTabs extends React.Component<{
-	activeTab: IAppTabs['tabs']
+	activeTab: AppTab
 	availFiles: Array<IDriveFile>
 	authState: IAuthState
 	onChgAvailFiles: Function
@@ -942,7 +959,7 @@ class AppTabs extends React.Component<{
 }> {
 	constructor(
 		props: Readonly<{
-			activeTab: IAppTabs['tabs']
+			activeTab: AppTab
 			availFiles: Array<IDriveFile>
 			authState: IAuthState
 			onChgAvailFiles: Function
@@ -955,11 +972,11 @@ class AppTabs extends React.Component<{
 
 	render() {
 		switch (this.props.activeTab) {
-			case 'search':
+			case AppTab.search:
 				return <TabSearch />
-			case 'add':
+			case AppTab.add:
 				return <TabAdd onChgNewEntry={this.props.onChgNewEntry} />
-			case 'home':
+			case AppTab.home:
 			default:
 				return (
 					<TabHome
@@ -979,24 +996,24 @@ class App extends React.Component<
 	{
 		availFiles: Array<IDriveFile>
 		auth: IAuthState
-		data: Array<IDailyEntry>
+		dreamJournal: IDreamJournal
 		showModal: boolean
-		showTab: IAppTabs['tabs']
+		showTab: AppTab
 	}
 > {
 	constructor(props: Readonly<{ availFiles: Array<IDriveFile>; auth: IAuthState; showModal: boolean }>) {
 		super(props)
 
 		this.state = {
-			data: [],
+			dreamJournal: {data:[]},
 			availFiles: [],
 			auth: {
-				status: 'Unauthenticated',
+				status: AuthState.Unauthenticated,
 				userName: '',
 				userPhoto: '',
 			},
 			showModal: props.showModal || false,
-			showTab: 'home',
+			showTab: AppTab.home,
 		}
 
 		this.updateAuthState()
@@ -1032,7 +1049,7 @@ class App extends React.Component<
 						} else if (json && json.user) {
 							// A: Set user states
 							let newState: IAuthState = {
-								status: 'Authenticated',
+								status: AuthState.Authenticated,
 								userName: json.user.displayName || null,
 								userPhoto: json.user.photoLink || null,
 							}
@@ -1042,7 +1059,7 @@ class App extends React.Component<
 					.catch(error => {
 						if (error.code == '401') {
 							let newState: IAuthState = this.state.auth
-							newState.status = 'Expired'
+							newState.status = AuthState.Expired
 							this.setState({ auth: newState })
 						} else {
 							console.error ? console.error(error) : console.log(error)
@@ -1057,17 +1074,17 @@ class App extends React.Component<
 			showModal: value,
 		})
 	}
-	chgShowTab = (value: IAppTabs['tabs']) => {
+	chgShowTab = (value: AppTab) => {
 		this.setState({
 			showTab: value,
 		})
 	}
-	chgLoadFile = (value: IAuthState) => {
+	chgLoadFile = (value: IDreamJournal) => {
 		this.setState({
-			auth: value,
+			dreamJournal: value,
 		})
-		console.log('FYI: app.state.auth updated')
-		console.log(this.state.auth)
+		console.log('FYI: app.state.data updated')
+		console.log(this.state.dreamJournal)
 	}
 	chgAvailFiles = (value: Array<IDriveFile>) => {
 		this.setState({
@@ -1076,20 +1093,20 @@ class App extends React.Component<
 		console.log('FYI: app.state.availFiles updated')
 		console.log(this.state.availFiles)
 	}
-	chgNewEntry = (value: IDailyEntry) => {
-		let appData = this.state.data
-		appData.push(value)
+	chgNewEntry = (value: IJournalEntry) => {
+		let appData = this.state.dreamJournal
+		appData.data.push(value)
 		this.setState({
-			data: appData,
+			dreamJournal: appData,
 		})
 		console.log('New entry added!')
-		console.log(this.state.data)
+		console.log(this.state.dreamJournal)
 	}
 
 	render() {
 		return (
 			<main>
-				<AppNavBar appData={this.state.data} onShowModal={this.chgShowModal} onShowTab={this.chgShowTab} />
+				<AppNavBar appData={this.state.dreamJournal} onShowModal={this.chgShowModal} onShowTab={this.chgShowTab} />
 				<AppTabs
 					activeTab={this.state.showTab}
 					availFiles={this.state.availFiles}
