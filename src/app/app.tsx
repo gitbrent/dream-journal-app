@@ -51,6 +51,7 @@ interface IDream {
 	title: string
 	notes?: string
 	dreamSigns?: Array<string>
+	dreamImages?: Array<string>
 	lucidDream?: boolean
 	lucidMethod?: 'dild' | 'mild' | 'wbtb' | 'other'
 }
@@ -61,11 +62,19 @@ interface IDailyEntry {
 	notesWake?: string
 	dreams?: Array<IDream>
 }
+interface IAuthState {
+	status: 'Authenticated' | 'Unauthenticated' | 'Expired'
+	userName: ''
+	userPhoto: ''
+}
 interface IAppTabs {
 	tabs: 'home' | 'search' | 'add'
 }
-interface IAppStates {
-	auth: 'Authenticated' | 'Unauthenticated' | 'Expired'
+interface IDriveFile {
+	id: string
+	modifiedTime: string
+	name: string
+	size: string
 }
 
 // @see: https://flaviocopes.com/react-forms/
@@ -125,6 +134,17 @@ function parseStoreAccessKey() {
 	if (Object.keys(params).length > 0) {
 		localStorage.setItem('oauth2-params', JSON.stringify(params))
 	}
+}
+
+function getReadableFileSizeString(fileSizeInBytes: number) {
+	var i = -1
+	var byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB']
+	do {
+		fileSizeInBytes = fileSizeInBytes / 1024
+		i++
+	} while (fileSizeInBytes > 1024)
+
+	return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i]
 }
 
 // ============================================================================
@@ -225,61 +245,31 @@ class AppNavBar extends React.Component<
 }
 
 class TabHome extends React.Component<
-	{ onChgLoadData: Function },
-	{ authState: IAppStates['auth']; userName: string; userPhoto: string; gdriveFiles: Array<string> }
+	{ availFiles: Array<IDriveFile>; authState: IAuthState; onChgAvailFiles: Function; onChgLoadFile: Function },
+	{ gdriveFiles: Array<object> }
 > {
-	constructor(props: Readonly<{ onChgLoadData: Function }>) {
+	constructor(
+		props: Readonly<{
+			availFiles: Array<IDriveFile>
+			authState: IAuthState
+			onChgAvailFiles: Function
+			onChgLoadFile: Function
+		}>
+	) {
 		super(props)
 
+		// NOTE: `constructor` is called every time we show this tab, so use `availFiles` prop to cache files
 		this.state = {
-			authState: 'Authenticated',
-			userName: '',
-			userPhoto: '',
-			gdriveFiles: [],
+			gdriveFiles: this.props.availFiles || [],
 		}
-
-		this.updateAuthState()
 	}
 
-	updateAuthState = () => {
-		let params = localStorage.getItem('oauth2-params') ? JSON.parse(localStorage.getItem('oauth2-params')) : null
-
-		if (params) {
-			/**
-			 * NOTE: Docs show this: 'https://www.googleapis.com/drive/v3/about?fields=user&access_token=' + params['access_token']);
-			 * But it does not work! "Unauthorized" every time!
-			 * SOLN: Use `headers` for "Bearer" value
-			 */
-			fetch('https://www.googleapis.com/drive/v3/about?fields=user', {
-				method: 'GET',
-				headers: {
-					Accept: 'application/json',
-					Authorization: 'Bearer ' + params['access_token'],
-				},
-			}).then(response => {
-				response
-					.json()
-					.then(json => {
-						if (json && json.error && json.error.code) {
-							// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
-							throw json.error
-						} else if (json && json.user) {
-							// A: Set user states
-							this.setState({ authState: 'Authenticated' })
-							this.setState({ userName: json.user.displayName || null })
-							this.setState({ userPhoto: json.user.photoLink || null })
-							// B: Update file list
-							this.handleDriveFileList(null)
-						}
-					})
-					.catch(error => {
-						if (error.code == '401') {
-							this.setState({ authState: 'Expired' })
-						} else {
-							console.error ? console.error(error) : console.log(error)
-						}
-					})
-			})
+	/**
+	 * Detect prop (auth) changes, then re-render file list
+	 */
+	componentDidUpdate(prevProps) {
+		if (this.props.authState.status !== prevProps.authState.status) {
+			this.handleDriveFileList(null)
 		}
 	}
 
@@ -288,13 +278,10 @@ class TabHome extends React.Component<
 	}
 
 	handleDriveFileList = e => {
-		parseStoreAccessKey()
 		var params = JSON.parse(localStorage.getItem('oauth2-params'))
 		if (!params || !params['access_token']) {
 			oauth2SignIn()
 			return
-		} else {
-			this.setState({ authState: 'Authenticated' })
 		}
 
 		// GET https://www.googleapis.com/drive/v3/files/
@@ -317,8 +304,8 @@ class TabHome extends React.Component<
 						if (data && data.error && data.error.code) throw data.error
 
 						// STEP 2: Update data
-						console.log(data.files) // DEBUG:
 						this.setState({ gdriveFiles: data.files })
+						this.props.onChgAvailFiles(data.files)
 					})
 					.catch(error => {
 						if (error.code == '401') {
@@ -342,17 +329,18 @@ class TabHome extends React.Component<
 	 */
 	handleDriveFileCreate = e => {
 		let params = JSON.parse(localStorage.getItem('oauth2-params'))
-		let jsonData = {
+		let fileMeta = {
 			name: 'dream-journal.json',
 			description: 'Backup data for my app',
 			mimeType: 'application/json',
 		}
+
 		let reqBody =
 			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
-			JSON.stringify(jsonData) +
+			JSON.stringify(fileMeta) +
 			'\n' +
 			'--foo_bar_baz\nContent-Type: application/json\n\n' +
-			JSON.stringify(jsonData) +
+			'' +
 			'\n' +
 			'--foo_bar_baz--'
 		let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
@@ -410,8 +398,9 @@ class TabHome extends React.Component<
 					.arrayBuffer()
 					.then(buffer => {
 						let json = JSON.parse(new TextDecoder('utf-8').decode(buffer))
+						console.log('FYI: Get File results:')
 						console.log(json) // DEBUG
-						if (json) this.props.onChgLoadData(json)
+						if (json) this.props.onChgLoadFile(json)
 					})
 					.catch(error => {
 						if (error.code == '401') {
@@ -436,6 +425,7 @@ class TabHome extends React.Component<
 	 */
 	handleDriveFileCopy = e => {
 		// TODO:
+		// Use for "Make backup" (?)
 		// POST https://www.googleapis.com/drive/v3/files/fileId/copy
 	}
 
@@ -447,30 +437,25 @@ class TabHome extends React.Component<
 		// PATCH https://www.googleapis.com/drive/v3/files/fileId
 	}
 
-	handleDriveFileDelete = e => {
-		// TODO:
-		// DELETE https://www.googleapis.com/drive/v3/files/fileId
-	}
-
 	/**
 	 * @see: https://developers.google.com/drive/api/v3/appdata
 	 * @see: https://developers.google.com/drive/api/v3/search-parameters#file_fields
 	 */
 	render() {
 		let cardbody: JSX.Element
-		if (this.state.authState == 'Authenticated') {
+		if (this.props.authState.status == 'Authenticated') {
 			cardbody = (
 				<div>
 					<p className='card-text'>
 						<label className='text-muted text-uppercase d-block'>User Name:</label>
-						{this.state.userName}
+						{this.props.authState.userName}
 					</p>
 					<button className='btn btn-success' onClick={this.handleDriveLogin}>
 						Re-Auth
 					</button>
 				</div>
 			)
-		} else if (this.state.authState == 'Expired') {
+		} else if (this.props.authState.status == 'Expired') {
 			cardbody = (
 				<div>
 					<p className='card-text'>Your session has expired. Please re-authenticate to continue.</p>
@@ -492,7 +477,7 @@ class TabHome extends React.Component<
 				<thead className='thead'>
 					<tr>
 						<th>File Name</th>
-						<th>File Size</th>
+						<th className='text-center'>File Size</th>
 						<th>Last Modified</th>
 						<th>Action</th>
 					</tr>
@@ -502,7 +487,7 @@ class TabHome extends React.Component<
 						return (
 							<tr key={'filerow' + idx}>
 								<td>{file['name']}</td>
-								<td className='text-center'>{(Number(file['size']) / 1000).toFixed(2) + 'kb'}</td>
+								<td className='text-center'>{getReadableFileSizeString(Number(file['size']))}</td>
 								<td className='text-nowrap'>{new Date(file['modifiedTime']).toLocaleString()}</td>
 								<td>
 									<button
@@ -559,9 +544,9 @@ class TabHome extends React.Component<
 							<div
 								className={
 									'card-header' +
-									(this.state.authState == 'Authenticated' ? ' bg-success' : ' bg-warning')
+									(this.props.authState.status == 'Authenticated' ? ' bg-success' : ' bg-warning')
 								}>
-								<h5 className='card-title text-white mb-0'>{this.state.authState}</h5>
+								<h5 className='card-title text-white mb-0'>{this.props.authState.status}</h5>
 							</div>
 							<div className='card-body bg-light text-dark'>{cardbody}</div>
 						</div>
@@ -578,14 +563,14 @@ class TabHome extends React.Component<
 									<div className='row'>
 										<div className='col-12 col-md-6 text-center'>
 											<button
-												className='btn btn-outline-primary w-50'
+												className='btn btn-outline-info w-50'
 												onClick={this.handleDriveFileList}>
 												Refresh File List
 											</button>
 										</div>
 										<div className='col-12 col-md-6 text-center'>
 											<button
-												className='btn btn-outline-primary w-50'
+												className='btn btn-outline-info w-50'
 												onClick={this.handleDriveFileCreate}>
 												Create New Dream Journal
 											</button>
@@ -949,10 +934,22 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 
 class AppTabs extends React.Component<{
 	activeTab: IAppTabs['tabs']
-	onChgLoadData: Function
+	availFiles: Array<IDriveFile>
+	authState: IAuthState
+	onChgAvailFiles: Function
+	onChgLoadFile: Function
 	onChgNewEntry: Function
 }> {
-	constructor(props: Readonly<{ activeTab: IAppTabs['tabs']; onChgLoadData: Function; onChgNewEntry: Function }>) {
+	constructor(
+		props: Readonly<{
+			activeTab: IAppTabs['tabs']
+			availFiles: Array<IDriveFile>
+			authState: IAuthState
+			onChgAvailFiles: Function
+			onChgLoadFile: Function
+			onChgNewEntry: Function
+		}>
+	) {
 		super(props)
 	}
 
@@ -964,20 +961,94 @@ class AppTabs extends React.Component<{
 				return <TabAdd onChgNewEntry={this.props.onChgNewEntry} />
 			case 'home':
 			default:
-				return <TabHome onChgLoadData={this.props.onChgLoadData} />
+				return (
+					<TabHome
+						availFiles={this.props.availFiles}
+						authState={this.props.authState}
+						onChgAvailFiles={this.props.onChgAvailFiles}
+						onChgLoadFile={this.props.onChgLoadFile}
+					/>
+				)
 		}
 	}
 }
 
-// APP UI
-class App extends React.Component<{}, { data: Array<IDailyEntry>; showModal: boolean; showTab: IAppTabs['tabs'] }> {
-	constructor(props) {
+// MAIN APP
+class App extends React.Component<
+	{},
+	{
+		availFiles: Array<IDriveFile>
+		auth: IAuthState
+		data: Array<IDailyEntry>
+		showModal: boolean
+		showTab: IAppTabs['tabs']
+	}
+> {
+	constructor(props: Readonly<{ availFiles: Array<IDriveFile>; auth: IAuthState; showModal: boolean }>) {
 		super(props)
 
 		this.state = {
 			data: [],
+			availFiles: [],
+			auth: {
+				status: 'Unauthenticated',
+				userName: '',
+				userPhoto: '',
+			},
 			showModal: props.showModal || false,
 			showTab: 'home',
+		}
+
+		this.updateAuthState()
+	}
+
+	updateAuthState = () => {
+		// A: Get *current* value for `access_token` from location.href
+		parseStoreAccessKey()
+
+		// B: Grab newest token
+		let params = localStorage.getItem('oauth2-params') ? JSON.parse(localStorage.getItem('oauth2-params')) : null
+
+		// C: Check state
+		if (params) {
+			/**
+			 * NOTE: Docs show this: 'https://www.googleapis.com/drive/v3/about?fields=user&access_token=' + params['access_token']);
+			 * But it does not work! "Unauthorized" every time!
+			 * SOLN: Use `headers` for "Bearer" value
+			 */
+			fetch('https://www.googleapis.com/drive/v3/about?fields=user', {
+				method: 'GET',
+				headers: {
+					Accept: 'application/json',
+					Authorization: 'Bearer ' + params['access_token'],
+				},
+			}).then(response => {
+				response
+					.json()
+					.then(json => {
+						if (json && json.error && json.error.code) {
+							// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
+							throw json.error
+						} else if (json && json.user) {
+							// A: Set user states
+							let newState: IAuthState = {
+								status: 'Authenticated',
+								userName: json.user.displayName || null,
+								userPhoto: json.user.photoLink || null,
+							}
+							this.setState({ auth: newState })
+						}
+					})
+					.catch(error => {
+						if (error.code == '401') {
+							let newState: IAuthState = this.state.auth
+							newState.status = 'Expired'
+							this.setState({ auth: newState })
+						} else {
+							console.error ? console.error(error) : console.log(error)
+						}
+					})
+			})
 		}
 	}
 
@@ -991,12 +1062,19 @@ class App extends React.Component<{}, { data: Array<IDailyEntry>; showModal: boo
 			showTab: value,
 		})
 	}
-	chgLoadData = (value: Array<IDailyEntry>) => {
+	chgLoadFile = (value: IAuthState) => {
 		this.setState({
-			data: value,
+			auth: value,
 		})
-		console.log('Data updated!')
-		console.log(this.state.data)
+		console.log('FYI: app.state.auth updated')
+		console.log(this.state.auth)
+	}
+	chgAvailFiles = (value: Array<IDriveFile>) => {
+		this.setState({
+			availFiles: value || [],
+		})
+		console.log('FYI: app.state.availFiles updated')
+		console.log(this.state.availFiles)
 	}
 	chgNewEntry = (value: IDailyEntry) => {
 		let appData = this.state.data
@@ -1014,7 +1092,10 @@ class App extends React.Component<{}, { data: Array<IDailyEntry>; showModal: boo
 				<AppNavBar appData={this.state.data} onShowModal={this.chgShowModal} onShowTab={this.chgShowTab} />
 				<AppTabs
 					activeTab={this.state.showTab}
-					onChgLoadData={this.chgLoadData}
+					availFiles={this.state.availFiles}
+					authState={this.state.auth}
+					onChgAvailFiles={this.chgAvailFiles}
+					onChgLoadFile={this.chgLoadFile}
 					onChgNewEntry={this.chgNewEntry}
 				/>
 				<AppModal show={this.state.showModal} />
@@ -1023,7 +1104,7 @@ class App extends React.Component<{}, { data: Array<IDailyEntry>; showModal: boo
 	}
 }
 
-// AppMain
+// App Container
 const AppMain: React.SFC<{ compiler: string; framework: string }> = props => {
 	return <App />
 }
