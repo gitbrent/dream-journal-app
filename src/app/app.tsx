@@ -46,6 +46,11 @@ const GITBRENT_CLIENT_ID = '300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.g
 const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
 const FIREBASE_URL = 'https://brain-cloud-dream-journal.firebaseapp.com'
 const LOCALHOST_URL = 'http://localhost:8080'
+const JOURNAL_HEADER = {
+	name: 'dream-journal.json',
+	description: 'Brain Cloud Dream Journal data file',
+	mimeType: 'application/json',
+}
 
 enum AppTab {
 	home = 'home',
@@ -167,7 +172,14 @@ class AppNavBar extends React.Component<
 	{ onSaveFile: Function; onShowModal: Function; onShowTab: Function; selFileName: IDriveFile['name'] },
 	{ activeTab: AppTab }
 > {
-	constructor(props: Readonly<{ onSaveFile: Function; onShowModal: Function; onShowTab: Function; selFileName: IDriveFile['name'] }>) {
+	constructor(
+		props: Readonly<{
+			onSaveFile: Function
+			onShowModal: Function
+			onShowTab: Function
+			selFileName: IDriveFile['name']
+		}>
+	) {
 		super(props)
 
 		this.state = {
@@ -318,6 +330,7 @@ class TabHome extends React.Component<{
 
 	/**
 	 * @see: https://developers.google.com/drive/api/v3/reference/files
+	 * @see: https://stackoverflow.com/questions/43705453/how-do-i-rename-a-file-to-google-drive-rest-api-retrofit2
 	 */
 	handleDriveFileRename = e => {
 		// TODO:
@@ -592,11 +605,9 @@ class TabAdd extends React.Component<{ doAddNewEntry: Function }, { dailyEntry: 
 				updatedEntry.entryDate = event.target.value
 			} else if (event.target.id == 'bedTime') {
 				updatedEntry.bedTime = event.target.value
-			}
-			else if (event.target.id == 'notesPrep') {
+			} else if (event.target.id == 'notesPrep') {
 				updatedEntry.notesPrep = event.target.value
-			}
-			else if (event.target.id == 'notesWake') {
+			} else if (event.target.id == 'notesWake') {
 				updatedEntry.notesWake = event.target.value
 			}
 
@@ -1057,15 +1068,10 @@ class App extends React.Component<
 	 */
 	driveCreateNewJournal = () => {
 		let params = JSON.parse(localStorage.getItem('oauth2-params'))
-		let fileMeta = {
-			name: 'dream-journal.json',
-			description: 'Backup data for my app',
-			mimeType: 'application/json',
-		}
 
 		let reqBody =
 			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
-			JSON.stringify(fileMeta) +
+			JSON.stringify(JOURNAL_HEADER) +
 			'\n' +
 			'--foo_bar_baz\nContent-Type: application/json\n\n' +
 			'' +
@@ -1139,6 +1145,15 @@ class App extends React.Component<
 						this.setState({
 							dataFiles: newState,
 						})
+
+						// STEP 3: Re-select previously selected file (if any)
+						let selFileId = localStorage.getItem('journal-selected-fileid')
+						if (selFileId && this.state.dataFiles.available.length > 0) {
+							let selFile = this.state.dataFiles.available.filter(file => {
+								return file.id === selFileId
+							})
+							if (selFile && selFile[0]) this.doSelectFileById(selFile[0].id)
+						}
 					})
 					.catch(error => {
 						if (error.code == '401') {
@@ -1213,6 +1228,8 @@ class App extends React.Component<
 						})
 						console.log('FYI: app.state.dataFiles updated')
 						console.log(this.state.dataFiles)
+
+						localStorage.setItem('journal-selected-fileid', selFile.id)
 					})
 					.catch(error => {
 						if (error.code == '401') {
@@ -1246,9 +1263,70 @@ class App extends React.Component<
 			console.log(this.state.dataFiles.selected)
 		}
 	}
+	/**
+	 * @see: https://developers.google.com/drive/api/v3/reference/files/update
+	 */
 	doSaveFile = () => {
-		console.log('TODO: SAVE FILE!!!!')
-		// TODO: CURR: FIXME:
+		let params = JSON.parse(localStorage.getItem('oauth2-params'))
+
+		if (!this.state.dataFiles.selected) {
+			// TODO: disable save button if no `selected` file exists
+			console.log('No file selected!')
+			return
+		}
+
+		let jsonBody: object = {
+			entries: this.state.dataFiles.selected.entries,
+		}
+
+		let reqBody: string =
+			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
+			JSON.stringify(JOURNAL_HEADER) +
+			'\n' +
+			'--foo_bar_baz\nContent-Type: application/json\n\n' +
+			JSON.stringify(jsonBody, null, 2) +
+			'\n' +
+			'--foo_bar_baz--'
+		let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
+
+		let requestHeaders: any = {
+			Authorization: 'Bearer ' + params['access_token'],
+			'Content-Type': 'multipart/related; boundary=foo_bar_baz',
+			'Content-Length': reqBody.length + reqEnd.length,
+		}
+
+		fetch(
+			'https://www.googleapis.com/upload/drive/v3/files/' +
+				this.state.dataFiles.selected.id +
+				'?uploadType=multipart',
+			{
+				method: 'PATCH',
+				headers: requestHeaders,
+				body: reqBody,
+			}
+		)
+			.then(response => {
+				response
+					.json()
+					.then(fileResource => {
+						console.log(fileResource)
+					})
+					.catch(error => {
+						if (error.code == '401') {
+							oauth2SignIn()
+						} else {
+							// TODO: Show message onscreen
+							console.error ? console.error(error) : console.log(error)
+						}
+					})
+			})
+			.catch(error => {
+				if (error.code == '401') {
+					oauth2SignIn()
+				} else {
+					console.error ? console.error(error) : console.log(error)
+				}
+			})
 	}
 
 	render() {
