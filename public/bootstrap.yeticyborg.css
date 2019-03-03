@@ -2018,8 +2018,8 @@ pre code {
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #282828;
-  background-color: #fff;
+  color: #eee;
+  background-color: #080808;
   background-clip: padding-box;
   border: 1px solid transparent;
   border-radius: 0.25rem;
@@ -2042,8 +2042,8 @@ pre code {
 }
 
 .form-control:focus {
-  color: #282828;
-  background-color: #fff;
+  color: #eee;
+  background-color: #080808;
   border-color: #95cfeb;
   outline: 0;
   -webkit-box-shadow: 0 0 0 0.2rem rgba(42, 159, 214, 0.25);
