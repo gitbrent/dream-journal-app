@@ -59,6 +59,11 @@ enum AuthState {
 	Expired = 'Expired',
 }
 
+interface IAuthState {
+	status: AuthState
+	userName: ''
+	userPhoto: ''
+}
 interface IJournalDream {
 	title: string
 	notes?: string
@@ -74,19 +79,16 @@ interface IJournalEntry {
 	notesWake?: string
 	dreams?: Array<IJournalDream>
 }
-interface IDreamJournal {
-	data: Array<IJournalEntry>
-}
-interface IAuthState {
-	status: AuthState
-	userName: ''
-	userPhoto: ''
-}
 interface IDriveFile {
 	id: string
+	entries: Array<IJournalEntry>
 	modifiedTime: string
 	name: string
 	size: string
+}
+interface IDriveFiles {
+	available: Array<IDriveFile>
+	selected: IDriveFile
 }
 
 // @see: https://flaviocopes.com/react-forms/
@@ -162,10 +164,10 @@ function getReadableFileSizeString(fileSizeInBytes: number) {
 // ============================================================================
 
 class AppNavBar extends React.Component<
-	{ appData: IDreamJournal; onShowModal: Function; onShowTab: Function },
+	{ onSaveFile: Function; onShowModal: Function; onShowTab: Function; selFileName: IDriveFile['name'] },
 	{ activeTab: AppTab }
 > {
-	constructor(props: Readonly<{ appData: IDreamJournal; onShowModal: Function; onShowTab: Function }>) {
+	constructor(props: Readonly<{ onSaveFile: Function; onShowModal: Function; onShowTab: Function; selFileName: IDriveFile['name'] }>) {
 		super(props)
 
 		this.state = {
@@ -173,12 +175,11 @@ class AppNavBar extends React.Component<
 		}
 	}
 
+	onSaveFile = e => {
+		this.props.onSaveFile()
+	}
 	onShowModalHandler = e => {
-		if (typeof this.props.onShowModal === 'function') {
-			//this.props.onShowModal(e.target.value);
-			//this.props.onShowModal('TAB1');
-			this.props.onShowModal(true)
-		}
+		this.props.onShowModal(true)
 	}
 	onShowTabHandler = e => {
 		let clickedTabName = e.target.getAttribute('data-name')
@@ -249,17 +250,12 @@ class AppNavBar extends React.Component<
 				</div>
 				<div className='btn-group mr-3' role='group' aria-label='Journal Stats'>
 					<button type='button' className='btn btn-secondary' disabled>
-						Journal Entries
-					</button>
-					<button type='button' className='btn btn-secondary' disabled>
-						{this.props.appData && this.props.appData.data
-							? Object.keys(this.props.appData.data).length
-							: 0}
+						{this.props.selFileName}
 					</button>
 				</div>
 				<form className='form-inline mb-0'>
-					<button type='button' onClick={this.onShowModalHandler} className='btn btn-outline-primary mr-2'>
-						Settings
+					<button type='button' onClick={this.onSaveFile} className='btn btn-outline-primary mr-2'>
+						Save
 					</button>
 				</form>
 			</nav>
@@ -267,24 +263,23 @@ class AppNavBar extends React.Component<
 	}
 }
 
-class TabHome extends React.Component<
-	{ availFiles: Array<IDriveFile>; authState: IAuthState; onChgAvailFiles: Function; onChgLoadFile: Function },
-	{ gdriveFiles: Array<object> }
-> {
+class TabHome extends React.Component<{
+	authState: IAuthState
+	dataFiles: IDriveFiles
+	doCreateJournal: Function
+	doFileListRefresh: Function
+	doSelectFileById: Function
+}> {
 	constructor(
 		props: Readonly<{
-			availFiles: Array<IDriveFile>
 			authState: IAuthState
-			onChgAvailFiles: Function
-			onChgLoadFile: Function
+			dataFiles: IDriveFiles
+			doCreateJournal: Function
+			doFileListRefresh: Function
+			doSelectFileById: Function
 		}>
 	) {
 		super(props)
-
-		// NOTE: `constructor` is called every time we show this tab, so use `availFiles` prop to cache files
-		this.state = {
-			gdriveFiles: this.props.availFiles || [],
-		}
 	}
 
 	/**
@@ -301,155 +296,15 @@ class TabHome extends React.Component<
 	}
 
 	handleDriveFileList = e => {
-		var params = JSON.parse(localStorage.getItem('oauth2-params'))
-		if (!params || !params['access_token']) {
-			oauth2SignIn()
-			return
-		}
-
-		// GET https://www.googleapis.com/drive/v3/files/
-		// Authorization: Bearer [YOUR_ACCESS_TOKEN]
-		// Accept: application/json
-		fetch('https://www.googleapis.com/drive/v3/files?fields=files/id,files/name,files/size,files/modifiedTime', {
-			method: 'GET',
-			headers: {
-				Accept: 'application/json',
-				Authorization: 'Bearer ' + params['access_token'],
-			},
-		})
-			.then(response => {
-				response
-					.json()
-					.then(json => {
-						let data = json
-						// STEP 1: Check for errors
-						// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
-						if (data && data.error && data.error.code) throw data.error
-
-						// STEP 2: Update data
-						this.setState({ gdriveFiles: data.files })
-						this.props.onChgAvailFiles(data.files)
-					})
-					.catch(error => {
-						if (error.code == '401') {
-							oauth2SignIn()
-						} else {
-							console.error ? console.error(error) : console.log(error)
-						}
-					})
-			})
-			.catch(error => {
-				if (error.code == '401') {
-					oauth2SignIn()
-				} else {
-					console.error ? console.error(error) : console.log(error)
-				}
-			})
+		this.props.doFileListRefresh()
 	}
 
-	/**
-	 * @see: https://developers.google.com/drive/api/v3/multipart-upload
-	 */
 	handleDriveFileCreate = e => {
-		let params = JSON.parse(localStorage.getItem('oauth2-params'))
-		let fileMeta = {
-			name: 'dream-journal.json',
-			description: 'Backup data for my app',
-			mimeType: 'application/json',
-		}
-
-		let reqBody =
-			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
-			JSON.stringify(fileMeta) +
-			'\n' +
-			'--foo_bar_baz\nContent-Type: application/json\n\n' +
-			'' +
-			'\n' +
-			'--foo_bar_baz--'
-		let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
-
-		let requestHeaders: any = {
-			Authorization: 'Bearer ' + params['access_token'],
-			'Content-Type': 'multipart/related; boundary=foo_bar_baz',
-			'Content-Length': reqBody.length + reqEnd.length,
-		}
-
-		fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-			method: 'POST',
-			headers: requestHeaders,
-			body: reqBody,
-		})
-			.then(response => {
-				response
-					.json()
-					.then(json => {
-						this.handleDriveFileList(null)
-					})
-					.catch(error => {
-						if (error.code == '401') {
-							oauth2SignIn()
-						} else {
-							// TODO: Show message onscreen
-							console.error ? console.error(error) : console.log(error)
-						}
-					})
-			})
-			.catch(error => {
-				if (error.code == '401') {
-					oauth2SignIn()
-				} else {
-					console.error ? console.error(error) : console.log(error)
-				}
-			})
+		this.props.doCreateJournal()
 	}
 
-	/**
-	 * @see: https://developers.google.com/drive/api/v3/manage-downloads
-	 */
 	handleDriveFileGet = e => {
-		let fileId = e.target.getAttribute('data-file-id')
-		let params = JSON.parse(localStorage.getItem('oauth2-params'))
-
-		fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', {
-			method: 'GET',
-			headers: {
-				Authorization: 'Bearer ' + params['access_token'],
-			},
-		})
-			.then(response => {
-				response
-					.arrayBuffer()
-					.then(buffer => {
-						let decoded: string = new TextDecoder('utf-8').decode(buffer)
-						let json: Object = {}
-						if (decoded && decoded.length > 0) {
-							try {
-								json = JSON.parse(decoded)
-								console.log('FYI: Get File results:')
-								console.log(json) // DEBUG
-							} catch (ex) {
-								// TODO: Show message onscreen
-								console.error ? console.error(ex) : console.log(ex)
-							}
-						}
-						if (json) this.props.onChgLoadFile(json,fileId)
-					})
-					.catch(error => {
-						if (error.code == '401') {
-							oauth2SignIn()
-						} else {
-							// TODO: Show message onscreen
-							console.error ? console.error(error) : console.log(error)
-						}
-					})
-			})
-			.catch(error => {
-				if (error.code == '401') {
-					oauth2SignIn()
-				} else {
-					console.error ? console.error(error) : console.log(error)
-				}
-			})
+		this.props.doSelectFileById(e.target.getAttribute('data-file-id'))
 	}
 
 	/**
@@ -507,10 +362,17 @@ class TabHome extends React.Component<
 			)
 		}
 
+		let selFile =
+			this.props.dataFiles.selected && this.props.dataFiles.selected.id
+				? this.props.dataFiles.available.filter(file => {
+						return file.id === this.props.dataFiles.selected.id
+				  })[0]
+				: null
 		let tableFileList: JSX.Element = (
 			<table className='table'>
 				<thead className='thead'>
 					<tr>
+						<th>Status</th>
 						<th>File Name</th>
 						<th className='text-center'>File Size</th>
 						<th>Last Modified</th>
@@ -518,20 +380,31 @@ class TabHome extends React.Component<
 					</tr>
 				</thead>
 				<tbody>
-					{this.state.gdriveFiles.map((file, idx) => {
+					{this.props.dataFiles.available.map((file, idx) => {
 						return (
 							<tr key={'filerow' + idx}>
+								{selFile && file.id === selFile.id ? (
+									<td>
+										<div className='badge badge-success'>Active</div>
+									</td>
+								) : (
+									<td />
+								)}
 								<td>{file['name']}</td>
 								<td className='text-center'>{getReadableFileSizeString(Number(file['size']))}</td>
 								<td className='text-nowrap'>{new Date(file['modifiedTime']).toLocaleString()}</td>
-								<td>
-									<button
-										className='btn btn-sm btn-primary'
-										data-file-id={file['id']}
-										onClick={this.handleDriveFileGet}>
-										Select
-									</button>
-								</td>
+								{selFile && file.id === selFile.id ? (
+									<td />
+								) : (
+									<td>
+										<button
+											className='btn btn-sm btn-primary'
+											data-file-id={file['id']}
+											onClick={this.handleDriveFileGet}>
+											Select
+										</button>
+									</td>
+								)}
 							</tr>
 						)
 					})}
@@ -623,33 +496,13 @@ class TabHome extends React.Component<
 	}
 }
 
-class TabSearch extends React.Component {
-	render() {
-		return (
-			<div className='container mt-3'>
-				<h2 className='text-primary mb-3'>Search Dream Journal</h2>
-
-				<div className='row'>
-					<div className='col-auto'>
-						<h1 className='text-primary'>TODO</h1>
-					</div>
-					<div className='col-auto'>
-						<h6 id='appVer' className='text-black-50 font-weight-light' />
-					</div>
-				</div>
-			</div>
-		)
-	}
-}
-
-class TabView extends React.Component<
-	{ appData: IDreamJournal; selectedFileId: string }> {
-
-	constructor(props: Readonly<{ appData: IDreamJournal; selectedFileId: string }>) {
+class TabView extends React.Component<{ selDataFile: IDriveFile }> {
+	constructor(props: Readonly<{ selDataFile: IDriveFile }>) {
 		super(props)
 	}
 
 	render() {
+		console.log(this.props.selDataFile)
 		let tableFileList: JSX.Element = (
 			<table className='table'>
 				<thead className='thead'>
@@ -660,16 +513,16 @@ class TabView extends React.Component<
 					</tr>
 				</thead>
 				<tbody>
-					{(this.props.appData && this.props.appData.data ? this.props.appData.data : []).map((entry:IJournalEntry, idx) => {
+					{(this.props.selDataFile && this.props.selDataFile.entries
+						? this.props.selDataFile.entries
+						: []
+					).map((entry: IJournalEntry, idx) => {
 						return (
 							<tr key={'journalrow' + idx}>
 								<td>{entry.entryDate}</td>
 								<td>{entry.dreams.length}</td>
 								<td>
-									<button
-										className='btn btn-sm btn-primary'
-										data-entry-key={entry.entryDate}
-										>
+									<button className='btn btn-sm btn-primary' data-entry-key={entry.entryDate}>
 										Edit
 									</button>
 								</td>
@@ -678,15 +531,22 @@ class TabView extends React.Component<
 					})}
 				</tbody>
 				<tfoot>
-					{(!this.props.appData || !this.props.appData.data) && (
-					    <tr>
-					        <td colSpan={3} className="text-center p-3 text-muted">(No Dream Journal entries found - select "Add Journal Entry" above to create a new one)</td>
-					    </tr>
-					)}
-					{!this.props.selectedFileId && (
+					{this.props.selDataFile &&
+						this.props.selDataFile.entries &&
+						this.props.selDataFile.entries.length == 0 && (
+							<tr>
+								<td colSpan={3} className='text-center p-3 text-muted'>
+									(No Dream Journal entries found - select "Add Journal Entry" above to create a new
+									one)
+								</td>
+							</tr>
+						)}
+					{!this.props.selDataFile && (
 						<tr>
-					        <td colSpan={3} className="text-center p-3 text-muted">(Select a Dream Journal to see entries)</td>
-					    </tr>
+							<td colSpan={3} className='text-center p-3 text-muted'>
+								(Select a Dream Journal to see entries)
+							</td>
+						</tr>
 					)}
 				</tfoot>
 			</table>
@@ -695,15 +555,14 @@ class TabView extends React.Component<
 		return (
 			<div className='container mt-3'>
 				<h2 className='text-primary mb-3'>View Dream Journal</h2>
-
 				{tableFileList}
 			</div>
 		)
 	}
 }
 
-class TabAdd extends React.Component<{ onChgNewEntry: Function }, { dailyEntry: IJournalEntry }> {
-	constructor(props: Readonly<{ show?: boolean; onChgNewEntry: Function }>) {
+class TabAdd extends React.Component<{ doAddNewEntry: Function }, { dailyEntry: IJournalEntry }> {
+	constructor(props: Readonly<{ show?: boolean; doAddNewEntry: Function }>) {
 		super(props)
 
 		this.state = {
@@ -734,7 +593,15 @@ class TabAdd extends React.Component<{ onChgNewEntry: Function }, { dailyEntry: 
 			} else if (event.target.id == 'bedTime') {
 				updatedEntry.bedTime = event.target.value
 			}
-			// TODO: CURR: keep going! add all other fields!!
+			else if (event.target.id == 'notesPrep') {
+				updatedEntry.notesPrep = event.target.value
+			}
+			else if (event.target.id == 'notesWake') {
+				updatedEntry.notesWake = event.target.value
+			}
+
+			// CURR: FIXME:
+			// TODO: CURR: keep going! add DREAM ROW(S)
 			// what to do about DREAM-n rows - they wont have unique ids?
 
 			this.setState({ dailyEntry: updatedEntry })
@@ -744,10 +611,8 @@ class TabAdd extends React.Component<{ onChgNewEntry: Function }, { dailyEntry: 
 	}
 
 	handleSubmit = event => {
-		this.props.onChgNewEntry(this.state.dailyEntry)
+		this.props.doAddNewEntry(this.state.dailyEntry)
 		event.preventDefault()
-		console.log('SUBMIT!')
-		console.log(this.state.dailyEntry)
 	}
 
 	renderDreamRow = (dream: IJournalDream, idx: number) => {
@@ -864,6 +729,25 @@ class TabAdd extends React.Component<{ onChgNewEntry: Function }, { dailyEntry: 
 					</div>
 				</div>
 			</form>
+		)
+	}
+}
+
+class TabSearch extends React.Component {
+	render() {
+		return (
+			<div className='container mt-3'>
+				<h2 className='text-primary mb-3'>Search Dream Journal</h2>
+
+				<div className='row'>
+					<div className='col-auto'>
+						<h1 className='text-primary'>TODO</h1>
+					</div>
+					<div className='col-auto'>
+						<h6 id='appVer' className='text-black-50 font-weight-light' />
+					</div>
+				</div>
+			</div>
 		)
 	}
 }
@@ -1031,24 +915,24 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 
 class AppTabs extends React.Component<{
 	activeTab: AppTab
-	appData: IDreamJournal
-	availFiles: Array<IDriveFile>
 	authState: IAuthState
-	selectedFileId: string
-	onChgAvailFiles: Function
-	onChgLoadFile: Function
-	onChgNewEntry: Function
+	dataFiles: IDriveFiles
+	doAddNewEntry: Function
+	doCreateJournal: Function
+	doFileListRefresh: Function
+	doSelectFileById: Function
+	selDataFile: IDriveFile
 }> {
 	constructor(
 		props: Readonly<{
 			activeTab: AppTab
-			appData: IDreamJournal
-			availFiles: Array<IDriveFile>
 			authState: IAuthState
-			selectedFileId: string
-			onChgAvailFiles: Function
-			onChgLoadFile: Function
-			onChgNewEntry: Function
+			dataFiles: IDriveFiles
+			doAddNewEntry: Function
+			doCreateJournal: Function
+			doFileListRefresh: Function
+			doSelectFileById: Function
+			selDataFile: IDriveFile
 		}>
 	) {
 		super(props)
@@ -1057,19 +941,20 @@ class AppTabs extends React.Component<{
 	render() {
 		switch (this.props.activeTab) {
 			case AppTab.view:
-				return <TabView appData={this.props.appData} selectedFileId={this.props.selectedFileId} />
+				return <TabView selDataFile={this.props.selDataFile} />
 			case AppTab.add:
-				return <TabAdd onChgNewEntry={this.props.onChgNewEntry} />
+				return <TabAdd doAddNewEntry={this.props.doAddNewEntry} />
 			case AppTab.search:
 				return <TabSearch />
 			case AppTab.home:
 			default:
 				return (
 					<TabHome
-						availFiles={this.props.availFiles}
 						authState={this.props.authState}
-						onChgAvailFiles={this.props.onChgAvailFiles}
-						onChgLoadFile={this.props.onChgLoadFile}
+						dataFiles={this.props.dataFiles}
+						doCreateJournal={this.props.doCreateJournal}
+						doFileListRefresh={this.props.doFileListRefresh}
+						doSelectFileById={this.props.doSelectFileById}
 					/>
 				)
 		}
@@ -1080,15 +965,13 @@ class AppTabs extends React.Component<{
 class App extends React.Component<
 	{},
 	{
-		availFiles: Array<IDriveFile>
 		auth: IAuthState
-		dreamJournal: IDreamJournal
-		selectedFileId: string
+		dataFiles: IDriveFiles
 		showModal: boolean
 		showTab: AppTab
 	}
 > {
-	constructor(props: Readonly<{ availFiles: Array<IDriveFile>; auth: IAuthState; showModal: boolean }>) {
+	constructor(props: Readonly<{ auth: IAuthState; dataFiles: IDriveFiles; showModal: boolean }>) {
 		super(props)
 
 		this.state = {
@@ -1097,9 +980,10 @@ class App extends React.Component<
 				userName: '',
 				userPhoto: '',
 			},
-			availFiles: [],
-			dreamJournal: { data: [] },
-			selectedFileId: "",
+			dataFiles: {
+				available: [],
+				selected: null,
+			},
 			showModal: props.showModal || false,
 			showTab: AppTab.home,
 		}
@@ -1167,50 +1051,230 @@ class App extends React.Component<
 			showTab: value,
 		})
 	}
-	chgLoadFile = (fileJson: IDreamJournal, fileId:string) => {
-		this.setState({
-			dreamJournal: fileJson,
+
+	/**
+	 * @see: https://developers.google.com/drive/api/v3/multipart-upload
+	 */
+	driveCreateNewJournal = () => {
+		let params = JSON.parse(localStorage.getItem('oauth2-params'))
+		let fileMeta = {
+			name: 'dream-journal.json',
+			description: 'Backup data for my app',
+			mimeType: 'application/json',
+		}
+
+		let reqBody =
+			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
+			JSON.stringify(fileMeta) +
+			'\n' +
+			'--foo_bar_baz\nContent-Type: application/json\n\n' +
+			'' +
+			'\n' +
+			'--foo_bar_baz--'
+		let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
+
+		let requestHeaders: any = {
+			Authorization: 'Bearer ' + params['access_token'],
+			'Content-Type': 'multipart/related; boundary=foo_bar_baz',
+			'Content-Length': reqBody.length + reqEnd.length,
+		}
+
+		fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+			method: 'POST',
+			headers: requestHeaders,
+			body: reqBody,
 		})
-		this.setState({
-			selectedFileId: fileId
-		})
-		console.log('FYI: app.state.data updated')
-		console.log(this.state.dreamJournal)
+			.then(response => {
+				response
+					.json()
+					.then(json => {
+						this.driveGetFileList()
+					})
+					.catch(error => {
+						if (error.code == '401') {
+							oauth2SignIn()
+						} else {
+							// TODO: Show message onscreen
+							console.error ? console.error(error) : console.log(error)
+						}
+					})
+			})
+			.catch(error => {
+				if (error.code == '401') {
+					oauth2SignIn()
+				} else {
+					console.error ? console.error(error) : console.log(error)
+				}
+			})
 	}
-	chgAvailFiles = (value: Array<IDriveFile>) => {
-		this.setState({
-			availFiles: value || [],
+	driveGetFileList = () => {
+		var params = JSON.parse(localStorage.getItem('oauth2-params'))
+		if (!params || !params['access_token']) {
+			oauth2SignIn()
+			return
+		}
+
+		// GET https://www.googleapis.com/drive/v3/files/
+		// Authorization: Bearer [YOUR_ACCESS_TOKEN]
+		// Accept: application/json
+		fetch('https://www.googleapis.com/drive/v3/files?fields=files/id,files/name,files/size,files/modifiedTime', {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json',
+				Authorization: 'Bearer ' + params['access_token'],
+			},
 		})
-		console.log('FYI: app.state.availFiles updated')
-		console.log(this.state.availFiles)
+			.then(response => {
+				response
+					.json()
+					.then(json => {
+						let data = json
+						// STEP 1: Check for errors
+						// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
+						if (data && data.error && data.error.code) throw data.error
+
+						// STEP 2: Update data
+						let newState = this.state.dataFiles
+						newState.available = data.files
+						this.setState({
+							dataFiles: newState,
+						})
+					})
+					.catch(error => {
+						if (error.code == '401') {
+							oauth2SignIn()
+						} else {
+							console.error ? console.error(error) : console.log(error)
+						}
+					})
+			})
+			.catch(error => {
+				if (error.code == '401') {
+					oauth2SignIn()
+				} else {
+					console.error ? console.error(error) : console.log(error)
+				}
+			})
 	}
-	chgNewEntry = (value: IJournalEntry) => {
-		let appData = this.state.dreamJournal
-		appData.data.push(value)
-		this.setState({
-			dreamJournal: appData,
+	/**
+	 * @see: https://developers.google.com/drive/api/v3/manage-downloads
+	 */
+	doSelectFileById = (fileId: string) => {
+		let params = JSON.parse(localStorage.getItem('oauth2-params'))
+
+		let selFile =
+			fileId &&
+			this.state.dataFiles &&
+			this.state.dataFiles.available &&
+			this.state.dataFiles.available.filter(file => {
+				return file.id === fileId
+			}).length > 0
+				? this.state.dataFiles.available.filter(file => {
+						return file.id === fileId
+				  })[0]
+				: null
+
+		if (!selFile) {
+			console.error ? console.error('NO SUCH FILE') : console.log('WTH?!')
+			return
+		}
+
+		fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', {
+			method: 'GET',
+			headers: {
+				Authorization: 'Bearer ' + params['access_token'],
+			},
 		})
-		console.log('New entry added!')
-		console.log(this.state.dreamJournal)
+			.then(response => {
+				response
+					.arrayBuffer()
+					.then(buffer => {
+						let decoded: string = new TextDecoder('utf-8').decode(buffer)
+						let json: Object = {}
+						let entries: Array<IJournalEntry>
+						if (decoded && decoded.length > 0) {
+							try {
+								// NOTE: Initial dream-journal file is empty!
+								json = JSON.parse(decoded)
+								entries = json['entries']
+								console.log('FYI: Get File results:')
+								console.log(json) // DEBUG
+							} catch (ex) {
+								// TODO: Show message onscreen
+								console.error ? console.error(ex) : console.log(ex)
+							}
+						}
+						let newState = this.state.dataFiles
+						newState.selected = selFile
+						newState.selected.entries = entries || []
+
+						this.setState({
+							dataFiles: newState,
+						})
+						console.log('FYI: app.state.dataFiles updated')
+						console.log(this.state.dataFiles)
+					})
+					.catch(error => {
+						if (error.code == '401') {
+							oauth2SignIn()
+						} else {
+							// TODO: Show message onscreen
+							console.error ? console.error(error) : console.log(error)
+						}
+					})
+			})
+			.catch(error => {
+				if (error.code == '401') {
+					oauth2SignIn()
+				} else {
+					console.error ? console.error(error) : console.log(error)
+				}
+			})
+	}
+	doAddNewEntry = (value: IJournalEntry) => {
+		let dataFiles = this.state.dataFiles
+
+		if (!dataFiles || !dataFiles.selected) {
+			alert('no file selected')
+			// TODO: https://getbootstrap.com/docs/4.3/components/toasts/
+		} else {
+			dataFiles.selected.entries.push(value)
+			this.setState({
+				dataFiles: dataFiles,
+			})
+			console.log('New entry added!')
+			console.log(this.state.dataFiles.selected)
+		}
+	}
+	doSaveFile = () => {
+		console.log('TODO: SAVE FILE!!!!')
+		// TODO: CURR: FIXME:
 	}
 
 	render() {
 		return (
 			<main>
 				<AppNavBar
-					appData={this.state.dreamJournal}
+					selFileName={
+						this.state.dataFiles && this.state.dataFiles.selected && this.state.dataFiles.selected.name
+							? this.state.dataFiles.selected.name
+							: '(no file selected)'
+					}
+					onSaveFile={this.doSaveFile}
 					onShowModal={this.chgShowModal}
 					onShowTab={this.chgShowTab}
 				/>
 				<AppTabs
 					activeTab={this.state.showTab}
-					appData={this.state.dreamJournal}
-					availFiles={this.state.availFiles}
 					authState={this.state.auth}
-					selectedFileId={this.state.selectedFileId}
-					onChgAvailFiles={this.chgAvailFiles}
-					onChgLoadFile={this.chgLoadFile}
-					onChgNewEntry={this.chgNewEntry}
+					dataFiles={this.state.dataFiles}
+					doAddNewEntry={this.doAddNewEntry}
+					doCreateJournal={this.driveCreateNewJournal}
+					doFileListRefresh={this.driveGetFileList}
+					doSelectFileById={this.doSelectFileById}
+					selDataFile={
+						this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
+					}
 				/>
 				<AppModal show={this.state.showModal} />
 			</main>
