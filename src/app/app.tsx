@@ -169,13 +169,12 @@ function getReadableFileSizeString(fileSizeInBytes: number) {
 // ============================================================================
 
 class AppNavBar extends React.Component<
-	{ onSaveFile: Function; onShowModal: Function; onShowTab: Function; selFileName: IDriveFile['name'] },
+	{ onSaveFile: Function; onShowTab: Function; selFileName: IDriveFile['name'] },
 	{ activeTab: AppTab }
 > {
 	constructor(
 		props: Readonly<{
 			onSaveFile: Function
-			onShowModal: Function
 			onShowTab: Function
 			selFileName: IDriveFile['name']
 		}>
@@ -189,9 +188,6 @@ class AppNavBar extends React.Component<
 
 	onSaveFile = e => {
 		this.props.onSaveFile()
-	}
-	onShowModalHandler = e => {
-		this.props.onShowModal(true)
 	}
 	onShowTabHandler = e => {
 		let clickedTabName = e.target.getAttribute('data-name')
@@ -208,7 +204,7 @@ class AppNavBar extends React.Component<
 			<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
 				<a className='navbar-brand' href='/'>
 					<img src={LogoBase64} width='30' height='30' className='d-inline-block align-top mr-3' alt='' />
-					Dream Journal App
+					Brain Cloud
 				</a>
 				<button
 					className='navbar-toggler'
@@ -277,18 +273,22 @@ class AppNavBar extends React.Component<
 
 class TabHome extends React.Component<{
 	authState: IAuthState
-	dataFiles: IDriveFiles
+	availDataFiles: IDriveFiles["available"]
+	doAuthSignOut: Function
 	doCreateJournal: Function
 	doFileListRefresh: Function
 	doSelectFileById: Function
+	selDataFile: IDriveFile
 }> {
 	constructor(
 		props: Readonly<{
 			authState: IAuthState
-			dataFiles: IDriveFiles
+			availDataFiles: IDriveFiles["available"]
+			doAuthSignOut: Function
 			doCreateJournal: Function
 			doFileListRefresh: Function
 			doSelectFileById: Function
+			selDataFile: IDriveFile
 		}>
 	) {
 		super(props)
@@ -303,8 +303,11 @@ class TabHome extends React.Component<{
 		}
 	}
 
-	handleDriveLogin = e => {
+	handleDriveSignIn = e => {
 		oauth2SignIn()
+	}
+	handleDriveSignOut = e => {
+		this.props.doAuthSignOut()
 	}
 
 	handleDriveFileList = e => {
@@ -350,17 +353,28 @@ class TabHome extends React.Component<{
 						<label className='text-muted text-uppercase d-block'>User Name:</label>
 						{this.props.authState.userName}
 					</p>
-					<button className='btn btn-success' onClick={this.handleDriveLogin}>
-						Re-Auth
-					</button>
+					<div className='row'>
+						<div className='col-12 col-lg-6 mb-md-3'>
+							<button
+								className='btn btn-outline-primary w-100 mb-3 mb-md-0'
+								onClick={this.handleDriveSignIn}>
+								Renew
+							</button>
+						</div>
+						<div className='col-12 col-lg-6 text-right'>
+							<button className='btn btn-outline-secondary w-100' onClick={this.handleDriveSignOut}>
+								Sign Out
+							</button>
+						</div>
+					</div>
 				</div>
 			)
 		} else if (this.props.authState.status == AuthState.Expired) {
 			cardbody = (
 				<div>
 					<p className='card-text'>Your session has expired. Please re-authenticate to continue.</p>
-					<button className='btn btn-success' onClick={this.handleDriveLogin}>
-						Renew
+					<button className='btn btn-primary' onClick={this.handleDriveSignIn}>
+						Renew Session
 					</button>
 				</div>
 			)
@@ -368,45 +382,43 @@ class TabHome extends React.Component<{
 			cardbody = (
 				<div>
 					<p className='card-text'>Please sign-in to allow access to Google Drive space.</p>
-					<button className='btn btn-primary' onClick={this.handleDriveLogin}>
+					<button className='btn btn-primary' onClick={this.handleDriveSignIn}>
 						Sign In/Authorize
 					</button>
 				</div>
 			)
 		}
 
-		let selFile =
-			this.props.dataFiles.selected && this.props.dataFiles.selected.id
-				? this.props.dataFiles.available.filter(file => {
-						return file.id === this.props.dataFiles.selected.id
-				  })[0]
-				: null
 		let tableFileList: JSX.Element = (
 			<table className='table'>
 				<thead className='thead'>
 					<tr>
 						<th>Status</th>
 						<th>File Name</th>
-						<th className='text-center'>File Size</th>
-						<th>Last Modified</th>
+						<th className='text-center d-none d-md-table-cell'>File Size</th>
+						<th className='text-center d-none d-md-table-cell'>Last Modified</th>
 						<th>Action</th>
 					</tr>
 				</thead>
 				<tbody>
-					{this.props.dataFiles.available.map((file, idx) => {
+					{this.props.availDataFiles.map((file, idx) => {
 						return (
 							<tr key={'filerow' + idx}>
-								{selFile && file.id === selFile.id ? (
+								{this.props.selDataFile && this.props.selDataFile.name ? (
 									<td>
-										<div className='badge badge-success'>Active</div>
+										<div className='badge badge-success p-2'>Active</div>
 									</td>
 								) : (
 									<td />
 								)}
-								<td>{file['name']}</td>
-								<td className='text-center'>{getReadableFileSizeString(Number(file['size']))}</td>
-								<td className='text-nowrap'>{new Date(file['modifiedTime']).toLocaleString()}</td>
-								{selFile && file.id === selFile.id ? (
+								<td>{file.name}</td>
+								<td className='text-center d-none d-md-table-cell'>
+									{getReadableFileSizeString(Number(file['size']))}
+								</td>
+								<td className='text-center text-nowrap d-none d-md-table-cell'>
+									{new Date(file['modifiedTime']).toLocaleString()}
+								</td>
+								{this.props.selDataFile && this.props.selDataFile.id && file.id === this.props.selDataFile.id ? (
 									<td />
 								) : (
 									<td>
@@ -428,77 +440,80 @@ class TabHome extends React.Component<{
 		return (
 			<div className='container mt-5'>
 				<div className='jumbotron'>
-					<h1 className='display-4 text-primary d-none d-md-block'>
-						<img
-							src={LogoBase64}
-							width='150'
-							height='150'
-							className='mr-4 d-none d-lg-inline-block'
-							alt='Logo'
-						/>
+					<h1 className='display-4 text-primary d-none d-md-none d-xl-block'>
+						<img src={LogoBase64} width='150' height='150' className='mr-4' alt='Logo' />
 						Brain Cloud - Dream Journal
 					</h1>
-					<h2 className='display-5 text-primary mb-3 d-block d-md-none'>Brain Cloud</h2>
-					<p className='lead'>
+					<h1 className='display-4 text-primary d-none d-md-none d-lg-block d-xl-none'>
+						<img src={LogoBase64} width='75' height='75' className='mr-4' alt='Logo' />
+						Brain Cloud - Dream Journal
+					</h1>
+					<h1 className='display-5 text-primary d-none d-md-block d-lg-none'>
+						<img src={LogoBase64} width='50' height='50' className='mr-4' alt='Logo' />
+						Brain Cloud - Dream Journal
+					</h1>
+					<h1 className='display-5 text-primary d-block d-md-none'>
+						<img src={LogoBase64} width='50' height='50' className='mr-4' alt='Logo' />
+						Brain Cloud
+					</h1>
+					<p className='lead mt-3'>
 						Record your daily dream journal entries into well-formatted JSON, enabling keyword searches,
 						metrics and more.
 					</p>
 					<hr className='my-4' />
 
-					<div className='d-flex mb-5'>
-						<div className='card flex-grow-1 w-75 mr-5'>
-							<div className='card-header bg-primary'>
-								<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
-							</div>
-							<div className='card-body bg-light text-dark'>
-								<p className='card-text'>
-									This application uses your Google Drive to store dream journals so they are safe,
-									secure, and accessible on any of your devices.
-								</p>
-								<p className='card-text'>
-									Signing In will request permissions to create and modify
-									<strong> only its own files</strong> on your Google Drive.
-								</p>
+					<div className='row mb-5'>
+						<div className='col-12 col-md-8 d-flex mb-5 mb-md-0'>
+							<div className='card flex-fill'>
+								<div className='card-header bg-primary'>
+									<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
+								</div>
+								<div className='card-body bg-light text-dark'>
+									<p className='card-text'>
+										This application uses your Google Drive to store dream journals so they are
+										safe, secure, and accessible on any of your devices.
+									</p>
+									<p className='card-text'>
+										Signing In will request permissions to create and modify
+										<strong> only its own files</strong> on your Google Drive.
+									</p>
+								</div>
 							</div>
 						</div>
-						<div className='card flex-grow-1 w-25'>
-							<div
-								className={
-									'card-header' +
-									(this.props.authState.status == AuthState.Authenticated
-										? ' bg-success'
-										: ' bg-warning')
-								}>
-								<h5 className='card-title text-white mb-0'>{this.props.authState.status}</h5>
+						<div className='col-12 col-md-4 d-flex'>
+							<div className='card flex-fill'>
+								<div
+									className={
+										'card-header' +
+										(this.props.authState.status == AuthState.Authenticated
+											? ' bg-success'
+											: ' bg-warning')
+									}>
+									<h5 className='card-title text-white mb-0'>{this.props.authState.status}</h5>
+								</div>
+								<div className='card-body bg-light text-dark'>{cardbody}</div>
 							</div>
-							<div className='card-body bg-light text-dark'>{cardbody}</div>
 						</div>
 					</div>
 
-					<div className='row'>
-						<div className='col-12'>
-							<div className='card'>
-								<div className='card-header bg-info'>
-									<h5 className='card-title text-white mb-0'>Available Dream Journals</h5>
+					<div className='card'>
+						<div className='card-header bg-info'>
+							<h5 className='card-title text-white mb-0'>Available Dream Journals</h5>
+						</div>
+						<div className='card-body bg-light text-dark'>
+							{tableFileList}
+							<div className='row'>
+								<div className='col-12 col-md-6 text-center'>
+									<button
+										className='btn btn-outline-info w-100 mb-3 mb-md-0'
+										onClick={this.handleDriveFileList}>
+										Refresh File List
+									</button>
 								</div>
-								<div className='card-body bg-light text-dark'>
-									{tableFileList}
-									<div className='row'>
-										<div className='col-12 col-md-6 text-center'>
-											<button
-												className='btn btn-outline-info w-50'
-												onClick={this.handleDriveFileList}>
-												Refresh File List
-											</button>
-										</div>
-										<div className='col-12 col-md-6 text-center'>
-											<button
-												className='btn btn-outline-info w-50'
-												onClick={this.handleDriveFileCreate}>
-												Create New Dream Journal
-											</button>
-										</div>
-									</div>
+								<div className='col-12 col-md-6 text-center'>
+									<button className='btn btn-outline-info w-100' onClick={this.handleDriveFileCreate}>
+										New Dream Journal
+									</button>
 								</div>
 							</div>
 						</div>
@@ -509,13 +524,16 @@ class TabHome extends React.Component<{
 	}
 }
 
-class TabView extends React.Component<{ selDataFile: IDriveFile }> {
-	constructor(props: Readonly<{ selDataFile: IDriveFile }>) {
+class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDriveFile }> {
+	constructor(props: Readonly<{ onShowModal: Function; selDataFile: IDriveFile }>) {
 		super(props)
 	}
 
+	handleEditEntryModal = e => {
+		this.props.onShowModal({show:true, entryKey:e.target.getAttribute('data-entry-key')})
+	}
+
 	render() {
-		console.log(this.props.selDataFile)
 		let tableFileList: JSX.Element = (
 			<table className='table'>
 				<thead className='thead'>
@@ -535,7 +553,7 @@ class TabView extends React.Component<{ selDataFile: IDriveFile }> {
 								<td>{entry.entryDate}</td>
 								<td>{entry.dreams.length}</td>
 								<td>
-									<button className='btn btn-sm btn-primary' data-entry-key={entry.entryDate}>
+									<button className='btn btn-sm btn-primary' data-entry-key={entry.entryDate} onClick={this.handleEditEntryModal}>
 										Edit
 									</button>
 								</td>
@@ -765,12 +783,11 @@ class TabSearch extends React.Component {
 
 // ============================================================================
 
-class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dailyEntry: IJournalEntry }> {
-	constructor(props: Readonly<{ show?: boolean }>) {
+class EntryModal extends React.Component<{ editEntryKey?: string; show?: boolean }, { dailyEntry: IJournalEntry; show: boolean;  }> {
+	constructor(props: Readonly<{ editEntryKey?: string; show?: boolean }>) {
 		super(props)
 
 		this.state = {
-			show: props.show,
 			dailyEntry: {
 				entryDate: null,
 				bedTime: null,
@@ -778,13 +795,14 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 				notesWake: null,
 				dreams: [{ title: '' }],
 			},
+			show: props.show,
 		}
 	}
 
 	// React-Design: Allow `props` changes from other Components to change state/render
 	componentWillReceiveProps(nextProps) {
 		const newName = nextProps.show
-		if (this.state.show !== newName) {
+		if ( typeof newName !== 'undefined' && this.state.show !== newName) {
 			this.setState({ show: newName })
 
 			// NOTE: `constructor` is only called once on app init, so use this to reset state as modal is reused
@@ -799,6 +817,13 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 					},
 				})
 			}
+		}
+
+		// TODO: Edit ability (load data from `entries`)
+		if ( nextProps.editEntryKey ) {
+			// CURR:
+			// TODO: we need to be able to read the `entries` form the selected file!
+			console.log('EDIT !!!')
 		}
 	}
 
@@ -927,22 +952,26 @@ class AppModal extends React.Component<{ show?: boolean }, { show: boolean; dail
 class AppTabs extends React.Component<{
 	activeTab: AppTab
 	authState: IAuthState
-	dataFiles: IDriveFiles
+	availDataFiles: IDriveFiles["available"]
 	doAddNewEntry: Function
+	doAuthSignOut: Function
 	doCreateJournal: Function
 	doFileListRefresh: Function
 	doSelectFileById: Function
+	onShowModal: Function
 	selDataFile: IDriveFile
 }> {
 	constructor(
 		props: Readonly<{
 			activeTab: AppTab
 			authState: IAuthState
-			dataFiles: IDriveFiles
+			availDataFiles: IDriveFiles["available"]
 			doAddNewEntry: Function
+			doAuthSignOut: Function
 			doCreateJournal: Function
 			doFileListRefresh: Function
 			doSelectFileById: Function
+			onShowModal: Function
 			selDataFile: IDriveFile
 		}>
 	) {
@@ -952,7 +981,7 @@ class AppTabs extends React.Component<{
 	render() {
 		switch (this.props.activeTab) {
 			case AppTab.view:
-				return <TabView selDataFile={this.props.selDataFile} />
+				return <TabView onShowModal={this.props.onShowModal} selDataFile={this.props.selDataFile} />
 			case AppTab.add:
 				return <TabAdd doAddNewEntry={this.props.doAddNewEntry} />
 			case AppTab.search:
@@ -962,10 +991,12 @@ class AppTabs extends React.Component<{
 				return (
 					<TabHome
 						authState={this.props.authState}
-						dataFiles={this.props.dataFiles}
+						availDataFiles={this.props.availDataFiles}
+						doAuthSignOut={this.props.doAuthSignOut}
 						doCreateJournal={this.props.doCreateJournal}
 						doFileListRefresh={this.props.doFileListRefresh}
 						doSelectFileById={this.props.doSelectFileById}
+						selDataFile={this.props.selDataFile}
 					/>
 				)
 		}
@@ -978,11 +1009,12 @@ class App extends React.Component<
 	{
 		auth: IAuthState
 		dataFiles: IDriveFiles
+		editEntryKey: string
 		showModal: boolean
 		showTab: AppTab
 	}
 > {
-	constructor(props: Readonly<{ auth: IAuthState; dataFiles: IDriveFiles; showModal: boolean }>) {
+	constructor(props: Readonly<{ showModal: boolean }>) {
 		super(props)
 
 		this.state = {
@@ -995,6 +1027,7 @@ class App extends React.Component<
 				available: [],
 				selected: null,
 			},
+			editEntryKey: "",
 			showModal: props.showModal || false,
 			showTab: AppTab.home,
 		}
@@ -1052,15 +1085,49 @@ class App extends React.Component<
 		}
 	}
 
-	chgShowModal = (value: boolean) => {
+	chgShowModal = (options:object) => {
 		this.setState({
-			showModal: value,
+			editEntryKey: options['entryKey'],
+			showModal: options['show'],
 		})
 	}
 	chgShowTab = (value: AppTab) => {
 		this.setState({
 			showTab: value,
 		})
+	}
+
+	/**
+	* @see: https://developers.google.com/identity/protocols/OAuth2UserAgent#tokenrevoke
+	*/
+	doAuthSignOut = () => {
+		let params = JSON.parse(localStorage.getItem('oauth2-params'))
+
+		// TODO: Prompt for Save!!!
+
+		fetch('https://accounts.google.com/o/oauth2/revoke?token=' + params['access_token'], {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
+		})
+			.then(response => {
+				this.setState({
+					auth: {
+						status: AuthState.Unauthenticated,
+						userName: '',
+						userPhoto: '',
+					},
+					dataFiles: {
+						available: [],
+						selected: null,
+					},
+				})
+				localStorage.setItem('journal-selected-fileid', null)
+			})
+			.catch(error => {
+				console.error ? console.error(error) : console.log(error)
+			})
 	}
 
 	/**
@@ -1171,6 +1238,7 @@ class App extends React.Component<
 				}
 			})
 	}
+
 	/**
 	 * @see: https://developers.google.com/drive/api/v3/manage-downloads
 	 */
@@ -1339,22 +1407,23 @@ class App extends React.Component<
 							: '(no file selected)'
 					}
 					onSaveFile={this.doSaveFile}
-					onShowModal={this.chgShowModal}
 					onShowTab={this.chgShowTab}
 				/>
 				<AppTabs
 					activeTab={this.state.showTab}
 					authState={this.state.auth}
-					dataFiles={this.state.dataFiles}
+					availDataFiles={this.state.dataFiles && this.state.dataFiles.available ? this.state.dataFiles.available : null}
 					doAddNewEntry={this.doAddNewEntry}
 					doCreateJournal={this.driveCreateNewJournal}
 					doFileListRefresh={this.driveGetFileList}
+					doAuthSignOut={this.doAuthSignOut}
 					doSelectFileById={this.doSelectFileById}
+					onShowModal={this.chgShowModal}
 					selDataFile={
 						this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
 					}
 				/>
-				<AppModal show={this.state.showModal} />
+				<EntryModal editEntryKey={this.state.editEntryKey} show={this.state.showModal} />
 			</main>
 		)
 	}
