@@ -34,6 +34,8 @@ import * as ReactDOM from 'react-dom'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import LogoBase64 from '../img/logo_base64'
+//import SwitchButton from './bootstrap-switch-button'
+//<SwitchButton/>
 
 // TODO: FIXME: https://stackoverflow.com/questions/48699820/how-do-i-hide-api-key-in-create-react-app
 console.log(process.env.REACT_APP_GDRIVE_CLIENT_ID)
@@ -69,21 +71,6 @@ interface IAuthState {
 	userName: ''
 	userPhoto: ''
 }
-interface IJournalDream {
-	title: string
-	notes?: string
-	dreamSigns?: Array<string>
-	dreamImages?: Array<string>
-	isLucidDream?: boolean
-	lucidMethod?: 'dild' | 'mild' | 'wbtb' | 'wild' | 'other'
-}
-interface IJournalEntry {
-	entryDate: string
-	bedTime?: string
-	notesPrep?: string
-	notesWake?: string
-	dreams?: Array<IJournalDream>
-}
 interface IDriveFile {
 	id: string
 	entries: Array<IJournalEntry>
@@ -94,6 +81,27 @@ interface IDriveFile {
 interface IDriveFiles {
 	available: Array<IDriveFile>
 	selected: IDriveFile
+}
+/**
+ * A single dream entry - there are 1+ of these in every IJournalEntry
+ */
+interface IJournalDream {
+	title: string
+	notes?: string
+	dreamSigns?: Array<string>
+	dreamImages?: Array<string>
+	isLucidDream?: boolean
+	lucidMethod?: 'dild' | 'mild' | 'wbtb' | 'wild' | 'other'
+}
+/**
+ * A daily journal entry containing 1+ dreams
+ */
+interface IJournalEntry {
+	entryDate: string
+	bedTime?: string
+	notesPrep?: string
+	notesWake?: string
+	dreams?: Array<IJournalDream>
 }
 
 // @see: https://flaviocopes.com/react-forms/
@@ -273,7 +281,7 @@ class AppNavBar extends React.Component<
 
 class TabHome extends React.Component<{
 	authState: IAuthState
-	availDataFiles: IDriveFiles["available"]
+	availDataFiles: IDriveFiles['available']
 	doAuthSignOut: Function
 	doCreateJournal: Function
 	doFileListRefresh: Function
@@ -283,7 +291,7 @@ class TabHome extends React.Component<{
 	constructor(
 		props: Readonly<{
 			authState: IAuthState
-			availDataFiles: IDriveFiles["available"]
+			availDataFiles: IDriveFiles['available']
 			doAuthSignOut: Function
 			doCreateJournal: Function
 			doFileListRefresh: Function
@@ -418,7 +426,9 @@ class TabHome extends React.Component<{
 								<td className='text-center text-nowrap d-none d-md-table-cell'>
 									{new Date(file['modifiedTime']).toLocaleString()}
 								</td>
-								{this.props.selDataFile && this.props.selDataFile.id && file.id === this.props.selDataFile.id ? (
+								{this.props.selDataFile &&
+								this.props.selDataFile.id &&
+								file.id === this.props.selDataFile.id ? (
 									<td />
 								) : (
 									<td>
@@ -530,7 +540,12 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 	}
 
 	handleEditEntryModal = e => {
-		this.props.onShowModal({show:true, entryKey:e.target.getAttribute('data-entry-key')})
+		this.props.onShowModal({
+			show: true,
+			editEntry: this.props.selDataFile.entries.filter(entry => {
+				return entry.entryDate == e.target.getAttribute('data-entry-key')
+			})[0],
+		})
 	}
 
 	render() {
@@ -553,7 +568,10 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 								<td>{entry.entryDate}</td>
 								<td>{entry.dreams.length}</td>
 								<td>
-									<button className='btn btn-sm btn-primary' data-entry-key={entry.entryDate} onClick={this.handleEditEntryModal}>
+									<button
+										className='btn btn-sm btn-primary'
+										data-entry-key={entry.entryDate}
+										onClick={this.handleEditEntryModal}>
 										Edit
 									</button>
 								</td>
@@ -783,13 +801,16 @@ class TabSearch extends React.Component {
 
 // ============================================================================
 
-class EntryModal extends React.Component<{ editEntryKey?: string; show?: boolean }, { dailyEntry: IJournalEntry; show: boolean;  }> {
-	constructor(props: Readonly<{ editEntryKey?: string; show?: boolean }>) {
+class EntryModal extends React.Component<
+	{ editEntry?: IJournalEntry; onShowModal: Function; show?: boolean },
+	{ dailyEntry: IJournalEntry; show: boolean }
+> {
+	constructor(props: Readonly<{ editEntry?: IJournalEntry; onShowModal: Function; show?: boolean }>) {
 		super(props)
 
 		this.state = {
 			dailyEntry: {
-				entryDate: null,
+				entryDate: new Date().toISOString().substring(0, 10),
 				bedTime: null,
 				notesPrep: null,
 				notesWake: null,
@@ -801,80 +822,138 @@ class EntryModal extends React.Component<{ editEntryKey?: string; show?: boolean
 
 	// React-Design: Allow `props` changes from other Components to change state/render
 	componentWillReceiveProps(nextProps) {
-		const newName = nextProps.show
-		if ( typeof newName !== 'undefined' && this.state.show !== newName) {
-			this.setState({ show: newName })
-
+		// A:
+		if (
+			typeof nextProps.show !== 'undefined' &&
+			typeof nextProps.show === 'boolean' &&
+			this.state.show !== nextProps.show
+		) {
+			this.setState({ show: nextProps.show })
+		}
+		// B:
+		if (nextProps.editEntry && this.state.dailyEntry !== nextProps.editEntry) {
+			// NOTE: React Feb-2019 wont do: `dailyEntry: nextProps.editEntry`, so do a deep copy
+			let entryCopy = this.state.dailyEntry
+			Object.keys(entryCopy).forEach(key => {
+				entryCopy[key] = nextProps.editEntry[key]
+			})
+			this.setState({
+				dailyEntry: entryCopy,
+			})
+		}
+		/* HOWTO: reset values upon "New" item entry - do we *have* to pass a flag?? :(
+		else if ( !nextProps.editEntry ) {
 			// NOTE: `constructor` is only called once on app init, so use this to reset state as modal is reused
-			if (newName == true) {
-				this.setState({
-					dailyEntry: {
-						entryDate: null,
-						bedTime: null,
-						notesPrep: null,
-						notesWake: null,
-						dreams: [{ title: '' }],
-					},
-				})
-			}
+			this.setState({
+				dailyEntry: {
+					entryDate: null,
+					bedTime: null,
+					notesPrep: null,
+					notesWake: null,
+					dreams: [{ title: '' }],
+				},
+			})
+			console.log('MODAL: RESET DATA')
 		}
-
-		// TODO: Edit ability (load data from `entries`)
-		if ( nextProps.editEntryKey ) {
-			// CURR:
-			// TODO: we need to be able to read the `entries` form the selected file!
-			console.log('EDIT !!!')
-		}
+		*/
 	}
 
-	addRowHandler = e => {
+	addRowHandler = event => {
 		let dailyEntryNew = this.state.dailyEntry
 		dailyEntryNew.dreams.push({ title: '' })
 		this.setState({ dailyEntry: dailyEntryNew })
 	}
 
-	changeHandler = e => {
-		console.log('form field changed!')
+	handleInputChange = event => {
+		const target = event.target
+		const value = target.type === 'checkbox' ? target.checked : target.value
+		const name = target.name
+
+		let newState = this.state.dailyEntry
+		newState[name] = value
+
+		this.setState({
+			dailyEntry: newState,
+		})
+	}
+
+	handleSubmit = event => {
+		// TODO: Insert or Update?
+		if (this.props.editEntry) {
+			// TODO: This works, but its an encapsilation violation!!
+			// Pass up to App instead (as we'll do for insert)
+			// Actually, thats the soln - just pass it up - let app componet search and add or update
+			let entryCopy = this.state.dailyEntry
+			Object.keys(entryCopy).forEach(key => {
+				this.props.editEntry[key] = this.state.dailyEntry[key]
+			})
+		}
+		this.modalClose()
+		event.preventDefault()
+	}
+
+	modalClose = () => {
+		// Reset state in both components
+		this.setState({ show: false })
+		this.props.onShowModal({ show: false })
 	}
 
 	renderDreamRow = (dream: IJournalDream, idx: number) => {
 		return (
-			<div className='row pt-3 mb-4 border-top' key={'dreamrow' + idx}>
+			<div className='row pt-3 mb-4' key={'dreamrow' + idx}>
 				<div className='col-auto'>
-					<h2 className='text-primary font-weight-light'>{idx + 1}</h2>
+					<h1 className='text-primary font-weight-light'>{idx + 1}</h1>
 				</div>
 				<div className='col'>
+					<div className='row mb-3'>
+						<div className='col-12 col-md-6'>
+							<label className='text-muted text-uppercase text-sm d-block'>Dream Signs</label>
+							<input
+								name='dreamSigns'
+								type='text'
+								className='form-control'
+								value={dream.dreamSigns}
+								onChange={this.handleInputChange}
+							/>
+						</div>
+						<div className='col-6 col-md-3'>
+							<label className='text-muted text-uppercase text-sm d-block'>Lucid Dream?</label>
+							<input
+								name='isLucidDream'
+								type='checkbox'
+								data-toggle='switchbutton'
+								checked
+								onChange={this.handleInputChange}
+							/>
+						</div>
+						<div className='col-6 col-md-3'>
+							<label className='text-muted text-uppercase text-sm d-block'>Lucid Method</label>
+							<select name='lucidMethod' onChange={this.handleInputChange} className='form-control'>
+								<option>Select...</option>
+							</select>
+						</div>
+					</div>
 					<div className='row mb-3'>
 						<div className='col'>
 							<label className='text-muted text-uppercase text-sm'>Title</label>
 							<input
-								id='title'
+								name='title'
 								type='text'
 								className='form-control'
 								value={dream.title}
-								onChange={this.changeHandler}
+								onChange={this.handleInputChange}
 							/>
-						</div>
-						<div className='col-auto'>
-							<label className='text-muted text-uppercase text-sm d-block'>Lucid Dream?</label>
-							<span>TODO-bs4-toggle</span>
-						</div>
-						<div className='col-auto'>
-							<label className='text-muted text-uppercase text-sm d-block'>Lucid Method</label>
-							<select className='form-control'>
-								<option>Select...</option>
-							</select>
 						</div>
 					</div>
 					<div className='row'>
 						<div className='col'>
 							<label className='text-muted text-uppercase text-sm'>Notes</label>
 							<textarea
-								id='notes'
+								name='notes'
 								className='form-control'
 								rows={5}
 								value={dream.notes}
-								onChange={this.changeHandler}
+								onChange={this.handleInputChange}
 							/>
 						</div>
 					</div>
@@ -884,12 +963,8 @@ class EntryModal extends React.Component<{ editEntryKey?: string; show?: boolean
 	}
 
 	render() {
-		let modalClose = () => {
-			this.setState({ show: false })
-		}
-
 		return (
-			<Modal size='lg' show={this.state.show} onHide={modalClose} backdrop='static'>
+			<Modal size='lg' show={this.state.show} onHide={this.modalClose} backdrop='static'>
 				<Modal.Header className='bg-primary' closeButton>
 					<Modal.Title className='text-white'>Journal Entry</Modal.Title>
 				</Modal.Header>
@@ -899,22 +974,47 @@ class EntryModal extends React.Component<{ editEntryKey?: string; show?: boolean
 						<div className='row mb-3'>
 							<div className='col-12 col-md-6 required'>
 								<label className='text-muted text-uppercase text-sm'>Entry Date</label>
-								<input id='entryDate' type='date' className='form-control w-50' required />
+								<input
+									name='entryDate'
+									type='date'
+									value={this.state.dailyEntry.entryDate}
+									onChange={this.handleInputChange}
+									className='form-control w-50'
+									required
+								/>
 								<div className='invalid-feedback'>Please provide Entry Date</div>
 							</div>
 							<div className='col-12 col-md-6'>
 								<label className='text-muted text-uppercase text-sm'>Bed Time</label>
-								<input id='bedTime' type='time' className='form-control w-50' />
+								<input
+									name='bedTime'
+									type='time'
+									value={this.state.dailyEntry.bedTime}
+									onChange={this.handleInputChange}
+									className='form-control w-50'
+								/>
 							</div>
 						</div>
 						<div className='row'>
 							<div className='col-12 col-md-6'>
 								<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
-								<textarea id='notesPrep' className='form-control' rows={3} />
+								<textarea
+									name='notesPrep'
+									value={this.state.dailyEntry.notesPrep}
+									onChange={this.handleInputChange}
+									className='form-control'
+									rows={3}
+								/>
 							</div>
 							<div className='col-12 col-md-6'>
 								<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
-								<textarea id='notesWake' className='form-control' rows={3} />
+								<textarea
+									name='notesWake'
+									value={this.state.dailyEntry.notesWake}
+									onChange={this.handleInputChange}
+									className='form-control'
+									rows={3}
+								/>
 							</div>
 						</div>
 					</div>
@@ -925,7 +1025,7 @@ class EntryModal extends React.Component<{ editEntryKey?: string; show?: boolean
 								<h5 className='text-primary'>Dreams</h5>
 							</div>
 							<div className='col-auto'>
-								<button className='btn btn-sm btn-outline-info' onClick={this.addRowHandler}>
+								<button className='btn btn-sm btn-outline-primary' onClick={this.addRowHandler}>
 									Add Dream Row
 								</button>
 							</div>
@@ -935,10 +1035,10 @@ class EntryModal extends React.Component<{ editEntryKey?: string; show?: boolean
 				</Modal.Body>
 
 				<Modal.Footer>
-					<Button variant='secondary' className='px-4 mr-2' onClick={modalClose}>
+					<Button variant='secondary' className='px-4 mr-2' onClick={this.modalClose}>
 						Close
 					</Button>
-					<Button variant='primary' className='w-25'>
+					<Button variant='success' className='w-25' onClick={this.handleSubmit}>
 						Submit
 					</Button>
 				</Modal.Footer>
@@ -952,7 +1052,7 @@ class EntryModal extends React.Component<{ editEntryKey?: string; show?: boolean
 class AppTabs extends React.Component<{
 	activeTab: AppTab
 	authState: IAuthState
-	availDataFiles: IDriveFiles["available"]
+	availDataFiles: IDriveFiles['available']
 	doAddNewEntry: Function
 	doAuthSignOut: Function
 	doCreateJournal: Function
@@ -965,7 +1065,7 @@ class AppTabs extends React.Component<{
 		props: Readonly<{
 			activeTab: AppTab
 			authState: IAuthState
-			availDataFiles: IDriveFiles["available"]
+			availDataFiles: IDriveFiles['available']
 			doAddNewEntry: Function
 			doAuthSignOut: Function
 			doCreateJournal: Function
@@ -1009,7 +1109,7 @@ class App extends React.Component<
 	{
 		auth: IAuthState
 		dataFiles: IDriveFiles
-		editEntryKey: string
+		editEntry: IJournalEntry
 		showModal: boolean
 		showTab: AppTab
 	}
@@ -1027,8 +1127,8 @@ class App extends React.Component<
 				available: [],
 				selected: null,
 			},
-			editEntryKey: "",
-			showModal: props.showModal || false,
+			editEntry: null,
+			showModal: typeof props.showModal === 'boolean' ? props.showModal : false,
 			showTab: AppTab.home,
 		}
 
@@ -1085,10 +1185,10 @@ class App extends React.Component<
 		}
 	}
 
-	chgShowModal = (options:object) => {
+	chgShowModal = (options: { editEntry: IJournalEntry; show: boolean }) => {
 		this.setState({
-			editEntryKey: options['entryKey'],
-			showModal: options['show'],
+			editEntry: options.editEntry,
+			showModal: options.show,
 		})
 	}
 	chgShowTab = (value: AppTab) => {
@@ -1098,8 +1198,8 @@ class App extends React.Component<
 	}
 
 	/**
-	* @see: https://developers.google.com/identity/protocols/OAuth2UserAgent#tokenrevoke
-	*/
+	 * @see: https://developers.google.com/identity/protocols/OAuth2UserAgent#tokenrevoke
+	 */
 	doAuthSignOut = () => {
 		let params = JSON.parse(localStorage.getItem('oauth2-params'))
 
@@ -1412,7 +1512,9 @@ class App extends React.Component<
 				<AppTabs
 					activeTab={this.state.showTab}
 					authState={this.state.auth}
-					availDataFiles={this.state.dataFiles && this.state.dataFiles.available ? this.state.dataFiles.available : null}
+					availDataFiles={
+						this.state.dataFiles && this.state.dataFiles.available ? this.state.dataFiles.available : null
+					}
 					doAddNewEntry={this.doAddNewEntry}
 					doCreateJournal={this.driveCreateNewJournal}
 					doFileListRefresh={this.driveGetFileList}
@@ -1423,7 +1525,11 @@ class App extends React.Component<
 						this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
 					}
 				/>
-				<EntryModal editEntryKey={this.state.editEntryKey} show={this.state.showModal} />
+				<EntryModal
+					editEntry={this.state.editEntry}
+					onShowModal={this.chgShowModal}
+					show={this.state.showModal}
+				/>
 			</main>
 		)
 	}
