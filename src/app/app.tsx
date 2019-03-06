@@ -27,7 +27,7 @@
 |*|  SOFTWARE.
 \*/
 
-// TODO: https://github.com/FortAwesome/react-fontawesome
+// FUTURE: https://github.com/FortAwesome/react-fontawesome
 
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
@@ -36,23 +36,6 @@ import Modal from 'react-bootstrap/Modal'
 import LogoBase64 from '../img/logo_base64'
 //import SwitchButton from './bootstrap-switch-button'
 //<SwitchButton/>
-
-// TODO: FIXME: https://stackoverflow.com/questions/48699820/how-do-i-hide-api-key-in-create-react-app
-console.log(process.env.REACT_APP_GDRIVE_CLIENT_ID)
-console.log(`${process.env.REACT_APP_GDRIVE_CLIENT_ID}`)
-/*
-const API_KEY = `${process.env.REACT_APP_GDRIVE_API_KEY}`;
-console.log(API_KEY)
-*/
-const GITBRENT_CLIENT_ID = '300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com'
-const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
-const FIREBASE_URL = 'https://brain-cloud-dream-journal.firebaseapp.com'
-const LOCALHOST_URL = 'http://localhost:8080'
-const JOURNAL_HEADER = {
-	name: 'dream-journal.json',
-	description: 'Brain Cloud Dream Journal data file',
-	mimeType: 'application/json',
-}
 
 enum AppTab {
 	home = 'home',
@@ -64,6 +47,14 @@ enum AuthState {
 	Authenticated = 'Authenticated',
 	Unauthenticated = 'Unauthenticated',
 	Expired = 'Expired',
+}
+enum InductionTypes {
+	'none' = '(n/a)',
+	'dild' = 'DILD',
+	'mild' = 'MILD',
+	'wbtb' = 'WBTB',
+	'wild' = 'WILD',
+	'other' = 'Other',
 }
 
 interface IAuthState {
@@ -90,8 +81,8 @@ interface IJournalDream {
 	notes?: string
 	dreamSigns?: Array<string>
 	dreamImages?: Array<string>
-	isLucidDream?: boolean
-	lucidMethod?: 'dild' | 'mild' | 'wbtb' | 'wild' | 'other'
+	isLucidDream: boolean
+	lucidMethod: InductionTypes
 }
 /**
  * A daily journal entry containing 1+ dreams
@@ -104,9 +95,30 @@ interface IJournalEntry {
 	dreams?: Array<IJournalDream>
 }
 
-// @see: https://flaviocopes.com/react-forms/
-// @see: https://github.com/jaredpalmer/formik
-// TODO: https://reactjs.org/docs/forms.html
+// TODO: FIXME: https://stackoverflow.com/questions/48699820/how-do-i-hide-api-key-in-create-react-app
+console.log(process.env.REACT_APP_GDRIVE_CLIENT_ID)
+console.log(`${process.env.REACT_APP_GDRIVE_CLIENT_ID}`)
+/*
+const API_KEY = `${process.env.REACT_APP_GDRIVE_API_KEY}`;
+console.log(API_KEY)
+*/
+const GITBRENT_CLIENT_ID = '300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com'
+const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
+const FIREBASE_URL = 'https://brain-cloud-dream-journal.firebaseapp.com'
+const LOCALHOST_URL = 'http://localhost:8080'
+const JOURNAL_HEADER = {
+	name: 'dream-journal.json',
+	description: 'Brain Cloud Dream Journal data file',
+	mimeType: 'application/json',
+}
+const EMPTY_DREAM = {
+	title: '',
+	notes: '',
+	dreamSigns: [],
+	dreamImages: [],
+	isLucidDream: false,
+	lucidMethod: InductionTypes.none,
+}
 
 // ============================================================================
 
@@ -554,8 +566,10 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 				<thead className='thead'>
 					<tr>
 						<th>Entry Date</th>
-						<th>Dream Count</th>
-						<th>Action</th>
+						<th>Bed Time</th>
+						<th className='text-center'>Dream Count</th>
+						<th className='text-center'>Lucid Dream?</th>
+						<th className='text-center'>Action</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -566,10 +580,20 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 						return (
 							<tr key={'journalrow' + idx}>
 								<td>{entry.entryDate}</td>
-								<td>{entry.dreams.length}</td>
-								<td>
+								<td>{entry.bedTime}</td>
+								<td className='text-center'>{entry.dreams.length}</td>
+								<td className='text-center'>
+									{entry.dreams.filter(dream => {
+										return dream.isLucidDream == true
+									}).length > 0 ? (
+										<div className='badge badge-success'>Yes</div>
+									) : (
+										''
+									)}
+								</td>
+								<td className='text-center'>
 									<button
-										className='btn btn-sm btn-primary'
+										className='btn btn-sm btn-primary px-4'
 										data-entry-key={entry.entryDate}
 										onClick={this.handleEditEntryModal}>
 										Edit
@@ -620,14 +644,14 @@ class TabAdd extends React.Component<{ doAddNewEntry: Function }, { dailyEntry: 
 				bedTime: '',
 				notesPrep: '',
 				notesWake: '',
-				dreams: [{ title: '' }],
+				dreams: [EMPTY_DREAM],
 			},
 		}
 	}
 
 	addRowHandler = event => {
 		let dailyEntryNew = this.state.dailyEntry
-		dailyEntryNew.dreams.push({ title: '' })
+		dailyEntryNew.dreams.push(EMPTY_DREAM)
 		this.setState({ dailyEntry: dailyEntryNew })
 	}
 
@@ -814,7 +838,7 @@ class EntryModal extends React.Component<
 				bedTime: null,
 				notesPrep: null,
 				notesWake: null,
-				dreams: [{ title: '' }],
+				dreams: [EMPTY_DREAM],
 			},
 			show: props.show,
 		}
@@ -832,13 +856,10 @@ class EntryModal extends React.Component<
 		}
 		// B:
 		if (nextProps.editEntry && this.state.dailyEntry !== nextProps.editEntry) {
-			// NOTE: React Feb-2019 wont do: `dailyEntry: nextProps.editEntry`, so do a deep copy
-			let entryCopy = this.state.dailyEntry
-			Object.keys(entryCopy).forEach(key => {
-				entryCopy[key] = nextProps.editEntry[key]
-			})
+			// NOTE: React Feb-2019 wont do: `dailyEntry: nextProps.editEntry`
+			// SOLN: create a copy use json+json as `dreams` requires deep copy
 			this.setState({
-				dailyEntry: entryCopy,
+				dailyEntry: JSON.parse(JSON.stringify(nextProps.editEntry)),
 			})
 		}
 		/* HOWTO: reset values upon "New" item entry - do we *have* to pass a flag?? :(
@@ -860,7 +881,14 @@ class EntryModal extends React.Component<
 
 	addRowHandler = event => {
 		let dailyEntryNew = this.state.dailyEntry
-		dailyEntryNew.dreams.push({ title: '' })
+		dailyEntryNew.dreams.push({
+			title: '',
+			notes: '',
+			dreamSigns: [],
+			dreamImages: [],
+			isLucidDream: false,
+			lucidMethod: null,
+		})
 		this.setState({ dailyEntry: dailyEntryNew })
 	}
 
@@ -876,7 +904,18 @@ class EntryModal extends React.Component<
 			dailyEntry: newState,
 		})
 	}
+	handleInputDreamChange = event => {
+		const target = event.target
+		const value = target.type === 'checkbox' ? target.checked : target.value
+		const name = target.name
 
+		let newState = this.state.dailyEntry
+		newState.dreams[event.target.getAttribute('data-dream-idx')][name] = value
+
+		this.setState({
+			dailyEntry: newState,
+		})
+	}
 	handleSubmit = event => {
 		// TODO: Insert or Update?
 		if (this.props.editEntry) {
@@ -898,11 +937,11 @@ class EntryModal extends React.Component<
 		this.props.onShowModal({ show: false })
 	}
 
-	renderDreamRow = (dream: IJournalDream, idx: number) => {
+	renderDreamRow = (dream: IJournalDream, dreamIdx: number) => {
 		return (
-			<div className='row pt-3 mb-4' key={'dreamrow' + idx}>
+			<div className='row pt-3 mb-4' key={'dreamrow' + dreamIdx}>
 				<div className='col-auto'>
-					<h1 className='text-primary font-weight-light'>{idx + 1}</h1>
+					<h1 className='text-primary font-weight-light'>{dreamIdx + 1}</h1>
 				</div>
 				<div className='col'>
 					<div className='row mb-3'>
@@ -913,7 +952,8 @@ class EntryModal extends React.Component<
 								type='text'
 								className='form-control'
 								value={dream.dreamSigns}
-								onChange={this.handleInputChange}
+								onChange={this.handleInputDreamChange}
+								data-dream-idx={dreamIdx}
 							/>
 						</div>
 						<div className='col-6 col-md-3'>
@@ -922,14 +962,26 @@ class EntryModal extends React.Component<
 								name='isLucidDream'
 								type='checkbox'
 								data-toggle='switchbutton'
-								checked
-								onChange={this.handleInputChange}
+								checked={dream.isLucidDream}
+								onChange={this.handleInputDreamChange}
+								data-dream-idx={dreamIdx}
 							/>
 						</div>
 						<div className='col-6 col-md-3'>
 							<label className='text-muted text-uppercase text-sm d-block'>Lucid Method</label>
-							<select name='lucidMethod' onChange={this.handleInputChange} className='form-control'>
-								<option>Select...</option>
+							<select
+								name='lucidMethod'
+								value={dream.lucidMethod || InductionTypes.none}
+								data-dream-idx={dreamIdx}
+								onChange={this.handleInputDreamChange}
+								className='form-control'>
+								{Object.keys(InductionTypes).map(type => {
+									return (
+										<option value={type} key={'lucid-' + type + '-' + dreamIdx}>
+											{InductionTypes[type]}
+										</option>
+									)
+								})}
 							</select>
 						</div>
 					</div>
@@ -941,7 +993,8 @@ class EntryModal extends React.Component<
 								type='text'
 								className='form-control'
 								value={dream.title}
-								onChange={this.handleInputChange}
+								onChange={this.handleInputDreamChange}
+								data-dream-idx={dreamIdx}
 							/>
 						</div>
 					</div>
@@ -953,7 +1006,8 @@ class EntryModal extends React.Component<
 								className='form-control'
 								rows={5}
 								value={dream.notes}
-								onChange={this.handleInputChange}
+								onChange={this.handleInputDreamChange}
+								data-dream-idx={dreamIdx}
 							/>
 						</div>
 					</div>
@@ -1477,7 +1531,8 @@ class App extends React.Component<
 				response
 					.json()
 					.then(fileResource => {
-						console.log(fileResource)
+						// TODO: toast "success"
+						// TODO: update date in app menubar?
 					})
 					.catch(error => {
 						if (error.code == '401') {
