@@ -34,7 +34,7 @@ import * as ReactDOM from 'react-dom'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import LogoBase64 from '../img/logo_base64'
-import '../templates/bootstrap.yeticyborg.css'
+import '../css/bootstrap.yeticyborg.css'
 /* WIP
 //import '../templates/bootstrap-switch-button.css'
 //import SwitchButton from './bootstrap-switch-button'
