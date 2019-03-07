@@ -35,21 +35,18 @@ import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import LogoBase64 from '../img/logo_base64'
 import '../css/bootstrap.yeticyborg.css'
+import DateRangePicker from '../app/date-range-picker';
+
 /* WIP
 //import '../templates/bootstrap-switch-button.css'
 //import SwitchButton from './bootstrap-switch-button'
 //<SwitchButton/>
-*/
-/* WIP
-//import 'flatpickr/dist/themes/dark.css'
-//import Flatpickr from 'react-flatpickr' //doesnt work :(
 */
 
 enum AppTab {
 	home = 'home',
 	view = 'view',
 	search = 'search',
-	add = 'add',
 }
 enum AuthState {
 	Authenticated = 'Authenticated',
@@ -252,7 +249,7 @@ class AppNavBar extends React.Component<
 								href='javascript:void(0)'
 								data-name='home'
 								onClick={this.onShowTabHandler}>
-								Home <span className='sr-only'>(current)</span>
+								Get Started <span className='sr-only'>(current)</span>
 							</a>
 						</li>
 						<li className={this.state.activeTab == AppTab.view ? 'nav-item active' : 'nav-item'}>
@@ -261,16 +258,7 @@ class AppNavBar extends React.Component<
 								href='javascript:void(0)'
 								data-name='view'
 								onClick={this.onShowTabHandler}>
-								View Dream Journal
-							</a>
-						</li>
-						<li className={this.state.activeTab == AppTab.add ? 'nav-item active' : 'nav-item'}>
-							<a
-								className='nav-link'
-								href='javascript:void(0)'
-								data-name='add'
-								onClick={this.onShowTabHandler}>
-								Add Journal Entry
+								Modify Dream Journal
 							</a>
 						</li>
 						<li className={this.state.activeTab == AppTab.search ? 'nav-item active' : 'nav-item'}>
@@ -559,6 +547,11 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 		super(props)
 	}
 
+	handleNewModal = e => {
+		this.props.onShowModal({
+			show: true})
+	}
+
 	handleEditEntryModal = e => {
 		this.props.onShowModal({
 			show: true,
@@ -567,6 +560,9 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 			})[0],
 		})
 	}
+
+	// TODO:
+	// @see: http://react-day-picker.js.org/examples/selected-range
 
 	render() {
 		let tableFileList: JSX.Element = (
@@ -636,203 +632,46 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 		return (
 			<div className='container mt-5'>
 				<div className='row'>
-					<div className='col-6 col-md-9 d-flex'>
+					<div className='col-12 col-md-6 d-flex mb-5 mb-md-0'>
 						<div className='card flex-fill'>
-							<div className='card-header bg-info'>
-								<h5 className='card-title text-white mb-0'>Your Dream Journal</h5>
+							<div className='card-header bg-primary'>
+								<h5 className='card-title text-white mb-0'>Edit Entries</h5>
 							</div>
 							<div className='card-body bg-light text-dark'>
 								<p className='card-text'>
-									Create and edit daily entries here.
-								</p>
+								Maintain your journal</p>
+								<ul><li>Search for entries using the calendar and/or search fields below</li>
+								<li>You can always go back and update entries</li></ul>
 							</div>
 						</div>
 					</div>
-					<div className='col-6 col-md-3 d-flex'>
+					<div className='col-12 col-md-6 d-flex'>
 						<div className='card flex-fill'>
 							<div className='card-header bg-success'>
-								<h5 className='card-title text-white mb-0'>Add New</h5>
+								<h5 className='card-title text-white mb-0'>Add Entry</h5>
 							</div>
 							<div className='card-body bg-light text-dark'>
-								<button type="button" className={ !this.props.selDataFile ? 'disabled ':'' + "btn btn-sm btn-outline-success"}>Create Entry</button>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<h2 className='text-primary my-4'>(Calendar Range Picker)</h2>
-				{tableFileList}
-			</div>
-		)
-	}
-}
-
-class TabAdd extends React.Component<{ doAddNewEntry: Function }, { dailyEntry: IJournalEntry }> {
-	constructor(props: Readonly<{ show?: boolean; doAddNewEntry: Function }>) {
-		super(props)
-
-		this.state = {
-			dailyEntry: {
-				entryDate: new Date().toISOString().substring(0, 10),
-				bedTime: '',
-				notesPrep: '',
-				notesWake: '',
-				dreams: [EMPTY_DREAM],
-			},
-		}
-	}
-
-	addRowHandler = event => {
-		let dailyEntryNew = this.state.dailyEntry
-		dailyEntryNew.dreams.push(EMPTY_DREAM)
-		this.setState({ dailyEntry: dailyEntryNew })
-	}
-
-	handleChange = event => {
-		console.log('form field changed!')
-
-		if (event && event.target && event.target.id) {
-			let updatedEntry = this.state.dailyEntry
-
-			if (event.target.id == 'entryDate') {
-				updatedEntry.entryDate = event.target.value
-			} else if (event.target.id == 'bedTime') {
-				updatedEntry.bedTime = event.target.value
-			} else if (event.target.id == 'notesPrep') {
-				updatedEntry.notesPrep = event.target.value
-			} else if (event.target.id == 'notesWake') {
-				updatedEntry.notesWake = event.target.value
-			}
-
-			// CURR: FIXME:
-			// TODO: CURR: keep going! add DREAM ROW(S)
-			// what to do about DREAM-n rows - they wont have unique ids?
-
-			this.setState({ dailyEntry: updatedEntry })
-		}
-
-		console.log(this.state.dailyEntry)
-	}
-
-	handleSubmit = event => {
-		this.props.doAddNewEntry(this.state.dailyEntry)
-		event.preventDefault()
-	}
-
-	renderDreamRow = (dream: IJournalDream, idx: number) => {
-		return (
-			<div className='row p-3 mb-4 bg-light' key={'dreamrow' + idx}>
-				<div className='col-auto'>
-					<h2 className='text-primary font-weight-light'>{idx + 1}</h2>
-				</div>
-				<div className='col'>
-					<div className='row mb-3'>
-						<div className='col'>
-							<label className='text-muted text-uppercase text-sm'>Title</label>
-							<input
-								id='title'
-								type='text'
-								className='form-control'
-								value={dream.title}
-								onChange={this.handleChange}
-							/>
-						</div>
-						<div className='col-auto'>
-							<label className='text-muted text-uppercase text-sm d-block'>Lucid Dream?</label>
-							<span>TODO-bs4-toggle</span>
-						</div>
-						<div className='col-auto'>
-							<label className='text-muted text-uppercase text-sm d-block'>Lucid Method</label>
-							<select className='form-control'>
-								<option>Select...</option>
-							</select>
-						</div>
-					</div>
-					<div className='row'>
-						<div className='col'>
-							<label className='text-muted text-uppercase text-sm'>Notes</label>
-							<textarea
-								id='notes'
-								className='form-control'
-								rows={5}
-								value={dream.notes}
-								onChange={this.handleChange}
-							/>
-						</div>
-					</div>
-				</div>
-			</div>
-		)
-	}
-
-	render() {
-		return (
-			<form onSubmit={this.handleSubmit}>
-				<div className='container mt-3'>
-					<div className='row no-gutters'>
-						<div className='col'>
-							<h2 className='text-primary mb-3'>New Journal Entry</h2>
-						</div>
-						<div className='col-auto'>
-							<button type='submit' className='btn btn-primary px-4'>
-								Add to Journal
-							</button>
-						</div>
-					</div>
-					<div className='container bg-light p-4'>
-						<div className='row mb-4'>
-							<div className='col-12 col-md-6 required'>
-								<label className='text-muted text-uppercase text-sm'>Entry Date</label>
-								<input
-									id='entryDate'
-									type='date'
-									className='form-control w-50'
-									required
-									value={this.state.dailyEntry.entryDate}
-									onChange={this.handleChange}
-								/>
-								<div className='invalid-feedback'>Please provide Entry Date</div>
-							</div>
-							<div className='col-12 col-md-6'>
-								<label className='text-muted text-uppercase text-sm'>Bed Time</label>
-								<input
-									id='bedTime'
-									type='time'
-									className='form-control w-50'
-									value={this.state.dailyEntry.bedTime}
-									onChange={this.handleChange}
-								/>
-							</div>
-						</div>
-						<div className='row'>
-							<div className='col-12 col-md-6'>
-								<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
-								<textarea id='notesPrep' className='form-control' rows={3} />
-							</div>
-							<div className='col-12 col-md-6'>
-								<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
-								<textarea id='notesWake' className='form-control' rows={3} />
-							</div>
-						</div>
-					</div>
-					<div className='container mt-4'>
-						<div className='row mb-3'>
-							<div className='col'>
-								<h4 className='text-primary'>Dreams</h4>
-							</div>
-							<div className='col-auto'>
+								<p className='card-text'>
+									Add a new daily entry to your journal.
+								</p>
 								<button
 									type='button'
-									className='btn btn-sm btn-outline-info'
-									onClick={this.addRowHandler}>
-									Add Dream Row
+									className={
+										!this.props.selDataFile ? 'disabled ' : '' + 'btn btn-outline-success'
+									}
+									onClick={this.handleNewModal}>
+									Create Day
 								</button>
 							</div>
 						</div>
-						{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamRow(dream, idx))}
 					</div>
 				</div>
-			</form>
+
+				<DateRangePicker/>
+
+				<h2 className='text-primary my-5'>(Calendar Range Picker)</h2>
+				{tableFileList}
+			</div>
 		)
 	}
 }
@@ -1180,8 +1019,6 @@ class AppTabs extends React.Component<{
 		switch (this.props.activeTab) {
 			case AppTab.view:
 				return <TabView onShowModal={this.props.onShowModal} selDataFile={this.props.selDataFile} />
-			case AppTab.add:
-				return <TabAdd doAddNewEntry={this.props.doAddNewEntry} />
 			case AppTab.search:
 				return <TabSearch />
 			case AppTab.home:
