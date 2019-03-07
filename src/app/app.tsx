@@ -34,8 +34,16 @@ import * as ReactDOM from 'react-dom'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import LogoBase64 from '../img/logo_base64'
+import '../templates/bootstrap.yeticyborg.css'
+/* WIP
+//import '../templates/bootstrap-switch-button.css'
 //import SwitchButton from './bootstrap-switch-button'
 //<SwitchButton/>
+*/
+/* WIP
+//import 'flatpickr/dist/themes/dark.css'
+//import Flatpickr from 'react-flatpickr' //doesnt work :(
+*/
 
 enum AppTab {
 	home = 'home',
@@ -566,7 +574,7 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 				<thead className='thead'>
 					<tr>
 						<th>Entry Date</th>
-						<th>Bed Time</th>
+						<th className='text-center'>Bed Time</th>
 						<th className='text-center'>Dream Count</th>
 						<th className='text-center'>Lucid Dream?</th>
 						<th className='text-center'>Action</th>
@@ -580,7 +588,7 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 						return (
 							<tr key={'journalrow' + idx}>
 								<td>{entry.entryDate}</td>
-								<td>{entry.bedTime}</td>
+								<td className='text-center'>{entry.bedTime}</td>
 								<td className='text-center'>{entry.dreams.length}</td>
 								<td className='text-center'>
 									{entry.dreams.filter(dream => {
@@ -616,7 +624,7 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 						)}
 					{!this.props.selDataFile && (
 						<tr>
-							<td colSpan={3} className='text-center p-3 text-muted'>
+							<td colSpan={5} className='text-center p-3 text-muted'>
 								(Select a Dream Journal to see entries)
 							</td>
 						</tr>
@@ -626,8 +634,33 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 		)
 
 		return (
-			<div className='container mt-3'>
-				<h2 className='text-primary mb-3'>View Dream Journal</h2>
+			<div className='container mt-5'>
+				<div className='row'>
+					<div className='col-6 col-md-9 d-flex'>
+						<div className='card flex-fill'>
+							<div className='card-header bg-info'>
+								<h5 className='card-title text-white mb-0'>Your Dream Journal</h5>
+							</div>
+							<div className='card-body bg-light text-dark'>
+								<p className='card-text'>
+									Create and edit daily entries here.
+								</p>
+							</div>
+						</div>
+					</div>
+					<div className='col-6 col-md-3 d-flex'>
+						<div className='card flex-fill'>
+							<div className='card-header bg-success'>
+								<h5 className='card-title text-white mb-0'>Add New</h5>
+							</div>
+							<div className='card-body bg-light text-dark'>
+								<button type="button" className={ !this.props.selDataFile ? 'disabled ':'' + "btn btn-sm btn-outline-success"}>Create Entry</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<h2 className='text-primary my-4'>(Calendar Range Picker)</h2>
 				{tableFileList}
 			</div>
 		)
@@ -1016,6 +1049,17 @@ class EntryModal extends React.Component<
 		)
 	}
 
+	/*
+	<Flatpickr
+		value={this.state.dailyEntry.entryDate}
+		onChange={date => {
+			let newState = this.state.dailyEntry
+			newState.entryDate = date && date[0] ? date[0].toISOString().substring(0,10) : null
+			this.setState({dailyEntry:newState})
+		}}
+		className='form-control w-50'
+	/>
+	*/
 	render() {
 		return (
 			<Modal size='lg' show={this.state.show} onHide={this.modalClose} backdrop='static'>
