@@ -1,9 +1,9 @@
 import React from 'react'
 import Helmet from 'react-helmet'
 import DayPicker, { DateUtils } from 'react-day-picker'
-import 'react-day-picker/lib/style.css'
+import '../css/daypicker.css'
 
-export default class Example extends React.Component {
+export default class DateRangeSelector extends React.Component {
 	constructor(props) {
 		super(props)
 		this.handleDayClick = this.handleDayClick.bind(this)
@@ -14,6 +14,7 @@ export default class Example extends React.Component {
 		return {
 			from: undefined,
 			to: undefined,
+			numberOfMonths: this.props.numberOfMonths || 3
 		}
 	}
 	handleDayClick(day) {
@@ -27,23 +28,26 @@ export default class Example extends React.Component {
 		const { from, to } = this.state
 		const modifiers = { start: from, end: to }
 		return (
-			<div className='RangeExample'>
-				<p>
-					{!from && !to && 'Please select the first day.'}
-					{from && !to && 'Please select the last day.'}
-					{from &&
-						to &&
-						`Selected from ${from.toLocaleDateString()} to
-                ${to.toLocaleDateString()}`}{' '}
-					{from && to && (
-						<button className='link' onClick={this.handleResetClick}>
-							Reset
-						</button>
-					)}
-				</p>
+			<div className='DateRangeSelector'>
+				<div className='row justify-content-center align-items-center'>
+					<div className='col-auto'>
+						<h5 className='text-primary mb-0'>
+							{!from && !to && 'Please select the first day.'}
+							{from && !to && 'Please select the last day.'}
+							{from && to && `Range Selected: ${from.toLocaleDateString()} to ${to.toLocaleDateString()}`}
+						</h5>
+					</div>
+					<div className='col-auto'>
+						{from && to && (
+							<button className='btn btn-sm btn-outline-secondary' onClick={this.handleResetClick}>
+								Reset
+							</button>
+						)}
+					</div>
+				</div>
 				<DayPicker
 					className='Selectable'
-					numberOfMonths={3}
+					numberOfMonths={this.state.numberOfMonths}
 					selectedDays={[from, { from, to }]}
 					modifiers={modifiers}
 					onDayClick={this.handleDayClick}
@@ -51,8 +55,8 @@ export default class Example extends React.Component {
 				<Helmet>
 					<style>{`
 					  .Selectable .DayPicker-Day--selected:not(.DayPicker-Day--start):not(.DayPicker-Day--end):not(.DayPicker-Day--outside) {
-					    background-color: #f0f8ff !important;
-					    color: #4a90e2;
+					    background-color: var(--gray) !important;
+					    color: var(--white);
 					  }
 					  .Selectable .DayPicker-Day {
 					    border-radius: 0 !important;

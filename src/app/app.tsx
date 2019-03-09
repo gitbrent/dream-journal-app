@@ -35,7 +35,7 @@ import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import LogoBase64 from '../img/logo_base64'
 import '../css/bootstrap.yeticyborg.css'
-import DateRangePicker from '../app/date-range-picker';
+import DateRangePicker from '../app/date-range-picker'
 
 /* WIP
 //import '../templates/bootstrap-switch-button.css'
@@ -390,7 +390,7 @@ class TabHome extends React.Component<{
 				<div>
 					<p className='card-text'>Your session has expired. Please re-authenticate to continue.</p>
 					<button className='btn btn-primary' onClick={this.handleDriveSignIn}>
-						Renew Session
+						Sign In
 					</button>
 				</div>
 			)
@@ -549,7 +549,8 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 
 	handleNewModal = e => {
 		this.props.onShowModal({
-			show: true})
+			show: true,
+		})
 	}
 
 	handleEditEntryModal = e => {
@@ -570,9 +571,9 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 				<thead className='thead'>
 					<tr>
 						<th>Entry Date</th>
-						<th className='text-center'>Bed Time</th>
-						<th className='text-center'>Dream Count</th>
-						<th className='text-center'>Lucid Dream?</th>
+						<th className='text-center d-none d-md-table-cell'>Bed Time</th>
+						<th className='text-center d-none d-md-table-cell'>Dream Count</th>
+						<th className='text-center d-none d-md-table-cell'>Lucid Dream?</th>
 						<th className='text-center'>Action</th>
 					</tr>
 				</thead>
@@ -584,9 +585,9 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 						return (
 							<tr key={'journalrow' + idx}>
 								<td>{entry.entryDate}</td>
-								<td className='text-center'>{entry.bedTime}</td>
-								<td className='text-center'>{entry.dreams.length}</td>
-								<td className='text-center'>
+								<td className='text-center d-none d-md-table-cell'>{entry.bedTime}</td>
+								<td className='text-center d-none d-md-table-cell'>{entry.dreams.length}</td>
+								<td className='text-center d-none d-md-table-cell'>
 									{entry.dreams.filter(dream => {
 										return dream.isLucidDream == true
 									}).length > 0 ? (
@@ -631,46 +632,51 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 
 		return (
 			<div className='container mt-5'>
-				<div className='row'>
-					<div className='col-12 col-md-6 d-flex mb-5 mb-md-0'>
-						<div className='card flex-fill'>
+				<div className='row justify-content-between'>
+					<div className='col-12'>
+						<div className='card'>
 							<div className='card-header bg-primary'>
-								<h5 className='card-title text-white mb-0'>Edit Entries</h5>
+								<h5 className='card-title text-white mb-0'>Modify Journal</h5>
 							</div>
-							<div className='card-body bg-light text-dark'>
-								<p className='card-text'>
-								Maintain your journal</p>
-								<ul><li>Search for entries using the calendar and/or search fields below</li>
-								<li>You can always go back and update entries</li></ul>
-							</div>
-						</div>
-					</div>
-					<div className='col-12 col-md-6 d-flex'>
-						<div className='card flex-fill'>
-							<div className='card-header bg-success'>
-								<h5 className='card-title text-white mb-0'>Add Entry</h5>
-							</div>
-							<div className='card-body bg-light text-dark'>
-								<p className='card-text'>
-									Add a new daily entry to your journal.
-								</p>
-								<button
-									type='button'
-									className={
-										!this.props.selDataFile ? 'disabled ' : '' + 'btn btn-outline-success'
-									}
-									onClick={this.handleNewModal}>
-									Create Day
-								</button>
+							<div className='card-body bg-light'>
+								<div className='row mb-4 align-items-center'>
+									<div className='col text-secondary'>
+										Your latest journal entries are shown by default. Use the date range search to
+										find specific entries.
+									</div>
+									<div className='col-auto'>
+										<button
+											type='button'
+											className={(!this.props.selDataFile ? 'disabled ' : '') + 'btn btn-success'}
+											onClick={this.handleNewModal}>
+											Create Day
+										</button>
+									</div>
+								</div>
+								<div className='text-center d-block d-sm-none'>
+									<DateRangePicker numberOfMonths={1} />
+								</div>
+								<div className='text-center d-none d-sm-block d-md-none'>
+									<DateRangePicker numberOfMonths={2} />
+								</div>
+								<div className='text-center d-none d-md-block d-lg-none'>
+									<DateRangePicker numberOfMonths={2} />
+								</div>
+								<div className='text-center d-none d-lg-block d-xl-none'>
+									<DateRangePicker numberOfMonths={3} />
+								</div>
+								<div className='text-center d-none d-xl-block'>
+									<DateRangePicker numberOfMonths={4} />
+								</div>
+								{tableFileList}
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<DateRangePicker/>
-
-				<h2 className='text-primary my-5'>(Calendar Range Picker)</h2>
-				{tableFileList}
+				<div className='row'>
+					<div className='col-12' />
+				</div>
 			</div>
 		)
 	}
@@ -888,17 +894,6 @@ class EntryModal extends React.Component<
 		)
 	}
 
-	/*
-	<Flatpickr
-		value={this.state.dailyEntry.entryDate}
-		onChange={date => {
-			let newState = this.state.dailyEntry
-			newState.entryDate = date && date[0] ? date[0].toISOString().substring(0,10) : null
-			this.setState({dailyEntry:newState})
-		}}
-		className='form-control w-50'
-	/>
-	*/
 	render() {
 		return (
 			<Modal size='lg' show={this.state.show} onHide={this.modalClose} backdrop='static'>
@@ -972,11 +967,11 @@ class EntryModal extends React.Component<
 				</Modal.Body>
 
 				<Modal.Footer>
-					<Button variant='secondary' className='px-4 mr-2' onClick={this.modalClose}>
+					<Button variant='outline-secondary' className='px-4 mr-2' onClick={this.modalClose}>
 						Close
 					</Button>
 					<Button variant='success' className='w-25' onClick={this.handleSubmit}>
-						Submit
+						Add Entry
 					</Button>
 				</Modal.Footer>
 			</Modal>
