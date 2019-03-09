@@ -47,6 +47,7 @@ enum AppTab {
 	home = 'home',
 	view = 'view',
 	search = 'search',
+	import = 'import',
 }
 enum AuthState {
 	Authenticated = 'Authenticated',
@@ -60,6 +61,10 @@ enum InductionTypes {
 	'wbtb' = 'WBTB',
 	'wild' = 'WILD',
 	'other' = 'Other',
+}
+enum ImportTypes {
+	'docx' = 'Document',
+	'xlsx' = 'Spreadsheet',
 }
 
 interface IAuthState {
@@ -249,7 +254,7 @@ class AppNavBar extends React.Component<
 								href='javascript:void(0)'
 								data-name='home'
 								onClick={this.onShowTabHandler}>
-								Get Started <span className='sr-only'>(current)</span>
+								Home <span className='sr-only'>(current)</span>
 							</a>
 						</li>
 						<li className={this.state.activeTab == AppTab.view ? 'nav-item active' : 'nav-item'}>
@@ -258,7 +263,7 @@ class AppNavBar extends React.Component<
 								href='javascript:void(0)'
 								data-name='view'
 								onClick={this.onShowTabHandler}>
-								Modify Dream Journal
+								Modify Journal
 							</a>
 						</li>
 						<li className={this.state.activeTab == AppTab.search ? 'nav-item active' : 'nav-item'}>
@@ -267,12 +272,21 @@ class AppNavBar extends React.Component<
 								href='javascript:void(0)'
 								data-name='search'
 								onClick={this.onShowTabHandler}>
-								Search Dream Journal
+								Search Journal
+							</a>
+						</li>
+						<li className={this.state.activeTab == AppTab.import ? 'nav-item active' : 'nav-item'}>
+							<a
+								className='nav-link'
+								href='javascript:void(0)'
+								data-name='import'
+								onClick={this.onShowTabHandler}>
+								Import Entries
 							</a>
 						</li>
 					</ul>
 				</div>
-				<div className='btn-group mr-3' role='group' aria-label='Journal Stats'>
+				<div className='btn-group mr-3' role='group' aria-label='Selected Journal Name'>
 					<button type='button' className='btn btn-secondary' disabled>
 						{this.props.selFileName}
 					</button>
@@ -417,40 +431,41 @@ class TabHome extends React.Component<{
 					</tr>
 				</thead>
 				<tbody>
-					{this.props.availDataFiles.map((file, idx) => {
-						return (
-							<tr key={'filerow' + idx}>
-								{this.props.selDataFile && this.props.selDataFile.name ? (
-									<td>
-										<div className='badge badge-success p-2'>Active</div>
+					{this.props.authState.status == AuthState.Authenticated &&
+						this.props.availDataFiles.map((file, idx) => {
+							return (
+								<tr key={'filerow' + idx}>
+									{this.props.selDataFile && this.props.selDataFile.name ? (
+										<td>
+											<div className='badge badge-success p-2'>Active</div>
+										</td>
+									) : (
+										<td />
+									)}
+									<td>{file.name}</td>
+									<td className='text-center d-none d-md-table-cell'>
+										{getReadableFileSizeString(Number(file['size']))}
 									</td>
-								) : (
-									<td />
-								)}
-								<td>{file.name}</td>
-								<td className='text-center d-none d-md-table-cell'>
-									{getReadableFileSizeString(Number(file['size']))}
-								</td>
-								<td className='text-center text-nowrap d-none d-md-table-cell'>
-									{new Date(file['modifiedTime']).toLocaleString()}
-								</td>
-								{this.props.selDataFile &&
-								this.props.selDataFile.id &&
-								file.id === this.props.selDataFile.id ? (
-									<td />
-								) : (
-									<td>
-										<button
-											className='btn btn-sm btn-primary'
-											data-file-id={file['id']}
-											onClick={this.handleDriveFileGet}>
-											Select
-										</button>
+									<td className='text-center text-nowrap d-none d-md-table-cell'>
+										{new Date(file['modifiedTime']).toLocaleString()}
 									</td>
-								)}
-							</tr>
-						)
-					})}
+									{this.props.selDataFile &&
+									this.props.selDataFile.id &&
+									file.id === this.props.selDataFile.id ? (
+										<td />
+									) : (
+										<td>
+											<button
+												className='btn btn-sm btn-primary'
+												data-file-id={file['id']}
+												onClick={this.handleDriveFileGet}>
+												Select
+											</button>
+										</td>
+									)}
+								</tr>
+							)
+						})}
 				</tbody>
 			</table>
 		)
@@ -562,8 +577,8 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 		})
 	}
 
-	// TODO:
-	// @see: http://react-day-picker.js.org/examples/selected-range
+	// TODO: Show days with dreams and/or with Lucid success:
+	// @see: http://react-day-picker.js.org/examples/elements-cell
 
 	render() {
 		let tableFileList: JSX.Element = (
@@ -640,14 +655,15 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 							</div>
 							<div className='card-body bg-light'>
 								<div className='row mb-4 align-items-center'>
-									<div className='col text-secondary'>
+									<div className='col'>
 										Your latest journal entries are shown by default. Use the date range search to
 										find specific entries.
 									</div>
 									<div className='col-auto'>
 										<button
 											type='button'
-											className={(!this.props.selDataFile ? 'disabled ' : '') + 'btn btn-success'}
+											className='btn btn-success'
+											disabled={!this.props.selDataFile}
 											onClick={this.handleNewModal}>
 											Create Day
 										</button>
@@ -696,6 +712,253 @@ class TabSearch extends React.Component {
 						<h6 id='appVer' className='text-black-50 font-weight-light' />
 					</div>
 				</div>
+			</div>
+		)
+	}
+}
+
+class TabImport extends React.Component<{ selDataFile: IDriveFile }, { showImporter: ImportTypes }> {
+	constructor(props: Readonly<{ selDataFile: IDriveFile }>) {
+		super(props)
+
+		this.state = {
+			showImporter: null,
+		}
+	}
+
+	handleImport = () => {
+		// TODO:
+	}
+
+	render() {
+		// TODO: Spreadsheet Importer
+		let importerCard: JSX.Element = (
+			<div>
+				{this.state.showImporter == ImportTypes.docx && (
+					<div className='card mb-5'>
+						<div className='card-header bg-info'>
+							<h5 className='card-title text-white mb-0'>Document Importer</h5>
+						</div>
+						<div className='card-body bg-light'>
+							<div className='row align-items-top'>
+								<div className='col-8'>
+									<h5 className='text-primary'>Field Mapping</h5>
+									<p className='card-text'>
+										Use the form below to map your dream journal fields to Brain Cloud's, then your
+										data will be automatically imported into your new dream journal.
+									</p>
+									<div className='row'>
+										<div className='col'>
+											<label className='text-muted text-uppercase'>Field Description</label>
+										</div>
+										<div className='col'>
+											<label className='text-muted text-uppercase'>Your Journal Field</label>
+										</div>
+									</div>
+									<div className='row align-items-center mb-2'>
+										<div className='col'>
+											Entry Date
+											<span className='text-danger mx-1' title='required field'>
+												*
+											</span>
+										</div>
+										<div className='col'>
+											<input
+												name='entryDate'
+												type='text'
+												className='form-control'
+												placeholder='MM/DD/YYYY:'
+												required
+											/>
+											<div className='invalid-feedback'>Entry Date format required</div>
+										</div>
+									</div>
+									<div className='row align-items-center mb-2'>
+										<div className='col'>Bed Time</div>
+										<div className='col'>
+											<input
+												name='bedTime'
+												type='text'
+												className='form-control'
+												placeholder='BEDTIME'
+											/>
+										</div>
+									</div>
+									<div className='row align-items-center mb-2'>
+										<div className='col'>Prep Notes</div>
+										<div className='col'>
+											<input
+												name='notesPrep'
+												type='text'
+												className='form-control'
+												placeholder='PREP'
+											/>
+										</div>
+									</div>
+									<div className='row align-items-center mb-2'>
+										<div className='col'>Wake Notes</div>
+										<div className='col'>
+											<input
+												name='notesWake'
+												type='text'
+												className='form-control'
+												placeholder='WAKES'
+											/>
+										</div>
+									</div>
+
+									<h6 className='text-primary border-bottom border-primary'>Dreams (1 or more)</h6>
+
+									<div className='row align-items-center mb-2'>
+										<div className='col'>Dream Title</div>
+										<div className='col'>
+											<input
+												name='title'
+												type='text'
+												className='form-control'
+												placeholder='DREAM 1'
+											/>
+										</div>
+									</div>
+									<div className='row align-items-center mb-2'>
+										<div className='col'>
+											<code>Dream Notes</code>
+										</div>
+										<div className='col'>
+											<input
+												name='notes'
+												type='text'
+												className='form-control'
+												placeholder='DREAM 1'
+											/>
+										</div>
+									</div>
+									<div className='row align-items-center mb-2'>
+										<div className='col'>
+											<code>Dream Signs</code>
+										</div>
+										<div className='col'>
+											<input
+												name='dreamSigns'
+												type='text'
+												className='form-control'
+												placeholder='DREAMSIGNS'
+											/>
+										</div>
+									</div>
+									<div className='row align-items-center mb-2'>
+										<div className='col'>
+											<code>Lucid Dream?</code>
+										</div>
+										<div className='col'>
+											<input
+												name='isLucidDream'
+												type='text'
+												className='form-control'
+												placeholder='SUCCESS'
+											/>
+										</div>
+									</div>
+								</div>
+								<div className='col-4'>
+									<h5 className='text-primary'>Document Layout</h5>
+									<p className='card-text'>
+										Given this type of journal format, see mapping on the left.
+									</p>
+									<label className='text-muted text-uppercase d-block'>Sample Entry</label>
+									<div className='container p-3 bg-black'>
+										<span className='text-white'>03/08/2019:</span>
+										<ul>
+											<li>
+												<span className='text-white'>DREAMSIGNS:</span> Dad, Camping
+											</li>
+											<li>
+												<span className='text-white'>PREP:</span> Bath
+											</li>
+											<li>
+												<span className='text-white'>BEDTIME:</span> 11:30
+											</li>
+											<li>
+												<span className='text-white'>WAKES:</span> 06:00 for bio break
+											</li>
+											<li>
+												<span className='text-white'>DREAM 1:</span> At the mall
+											</li>
+											<ul>
+												<li>Working at pizza place again</li>
+												<li>It was snowing outside</li>
+											</ul>
+											<li>
+												<span className='text-white'>DREAM 2:</span> Camping with dad
+											</li>
+											<ul>
+												<li>Dad and I were off camping</li>
+												<li>Same place we used to go</li>
+												<li>Talked about school and stuff</li>
+											</ul>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
+				{this.state.showImporter == ImportTypes.xlsx && (
+					<div className='card mb-5'>
+						<div className='card-header bg-info'>
+							<h5 className='card-title text-white mb-0'>Spreadsheet Importer</h5>
+						</div>
+						<div className='card-body bg-light'>Coming Soon!</div>
+					</div>
+				)}
+			</div>
+		)
+
+		return (
+			<div className='container mt-5'>
+				<div className='card mb-5'>
+					<div className='card-header bg-primary'>
+						<h5 className='card-title text-white mb-0'>Import Dream Journal Entries</h5>
+					</div>
+					<div className='card-body bg-light'>
+						<div className='row align-items-top'>
+							<div className='col'>
+								<p className='card-text'>
+									It's likely that you're already keeping a dream journal in another format, such a
+									Document (Google Docs, Microsoft Word), spreadsheet (Google Sheets, Microsoft
+									Excel), or just plain text.
+								</p>
+								<p className='card-text'>
+									The importer interface allows you to import your free-form journal into the
+									well-formatted Brain Cloud JSON format which is a universal, flat-file database and
+									is supported by a myriad of apps (Microsoft Access, etc.).
+								</p>
+							</div>
+							<div className='col-auto'>
+								<button
+									type='button'
+									className='btn btn-primary d-block w-100 mb-4'
+									disabled={!this.props.selDataFile}
+									onClick={() => {
+										this.setState({ showImporter: ImportTypes.docx })
+									}}>
+									Import Document
+								</button>
+								<button
+									type='button'
+									className='btn btn-primary d-block w-100'
+									disabled={!this.props.selDataFile}
+									onClick={() => {
+										this.setState({ showImporter: ImportTypes.xlsx })
+									}}>
+									Import Spreadsheet
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				{importerCard}
 			</div>
 		)
 	}
@@ -1016,6 +1279,8 @@ class AppTabs extends React.Component<{
 				return <TabView onShowModal={this.props.onShowModal} selDataFile={this.props.selDataFile} />
 			case AppTab.search:
 				return <TabSearch />
+			case AppTab.import:
+				return <TabImport selDataFile={this.props.selDataFile} />
 			case AppTab.home:
 			default:
 				return (
