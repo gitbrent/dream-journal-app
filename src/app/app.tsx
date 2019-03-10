@@ -717,12 +717,84 @@ class TabSearch extends React.Component {
 	}
 }
 
-class TabImport extends React.Component<{ selDataFile: IDriveFile }, { showImporter: ImportTypes }> {
+class TabImport extends React.Component<
+	{ selDataFile: IDriveFile },
+	{
+		showImporter: ImportTypes
+		entryDate: string
+		bedTime: string
+		notesPrep: string
+		notesWake: string
+		selEntryType: string
+	}
+> {
 	constructor(props: Readonly<{ selDataFile: IDriveFile }>) {
 		super(props)
 
 		this.state = {
 			showImporter: null,
+			selEntryType: 'match',
+			entryDate: null,
+			bedTime: null,
+			notesPrep: null,
+			notesWake: null,
+		}
+	}
+
+	handleInputChange = event => {
+		const target = event.target
+		const value = target.type === 'checkbox' ? target.checked : target.value
+		const name = target.name
+		const demoData = document.getElementById('contDemoData').innerText || ''
+
+		if (name == 'selEntryType') {
+			if (value && this.state.selEntryType != value) this.setState({ selEntryType: value })
+			this.setState({
+				entryDate: null,
+			})
+		} else {
+			let newState = {}
+			newState[name] = null
+			this.setState(newState)
+		}
+
+		/* WORKS
+		document.getElementById('contMapDemo').querySelectorAll('input').forEach(ele => {
+			console.log(ele)
+		});
+		*/
+		console.log(value)
+		console.log(name)
+		console.log('-------------')
+
+		if (name == 'selEntryType') {
+			if (value == 'first' && (demoData.split('\n') || []).length > 0) {
+				try {
+					let textParse = demoData.split('\n')[0].replace(/[^0-9$\/]/g, '')
+					let dateParse = new Date(textParse)
+					if (Object.prototype.toString.call(dateParse) === '[object Date]' && dateParse.getDay() > 0) {
+						this.setState({
+							entryDate: dateParse.toUTCString().substring(0, 16),
+						})
+					}
+				} catch (ex) {
+					this.setState({
+						entryDate: ex,
+					})
+				}
+			}
+		} else if (typeof value !== 'undefined') {
+			;(demoData.split('\n') || []).forEach(line => {
+				if (line.trim().startsWith(value) && value) {
+					let keyVal = line.trim().split(value)
+					console.log(keyVal)
+					if (keyVal[1]) {
+						let newState = {}
+						newState[name] = keyVal[1]
+						this.setState(newState)
+					}
+				}
+			})
 		}
 	}
 
@@ -741,73 +813,115 @@ class TabImport extends React.Component<{ selDataFile: IDriveFile }, { showImpor
 						</div>
 						<div className='card-body bg-light'>
 							<div className='row align-items-top'>
-								<div className='col-8'>
+								<div id='contMapDemo' className='col-8'>
 									<h5 className='text-primary'>Field Mapping</h5>
 									<p className='card-text'>
 										Use the form below to map your dream journal fields to Brain Cloud's, then your
 										data will be automatically imported into your new dream journal.
 									</p>
 									<div className='row'>
-										<div className='col'>
-											<label className='text-muted text-uppercase'>Field Description</label>
+										<div className='col-3'>
+											<label className='text-muted text-uppercase d-block'>Description</label>
 										</div>
 										<div className='col'>
-											<label className='text-muted text-uppercase'>Your Journal Field</label>
+											<label className='text-muted text-uppercase'>Your Field Name</label>
+										</div>
+										<div className='col'>
+											<label className='text-muted text-uppercase'>Result</label>
 										</div>
 									</div>
 									<div className='row align-items-center mb-2'>
-										<div className='col'>
+										<div className='col-3'>
 											Entry Date
 											<span className='text-danger mx-1' title='required field'>
 												*
 											</span>
 										</div>
 										<div className='col'>
-											<input
-												name='entryDate'
-												type='text'
-												className='form-control'
-												placeholder='MM/DD/YYYY:'
-												required
-											/>
-											<div className='invalid-feedback'>Entry Date format required</div>
+											<div className='row no-gutters'>
+												<div className='col-5'>
+													<select
+														name='selEntryType'
+														className='form-control mr-1'
+														onChange={this.handleInputChange}
+														value={this.state.selEntryType}>
+														<option value='match'>Starts with</option>
+														<option value='first'>Use first line</option>
+													</select>
+												</div>
+												<div className='col-7'>
+													<input
+														name='entryDate'
+														type='text'
+														className='form-control'
+														onChange={this.handleInputChange}
+														placeholder='DATE:'
+														disabled={this.state.selEntryType == 'first' ? true : false}
+														required
+													/>
+													<div className='invalid-feedback'>Entry Date format required</div>
+												</div>
+											</div>
+										</div>
+										<div className='col'>
+											<div className='form-control bg-light p-2 border-secondary border-top-0 border-left-0 border-right-0'>
+												{this.state.entryDate}
+											</div>
 										</div>
 									</div>
 									<div className='row align-items-center mb-2'>
-										<div className='col'>Bed Time</div>
+										<div className='col-3'>Bed Time</div>
 										<div className='col'>
 											<input
 												name='bedTime'
 												type='text'
 												className='form-control'
+												onChange={this.handleInputChange}
 												placeholder='BEDTIME'
 											/>
 										</div>
+										<div className='col'>
+											<div className='form-control bg-light p-2 border-secondary border-top-0 border-left-0 border-right-0'>
+												{this.state.bedTime}
+											</div>
+										</div>
 									</div>
 									<div className='row align-items-center mb-2'>
-										<div className='col'>Prep Notes</div>
+										<div className='col-3'>Prep Notes</div>
 										<div className='col'>
 											<input
 												name='notesPrep'
 												type='text'
 												className='form-control'
+												onChange={this.handleInputChange}
 												placeholder='PREP'
 											/>
 										</div>
+										<div className='col'>
+											<div className='form-control bg-light p-2 border-secondary border-top-0 border-left-0 border-right-0'>
+												{this.state.notesPrep}
+											</div>
+										</div>
 									</div>
 									<div className='row align-items-center mb-2'>
-										<div className='col'>Wake Notes</div>
+										<div className='col-3'>Wake Notes</div>
 										<div className='col'>
 											<input
 												name='notesWake'
 												type='text'
 												className='form-control'
+												onChange={this.handleInputChange}
 												placeholder='WAKES'
 											/>
 										</div>
+										<div className='col'>
+											<div className='form-control bg-light p-2 border-secondary border-top-0 border-left-0 border-right-0'>
+												{this.state.notesWake}
+											</div>
+										</div>
 									</div>
 
-									<h6 className='text-primary border-bottom border-primary'>Dreams (1 or more)</h6>
+									<label className='text-muted'>DREAMS: (1 or more)</label>
 
 									<div className='row align-items-center mb-2'>
 										<div className='col'>Dream Title</div>
@@ -816,6 +930,7 @@ class TabImport extends React.Component<{ selDataFile: IDriveFile }, { showImpor
 												name='title'
 												type='text'
 												className='form-control'
+												onChange={this.handleInputChange}
 												placeholder='DREAM 1'
 											/>
 										</div>
@@ -862,31 +977,31 @@ class TabImport extends React.Component<{ selDataFile: IDriveFile }, { showImpor
 								</div>
 								<div className='col-4'>
 									<h5 className='text-primary'>Document Layout</h5>
-									<p className='card-text'>
-										Given this type of journal format, see mapping on the left.
-									</p>
+									<p className='card-text'>Sample journal format to test field mapping.</p>
 									<label className='text-muted text-uppercase d-block'>Sample Entry</label>
-									<div className='container p-3 bg-black'>
+									<div id='contDemoData' className='container p-3 bg-black'>
 										<span className='text-white'>03/08/2019:</span>
 										<ul>
 											<li>
-												<span className='text-white'>DREAMSIGNS:</span> Dad, Camping
+												<span className='text-white'>BEDTIME:</span> 11:30
 											</li>
 											<li>
 												<span className='text-white'>PREP:</span> Bath
 											</li>
 											<li>
-												<span className='text-white'>BEDTIME:</span> 11:30
+												<span className='text-white'>WAKES:</span> 06:00 for bio break
 											</li>
 											<li>
-												<span className='text-white'>WAKES:</span> 06:00 for bio break
+												<span className='text-white'>DREAMSIGNS:</span> Dad, Camping
 											</li>
 											<li>
 												<span className='text-white'>DREAM 1:</span> At the mall
 											</li>
 											<ul>
+												<li>SUCCESS!!</li>
 												<li>Working at pizza place again</li>
 												<li>It was snowing outside</li>
+												<li>Realized I was dreaming when i could not find my phone</li>
 											</ul>
 											<li>
 												<span className='text-white'>DREAM 2:</span> Camping with dad
