@@ -720,24 +720,36 @@ class TabSearch extends React.Component {
 class TabImport extends React.Component<
 	{ selDataFile: IDriveFile },
 	{
-		showImporter: ImportTypes
-		entryDate: string
+		_dreamBreak: Array<string>
+		_selDreamNotes: string
+		_selEntryType: string
+		_showImporter: ImportTypes
 		bedTime: string
+		dreamSigns: string
+		entryDate: string
+		isLucidDream: boolean
+		notes: string
 		notesPrep: string
 		notesWake: string
-		selEntryType: string
+		title: string
 	}
 > {
 	constructor(props: Readonly<{ selDataFile: IDriveFile }>) {
 		super(props)
 
 		this.state = {
-			showImporter: null,
-			selEntryType: 'match',
-			entryDate: null,
+			_dreamBreak: [],
+			_selDreamNotes: 'match',
+			_selEntryType: 'match',
+			_showImporter: null,
 			bedTime: null,
+			dreamSigns: null,
+			entryDate: null,
+			isLucidDream: false,
+			notes: null,
 			notesPrep: null,
 			notesWake: null,
+			title: null,
 		}
 	}
 
@@ -747,8 +759,8 @@ class TabImport extends React.Component<
 		const name = target.name
 		const demoData = document.getElementById('contDemoData').innerText || ''
 
-		if (name == 'selEntryType') {
-			if (value && this.state.selEntryType != value) this.setState({ selEntryType: value })
+		if (name == '_selEntryType') {
+			if (value && this.state._selEntryType != value) this.setState({ _selEntryType: value })
 			this.setState({
 				entryDate: null,
 			})
@@ -767,7 +779,11 @@ class TabImport extends React.Component<
 		console.log(name)
 		console.log('-------------')
 
-		if (name == 'selEntryType') {
+		// TODO: FIXME: CURR:
+		// _selDreamNotes
+		// ^^ need to use this
+
+		if (name == '_selEntryType') {
 			if (value == 'first' && (demoData.split('\n') || []).length > 0) {
 				try {
 					let textParse = demoData.split('\n')[0].replace(/[^0-9$\/]/g, '')
@@ -783,14 +799,23 @@ class TabImport extends React.Component<
 					})
 				}
 			}
+		} else if (name == '_dreamBreak' && value && (demoData || '').split('\n').length > 0) {
+			let arrMatch = []
+			demoData.split('\n').forEach(line => {
+				if (line.trim().match(new RegExp(value, 'g'))) {
+					let keyVal = line.trim().split(new RegExp(value, 'g'))
+					arrMatch.push(keyVal[1])
+				}
+			})
+			console.log(arrMatch)
+			this.setState({ _dreamBreak: arrMatch })
 		} else if (typeof value !== 'undefined') {
 			;(demoData.split('\n') || []).forEach(line => {
-				if (line.trim().startsWith(value) && value) {
-					let keyVal = line.trim().split(value)
-					console.log(keyVal)
+				if (line.trim().match(new RegExp(value, 'g')) && value) {
+					let keyVal = line.trim().split(new RegExp(value, 'g'))
 					if (keyVal[1]) {
 						let newState = {}
-						newState[name] = keyVal[1]
+						newState[name] = name == 'isLucidDream' ? true : keyVal[1]
 						this.setState(newState)
 					}
 				}
@@ -806,19 +831,27 @@ class TabImport extends React.Component<
 		// TODO: Spreadsheet Importer
 		let importerCard: JSX.Element = (
 			<div>
-				{this.state.showImporter == ImportTypes.docx && (
+				{this.state._showImporter == ImportTypes.docx && (
 					<div className='card mb-5'>
 						<div className='card-header bg-info'>
 							<h5 className='card-title text-white mb-0'>Document Importer</h5>
 						</div>
 						<div className='card-body bg-light'>
-							<div className='row align-items-top'>
-								<div id='contMapDemo' className='col-8'>
+							<div className='row align-items-top mb-4'>
+								<div className='col-8'>
 									<h5 className='text-primary'>Field Mapping</h5>
 									<p className='card-text'>
 										Use the form below to map your dream journal fields to Brain Cloud's, then your
 										data will be automatically imported into your new dream journal.
 									</p>
+								</div>
+								<div className='col-4'>
+									<h5 className='text-primary'>Document Layout</h5>
+									<p className='card-text'>Sample journal format to test field mapping.</p>
+								</div>
+							</div>
+							<div className='row align-items-top'>
+								<div id='contMapDemo' className='col-8'>
 									<div className='row'>
 										<div className='col-3'>
 											<label className='text-muted text-uppercase d-block'>Description</label>
@@ -839,24 +872,26 @@ class TabImport extends React.Component<
 										</div>
 										<div className='col'>
 											<div className='row no-gutters'>
-												<div className='col-5'>
+												<div className='col'>
 													<select
-														name='selEntryType'
-														className='form-control mr-1'
+														name='_selEntryType'
+														className='form-control'
 														onChange={this.handleInputChange}
-														value={this.state.selEntryType}>
-														<option value='match'>Starts with</option>
-														<option value='first'>Use first line</option>
+														value={this.state._selEntryType}>
+														<option value='match'>Regex</option>
+														<option value='first'>First line is the Entry Date</option>
 													</select>
 												</div>
-												<div className='col-7'>
+												<div
+													className={
+														this.state._selEntryType == 'first' ? 'd-none' : 'col-7 pl-2'
+													}>
 													<input
 														name='entryDate'
 														type='text'
 														className='form-control'
 														onChange={this.handleInputChange}
 														placeholder='DATE:'
-														disabled={this.state.selEntryType == 'first' ? true : false}
 														required
 													/>
 													<div className='invalid-feedback'>Entry Date format required</div>
@@ -924,60 +959,116 @@ class TabImport extends React.Component<
 									<label className='text-muted'>DREAMS: (1 or more)</label>
 
 									<div className='row align-items-center mb-2'>
-										<div className='col'>Dream Title</div>
+										<div className='col-3'>Dream Section</div>
+										<div className='col'>
+											<input
+												name='_dreamBreak'
+												type='text'
+												className='form-control'
+												onChange={this.handleInputChange}
+												placeholder='DREAM \d+:'
+											/>
+										</div>
+										<div className='col'>
+											{(this.state._dreamBreak || []).map(dream => {
+												return (
+													<div className='badge badge-primary mr-1 mb-1 font-weight-light p-2'>
+														{dream}
+													</div>
+												)
+											})}
+										</div>
+									</div>
+
+									<div className='row align-items-center mb-2'>
+										<div className='col-3'>Dream Title</div>
 										<div className='col'>
 											<input
 												name='title'
 												type='text'
 												className='form-control'
 												onChange={this.handleInputChange}
-												placeholder='DREAM 1'
+												placeholder='DREAM \d+:'
 											/>
+										</div>
+										<div className='col'>
+											<div className='form-control bg-light p-2 border-secondary border-top-0 border-left-0 border-right-0'>
+												{this.state.title}
+											</div>
 										</div>
 									</div>
 									<div className='row align-items-center mb-2'>
+										<div className='col-3'>Dream Notes</div>
 										<div className='col'>
-											<code>Dream Notes</code>
+											<div className='row no-gutters'>
+												<div className='col'>
+													<select
+														name='_selDreamNotes'
+														className='form-control'
+														onChange={this.handleInputChange}
+														value={this.state._selDreamNotes}>
+														<option value='match'>Regex</option>
+														<option value='after'>All text after Dream Title</option>
+													</select>
+												</div>
+												<div
+													className={
+														this.state._selDreamNotes == 'after' ? 'd-none' : 'col-7 pl-2'
+													}>
+													<input
+														name='notes'
+														type='text'
+														className='form-control'
+														onChange={this.handleInputChange}
+														placeholder='DREAM 1'
+													/>
+												</div>
+											</div>
 										</div>
 										<div className='col'>
-											<input
-												name='notes'
-												type='text'
-												className='form-control'
-												placeholder='DREAM 1'
-											/>
+											<div className='form-control bg-light p-2 border-secondary border-top-0 border-left-0 border-right-0'>
+												{this.state.notes}
+											</div>
 										</div>
 									</div>
 									<div className='row align-items-center mb-2'>
-										<div className='col'>
-											<code>Dream Signs</code>
-										</div>
+										<div className='col-3'>Dream Signs</div>
 										<div className='col'>
 											<input
 												name='dreamSigns'
 												type='text'
 												className='form-control'
+												onChange={this.handleInputChange}
 												placeholder='DREAMSIGNS'
 											/>
 										</div>
+										<div className='col'>
+											<div className='form-control bg-light p-2 border-secondary border-top-0 border-left-0 border-right-0'>
+												{this.state.dreamSigns}
+											</div>
+										</div>
 									</div>
 									<div className='row align-items-center mb-2'>
-										<div className='col'>
-											<code>Lucid Dream?</code>
-										</div>
+										<div className='col-3'>Lucid Dream?</div>
 										<div className='col'>
 											<input
 												name='isLucidDream'
 												type='text'
 												className='form-control'
+												onChange={this.handleInputChange}
 												placeholder='SUCCESS'
 											/>
+										</div>
+										<div className='col'>
+											{this.state.isLucidDream && (
+												<div className='badge badge-success font-weight-light py-2 px-3'>
+													YES
+												</div>
+											)}
 										</div>
 									</div>
 								</div>
 								<div className='col-4'>
-									<h5 className='text-primary'>Document Layout</h5>
-									<p className='card-text'>Sample journal format to test field mapping.</p>
 									<label className='text-muted text-uppercase d-block'>Sample Entry</label>
 									<div id='contDemoData' className='container p-3 bg-black'>
 										<span className='text-white'>03/08/2019:</span>
@@ -1004,7 +1095,7 @@ class TabImport extends React.Component<
 												<li>Realized I was dreaming when i could not find my phone</li>
 											</ul>
 											<li>
-												<span className='text-white'>DREAM 2:</span> Camping with dad
+												<span className='text-white'>DREAM 99:</span> Camping with dad
 											</li>
 											<ul>
 												<li>Dad and I were off camping</li>
@@ -1018,7 +1109,7 @@ class TabImport extends React.Component<
 						</div>
 					</div>
 				)}
-				{this.state.showImporter == ImportTypes.xlsx && (
+				{this.state._showImporter == ImportTypes.xlsx && (
 					<div className='card mb-5'>
 						<div className='card-header bg-info'>
 							<h5 className='card-title text-white mb-0'>Spreadsheet Importer</h5>
@@ -1055,7 +1146,7 @@ class TabImport extends React.Component<
 									className='btn btn-primary d-block w-100 mb-4'
 									disabled={!this.props.selDataFile}
 									onClick={() => {
-										this.setState({ showImporter: ImportTypes.docx })
+										this.setState({ _showImporter: ImportTypes.docx })
 									}}>
 									Import Document
 								</button>
@@ -1064,7 +1155,7 @@ class TabImport extends React.Component<
 									className='btn btn-primary d-block w-100'
 									disabled={!this.props.selDataFile}
 									onClick={() => {
-										this.setState({ showImporter: ImportTypes.xlsx })
+										this.setState({ _showImporter: ImportTypes.xlsx })
 									}}>
 									Import Spreadsheet
 								</button>
