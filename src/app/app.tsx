@@ -721,6 +721,7 @@ class TabImport extends React.Component<
 	{ selDataFile: IDriveFile },
 	{
 		_dreamBreak: Array<string>
+		_goImport: ImportTypes
 		_selDreamNotes: string
 		_selEntryType: string
 		_showImporter: ImportTypes
@@ -728,7 +729,7 @@ class TabImport extends React.Component<
 		dreamSigns: string
 		entryDate: string
 		isLucidDream: boolean
-		notes: string
+		notes: Array<string>
 		notesPrep: string
 		notesWake: string
 		title: string
@@ -739,6 +740,7 @@ class TabImport extends React.Component<
 
 		this.state = {
 			_dreamBreak: [],
+			_goImport: null,
 			_selDreamNotes: 'match',
 			_selEntryType: 'match',
 			_showImporter: null,
@@ -746,7 +748,7 @@ class TabImport extends React.Component<
 			dreamSigns: null,
 			entryDate: null,
 			isLucidDream: false,
-			notes: null,
+			notes: [],
 			notesPrep: null,
 			notesWake: null,
 			title: null,
@@ -759,30 +761,21 @@ class TabImport extends React.Component<
 		const name = target.name
 		const demoData = document.getElementById('contDemoData').innerText || ''
 
+		// A:
 		if (name == '_selEntryType') {
 			if (value && this.state._selEntryType != value) this.setState({ _selEntryType: value })
 			this.setState({
 				entryDate: null,
 			})
+		} else if (name == '_selDreamNotes') {
+			this.setState({ _selDreamNotes: value })
 		} else {
 			let newState = {}
 			newState[name] = null
 			this.setState(newState)
 		}
 
-		/* WORKS
-		document.getElementById('contMapDemo').querySelectorAll('input').forEach(ele => {
-			console.log(ele)
-		});
-		*/
-		console.log(value)
-		console.log(name)
-		console.log('-------------')
-
-		// TODO: FIXME: CURR:
-		// _selDreamNotes
-		// ^^ need to use this
-
+		// B:
 		if (name == '_selEntryType') {
 			if (value == 'first' && (demoData.split('\n') || []).length > 0) {
 				try {
@@ -807,7 +800,6 @@ class TabImport extends React.Component<
 					arrMatch.push(keyVal[1])
 				}
 			})
-			console.log(arrMatch)
 			this.setState({ _dreamBreak: arrMatch })
 		} else if (typeof value !== 'undefined') {
 			;(demoData.split('\n') || []).forEach(line => {
@@ -821,6 +813,27 @@ class TabImport extends React.Component<
 				}
 			})
 		}
+
+		// C: Update "Dream Notes"
+		if (this.state._selDreamNotes == 'after' || (name == '_selDreamNotes' && value == 'after')) {
+			if (!this.state._dreamBreak) {
+				this.setState({ notes: ['(add text to Dream Section)'] })
+			} else {
+				let arrNotes = [],
+					isNotes = false
+				// Locate "Dream Title", capture all lines after it - until next [Dream Section]/[Dream Title]
+				demoData.split('\n').forEach(line => {
+					if (isNotes) arrNotes.push(line)
+					// Flip capture flag once we hit a subsequnet [DreamTitle]
+					if (line.trim().match(new RegExp(this.state.title, 'g'))) isNotes = isNotes ? false : true
+				})
+				this.setState({ notes: arrNotes })
+			}
+		}
+	}
+
+	handleParse = () => {
+		console.log('PARSE!')
 	}
 
 	handleImport = () => {
@@ -833,8 +846,8 @@ class TabImport extends React.Component<
 			<div>
 				{this.state._showImporter == ImportTypes.docx && (
 					<div className='card mb-5'>
-						<div className='card-header bg-info'>
-							<h5 className='card-title text-white mb-0'>Document Importer</h5>
+						<div className='card-header bg-secondary'>
+							<h5 className='card-title text-white mb-0'>Importer Setup</h5>
 						</div>
 						<div className='card-body bg-light'>
 							<div className='row align-items-top mb-4'>
@@ -850,7 +863,8 @@ class TabImport extends React.Component<
 									<p className='card-text'>Sample journal format to test field mapping.</p>
 								</div>
 							</div>
-							<div className='row align-items-top'>
+
+							<div className='row align-items-top mb-4'>
 								<div id='contMapDemo' className='col-8'>
 									<div className='row'>
 										<div className='col-3'>
@@ -938,7 +952,7 @@ class TabImport extends React.Component<
 											</div>
 										</div>
 									</div>
-									<div className='row align-items-center mb-2'>
+									<div className='row align-items-center mb-3'>
 										<div className='col-3'>Wake Notes</div>
 										<div className='col'>
 											<input
@@ -958,7 +972,7 @@ class TabImport extends React.Component<
 
 									<label className='text-muted'>DREAMS: (1 or more)</label>
 
-									<div className='row align-items-center mb-2'>
+									<div className='row align-items-center mb-3'>
 										<div className='col-3'>Dream Section</div>
 										<div className='col'>
 											<input
@@ -979,7 +993,44 @@ class TabImport extends React.Component<
 											})}
 										</div>
 									</div>
-
+									<div className='row align-items-center mb-2'>
+										<div className='col-3'>Lucid Dream?</div>
+										<div className='col'>
+											<input
+												name='isLucidDream'
+												type='text'
+												className='form-control'
+												onChange={this.handleInputChange}
+												placeholder='SUCCESS'
+											/>
+										</div>
+										<div className='col'>
+											<div className='form-control bg-light p-2 border-secondary border-top-0 border-left-0 border-right-0'>
+												{this.state.isLucidDream && (
+													<div className='badge badge-success font-weight-light py-2 px-3'>
+														YES
+													</div>
+												)}
+											</div>
+										</div>
+									</div>
+									<div className='row align-items-center mb-2'>
+										<div className='col-3'>Dream Signs</div>
+										<div className='col'>
+											<input
+												name='dreamSigns'
+												type='text'
+												className='form-control'
+												onChange={this.handleInputChange}
+												placeholder='DREAMSIGNS'
+											/>
+										</div>
+										<div className='col'>
+											<div className='form-control bg-light p-2 border-secondary border-top-0 border-left-0 border-right-0'>
+												{this.state.dreamSigns}
+											</div>
+										</div>
+									</div>
 									<div className='row align-items-center mb-2'>
 										<div className='col-3'>Dream Title</div>
 										<div className='col'>
@@ -997,7 +1048,7 @@ class TabImport extends React.Component<
 											</div>
 										</div>
 									</div>
-									<div className='row align-items-center mb-2'>
+									<div className='row align-items-top mb-2'>
 										<div className='col-3'>Dream Notes</div>
 										<div className='col'>
 											<div className='row no-gutters'>
@@ -1026,45 +1077,9 @@ class TabImport extends React.Component<
 											</div>
 										</div>
 										<div className='col'>
-											<div className='form-control bg-light p-2 border-secondary border-top-0 border-left-0 border-right-0'>
-												{this.state.notes}
-											</div>
-										</div>
-									</div>
-									<div className='row align-items-center mb-2'>
-										<div className='col-3'>Dream Signs</div>
-										<div className='col'>
-											<input
-												name='dreamSigns'
-												type='text'
-												className='form-control'
-												onChange={this.handleInputChange}
-												placeholder='DREAMSIGNS'
-											/>
-										</div>
-										<div className='col'>
-											<div className='form-control bg-light p-2 border-secondary border-top-0 border-left-0 border-right-0'>
-												{this.state.dreamSigns}
-											</div>
-										</div>
-									</div>
-									<div className='row align-items-center mb-2'>
-										<div className='col-3'>Lucid Dream?</div>
-										<div className='col'>
-											<input
-												name='isLucidDream'
-												type='text'
-												className='form-control'
-												onChange={this.handleInputChange}
-												placeholder='SUCCESS'
-											/>
-										</div>
-										<div className='col'>
-											{this.state.isLucidDream && (
-												<div className='badge badge-success font-weight-light py-2 px-3'>
-													YES
-												</div>
-											)}
+											{this.state.notes.map(note => {
+												return <div className='badge'>{note}</div>
+											})}
 										</div>
 									</div>
 								</div>
@@ -1106,6 +1121,20 @@ class TabImport extends React.Component<
 									</div>
 								</div>
 							</div>
+
+							<div className='row align-items-top'>
+								<div className='col-12 text-center'>
+									<p>
+										Once the options above are functioning correctly, click the import button below
+										to import your dream journal.
+									</p>
+									<button
+										className='btn btn-success'
+										onClick={() => this.setState({ _goImport: ImportTypes.docx })}>
+										Next Step: Import Dream Journal
+									</button>
+								</div>
+							</div>
 						</div>
 					</div>
 				)}
@@ -1115,6 +1144,41 @@ class TabImport extends React.Component<
 							<h5 className='card-title text-white mb-0'>Spreadsheet Importer</h5>
 						</div>
 						<div className='card-body bg-light'>Coming Soon!</div>
+					</div>
+				)}
+			</div>
+		)
+
+		let importerFile: JSX.Element = (
+			<div>
+				{this.state._goImport == ImportTypes.docx && (
+					<div className='card mb-5'>
+						<div className='card-header bg-info'>
+							<h5 className='card-title text-white mb-0'>Journal Importer</h5>
+						</div>
+						<div className='card-body bg-light'>
+							<div
+								className='form-control bg-black mb-2'
+								contentEditable
+								style={{ minHeight: '400px' }}
+							/>
+							<label className='d-block'>
+								Paste your Dream Journal entries above to parse them based upon the setup above.
+							</label>
+							<button className='btn btn-primary' onClick={this.handleParse}>
+								Parse Journal Text
+							</button>
+
+							<h5 className='text-primary mt-4'>Parse Results</h5>
+							<table className='table'>
+								<thead>
+									<tr>
+										<th>Entry Date</th>
+										<th>Bed Time</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
 					</div>
 				)}
 			</div>
@@ -1163,8 +1227,8 @@ class TabImport extends React.Component<
 						</div>
 					</div>
 				</div>
-
 				{importerCard}
+				{importerFile}
 			</div>
 		)
 	}
