@@ -1,9 +1,11 @@
 import React from 'react'
-import { ImportTypes, IDriveFile, IJournalEntry } from './app'
+import { ImportTypes, IDriveFile, IJournalEntry, IJournalDream } from './app'
+const DEBUG = true
 
 class TabImport extends React.Component<
 	{ selDataFile: IDriveFile },
 	{
+		_dreamSignsDelim: string
 		_importText: string
 		_parsedSections: Array<IJournalEntry>
 		_selBreakType: string
@@ -37,8 +39,9 @@ class TabImport extends React.Component<
 		let config = JSON.parse(localStorage.getItem('import-config')) || {}
 
 		this.state = {
+			_dreamSignsDelim: '',
 			_importText: null,
-			_parsedSections: config._parsedSections || [],
+			_parsedSections: [],
 			_selBreakType: config._selBreakType || 'blankLine',
 			_selDreamNotes: config._selDreamNotes || 'match',
 			_selEntryType: config._selEntryType || 'match',
@@ -86,7 +89,7 @@ class TabImport extends React.Component<
 					let dateParse = new Date(textParse)
 					if (Object.prototype.toString.call(dateParse) === '[object Date]' && dateParse.getDay() > 0) {
 						this.setState({
-							entryDate: dateParse.toUTCString().substring(0, 16),
+							entryDate: dateParse.toUTCString().substring(0, 10),
 						})
 					}
 				} catch (ex) {
@@ -95,6 +98,8 @@ class TabImport extends React.Component<
 					})
 				}
 			}
+		} else if (name == '_dreamSignsDelim') {
+			// SKIP: Dont descend into last else if
 		} else if (name == '_dreamBreak' && value && (demoData || '').split('\n').length > 0) {
 			let arrMatch = []
 			demoData.split('\n').forEach(line => {
@@ -140,6 +145,7 @@ class TabImport extends React.Component<
 	 */
 	handleParse = () => {
 		const strSecBreak = this.state._selBreakType == 'blankLine' ? new RegExp('\n\n') : 'TODO'
+		const strDreamSignDelim = ','
 		var arrEntries: Array<IJournalEntry> = []
 
 		// A: Reality check
@@ -155,8 +161,13 @@ class TabImport extends React.Component<
 		})
 
 		// C: Parse text
+		if (DEBUG) {
+			console.log(this.state._importText)
+			console.log('_importText split into sections:')
+			console.log(this.state._importText.split(strSecBreak))
+		}
 		this.state._importText.split(strSecBreak).forEach(sect => {
-			console.log(sect) // DEBUG
+			if (DEBUG) console.log('sect: ' + sect)
 
 			// 1: Divide text into dream sections
 			let objEntry: IJournalEntry = {
@@ -166,42 +177,100 @@ class TabImport extends React.Component<
 				notesWake: '',
 				dreams: [],
 			}
+			let objDream: IJournalDream
+			let tmpDreamSigns: IJournalDream['dreamSigns']
 
 			// 2: Tokenize each section into our fields
-			this.state._importText.split('\n').forEach((line, idx) => {
-				// NOTE: As each of the Entry props have diff reqs, handle each one sep
-				if (idx == 0 && this.state._selEntryType == 'first') {
-					try {
-						let textParse = line.split('\n')[0].replace(/[^0-9$\/]/g, '')
-						let dateParse = new Date(textParse)
-						if (Object.prototype.toString.call(dateParse) === '[object Date]' && dateParse.getDay() > 0) {
-							objEntry.entryDate = dateParse.toISOString()
-						}
-					} catch (ex) {
-						objEntry.entryDate = ex
+			if (DEBUG) {
+				console.log('sect.split(`\\n`):')
+			}
+			sect.split('\n').forEach((line, idx) => {
+				// DESIGN: dreams are 1+ lines that need to captured once they start, kind of a loop-within-loop
+				// As a initial algorithm, check for any `dream` array items, consider all other fields complete
+				if (line.trim().match(new RegExp(this.state._dreamBreak, 'g'))) {
+					objDream = {
+						title: '',
+						notes: '',
+						dreamSigns: tmpDreamSigns || [],
+						dreamImages: [],
+						isLucidDream: false,
+						lucidMethod: null,
 					}
-				} else if (
-					this.state._selEntryType != 'first' &&
-					line.trim().match(new RegExp(this.state._entryDate, 'g'))
-				) {
-					let keyVal = line.trim().split(new RegExp(this.state._entryDate, 'g'))
-					if (keyVal[1]) objEntry.entryDate = keyVal[1].trim()
-				} else if (line.trim().match(new RegExp(this.state._bedTime, 'g'))) {
-					let keyVal = line.trim().split(new RegExp(this.state._bedTime, 'g'))
-					if (keyVal[1]) objEntry.bedTime = keyVal[1].trim()
-				} else if (line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
-					let keyVal = line.trim().split(new RegExp(this.state._notesPrep, 'g'))
-					if (keyVal[1]) objEntry.notesPrep = keyVal[1].trim()
-				} else if (line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
-					let keyVal = line.trim().split(new RegExp(this.state._notesWake, 'g'))
-					if (keyVal[1]) objEntry.notesWake = keyVal[1].trim()
+					objEntry.dreams.push(objDream)
+					if (DEBUG) {
+						console.log('NEW (objDream)')
+						console.log(objDream)
+					}
 				}
-				// TODO: finish this!
-				// TODO: NEXT: Locate dream section and break it up
-				else if (line.trim().match(new RegExp(this.state._dreamBreak, 'g'))) {
-					// TODO: keep capturing lines and looking for props
-					console.log('DREAM:')
-					console.log(line)
+
+				if (objEntry.dreams.length == 0) {
+					// NOTE: As each of the Entry props have diff reqs, handle each one sep
+					if (idx == 0 && this.state._selEntryType == 'first') {
+						try {
+							let textParse = line.split('\n')[0].replace(/[^0-9$\/]/g, '')
+							let dateParse = new Date(textParse)
+							if (
+								Object.prototype.toString.call(dateParse) === '[object Date]' &&
+								dateParse.getDay() > 0
+							) {
+								objEntry.entryDate = dateParse.toISOString()
+							}
+						} catch (ex) {
+							objEntry.entryDate = ex
+						}
+					} else if (
+						this.state._selEntryType != 'first' &&
+						line.trim().match(new RegExp(this.state._entryDate, 'g'))
+					) {
+						let keyVal = line.trim().split(new RegExp(this.state._entryDate, 'g'))
+						if (keyVal[1].trim()) objEntry.entryDate = keyVal[1].trim()
+					} else if (line.trim().match(new RegExp(this.state._bedTime, 'g'))) {
+						let keyVal = line.trim().split(new RegExp(this.state._bedTime, 'g'))
+						if (keyVal[1].trim()) objEntry.bedTime = keyVal[1].trim()
+					} else if (line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
+						let keyVal = line.trim().split(new RegExp(this.state._notesPrep, 'g'))
+						if (keyVal[1].trim()) objEntry.notesPrep = keyVal[1].trim()
+					} else if (line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
+						let keyVal = line.trim().split(new RegExp(this.state._notesWake, 'g'))
+						if (keyVal[1].trim()) objEntry.notesWake = keyVal[1].trim()
+					} else if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
+						// DESIGN: Some people (*ahem*) choose to put DREAMSIGNS at the top-level (not as a Dream section field)
+						let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
+						if (keyVal[1].trim())
+							tmpDreamSigns = keyVal[1].trim().split(this.state._dreamSignsDelim || strDreamSignDelim)
+					}
+				} else {
+					// DESIGN: the last `else if` above created an item in `objEntry.dreams`
+					// Regardless of its index, closures allow us to address `objDream` and ensure the correct "Dream"
+
+					// A: Capture `title` so `notes` can be captured subsequnetly
+					if (line.trim().match(new RegExp(this.state._title, 'g'))) {
+						let keyVal = line.trim().split(new RegExp(this.state._title, 'g'))
+						if (keyVal[1]) objDream.title = keyVal[1].trim()
+					} else if (objDream.title && this.state._selDreamNotes == 'after') {
+						if (DEBUG) console.log('(notes)')
+						objDream.notes += line + '\n'
+					} else if (this.state._selDreamNotes != 'after') {
+						// TODO: look for regex
+					}
+
+					// B: Capture other `dream` fields
+					if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
+						let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
+						if (keyVal[1].trim())
+							objDream.dreamSigns =
+								tmpDreamSigns ||
+								keyVal[1].trim().split(this.state._dreamSignsDelim || strDreamSignDelim)
+					} else if (line.trim().match(new RegExp(this.state._isLucidDream, 'g'))) {
+						let keyVal = line.trim().split(new RegExp(this.state._isLucidDream, 'g'))
+						if (keyVal[1].trim()) objDream.isLucidDream = keyVal[1].trim() ? true : false
+					}
+					/* TODO:
+						else if (line.trim().match(new RegExp(this.state._lucidMethod, 'g'))) {
+							let keyVal = line.trim().split(new RegExp(this.state._lucidMethod, 'g'))
+							if (keyVal[1]) objDream.lucidMethod = keyVal[1].trim()
+						}
+						*/
 				}
 			})
 
@@ -221,6 +290,7 @@ class TabImport extends React.Component<
 		// E: Save current setup to localStorage
 		localStorage.setItem('import-config', JSON.stringify(this.state))
 		// TODO: remove `_importText` before saving into localStorage
+		// TODO: remove `_parsedSections`
 	}
 
 	/**
@@ -406,6 +476,15 @@ class TabImport extends React.Component<
 									onChange={this.handleInputChange}
 									placeholder='DREAMSIGNS'
 								/>
+								<select
+									name='_dreamSignsDelim'
+									value={this.state._dreamSignsDelim}
+									className='form-control'
+									onChange={this.handleInputChange}>
+									<option value=','>,</option>
+									<option value=';'>;</option>
+									<option value=' '>(space)</option>
+								</select>
 							</div>
 							<div className='col'>
 								<div className='form-control bg-secondary p-2'>{this.state.dreamSigns}</div>
@@ -560,35 +639,107 @@ class TabImport extends React.Component<
 
 		let importResults: JSX.Element = (
 			<div>
-				<h5 className='text-primary mt-4'>Parse Results</h5>
-				<p>{'Found ' + this.state._parsedSections.length + ' entries'}</p>
+				<h5 className='text-primary mb-3'>
+					Parse Results: {'Found ' + this.state._parsedSections.length + ' entries'}
+				</h5>
 
-				<ul className='list-group'>
+				<ul className='list-group mb-4'>
 					{this.state._parsedSections.map((sect, idx) => {
 						return (
 							<li className='list-group-item' key={'parsedsect' + idx}>
-								<div className='row'>
+								<h4 className='text-primary'>Entry {idx + 1}</h4>
+								<div className='row mb-4'>
 									<div className='col-auto'>
 										<label className='text-uppercase text-muted d-block'>Entry Date</label>
-										{new Date(sect.entryDate).toLocaleDateString()}
+										<input type='date' className='form-control' value={sect.entryDate} />
 									</div>
 									<div className='col-auto'>
 										<label className='text-uppercase text-muted d-block'>Bed Time</label>
-										{sect.bedTime}
+										<input type='time' className='form-control' value={sect.bedTime} />
 									</div>
-									<div className='col-auto'>
+									<div className='col'>
 										<label className='text-uppercase text-muted d-block'>Prep Notes</label>
-										{sect.notesPrep}
+										<input type='text' className='form-control' value={sect.notesPrep} />
 									</div>
-									<div className='col-auto'>
+									<div className='col'>
 										<label className='text-uppercase text-muted d-block'>Wake Notes</label>
-										{sect.notesWake}
+										<input type='text' className='form-control' value={sect.notesWake} />
 									</div>
 								</div>
+								{sect.dreams.map((dream, idy) => {
+									return (
+										<div key={'parsedsectdream' + idx + idy}>
+											<div className='row mb-3'>
+												<div className='col-auto'>
+													<h2 className='text-secondary'>{idy + 1}</h2>
+												</div>
+												<div className='col'>
+													<div className='row mb-3'>
+														<div className='col'>
+															<label className='text-uppercase text-muted d-block'>
+																Title
+															</label>
+															<input
+																type='text'
+																className='form-control'
+																value={dream.title}
+															/>
+														</div>
+														<div className='col-auto'>
+															<label className='text-uppercase text-muted d-block'>
+																Dream Signs
+															</label>
+															<input
+																type='text'
+																className='form-control'
+																value={dream.dreamSigns}
+															/>
+														</div>
+														<div className='col-auto'>
+															<label className='text-uppercase text-muted d-block'>
+																Lucid Dream?
+															</label>
+															<input
+																type='checkbox'
+																className='form-control'
+																checked={dream.isLucidDream}
+															/>
+														</div>
+														<div className='col-auto'>
+															<label className='text-uppercase text-muted d-block'>
+																Lucid Method
+															</label>
+															<input
+																type='text'
+																className='form-control'
+																value={dream.lucidMethod}
+															/>
+														</div>
+													</div>
+													<div className='row'>
+														<div className='col'>
+															<textarea
+																className='form-control w-100'
+																rows={5}
+																value={dream.notes}
+															/>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									)
+								})}
 							</li>
 						)
 					})}
 				</ul>
+
+				<div className='text-center p-3'>
+					<button className='btn btn-primary' onClick={this.handleImport}>
+						Import Entries into Journal
+					</button>
+				</div>
 			</div>
 		)
 
