@@ -439,14 +439,18 @@ class TabHome extends React.Component<{
 							return (
 								<tr key={'filerow' + idx}>
 									{this.props.selDataFile && this.props.selDataFile.name ? (
-										this.props.selDataFile.isLoading ? <td className="text-warning">
-										<div className="spinner-border spinner-border-sm mr-2" role="status">
-										  <span className="sr-only"></span>
-										</div>Loading...
-										</td> :
-										<td>
-											<div className='badge badge-success p-2'>Active</div>
-										</td>
+										this.props.selDataFile.isLoading ? (
+											<td className='text-warning'>
+												<div className='spinner-border spinner-border-sm mr-2' role='status'>
+													<span className='sr-only' />
+												</div>
+												Loading...
+											</td>
+										) : (
+											<td>
+												<div className='badge badge-success p-2'>Active</div>
+											</td>
+										)
 									) : (
 										<td />
 									)}
@@ -994,7 +998,9 @@ class AppTabs extends React.Component<{
 	doAuthSignOut: Function
 	doCreateJournal: Function
 	doFileListRefresh: Function
+	doSaveImportState: Function
 	doSelectFileById: Function
+	importState: object
 	onShowModal: Function
 	selDataFile: IDriveFile
 }> {
@@ -1007,7 +1013,9 @@ class AppTabs extends React.Component<{
 			doAuthSignOut: Function
 			doCreateJournal: Function
 			doFileListRefresh: Function
+			doSaveImportState: Function
 			doSelectFileById: Function
+			importState: object
 			onShowModal: Function
 			selDataFile: IDriveFile
 		}>
@@ -1022,7 +1030,13 @@ class AppTabs extends React.Component<{
 			case AppTab.search:
 				return <TabSearch />
 			case AppTab.import:
-				return <TabImport selDataFile={this.props.selDataFile} />
+				return (
+					<TabImport
+						doSaveImportState={this.props.doSaveImportState}
+						importState={this.props.importState}
+						selDataFile={this.props.selDataFile}
+					/>
+				)
 			case AppTab.home:
 			default:
 				return (
@@ -1045,6 +1059,7 @@ class App extends React.Component<
 	{},
 	{
 		auth: IAuthState
+		childImportState: object
 		dataFiles: IDriveFiles
 		editEntry: IJournalEntry
 		showModal: boolean
@@ -1060,6 +1075,7 @@ class App extends React.Component<
 				userName: '',
 				userPhoto: '',
 			},
+			childImportState: null,
 			dataFiles: {
 				available: [],
 				selected: null,
@@ -1070,6 +1086,16 @@ class App extends React.Component<
 		}
 
 		this.updateAuthState()
+	}
+
+	/**
+	 * the `app-import` constructor is called every damn time its shown, so we have t save state here
+	 * FUTURE: use hooks instead?
+	 */
+	doSaveImportState = (newState: object) => {
+		this.setState({
+			childImportState: newState,
+		})
 	}
 
 	updateAuthState = () => {
@@ -1353,13 +1379,11 @@ class App extends React.Component<
 			.catch(error => {
 				if (error.code == '401') {
 					oauth2SignIn()
-				}
-				else if (error.code == '503') {
+				} else if (error.code == '503') {
 					let newState = this.state.dataFiles
 					newState.selected.isLoading = false
 					// TODO: new field like `hasError` to hold "Service Unavailable" etc
-				}
-				else {
+				} else {
 					let newState = this.state.dataFiles
 					newState.selected.isLoading = false
 					console.error ? console.error(error) : console.log(error)
@@ -1467,10 +1491,12 @@ class App extends React.Component<
 						this.state.dataFiles && this.state.dataFiles.available ? this.state.dataFiles.available : null
 					}
 					doAddNewEntry={this.doAddNewEntry}
+					doAuthSignOut={this.doAuthSignOut}
 					doCreateJournal={this.driveCreateNewJournal}
 					doFileListRefresh={this.driveGetFileList}
-					doAuthSignOut={this.doAuthSignOut}
+					doSaveImportState={this.doSaveImportState}
 					doSelectFileById={this.doSelectFileById}
+					importState={this.state.childImportState}
 					onShowModal={this.chgShowModal}
 					selDataFile={
 						this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
