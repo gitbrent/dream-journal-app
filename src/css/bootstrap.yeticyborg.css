@@ -2046,7 +2046,8 @@ pre code {
 
 .form-control:focus {
   color: var(--formclr);
-  background-color: var(--formbgd);
+  /*background-color: var(--formbgd);*/
+  background-color: var(--white);
   border-color: #95cfeb;
   outline: 0;
   -webkit-box-shadow: 0 0 0 0.2rem rgba(42, 159, 214, 0.25);
@@ -10828,4 +10829,11 @@ legend {
 
 .popover-title {
   border-bottom: none;
+}
+
+.form-output {
+	min-height: calc(1.5em + 0.75rem + 2px);
+	border-left: 1px solid var(--primary);
+	background-color: #282828;
+	color: var(--white);
 }
