@@ -12,6 +12,7 @@ class TabImport extends React.Component<
 	{
 		_demoData: string
 		_dreamSignsDelim: string
+		_entryDateInvalidMsg: string
 		_importHTML: string
 		_importText: string
 		_invalidSections: Array<IJournalEntry>
@@ -53,6 +54,7 @@ class TabImport extends React.Component<
 		this.state = {
 			_demoData: config._demoData || '',
 			_dreamSignsDelim: config._dreamSignsDelim || '',
+			_entryDateInvalidMsg: '',
 			_importHTML: config._importHTML || '<br>',
 			_importText: config._importText || '',
 			_invalidSections: config._invalidSections || [],
@@ -112,6 +114,7 @@ class TabImport extends React.Component<
 		const demoData = this.refDemoData.current.innerText || ''
 
 		// A: "Entry Date"
+		this.setState({ _entryDateInvalidMsg: '' })
 		if (this.state._selEntryType == 'first') {
 			if ((demoData.split('\n') || []).length > 0) {
 				try {
@@ -128,6 +131,29 @@ class TabImport extends React.Component<
 					})
 				}
 			}
+		} else if (this.state._selEntryType == 'match' && this.state._entryDate) {
+			;(demoData.split('\n') || []).forEach(line => {
+				try {
+					if (line.trim().match(new RegExp(this.state._entryDate, 'g'))) {
+						let keyVal = line.trim().split(new RegExp(this.state._entryDate, 'g'))
+						let newState = { entryDate: '' }
+
+						// CASE 1: "DATE: 03/08/2019"
+						if (keyVal[1]) {
+							newState['entryDate'] = keyVal[1]
+						}
+						// CASE 2: "03/08/2019:" and thats it - no keyname or lede like "DATE:"
+						// NOTE: `\d\d/\d\d/\d\d\d\d:` parse result is ["",""], so show whole line
+						else if (!keyVal[0]) {
+							newState['entryDate'] = line.trim()
+						}
+
+						this.setState(newState)
+					}
+				} catch (ex) {
+					this.setState({ _entryDateInvalidMsg: ex.toString() })
+				}
+			})
 		}
 
 		// B: "Dream Break"
@@ -184,7 +210,14 @@ class TabImport extends React.Component<
 		newState[name] = value
 		this.setState(newState)
 
-		// B: Update UI (delay reqd as state isnt committed to memory fast enough for render to read it back!)
+		// B:
+		if (name == '_selEntryType') {
+			this.setState({
+				entryDate: '',
+			})
+		}
+
+		// C: Update UI (delay reqd as state isnt committed to memory fast enough for render to read it back!)
 		setTimeout(this.updateOptionResults, 100)
 	}
 
@@ -217,6 +250,10 @@ class TabImport extends React.Component<
 		if (this.state._selBreakType == 'blankLine') strSecBreak = new RegExp('\n\n')
 		if (this.state._selBreakType == 'entryDate') strSecBreak = new RegExp(this.state._entryDate)
 
+		// TODO: CURRENT:
+		// ISSUE: When the _entryDate is the entire line (eg: "03/08/2019:"), split-ing by it leaves no entry date text!
+		// therefore parsing fails - we get sections right, but without date theyre no good...
+
 		// A: Reality check
 		if (!this.state._importText) {
 			// TODO: invalid-response div shown
@@ -231,12 +268,12 @@ class TabImport extends React.Component<
 
 		// C: Parse text
 		if (DEBUG) {
-			console.log(this.state._importText)
+			//console.log(this.state._importText)
 			console.log('_importText split into sections:')
 			console.log(this.state._importText.split(strSecBreak))
 		}
 		this.state._importText.split(strSecBreak).forEach(sect => {
-			if (DEBUG) console.log('sect: ' + sect)
+			if (DEBUG) console.log('SECTION: ' + sect)
 
 			// 1: Divide text into dream sections
 			let objEntry: IJournalEntry = {
@@ -293,6 +330,7 @@ class TabImport extends React.Component<
 					) {
 						let keyVal = line.trim().split(new RegExp(this.state._entryDate, 'g'))
 						if (keyVal[1].trim()) objEntry.entryDate = keyVal[1].trim()
+						// TODO: CURRENT: parsing real journal entries from google drive have '\n\n' line breaks!
 						console.log('YO!')
 					} else if (line.trim().match(new RegExp(this.state._bedTime, 'g'))) {
 						let keyVal = line.trim().split(new RegExp(this.state._bedTime, 'g'))
@@ -353,12 +391,13 @@ class TabImport extends React.Component<
 			_parsedSections: arrEntries,
 		})
 
-		// DEBUG
-		console.log(arrEntries)
-		console.log(this.state)
-
 		// E: Save current setup to localStorage
 		localStorage.setItem('import-config', JSON.stringify(this.state))
+
+		if (DEBUG) {
+			console.log(arrEntries)
+			console.log(this.state)
+		}
 	}
 
 	/**
@@ -483,7 +522,7 @@ class TabImport extends React.Component<
 								<label className='text-muted text-uppercase'>Result</label>
 							</div>
 						</div>
-						<div className='row align-items-center mb-2'>
+						<div className='row align-items-top mb-2'>
 							<div className='col-3'>
 								Entry Date
 								<span className='text-danger mx-1' title='required field'>
@@ -518,6 +557,14 @@ class TabImport extends React.Component<
 							</div>
 							<div className='col'>
 								<div className='form-output p-2'>{this.state.entryDate}</div>
+								<div
+									className={
+										this.state._entryDateInvalidMsg
+											? 'invalid-feedback d-block'
+											: 'invalid-feedback'
+									}>
+									{this.state._entryDateInvalidMsg}
+								</div>
 							</div>
 						</div>
 						<div className='row align-items-center mb-2'>
@@ -974,7 +1021,7 @@ class TabImport extends React.Component<
 					</div>
 				</div>
 
-				<ul className='nav nav-tabs' role='tablist'>
+				<ul className='nav nav-tabs nav-fill' role='tablist'>
 					<li className='nav-item'>
 						<a
 							className='nav-link active'
