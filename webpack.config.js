@@ -4,6 +4,8 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = {
   entry: "./src/app/app.tsx",
   mode: "development",
+  //mode: "production", // these 2 made no diff in file size
+  //devtool: false,
   plugins: [
     new CleanWebpackPlugin(["public/build"]),
     new HtmlWebpackPlugin({
