@@ -1,6 +1,7 @@
 import React from 'react'
 import ContentEditable from 'react-contenteditable'
 import { IDriveFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './app'
+const ENTRY_DATE_BREAK = 'SECTIONBREAK'
 const DEBUG = true
 
 class TabImport extends React.Component<
@@ -247,12 +248,9 @@ class TabImport extends React.Component<
 		const strDreamSignDelim = ','
 		let arrEntries: Array<IJournalEntry> = []
 		let strSecBreak = new RegExp('\n\n')
+		let strImportText = this.state._importText
 		if (this.state._selBreakType == 'blankLine') strSecBreak = new RegExp('\n\n')
-		if (this.state._selBreakType == 'entryDate') strSecBreak = new RegExp(this.state._entryDate)
-
-		// TODO: CURRENT:
-		// ISSUE: When the _entryDate is the entire line (eg: "03/08/2019:"), split-ing by it leaves no entry date text!
-		// therefore parsing fails - we get sections right, but without date theyre no good...
+		if (this.state._selBreakType == 'entryDate') strSecBreak = new RegExp(ENTRY_DATE_BREAK)
 
 		// A: Reality check
 		if (!this.state._importText) {
@@ -261,137 +259,157 @@ class TabImport extends React.Component<
 			return
 		}
 
-		// B: Clear results
+		// B: Handle "Entry Date" as section break
+		// Merely using `split(new RegExp(this.state._entryDate))` will cause the loss of the date itself
+		// SOLN: Add custom break and split using that string instead so only its lost
+		if (this.state._selBreakType == 'entryDate') {
+			strImportText = strImportText.replace(new RegExp(this.state._entryDate, 'gi'), ENTRY_DATE_BREAK + '$&')
+		}
+
+		// C: clear state data
 		this.setState({
 			_parsedSections: [],
 		})
 
-		// C: Parse text
+		// D: Parse text
 		if (DEBUG) {
-			//console.log(this.state._importText)
-			console.log('_importText split into sections:')
-			console.log(this.state._importText.split(strSecBreak))
+			console.log('-------------------------------------------')
+			console.log('strImportText split into sections:')
+			console.log(strImportText.split(strSecBreak))
+			console.log('-------------------------------------------')
 		}
-		this.state._importText.split(strSecBreak).forEach(sect => {
-			if (DEBUG) console.log('SECTION: ' + sect)
+		strImportText
+			.split(strSecBreak)
+			.filter(sect => {
+				return sect
+			})
+			.forEach(sect => {
+				//if (DEBUG) console.log('SECTION: ' + sect)
 
-			// 1: Divide text into dream sections
-			let objEntry: IJournalEntry = {
-				entryDate: '',
-				bedTime: '',
-				notesPrep: '',
-				notesWake: '',
-				dreams: [],
-			}
-			let objDream: IJournalDream
-			let tmpDreamSigns: IJournalDream['dreamSigns']
-
-			// 2: Tokenize each section into our fields
-			if (DEBUG) {
-				console.log('sect.split(`\\n`):')
-			}
-			sect.split('\n').forEach((line, idx) => {
-				// DESIGN: dreams are 1+ lines that need to captured once they start, kind of a loop-within-loop
-				// As a initial algorithm, check for any `dream` array items, consider all other fields complete
-				if (line.trim().match(new RegExp(this.state._dreamBreak, 'g'))) {
-					objDream = {
-						title: '',
-						notes: '',
-						dreamSigns: tmpDreamSigns || [],
-						dreamImages: [],
-						isLucidDream: false,
-						lucidMethod: null,
-					}
-					objEntry.dreams.push(objDream)
-					if (DEBUG) {
-						console.log('NEW (objDream)')
-						console.log(objDream)
-					}
+				// 1: Divide text into dream sections
+				let objEntry: IJournalEntry = {
+					entryDate: '',
+					bedTime: '',
+					notesPrep: '',
+					notesWake: '',
+					dreams: [],
 				}
+				let objDream: IJournalDream
+				let tmpDreamSigns: IJournalDream['dreamSigns']
 
-				if (objEntry.dreams.length == 0) {
-					// NOTE: As each of the Entry props have diff reqs, handle each one sep
-					if (idx == 0 && this.state._selEntryType == 'first') {
-						try {
-							let textParse = line.split('\n')[0].replace(/[^0-9$\/]/g, '')
-							let dateParse = new Date(textParse)
-							if (
-								Object.prototype.toString.call(dateParse) === '[object Date]' &&
-								dateParse.getDay() > 0
-							) {
-								objEntry.entryDate = dateParse.toISOString().substring(0, 10)
-							}
-						} catch (ex) {
-							objEntry.entryDate = ex
+				// 2: Tokenize each section into our fields
+				//if (DEBUG) console.log('sect.split(`\\n`):')
+				sect.split('\n').forEach((line, idx) => {
+					// DESIGN: dreams are 1+ lines that need to captured once they start, kind of a loop-within-loop
+					// As a initial algorithm, check for any `dream` array items, consider all other fields complete
+					if (line.trim().match(new RegExp(this.state._dreamBreak, 'g'))) {
+						objDream = {
+							title: '',
+							notes: '',
+							dreamSigns: tmpDreamSigns || [],
+							dreamImages: [],
+							isLucidDream: false,
+							lucidMethod: null,
 						}
-					} else if (
-						this.state._selEntryType == 'match' &&
-						line.trim().match(new RegExp(this.state._entryDate, 'g'))
-					) {
-						let keyVal = line.trim().split(new RegExp(this.state._entryDate, 'g'))
-						if (keyVal[1].trim()) objEntry.entryDate = keyVal[1].trim()
-						// TODO: CURRENT: parsing real journal entries from google drive have '\n\n' line breaks!
-						console.log('YO!')
-					} else if (line.trim().match(new RegExp(this.state._bedTime, 'g'))) {
-						let keyVal = line.trim().split(new RegExp(this.state._bedTime, 'g'))
-						if (keyVal[1].trim()) objEntry.bedTime = keyVal[1].trim()
-					} else if (line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
-						let keyVal = line.trim().split(new RegExp(this.state._notesPrep, 'g'))
-						if (keyVal[1].trim()) objEntry.notesPrep = keyVal[1].trim()
-					} else if (line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
-						let keyVal = line.trim().split(new RegExp(this.state._notesWake, 'g'))
-						if (keyVal[1].trim()) objEntry.notesWake = keyVal[1].trim()
-					} else if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
-						// DESIGN: Some people (*ahem*) choose to put DREAMSIGNS at the top-level (not as a Dream section field)
-						let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
-						if (keyVal[1].trim())
-							tmpDreamSigns = keyVal[1].trim().split(this.state._dreamSignsDelim || strDreamSignDelim)
-					}
-				} else {
-					// DESIGN: the last `else if` above created an item in `objEntry.dreams`
-					// Regardless of its index, closures allow us to address `objDream` and ensure the correct "Dream"
-
-					// A: Capture `title` so `notes` can be captured subsequnetly
-					if (line.trim().match(new RegExp(this.state._title, 'g'))) {
-						let keyVal = line.trim().split(new RegExp(this.state._title, 'g'))
-						if (keyVal[1]) objDream.title = keyVal[1].trim()
-					} else if (objDream.title && this.state._selDreamNotes == 'after') {
-						if (DEBUG) console.log('(notes)')
-						objDream.notes += line + '\n'
-					} else if (this.state._selDreamNotes != 'after') {
-						// TODO: look for regex
+						objEntry.dreams.push(objDream)
+						if (DEBUG) {
+							console.log('NEW (objDream)')
+							console.log(objDream)
+						}
 					}
 
-					// B: Capture other `dream` fields
-					if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
-						let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
-						if (keyVal[1].trim())
-							objDream.dreamSigns =
-								tmpDreamSigns ||
-								keyVal[1].trim().split(this.state._dreamSignsDelim || strDreamSignDelim)
-					} else if (line.trim().match(new RegExp(this.state._isLucidDream, 'g'))) {
-						let keyVal = line.trim().split(new RegExp(this.state._isLucidDream, 'g'))
-						if (keyVal[1].trim()) objDream.isLucidDream = keyVal[1].trim() ? true : false
-					}
-					/* TODO:
+					if (objEntry.dreams.length == 0) {
+						// NOTE: As each of the Entry props have diff reqs, handle each one sep
+						if (idx == 0 && this.state._selEntryType == 'first') {
+							try {
+								let textParse = line.split('\n')[0].replace(/[^0-9$\/]/g, '')
+								let dateParse = new Date(textParse)
+								if (
+									Object.prototype.toString.call(dateParse) === '[object Date]' &&
+									dateParse.getDay() > 0
+								) {
+									objEntry.entryDate = dateParse.toISOString().substring(0, 10)
+								}
+							} catch (ex) {
+								objEntry.entryDate = ex
+							}
+						} else if (
+							this.state._selEntryType == 'match' &&
+							this.state._entryDate &&
+							line.trim().match(new RegExp(this.state._entryDate, 'g'))
+						) {
+							let textParse = line.trim().match(new RegExp(this.state._entryDate, 'gm'))[0]
+							if (textParse) {
+								textParse = textParse.replace(/:|;/gi, '') // For "01/01/2019:"
+								if (DEBUG) console.log('textParse = ' + textParse)
+								let dateParse = new Date(textParse)
+								if (
+									Object.prototype.toString.call(dateParse) === '[object Date]' &&
+									dateParse.getDay() > 0
+								) {
+									objEntry.entryDate = dateParse.toISOString().substring(0, 10)
+								}
+							}
+						} else if (line.trim().match(new RegExp(this.state._bedTime, 'g'))) {
+							let keyVal = line.trim().split(new RegExp(this.state._bedTime, 'g'))
+							if (keyVal[1].trim()) objEntry.bedTime = keyVal[1].trim()
+						} else if (line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
+							let keyVal = line.trim().split(new RegExp(this.state._notesPrep, 'g'))
+							if (keyVal[1].trim()) objEntry.notesPrep = keyVal[1].trim()
+						} else if (line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
+							let keyVal = line.trim().split(new RegExp(this.state._notesWake, 'g'))
+							if (keyVal[1].trim()) objEntry.notesWake = keyVal[1].trim()
+						} else if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
+							// DESIGN: Some people (*ahem*) choose to put DREAMSIGNS at the top-level (not as a Dream section field)
+							let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
+							if (keyVal[1].trim())
+								tmpDreamSigns = keyVal[1].trim().split(this.state._dreamSignsDelim || strDreamSignDelim)
+						}
+					} else {
+						// DESIGN: the last `else if` above created an item in `objEntry.dreams`
+						// Regardless of its index, closures allow us to address `objDream` and ensure the correct "Dream"
+
+						// A: Capture `title` so `notes` can be captured subsequnetly
+						if (line.trim().match(new RegExp(this.state._title, 'g'))) {
+							let keyVal = line.trim().split(new RegExp(this.state._title, 'g'))
+							if (keyVal[1]) objDream.title = keyVal[1].trim()
+						} else if (objDream.title && this.state._selDreamNotes == 'after' && line) {
+							objDream.notes += (line + '\n').replace(/\n\s*\n/g, '\n')
+							if (DEBUG) console.log('dream.notes:\n' + objDream.notes)
+						} else if (this.state._selDreamNotes != 'after') {
+							// TODO: look for regex
+						}
+
+						// B: Capture other `dream` fields
+						if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
+							let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
+							if (keyVal[1].trim())
+								objDream.dreamSigns =
+									tmpDreamSigns ||
+									keyVal[1].trim().split(this.state._dreamSignsDelim || strDreamSignDelim)
+						} else if (line.trim().match(new RegExp(this.state._isLucidDream, 'g'))) {
+							let keyVal = line.trim().split(new RegExp(this.state._isLucidDream, 'g'))
+							if (keyVal[1].trim()) objDream.isLucidDream = keyVal[1].trim() ? true : false
+						}
+						/* TODO:
 						else if (line.trim().match(new RegExp(this.state._lucidMethod, 'g'))) {
 							let keyVal = line.trim().split(new RegExp(this.state._lucidMethod, 'g'))
 							if (keyVal[1]) objDream.lucidMethod = keyVal[1].trim()
 						}
 						*/
-				}
+					}
+				})
+
+				// 3: Add section
+				arrEntries.push(objEntry)
 			})
 
-			// 3: Add section
-			arrEntries.push(objEntry)
-		})
-
-		// D: Populate results
+		// E: capture/populate results
 		this.setState({
 			_parsedSections: arrEntries,
 		})
 
-		// E: Save current setup to localStorage
+		// F: save current setup to localStorage
 		localStorage.setItem('import-config', JSON.stringify(this.state))
 
 		if (DEBUG) {
