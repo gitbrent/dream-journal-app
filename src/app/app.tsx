@@ -36,6 +36,7 @@ import DateRangePicker from '../app/date-range-picker'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import LogoBase64 from '../img/logo_base64'
+import SVG_edit from '../img/svg_edit'
 import TabImport from '../app/app-import'
 import TabSearch from '../app/app-search'
 
@@ -75,12 +76,14 @@ interface IAuthState {
 	userPhoto: ''
 }
 export interface IDriveFile {
+	_isLoading: boolean
+	_isSaving: boolean
+	_lastSaved: Date
 	id: string
 	entries: Array<IJournalEntry>
 	modifiedTime: string
 	name: string
 	size: string
-	isLoading: boolean
 }
 export interface IDriveFiles {
 	available: Array<IDriveFile>
@@ -202,14 +205,14 @@ function getReadableFileSizeString(fileSizeInBytes: number) {
 // ============================================================================
 
 class AppNavBar extends React.Component<
-	{ onSaveFile: Function; onShowTab: Function; selFileName: IDriveFile['name'] },
+	{ onSaveFile: Function; onShowTab: Function; selDataFile: IDriveFile },
 	{ activeTab: AppTab }
 > {
 	constructor(
 		props: Readonly<{
 			onSaveFile: Function
 			onShowTab: Function
-			selFileName: IDriveFile['name']
+			selDataFile: IDriveFile
 		}>
 	) {
 		super(props)
@@ -291,13 +294,26 @@ class AppNavBar extends React.Component<
 				</div>
 				<div className='btn-group mr-3' role='group' aria-label='Selected Journal Name'>
 					<button type='button' className='btn btn-secondary' disabled>
-						{this.props.selFileName}
+						{this.props.selDataFile
+							? this.props.selDataFile._lastSaved
+								? this.props.selDataFile._lastSaved.toLocaleString()
+								: '(unsaved)'
+							: '(no file selected)'}
 					</button>
 				</div>
 				<form className='form-inline mb-0'>
-					<button type='button' onClick={this.onSaveFile} className='btn btn-outline-primary mr-2'>
-						Save
-					</button>
+					{this.props.selDataFile && this.props.selDataFile._isSaving ? (
+						<td>
+							<div className='spinner-border spinner-border-sm mr-2' role='status'>
+								<span className='sr-only' />
+							</div>
+							Saving...
+						</td>
+					) : (
+						<button type='button' onClick={this.onSaveFile} className='btn btn-outline-primary mr-2'>
+							Save
+						</button>
+					)}
 				</form>
 			</nav>
 		)
@@ -439,7 +455,7 @@ class TabHome extends React.Component<{
 							return (
 								<tr key={'filerow' + idx}>
 									{this.props.selDataFile && this.props.selDataFile.name ? (
-										this.props.selDataFile.isLoading ? (
+										this.props.selDataFile._isLoading ? (
 											<td className='text-warning'>
 												<div className='spinner-border spinner-border-sm mr-2' role='status'>
 													<span className='sr-only' />
@@ -454,7 +470,15 @@ class TabHome extends React.Component<{
 									) : (
 										<td />
 									)}
-									<td>{file.name}</td>
+									<td>
+										<img
+											src={SVG_edit}
+											className='mr-2'
+											title='Rename File'
+											style={{ width: '24px' }}
+										/>
+										{file.name}
+									</td>
 									<td className='text-center d-none d-md-table-cell'>
 										{getReadableFileSizeString(Number(file['size']))}
 									</td>
@@ -541,7 +565,7 @@ class TabHome extends React.Component<{
 						</div>
 					</div>
 
-					<div className='card'>
+					<div className='card' aria-description='Available Dream Journals'>
 						<div className='card-header bg-info'>
 							<h5 className='card-title text-white mb-0'>Available Dream Journals</h5>
 						</div>
@@ -1197,8 +1221,10 @@ class App extends React.Component<
 	 * @see: https://developers.google.com/drive/api/v3/multipart-upload
 	 */
 	driveCreateNewJournal = () => {
-		let params = JSON.parse(localStorage.getItem('oauth2-params'))
+		// TODO: prompt for name on create click
+		//JOURNAL_HEADER.name = 'MY JOURNAL'
 
+		let params = JSON.parse(localStorage.getItem('oauth2-params'))
 		let reqBody =
 			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
 			JSON.stringify(JOURNAL_HEADER) +
@@ -1328,7 +1354,7 @@ class App extends React.Component<
 		// B:
 		let newState = this.state.dataFiles
 		newState.selected = selFile
-		newState.selected.isLoading = true
+		newState.selected._isLoading = true
 		this.setState({
 			dataFiles: newState,
 		})
@@ -1363,7 +1389,7 @@ class App extends React.Component<
 						// B:
 						let newState = this.state.dataFiles
 						newState.selected = selFile
-						newState.selected.isLoading = false
+						newState.selected._isLoading = false
 						newState.selected.entries = entries || []
 						this.setState({
 							dataFiles: newState,
@@ -1381,11 +1407,11 @@ class App extends React.Component<
 					oauth2SignIn()
 				} else if (error.code == '503') {
 					let newState = this.state.dataFiles
-					newState.selected.isLoading = false
+					newState.selected._isLoading = false
 					// TODO: new field like `hasError` to hold "Service Unavailable" etc
 				} else {
 					let newState = this.state.dataFiles
-					newState.selected.isLoading = false
+					newState.selected._isLoading = false
 					console.error ? console.error(error) : console.log(error)
 				}
 			})
@@ -1411,11 +1437,19 @@ class App extends React.Component<
 	doSaveFile = () => {
 		let params = JSON.parse(localStorage.getItem('oauth2-params'))
 
+		// A:
 		if (!this.state.dataFiles.selected) {
 			// TODO: disable save button if no `selected` file exists
 			console.log('No file selected!')
 			return
 		}
+
+		// B: Update state
+		let newState = this.state.dataFiles
+		newState.selected._isSaving = true
+		this.setState({
+			dataFiles: newState,
+		})
 
 		let jsonBody: object = {
 			entries: this.state.dataFiles.selected.entries,
@@ -1451,8 +1485,12 @@ class App extends React.Component<
 				response
 					.json()
 					.then(fileResource => {
-						// TODO: toast "success"
-						// TODO: update date in app menubar?
+						let newState = this.state.dataFiles
+						newState.selected._lastSaved = new Date()
+						newState.selected._isSaving = false
+						this.setState({
+							dataFiles: newState,
+						})
 					})
 					.catch(error => {
 						if (error.code == '401') {
@@ -1476,10 +1514,8 @@ class App extends React.Component<
 		return (
 			<main>
 				<AppNavBar
-					selFileName={
-						this.state.dataFiles && this.state.dataFiles.selected && this.state.dataFiles.selected.name
-							? this.state.dataFiles.selected.name
-							: '(no file selected)'
+					selDataFile={
+						this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
 					}
 					onSaveFile={this.doSaveFile}
 					onShowTab={this.chgShowTab}
