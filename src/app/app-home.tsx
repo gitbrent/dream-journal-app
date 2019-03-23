@@ -120,6 +120,14 @@ class TabHome extends React.Component<
 	}
 	*/
 
+	handleCancelRename = event => {
+		this.setState({
+			errorMessage: '',
+			fileBeingRenamed: null,
+			newFileName: '',
+			isRenaming: false,
+		})
+	}
 	handleRenameInputChange = event => {
 		this.setState({
 			newFileName: event && event.target ? event.target.value : '',
@@ -130,15 +138,14 @@ class TabHome extends React.Component<
 	 * @see: https://stackoverflow.com/questions/43705453/how-do-i-rename-a-file-to-google-drive-rest-api-retrofit2
 	 */
 	handleDriveFileRename = e => {
-		console.log(e)
-		if (!e) return
-
 		this.setState({
 			errorMessage: '',
 			fileBeingRenamed: this.props.availDataFiles.filter(file => {
 				return file.id == e.target.getAttribute('data-file-id')
 			})[0],
-			newFileName: this.props.selDataFile.name,
+			newFileName: this.props.availDataFiles.filter(file => {
+				return file.id == e.target.getAttribute('data-file-id')
+			})[0].name,
 		})
 	}
 	doRenameFile = e => {
@@ -262,15 +269,25 @@ class TabHome extends React.Component<
 													/>
 												</td>
 											)
+										) : this.props.selDataFile &&
+										  this.props.selDataFile.id &&
+										  file.id === this.props.selDataFile.id ? (
+											<td />
+										) : !this.state.fileBeingRenamed ? (
+											<td>
+												<button
+													className='btn btn-sm btn-info'
+													data-file-id={file['id']}
+													onClick={this.handleDriveFileGet}>
+													Select
+												</button>
+											</td>
 										) : (
 											<td />
 										)}
 										<td className='align-middle'>
 											{this.state.fileBeingRenamed &&
-											this.props.selDataFile &&
-											this.props.selDataFile.id &&
-											this.props.selDataFile.id &&
-											file.id === this.state.fileBeingRenamed.id ? (
+											this.state.fileBeingRenamed.id === file.id ? (
 												<input
 													name='newFileName'
 													value={this.state.newFileName}
@@ -298,7 +315,8 @@ class TabHome extends React.Component<
 											{new Date(file['modifiedTime']).toLocaleString()}
 										</td>
 										<td className='align-middle'>
-											{this.state.fileBeingRenamed ? (
+											{this.state.fileBeingRenamed &&
+											this.state.fileBeingRenamed.id === file.id ? (
 												this.state.isRenaming ? (
 													<div
 														className='spinner-border text-warning spinner-border-sm mr-2'
@@ -306,35 +324,33 @@ class TabHome extends React.Component<
 														<span className='sr-only' />
 													</div>
 												) : (
-													<button
-														type='button'
-														className='btn btn-sm btn-success mr-2'
-														data-file-id={file['id']}
-														onClick={this.doRenameFile}>
-														Save
-													</button>
+													<div>
+														<button
+															type='button'
+															className='btn btn-sm btn-success mr-2'
+															data-file-id={file['id']}
+															onClick={this.doRenameFile}>
+															Save
+														</button>
+														<button
+															type='button'
+															className='btn btn-sm btn-outline-secondary'
+															data-file-id={file['id']}
+															onClick={this.handleCancelRename}>
+															Cancel
+														</button>
+													</div>
 												)
 											) : (
-												<button
-													type='button'
-													className='btn btn-sm btn-secondary mr-2'
-													data-file-id={file['id']}
-													onClick={this.handleDriveFileRename}>
-													Rename
-												</button>
-											)}
-
-											{this.props.selDataFile &&
-											this.props.selDataFile.id &&
-											file.id === this.props.selDataFile.id ? (
-												''
-											) : (
-												<button
-													className='btn btn-sm btn-success'
-													data-file-id={file['id']}
-													onClick={this.handleDriveFileGet}>
-													Select
-												</button>
+												!this.state.fileBeingRenamed && (
+													<button
+														type='button'
+														className='btn btn-sm btn-secondary mr-2'
+														data-file-id={file['id']}
+														onClick={this.handleDriveFileRename}>
+														Rename
+													</button>
+												)
 											)}
 										</td>
 									</tr>
