@@ -739,6 +739,7 @@ class AppTabs extends React.Component<{
 	doAuthSignOut: Function
 	doCreateJournal: Function
 	doFileListRefresh: Function
+	doRenameFile: Function
 	doSaveImportState: Function
 	doSelectFileById: Function
 	importState: object
@@ -755,6 +756,7 @@ class AppTabs extends React.Component<{
 			doAuthSignOut: Function
 			doCreateJournal: Function
 			doFileListRefresh: Function
+			doRenameFile: Function
 			doSaveImportState: Function
 			doSelectFileById: Function
 			importState: object
@@ -789,6 +791,7 @@ class AppTabs extends React.Component<{
 						doAuthSignOut={this.props.doAuthSignOut}
 						doCreateJournal={this.props.doCreateJournal}
 						doFileListRefresh={this.props.doFileListRefresh}
+						doRenameFile={this.props.doRenameFile}
 						doSelectFileById={this.props.doSelectFileById}
 						selDataFile={this.props.selDataFile}
 					/>
@@ -1053,7 +1056,7 @@ class App extends React.Component<
 	/**
 	 * @see: https://developers.google.com/drive/api/v3/manage-downloads
 	 */
-	doSelectFileById = (fileId: string) => {
+	doSelectFileById = (fileId: IDriveFile['id']) => {
 		let params = JSON.parse(localStorage.getItem('oauth2-params'))
 		let selFile =
 			fileId &&
@@ -1137,6 +1140,44 @@ class App extends React.Component<
 					console.error ? console.error(error) : console.log(error)
 				}
 			})
+	}
+	doRenameFile = (file: IDriveFile, name: string) => {
+		let params = JSON.parse(localStorage.getItem('oauth2-params'))
+
+		return new Promise((resolve, reject) => {
+			// NOTE: 'Content-Type' is *required* (other a parse error is returned)
+			fetch('https://www.googleapis.com/drive/v3/files/' + file.id, {
+				method: 'PATCH',
+				headers: {
+					Authorization: 'Bearer ' + params['access_token'],
+					'Content-Type': 'application/json; charset=UTF-8',
+				},
+				body: JSON.stringify({
+					name: name,
+				}),
+			})
+				.then(response => {
+					response
+						.json()
+						.then(json => {
+							// NOTE: Google-api will return an `{error:{}}` object, so check!
+							if (!json.error && json.name) {
+								let newState = this.state.dataFiles
+								newState.selected.name = json.name
+								this.setState({
+									dataFiles: newState,
+								})
+							}
+							resolve(json)
+						})
+						.catch(error => {
+							reject(error)
+						})
+				})
+				.catch(error => {
+					reject(error)
+				})
+		})
 	}
 	doAddNewEntry = (value: IJournalEntry) => {
 		let dataFiles = this.state.dataFiles
@@ -1253,6 +1294,7 @@ class App extends React.Component<
 					doAuthSignOut={this.doAuthSignOut}
 					doCreateJournal={this.driveCreateNewJournal}
 					doFileListRefresh={this.driveGetFileList}
+					doRenameFile={this.doRenameFile}
 					doSaveImportState={this.doSaveImportState}
 					doSelectFileById={this.doSelectFileById}
 					importState={this.state.childImportState}

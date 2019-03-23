@@ -30,7 +30,7 @@
 import * as React from 'react'
 import { AuthState, IAuthState, IDriveFile, IDriveFiles } from './app'
 import LogoBase64 from '../img/logo_base64'
-import SVG_edit from '../img/svg_edit'
+import SVG_CHECK from '../img/svg_check'
 
 function getReadableFileSizeString(fileSizeInBytes: number) {
 	var i = -1
@@ -43,16 +43,25 @@ function getReadableFileSizeString(fileSizeInBytes: number) {
 	return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i]
 }
 
-class TabHome extends React.Component<{
-	authState: IAuthState
-	availDataFiles: IDriveFiles['available']
-	doAuthSignIn: Function
-	doAuthSignOut: Function
-	doCreateJournal: Function
-	doFileListRefresh: Function
-	doSelectFileById: Function
-	selDataFile: IDriveFile
-}> {
+class TabHome extends React.Component<
+	{
+		authState: IAuthState
+		availDataFiles: IDriveFiles['available']
+		doAuthSignIn: Function
+		doAuthSignOut: Function
+		doCreateJournal: Function
+		doFileListRefresh: Function
+		doRenameFile: Function
+		doSelectFileById: Function
+		selDataFile: IDriveFile
+	},
+	{
+		errorMessage: string
+		fileBeingRenamed: IDriveFile
+		newFileName: string
+		isRenaming: boolean
+	}
+> {
 	constructor(
 		props: Readonly<{
 			authState: IAuthState
@@ -61,11 +70,19 @@ class TabHome extends React.Component<{
 			doAuthSignOut: Function
 			doCreateJournal: Function
 			doFileListRefresh: Function
+			doRenameFile: Function
 			doSelectFileById: Function
 			selDataFile: IDriveFile
 		}>
 	) {
 		super(props)
+
+		this.state = {
+			errorMessage: '',
+			fileBeingRenamed: null,
+			newFileName: '',
+			isRenaming: false,
+		}
 	}
 
 	/**
@@ -77,41 +94,85 @@ class TabHome extends React.Component<{
 		}
 	}
 
-	handleDriveSignIn = e => {
+	handleAuthSignIn = e => {
 		this.props.doAuthSignIn()
 	}
-	handleDriveSignOut = e => {
+	handleAuthSignOut = e => {
 		this.props.doAuthSignOut()
 	}
 
 	handleDriveFileList = e => {
 		this.props.doFileListRefresh()
 	}
-
 	handleDriveFileCreate = e => {
 		this.props.doCreateJournal()
 	}
-
 	handleDriveFileGet = e => {
 		this.props.doSelectFileById(e.target.getAttribute('data-file-id'))
 	}
-
 	/**
 	 * @see:
-	 */
+
 	handleDriveFileCopy = e => {
 		// TODO:
 		// Use for "Make backup" (?)
 		// POST https://www.googleapis.com/drive/v3/files/fileId/copy
 	}
+	*/
 
+	handleRenameInputChange = event => {
+		this.setState({
+			newFileName: event && event.target ? event.target.value : '',
+		})
+	}
 	/**
 	 * @see: https://developers.google.com/drive/api/v3/reference/files
 	 * @see: https://stackoverflow.com/questions/43705453/how-do-i-rename-a-file-to-google-drive-rest-api-retrofit2
 	 */
 	handleDriveFileRename = e => {
-		// TODO:
-		// PATCH https://www.googleapis.com/drive/v3/files/fileId
+		console.log(e)
+		if (!e) return
+
+		this.setState({
+			errorMessage: '',
+			fileBeingRenamed: this.props.availDataFiles.filter(file => {
+				return file.id == e.target.getAttribute('data-file-id')
+			})[0],
+			newFileName: this.props.selDataFile.name,
+		})
+	}
+	doRenameFile = e => {
+		this.setState({
+			isRenaming: true,
+		})
+		this.props
+			.doRenameFile(
+				this.props.availDataFiles.filter(file => {
+					return file.id == e.target.getAttribute('data-file-id')
+				})[0],
+				this.state.newFileName
+			)
+			.catch(ex => {
+				throw ex
+			})
+			.then(file => {
+				// NOTE: Google-API will return an error object as a result
+				if (file.error) throw file.error
+				else {
+					this.setState({
+						errorMessage: '',
+						fileBeingRenamed: null,
+						newFileName: '',
+						isRenaming: false,
+					})
+				}
+			})
+			.catch(error => {
+				this.setState({
+					errorMessage: error && error.message ? error.message : (error || '').toString(),
+					isRenaming: false,
+				})
+			})
 	}
 
 	/**
@@ -131,12 +192,12 @@ class TabHome extends React.Component<{
 						<div className='col-12 col-lg-6 mb-md-3'>
 							<button
 								className='btn btn-outline-primary w-100 mb-3 mb-md-0'
-								onClick={this.handleDriveSignIn}>
+								onClick={this.handleAuthSignIn}>
 								Renew
 							</button>
 						</div>
 						<div className='col-12 col-lg-6 text-right'>
-							<button className='btn btn-outline-secondary w-100' onClick={this.handleDriveSignOut}>
+							<button className='btn btn-outline-secondary w-100' onClick={this.handleAuthSignOut}>
 								Sign Out
 							</button>
 						</div>
@@ -147,7 +208,7 @@ class TabHome extends React.Component<{
 			cardbody = (
 				<div>
 					<p className='card-text'>Your session has expired. Please re-authenticate to continue.</p>
-					<button className='btn btn-primary' onClick={this.handleDriveSignIn}>
+					<button className='btn btn-primary' onClick={this.handleAuthSignIn}>
 						Sign In
 					</button>
 				</div>
@@ -156,7 +217,7 @@ class TabHome extends React.Component<{
 			cardbody = (
 				<div>
 					<p className='card-text'>Please sign-in to allow access to Google Drive space.</p>
-					<button className='btn btn-primary' onClick={this.handleDriveSignIn}>
+					<button className='btn btn-primary' onClick={this.handleAuthSignIn}>
 						Sign In/Authorize
 					</button>
 				</div>
@@ -164,72 +225,124 @@ class TabHome extends React.Component<{
 		}
 
 		let tableFileList: JSX.Element = (
-			<table className='table'>
-				<thead className='thead'>
-					<tr>
-						<th>Status</th>
-						<th>File Name</th>
-						<th className='text-center d-none d-md-table-cell'>File Size</th>
-						<th className='text-center d-none d-md-table-cell'>Last Modified</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody>
-					{this.props.authState.status == AuthState.Authenticated &&
-						this.props.availDataFiles.map((file, idx) => {
-							return (
-								<tr key={'filerow' + idx}>
-									{this.props.selDataFile && this.props.selDataFile.name ? (
-										this.props.selDataFile._isLoading ? (
-											<td className='text-warning'>
-												<div className='spinner-border spinner-border-sm mr-2' role='status'>
-													<span className='sr-only' />
-												</div>
-												Loading...
-											</td>
+			<form onSubmit={this.handleDriveFileRename}>
+				<table className='table'>
+					<thead className='thead'>
+						<tr>
+							<th style={{ width: '5%' }}>Status</th>
+							<th style={{ width: '50%' }}>File Name</th>
+							<th className='text-center d-none d-md-table-cell'>File Size</th>
+							<th className='text-center d-none d-md-table-cell'>Last Modified</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						{this.props.authState.status == AuthState.Authenticated &&
+							this.props.availDataFiles.map((file, idx) => {
+								return (
+									<tr key={'filerow' + idx}>
+										{this.props.selDataFile &&
+										this.props.selDataFile.id &&
+										this.props.selDataFile.id === file.id ? (
+											this.props.selDataFile._isLoading ? (
+												<td className='align-middle text-center text-warning'>
+													<div
+														className='spinner-border spinner-border-sm mr-2'
+														role='status'>
+														<span className='sr-only' />
+													</div>
+												</td>
+											) : (
+												<td className='align-middle text-center'>
+													<img
+														src={SVG_CHECK}
+														alt='Selected File'
+														title='Selected File'
+														style={{ width: '24px' }}
+													/>
+												</td>
+											)
 										) : (
-											<td>
-												<div className='badge badge-success p-2'>Active</div>
-											</td>
-										)
-									) : (
-										<td />
-									)}
-									<td>
-										<img
-											src={SVG_edit}
-											className='mr-2'
-											alt='Rename File'
-											title='Rename File'
-											style={{ width: '24px' }}
-										/>
-										{file.name}
-									</td>
-									<td className='text-center d-none d-md-table-cell'>
-										{getReadableFileSizeString(Number(file['size']))}
-									</td>
-									<td className='text-center text-nowrap d-none d-md-table-cell'>
-										{new Date(file['modifiedTime']).toLocaleString()}
-									</td>
-									{this.props.selDataFile &&
-									this.props.selDataFile.id &&
-									file.id === this.props.selDataFile.id ? (
-										<td />
-									) : (
-										<td>
-											<button
-												className='btn btn-sm btn-primary'
-												data-file-id={file['id']}
-												onClick={this.handleDriveFileGet}>
-												Select
-											</button>
+											<td />
+										)}
+										<td className='align-middle'>
+											{this.state.fileBeingRenamed &&
+											this.props.selDataFile &&
+											this.props.selDataFile.id &&
+											this.props.selDataFile.id &&
+											file.id === this.state.fileBeingRenamed.id ? (
+												<input
+													name='newFileName'
+													value={this.state.newFileName}
+													type='text'
+													className='form-control'
+													onChange={this.handleRenameInputChange}
+													disabled={this.state.isRenaming}
+													required
+												/>
+											) : (
+												file.name
+											)}
+											{this.state.errorMessage ? (
+												<div className='invalid-feedback d-block'>
+													{this.state.errorMessage}
+												</div>
+											) : (
+												''
+											)}
 										</td>
-									)}
-								</tr>
-							)
-						})}
-				</tbody>
-			</table>
+										<td className='align-middle text-center d-none d-md-table-cell'>
+											{getReadableFileSizeString(Number(file['size']))}
+										</td>
+										<td className='align-middle text-center text-nowrap d-none d-md-table-cell'>
+											{new Date(file['modifiedTime']).toLocaleString()}
+										</td>
+										<td className='align-middle'>
+											{this.state.fileBeingRenamed ? (
+												this.state.isRenaming ? (
+													<div
+														className='spinner-border text-warning spinner-border-sm mr-2'
+														role='status'>
+														<span className='sr-only' />
+													</div>
+												) : (
+													<button
+														type='button'
+														className='btn btn-sm btn-success mr-2'
+														data-file-id={file['id']}
+														onClick={this.doRenameFile}>
+														Save
+													</button>
+												)
+											) : (
+												<button
+													type='button'
+													className='btn btn-sm btn-secondary mr-2'
+													data-file-id={file['id']}
+													onClick={this.handleDriveFileRename}>
+													Rename
+												</button>
+											)}
+
+											{this.props.selDataFile &&
+											this.props.selDataFile.id &&
+											file.id === this.props.selDataFile.id ? (
+												''
+											) : (
+												<button
+													className='btn btn-sm btn-success'
+													data-file-id={file['id']}
+													onClick={this.handleDriveFileGet}>
+													Select
+												</button>
+											)}
+										</td>
+									</tr>
+								)
+							})}
+					</tbody>
+				</table>
+			</form>
 		)
 
 		return (
@@ -291,7 +404,7 @@ class TabHome extends React.Component<{
 						</div>
 					</div>
 
-					<div className='card' aria-description='Available Dream Journals'>
+					<div className='card'>
 						<div className='card-header bg-info'>
 							<h5 className='card-title text-white mb-0'>Available Dream Journals</h5>
 						</div>
