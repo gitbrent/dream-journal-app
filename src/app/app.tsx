@@ -28,24 +28,6 @@
 \*/
 
 // FUTURE: https://github.com/FortAwesome/react-fontawesome
-
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-import '../css/bootstrap.yeticyborg.css'
-import DateRangePicker from '../app/date-range-picker'
-import Button from 'react-bootstrap/Button'
-import Modal from 'react-bootstrap/Modal'
-import LogoBase64 from '../img/logo_base64'
-import TabHome from '../app/app-home'
-import TabImport from '../app/app-import'
-import TabSearch from '../app/app-search'
-
-/* WIP
-//import '../templates/bootstrap-switch-button.css'
-//import SwitchButton from './bootstrap-switch-button'
-//<SwitchButton/>
-*/
-
 enum AppTab {
 	home = 'home',
 	view = 'view',
@@ -69,6 +51,22 @@ export enum InductionTypes {
 	'wild' = 'WILD',
 	'other' = 'Other',
 }
+
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
+import '../css/bootstrap.yeticyborg.css'
+import DateRangePicker from '../app/date-range-picker'
+import LogoBase64 from '../img/logo_base64'
+import TabHome from '../app/app-home'
+import TabImport from '../app/app-import'
+import TabSearch from '../app/app-search'
+import EntryModal from '../app/app-modal-entry'
+
+/* WIP
+//import '../templates/bootstrap-switch-button.css'
+//import SwitchButton from './bootstrap-switch-button'
+//<SwitchButton/>
+*/
 
 export interface IAuthState {
 	status: AuthState
@@ -126,14 +124,6 @@ const JOURNAL_HEADER = {
 	name: 'dream-journal.json',
 	description: 'Brain Cloud Dream Journal data file',
 	mimeType: 'application/json',
-}
-const EMPTY_DREAM = {
-	title: '',
-	notes: '',
-	dreamSigns: [],
-	dreamImages: [],
-	isLucidDream: false,
-	lucidMethod: InductionTypes.none,
 }
 
 // ============================================================================
@@ -292,12 +282,12 @@ class AppNavBar extends React.Component<
 				</div>
 				<form className='form-inline mb-0'>
 					{this.props.selDataFile && this.props.selDataFile._isSaving ? (
-						<td>
+						<div>
 							<div className='spinner-border spinner-border-sm mr-2' role='status'>
 								<span className='sr-only' />
 							</div>
 							Saving...
-						</td>
+						</div>
 					) : (
 						<button type='button' onClick={this.onSaveFile} className='btn btn-outline-primary mr-2'>
 							Save
@@ -452,289 +442,11 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 
 // ============================================================================
 
-class EntryModal extends React.Component<
-	{ editEntry?: IJournalEntry; onShowModal: Function; show?: boolean },
-	{ dailyEntry: IJournalEntry; show: boolean }
-> {
-	constructor(props: Readonly<{ editEntry?: IJournalEntry; onShowModal: Function; show?: boolean }>) {
-		super(props)
-
-		this.state = {
-			dailyEntry: {
-				entryDate: new Date().toISOString().substring(0, 10),
-				bedTime: null,
-				notesPrep: null,
-				notesWake: null,
-				dreams: [EMPTY_DREAM],
-			},
-			show: props.show,
-		}
-	}
-
-	// React-Design: Allow `props` changes from other Components to change state/render
-	componentWillReceiveProps(nextProps) {
-		// A:
-		if (
-			typeof nextProps.show !== 'undefined' &&
-			typeof nextProps.show === 'boolean' &&
-			this.state.show !== nextProps.show
-		) {
-			this.setState({ show: nextProps.show })
-		}
-		// B:
-		if (nextProps.editEntry && this.state.dailyEntry !== nextProps.editEntry) {
-			// NOTE: React Feb-2019 wont do: `dailyEntry: nextProps.editEntry`
-			// SOLN: create a copy use json+json as `dreams` requires deep copy
-			this.setState({
-				dailyEntry: JSON.parse(JSON.stringify(nextProps.editEntry)),
-			})
-		}
-		/* HOWTO: reset values upon "New" item entry - do we *have* to pass a flag?? :(
-		else if ( !nextProps.editEntry ) {
-			// NOTE: `constructor` is only called once on app init, so use this to reset state as modal is reused
-			this.setState({
-				dailyEntry: {
-					entryDate: null,
-					bedTime: null,
-					notesPrep: null,
-					notesWake: null,
-					dreams: [{ title: '' }],
-				},
-			})
-			console.log('MODAL: RESET DATA')
-		}
-		*/
-	}
-
-	addRowHandler = event => {
-		let dailyEntryNew = this.state.dailyEntry
-		dailyEntryNew.dreams.push({
-			title: '',
-			notes: '',
-			dreamSigns: [],
-			dreamImages: [],
-			isLucidDream: false,
-			lucidMethod: null,
-		})
-		this.setState({ dailyEntry: dailyEntryNew })
-	}
-
-	handleInputChange = event => {
-		const target = event.target
-		const value = target.type === 'checkbox' ? target.checked : target.value
-		const name = target.name
-
-		let newState = this.state.dailyEntry
-		newState[name] = value
-
-		this.setState({
-			dailyEntry: newState,
-		})
-	}
-	handleInputDreamChange = event => {
-		const target = event.target
-		const value = target.type === 'checkbox' ? target.checked : target.value
-		const name = target.name
-
-		let newState = this.state.dailyEntry
-		newState.dreams[event.target.getAttribute('data-dream-idx')][name] = value
-
-		this.setState({
-			dailyEntry: newState,
-		})
-	}
-	handleSubmit = event => {
-		// TODO: Insert or Update?
-		if (this.props.editEntry) {
-			// TODO: This works, but its an encapsilation violation!!
-			// Pass up to App instead (as we'll do for insert)
-			// Actually, thats the soln - just pass it up - let app componet search and add or update
-			let entryCopy = this.state.dailyEntry
-			Object.keys(entryCopy).forEach(key => {
-				this.props.editEntry[key] = this.state.dailyEntry[key]
-			})
-		}
-		this.modalClose()
-		event.preventDefault()
-	}
-
-	modalClose = () => {
-		// Reset state in both components
-		this.setState({ show: false })
-		this.props.onShowModal({ show: false })
-	}
-
-	renderDreamRow = (dream: IJournalDream, dreamIdx: number) => {
-		return (
-			<div className='row pt-3 mb-4' key={'dreamrow' + dreamIdx}>
-				<div className='col-auto'>
-					<h1 className='text-primary font-weight-light'>{dreamIdx + 1}</h1>
-				</div>
-				<div className='col'>
-					<div className='row mb-3'>
-						<div className='col-12 col-md-6'>
-							<label className='text-muted text-uppercase text-sm d-block'>Dream Signs</label>
-							<input
-								name='dreamSigns'
-								type='text'
-								className='form-control'
-								value={dream.dreamSigns}
-								onChange={this.handleInputDreamChange}
-								data-dream-idx={dreamIdx}
-							/>
-						</div>
-						<div className='col-6 col-md-3'>
-							<label className='text-muted text-uppercase text-sm d-block'>Lucid Dream?</label>
-							<input
-								name='isLucidDream'
-								type='checkbox'
-								data-toggle='switchbutton'
-								checked={dream.isLucidDream}
-								onChange={this.handleInputDreamChange}
-								data-dream-idx={dreamIdx}
-							/>
-						</div>
-						<div className='col-6 col-md-3'>
-							<label className='text-muted text-uppercase text-sm d-block'>Lucid Method</label>
-							<select
-								name='lucidMethod'
-								value={dream.lucidMethod || InductionTypes.none}
-								data-dream-idx={dreamIdx}
-								onChange={this.handleInputDreamChange}
-								className='form-control'>
-								{Object.keys(InductionTypes).map(type => {
-									return (
-										<option value={type} key={'lucid-' + type + '-' + dreamIdx}>
-											{InductionTypes[type]}
-										</option>
-									)
-								})}
-							</select>
-						</div>
-					</div>
-					<div className='row mb-3'>
-						<div className='col'>
-							<label className='text-muted text-uppercase text-sm'>Title</label>
-							<input
-								name='title'
-								type='text'
-								className='form-control'
-								value={dream.title}
-								onChange={this.handleInputDreamChange}
-								data-dream-idx={dreamIdx}
-							/>
-						</div>
-					</div>
-					<div className='row'>
-						<div className='col'>
-							<label className='text-muted text-uppercase text-sm'>Notes</label>
-							<textarea
-								name='notes'
-								className='form-control'
-								rows={5}
-								value={dream.notes}
-								onChange={this.handleInputDreamChange}
-								data-dream-idx={dreamIdx}
-							/>
-						</div>
-					</div>
-				</div>
-			</div>
-		)
-	}
-
-	render() {
-		return (
-			<Modal size='lg' show={this.state.show} onHide={this.modalClose} backdrop='static'>
-				<Modal.Header className='bg-primary' closeButton>
-					<Modal.Title className='text-white'>Journal Entry</Modal.Title>
-				</Modal.Header>
-
-				<Modal.Body className='bg-light'>
-					<div className='container mb-4'>
-						<div className='row mb-3'>
-							<div className='col-12 col-md-6 required'>
-								<label className='text-muted text-uppercase text-sm'>Entry Date</label>
-								<input
-									name='entryDate'
-									type='date'
-									value={this.state.dailyEntry.entryDate}
-									onChange={this.handleInputChange}
-									className='form-control w-50'
-									required
-								/>
-								<div className='invalid-feedback'>Please provide Entry Date</div>
-							</div>
-							<div className='col-12 col-md-6'>
-								<label className='text-muted text-uppercase text-sm'>Bed Time</label>
-								<input
-									name='bedTime'
-									type='time'
-									value={this.state.dailyEntry.bedTime}
-									onChange={this.handleInputChange}
-									className='form-control w-50'
-								/>
-							</div>
-						</div>
-						<div className='row'>
-							<div className='col-12 col-md-6'>
-								<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
-								<textarea
-									name='notesPrep'
-									value={this.state.dailyEntry.notesPrep}
-									onChange={this.handleInputChange}
-									className='form-control'
-									rows={3}
-								/>
-							</div>
-							<div className='col-12 col-md-6'>
-								<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
-								<textarea
-									name='notesWake'
-									value={this.state.dailyEntry.notesWake}
-									onChange={this.handleInputChange}
-									className='form-control'
-									rows={3}
-								/>
-							</div>
-						</div>
-					</div>
-
-					<div className='container'>
-						<div className='row mb-3'>
-							<div className='col'>
-								<h5 className='text-primary'>Dreams</h5>
-							</div>
-							<div className='col-auto'>
-								<button className='btn btn-sm btn-outline-primary' onClick={this.addRowHandler}>
-									Add Dream Row
-								</button>
-							</div>
-						</div>
-						{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamRow(dream, idx))}
-					</div>
-				</Modal.Body>
-
-				<Modal.Footer>
-					<Button variant='outline-secondary' className='px-4 mr-2' onClick={this.modalClose}>
-						Close
-					</Button>
-					<Button variant='success' className='w-25' onClick={this.handleSubmit}>
-						Add Entry
-					</Button>
-				</Modal.Footer>
-			</Modal>
-		)
-	}
-}
-
-// ============================================================================
-
 class AppTabs extends React.Component<{
 	activeTab: AppTab
 	authState: IAuthState
 	availDataFiles: IDriveFiles['available']
-	doAddNewEntry: Function
+	doCreateEntry: Function
 	doAuthSignIn: Function
 	doAuthSignOut: Function
 	doCreateJournal: Function
@@ -751,7 +463,7 @@ class AppTabs extends React.Component<{
 			activeTab: AppTab
 			authState: IAuthState
 			availDataFiles: IDriveFiles['available']
-			doAddNewEntry: Function
+			doCreateEntry: Function
 			doAuthSignIn: Function
 			doAuthSignOut: Function
 			doCreateJournal: Function
@@ -1163,7 +875,10 @@ class App extends React.Component<
 							// NOTE: Google-api will return an `{error:{}}` object, so check!
 							if (!json.error && json.name) {
 								let newState = this.state.dataFiles
-								newState.selected.name = json.name
+								let dataFile = newState.available.filter(file => {
+									return file.id === json.id
+								})[0]
+								dataFile.name = json.name
 								this.setState({
 									dataFiles: newState,
 								})
@@ -1178,21 +893,6 @@ class App extends React.Component<
 					reject(error)
 				})
 		})
-	}
-	doAddNewEntry = (value: IJournalEntry) => {
-		let dataFiles = this.state.dataFiles
-
-		if (!dataFiles || !dataFiles.selected) {
-			alert('no file selected')
-			// TODO: https://getbootstrap.com/docs/4.3/components/toasts/
-		} else {
-			dataFiles.selected.entries.push(value)
-			this.setState({
-				dataFiles: dataFiles,
-			})
-			console.log('New entry added!')
-			console.log(this.state.dataFiles.selected)
-		}
 	}
 	/**
 	 * @see: https://developers.google.com/drive/api/v3/reference/files/update
@@ -1273,6 +973,51 @@ class App extends React.Component<
 			})
 	}
 
+	/**
+	 * Add new `IJournalEntry` into selected `IDriveFile`
+	 */
+	doCreateEntry = (entry: IJournalEntry) => {
+		let dataFiles = this.state.dataFiles
+
+		return new Promise((resolve, reject) => {
+			if (!dataFiles || !dataFiles.selected) {
+				reject('No data file currently selected')
+			} else {
+				dataFiles.selected.entries.push(entry)
+				this.setState({
+					dataFiles: dataFiles,
+				})
+				resolve(true)
+			}
+		})
+	}
+	/**
+	 * Add new `IJournalEntry` into selected `IDriveFile`
+	 */
+	doUpdateEntry = (entry: IJournalEntry) => {
+		let dataFiles = this.state.dataFiles
+
+		return new Promise((resolve, reject) => {
+			if (!dataFiles || !dataFiles.selected) {
+				reject('No data file currently selected')
+			} else {
+				let editEntry = dataFiles.selected.entries.filter(ent => {
+					return ent.entryDate == entry.entryDate
+				})[0]
+				if (!editEntry) {
+					reject('ERROR: Unable to find this entry to update it')
+				} else {
+					editEntry = entry
+					this.setState({
+						dataFiles: dataFiles,
+					})
+
+					resolve(true)
+				}
+			}
+		})
+	}
+
 	render() {
 		return (
 			<main>
@@ -1289,7 +1034,7 @@ class App extends React.Component<
 					availDataFiles={
 						this.state.dataFiles && this.state.dataFiles.available ? this.state.dataFiles.available : null
 					}
-					doAddNewEntry={this.doAddNewEntry}
+					doCreateEntry={this.doCreateEntry}
 					doAuthSignIn={this.doAuthSignIn}
 					doAuthSignOut={this.doAuthSignOut}
 					doCreateJournal={this.driveCreateNewJournal}
@@ -1304,6 +1049,8 @@ class App extends React.Component<
 					}
 				/>
 				<EntryModal
+					doCreateEntry={this.doCreateEntry}
+					doUpdateEntry={this.doUpdateEntry}
 					editEntry={this.state.editEntry}
 					onShowModal={this.chgShowModal}
 					show={this.state.showModal}
