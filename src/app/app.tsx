@@ -995,21 +995,25 @@ class App extends React.Component<
 	 * Add new `IJournalEntry` into selected `IDriveFile`
 	 */
 	doUpdateEntry = (entry: IJournalEntry) => {
-		let dataFiles = this.state.dataFiles
+		let newState = this.state.dataFiles
 
 		return new Promise((resolve, reject) => {
-			if (!dataFiles || !dataFiles.selected) {
+			if (!newState || !newState.selected) {
 				reject('No data file currently selected')
 			} else {
-				let editEntry = dataFiles.selected.entries.filter(ent => {
+				let editEntry = newState.selected.entries.filter(ent => {
 					return ent.entryDate == entry.entryDate
 				})[0]
+
 				if (!editEntry) {
 					reject('ERROR: Unable to find this entry to update it')
 				} else {
-					editEntry = entry
+					Object.keys(entry).forEach(key => {
+						editEntry[key] = entry[key]
+					})
+
 					this.setState({
-						dataFiles: dataFiles,
+						dataFiles: newState,
 					})
 
 					resolve(true)
