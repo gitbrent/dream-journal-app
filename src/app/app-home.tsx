@@ -237,9 +237,9 @@ class TabHome extends React.Component<
 					<thead className='thead'>
 						<tr>
 							<th style={{ width: '5%' }}>Status</th>
-							<th style={{ width: '50%' }}>File Name</th>
-							<th className='text-center d-none d-md-table-cell'>File Size</th>
-							<th className='text-center d-none d-md-table-cell'>Last Modified</th>
+							<th style={{ width: '50%' }}>Name</th>
+							<th className='text-center d-none d-md-table-cell'>Size</th>
+							<th className='text-center d-none d-md-table-cell'>Modified&nbsp;▼</th>
 							<th>Action</th>
 						</tr>
 					</thead>
@@ -308,7 +308,7 @@ class TabHome extends React.Component<
 												''
 											)}
 										</td>
-										<td className='align-middle text-center d-none d-md-table-cell'>
+										<td className='align-middle text-center text-nowrap d-none d-md-table-cell'>
 											{getReadableFileSizeString(Number(file['size']))}
 										</td>
 										<td className='align-middle text-center text-nowrap d-none d-md-table-cell'>
