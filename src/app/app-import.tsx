@@ -11,6 +11,7 @@ class TabImport extends React.Component<
 		selDataFile: IDriveFile
 	},
 	{
+		_defaultYear: number
 		_demoData: string
 		_dreamSignsDelim: string
 		_entryDateInvalidMsg: string
@@ -53,6 +54,7 @@ class TabImport extends React.Component<
 		let config = this.props.importState || JSON.parse(localStorage.getItem('import-config')) || {}
 
 		this.state = {
+			_defaultYear: config._defaultYear || new Date().getFullYear(),
 			_demoData: config._demoData || '',
 			_dreamSignsDelim: config._dreamSignsDelim || '',
 			_entryDateInvalidMsg: '',
@@ -139,11 +141,11 @@ class TabImport extends React.Component<
 						let keyVal = line.trim().split(new RegExp(this.state._entryDate, 'g'))
 						let newState = { entryDate: '' }
 
-						// CASE 1: "DATE: 03/08/2019"
+						// CASE 1: "DATE: 03/08"
 						if (keyVal[1]) {
 							newState['entryDate'] = keyVal[1]
 						}
-						// CASE 2: "03/08/2019:" and thats it - no keyname or lede like "DATE:"
+						// CASE 2: "03/08:" and thats it - no keyname or lede like "DATE:"
 						// NOTE: `\d\d/\d\d/\d\d\d\d:` parse result is ["",""], so show whole line
 						else if (!keyVal[0]) {
 							newState['entryDate'] = line.trim()
@@ -239,6 +241,19 @@ class TabImport extends React.Component<
 		})
 	}
 
+	handleDeleteEntry = event => {
+		if (!confirm('Delete this Entry?')) return
+
+		let newState = this.state._parsedSections
+		newState.splice(event.target.getAttribute('data-sect-idx'), 1)
+
+		console.log('handleDeleteEntry!!')
+
+		this.setState({
+			_parsedSections: newState,
+		})
+	}
+
 	/* ======================================================================== */
 
 	/**
@@ -252,14 +267,14 @@ class TabImport extends React.Component<
 		if (this.state._selBreakType == 'blankLine') strSecBreak = new RegExp('\n\n')
 		if (this.state._selBreakType == 'entryDate') strSecBreak = new RegExp(ENTRY_DATE_BREAK)
 
-		// A: Reality check
+		// A: reality check
 		if (!this.state._importText) {
 			// TODO: invalid-response div shown
 			console.log('Bro, add some text!')
 			return
 		}
 
-		// B: Handle "Entry Date" as section break
+		// B: handle "Entry Date" as section break
 		// Merely using `split(new RegExp(this.state._entryDate))` will cause the loss of the date itself
 		// SOLN: Add custom break and split using that string instead so only its lost
 		if (this.state._selBreakType == 'entryDate') {
@@ -271,7 +286,7 @@ class TabImport extends React.Component<
 			_parsedSections: [],
 		})
 
-		// D: Parse text
+		// D: parse text
 		if (DEBUG) {
 			console.log('-------------------------------------------')
 			console.log('strImportText split into sections:')
@@ -318,6 +333,7 @@ class TabImport extends React.Component<
 						}
 					}
 
+					// parse entry tokens/dream(s) tokens
 					if (objEntry.dreams.length == 0) {
 						// NOTE: As each of the Entry props have diff reqs, handle each one sep
 						if (idx == 0 && this.state._selEntryType == 'first') {
@@ -340,9 +356,14 @@ class TabImport extends React.Component<
 						) {
 							let textParse = line.trim().match(new RegExp(this.state._entryDate, 'gm'))[0]
 							if (textParse) {
-								textParse = textParse.replace(/:|;/gi, '') // For "01/01/2019:"
+								textParse = textParse.replace(/:|;/gi, '') // For "11/29/2019:"
 								if (DEBUG) console.log('textParse = ' + textParse)
 								let dateParse = new Date(textParse)
+								if (this.state._defaultYear && textParse && textParse.length <= 5) {
+									// "12/31"
+									if (DEBUG) console.log('FYI using `_defaultYear`: ' + this.state._defaultYear)
+									dateParse.setFullYear(this.state._defaultYear)
+								}
 								if (
 									Object.prototype.toString.call(dateParse) === '[object Date]' &&
 									dateParse.getDay() > 0
@@ -475,7 +496,7 @@ class TabImport extends React.Component<
 	render() {
 		let contDemoData: JSX.Element = (
 			<div ref={this.refDemoData} className='container p-3 bg-black'>
-				<span className='text-white'>03/08/2019:</span>
+				<span className='text-white'>03/08:</span>
 				<ul>
 					<li>
 						<span className='text-white'>BEDTIME:</span> 11:30
@@ -770,10 +791,29 @@ class TabImport extends React.Component<
 					</div>
 				</div>
 
-				<div className='row align-items-top mb-4'>
-					<div className='col-8'>
+				<div className='row align-items-center mb-4'>
+					<div className='col-5'>
+						<h5 className='text-primary'>Default Year</h5>
+						<label>Used when no year is available (ex: "Date: 10/31")</label>
+					</div>
+					<div className='col-3'>
+						<input
+							name='_defaultYear'
+							type='number'
+							className='form-control'
+							min='1950'
+							max={new Date().getFullYear()}
+							onChange={this.handleInputChange}
+							value={this.state._defaultYear}
+						/>
+					</div>
+				</div>
+				<div className='row align-items-center mb-4'>
+					<div className='col-5'>
 						<h5 className='text-primary'>Section Break</h5>
-						<p>Select the type of break your journal uses between entries.</p>
+						<label>Type of break your journal uses between entries</label>
+					</div>
+					<div className='col-3'>
 						<select
 							name='_selBreakType'
 							className='form-control'
@@ -783,10 +823,9 @@ class TabImport extends React.Component<
 							<option value='entryDate'>Entry Date</option>
 						</select>
 					</div>
-					<div className='col-4' />
 				</div>
 
-				<div className='row align-items-top'>
+				<div className='row align-items-bottom'>
 					<div className='col-12 text-center'>
 						<p>
 							Once the options above are functioning correctly, go to the next tab to import your dream
@@ -799,20 +838,33 @@ class TabImport extends React.Component<
 
 		let importParse: JSX.Element = (
 			<div>
-				<h5 className='text-primary'>Instructions</h5>
-				<ul>
-					<li>
-						Copy one or more entries from your Dream Journal, then paste them below and click the Parse
-						button
-					</li>
-					<li>
-						The options in the Setup tab will be used to parse your existing entries into a new,
-						well-structured format
-					</li>
-					<li>
-						Review the results, make any changes, then click Import to add them to your Brain Cloud journal
-					</li>
-				</ul>
+				<div className='row'>
+					<div className='col'>
+						<h5 className='text-primary'>Instructions</h5>
+						<ul>
+							<li>
+								Copy one or more entries from your Dream Journal, then paste them below and click the
+								Parse button
+							</li>
+							<li>
+								The options in the Setup tab will be used to parse your existing entries into a new,
+								well-structured format
+							</li>
+							<li>
+								Review the results, make any changes, then click Import to add them to your Brain Cloud
+								journal
+							</li>
+						</ul>
+					</div>
+					<div className='col-auto pt-2'>
+						<button
+							className='btn btn-success'
+							onClick={this.handleParse}
+							disabled={(this.state._importText || '').length == 0}>
+							Parse Journal Entries
+						</button>
+					</div>
+				</div>
 
 				<ContentEditable
 					innerRef={this.refContentEditable}
@@ -828,29 +880,46 @@ class TabImport extends React.Component<
 					style={{ minHeight: '300px', height: 'auto' }}
 				/>
 				<div className='invalid-feedback'>Please paste your journal above</div>
-
-				<div className='text-center p-3'>
-					<button
-						className='btn btn-success'
-						onClick={this.handleParse}
-						disabled={(this.state._importText || '').length == 0}>
-						Parse Journal Entries
-					</button>
-				</div>
 			</div>
 		)
 
 		let importResults: JSX.Element = (
 			<form>
-				<h5 className='text-primary mb-3'>
-					Parse Results: {'Found ' + this.state._parsedSections.length + ' entries'}
-				</h5>
+				<div className='row'>
+					<div className='col'>
+						<h5 className='text-primary mb-3'>Parse Results</h5>
+						<ul>
+							<li>{'Found ' + this.state._parsedSections.length + ' entries'}</li>
+						</ul>
+					</div>
+					<div className='col-auto pt-2'>
+						<button
+							type='button'
+							className='btn btn-success'
+							onClick={this.handleImport}
+							disabled={this.state._parsedSections.length == 0}>
+							Import Entries into Journal
+						</button>
+					</div>
+				</div>
 
 				<ul className='list-group mb-4'>
 					{this.state._parsedSections.map((sect, idx) => {
 						return (
 							<li className='list-group-item' key={'parsedsect' + idx}>
-								<h4 className='text-primary'>Entry {idx + 1}</h4>
+								<div className='row no-gutters'>
+									<div className='col'>
+										<h4 className='text-primary'>Entry {idx + 1}</h4>
+									</div>
+									<div className='col-auto'>
+										<div
+											data-sect-idx={idx}
+											onClick={this.handleDeleteEntry}
+											className='iconSvg size24 small circle no cursor-pointer'
+											title='Delete Entry'
+										/>
+									</div>
+								</div>
 								<div className='row mb-4'>
 									<div className='col-auto'>
 										<label className='text-uppercase text-muted d-block'>Entry Date</label>
@@ -1002,16 +1071,6 @@ class TabImport extends React.Component<
 						)
 					})}
 				</ul>
-
-				<div className='text-center p-3'>
-					<button
-						type='button'
-						className='btn btn-success'
-						onClick={this.handleImport}
-						disabled={this.state._parsedSections.length == 0}>
-						Import Entries into Journal
-					</button>
-				</div>
 			</form>
 		)
 
@@ -1023,6 +1082,9 @@ class TabImport extends React.Component<
 					</div>
 					<div className='card-body bg-light'>
 						<div className='row align-items-top'>
+							<div className='col-auto'>
+								<div className='iconSvg size96 wizard' />
+							</div>
 							<div className='col'>
 								<p className='card-text'>
 									It's likely that you're already keeping a dream journal in another format, such a
