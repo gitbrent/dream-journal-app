@@ -236,11 +236,11 @@ class TabHome extends React.Component<
 				<table className='table'>
 					<thead className='thead'>
 						<tr>
-							<th style={{ width: '5%' }}>Status</th>
+							<th style={{ width: '5%' }}>&nbsp;</th>
 							<th style={{ width: '50%' }}>Name</th>
 							<th className='text-center d-none d-md-table-cell'>Size</th>
 							<th className='text-center d-none d-md-table-cell'>Modified&nbsp;▼</th>
-							<th>Action</th>
+							<th>&nbsp;</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -261,12 +261,7 @@ class TabHome extends React.Component<
 												</td>
 											) : (
 												<td className='align-middle text-center'>
-													<img
-														src={SVG_CHECK}
-														alt='Selected File'
-														title='Selected File'
-														style={{ width: '24px' }}
-													/>
+												<div className='text-info text-center w-100'><small>Selected</small></div>
 												</td>
 											)
 										) : this.props.selDataFile &&
@@ -276,7 +271,7 @@ class TabHome extends React.Component<
 										) : !this.state.fileBeingRenamed ? (
 											<td>
 												<button
-													className='btn btn-sm btn-info'
+													className='btn btn-sm btn-info w-100'
 													data-file-id={file['id']}
 													onClick={this.handleDriveFileGet}>
 													Select
