@@ -147,9 +147,6 @@ class EntryModal extends React.Component<
 	handleSubmit = event => {
 		let arrPromises = []
 
-		// TODO: CURRENT: FIXME:
-		console.log('TODO: FIXME:')
-
 		if (this.props.editEntry) {
 			arrPromises.push(this.props.doUpdateEntry(this.state.dailyEntry))
 		} else {
@@ -187,6 +184,19 @@ class EntryModal extends React.Component<
 					<h1 className='text-primary font-weight-light'>{dreamIdx + 1}</h1>
 				</div>
 				<div className='col'>
+					<div className='row mb-3'>
+						<div className='col'>
+							<label className='text-muted text-uppercase text-sm'>Title</label>
+							<input
+								name='title'
+								type='text'
+								className='form-control'
+								value={dream.title}
+								onChange={this.handleInputDreamChange}
+								data-dream-idx={dreamIdx}
+							/>
+						</div>
+					</div>
 					<div className='row mb-3'>
 						<div className='col-12 col-md-6'>
 							<label className='text-muted text-uppercase text-sm d-block'>Dream Signs</label>
@@ -226,19 +236,6 @@ class EntryModal extends React.Component<
 									)
 								})}
 							</select>
-						</div>
-					</div>
-					<div className='row mb-3'>
-						<div className='col'>
-							<label className='text-muted text-uppercase text-sm'>Title</label>
-							<input
-								name='title'
-								type='text'
-								className='form-control'
-								value={dream.title}
-								onChange={this.handleInputDreamChange}
-								data-dream-idx={dreamIdx}
-							/>
 						</div>
 					</div>
 					<div className='row'>
