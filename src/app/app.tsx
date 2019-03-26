@@ -55,10 +55,11 @@ export enum InductionTypes {
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import '../css/bootstrap.yeticyborg.css'
-import DateRangePicker from '../app/date-range-picker'
+import '../css/svg-images.css'
 import LogoBase64 from '../img/logo_base64'
 import TabHome from '../app/app-home'
 import TabImport from '../app/app-import'
+import TabModify from '../app/app-modify'
 import TabSearch from '../app/app-search'
 import EntryModal from '../app/app-modal-entry'
 
@@ -126,8 +127,6 @@ const JOURNAL_HEADER = {
 	mimeType: 'application/json',
 }
 
-// ============================================================================
-
 /**
  * @see: https://developers.google.com/identity/protocols/OAuth2UserAgent#example
  */
@@ -180,8 +179,6 @@ function parseStoreAccessKey() {
 		localStorage.setItem('oauth2-params', JSON.stringify(params))
 	}
 }
-
-// ============================================================================
 
 class AppNavBar extends React.Component<
 	{ onSaveFile: Function; onShowTab: Function; selDataFile: IDriveFile },
@@ -299,149 +296,6 @@ class AppNavBar extends React.Component<
 	}
 }
 
-class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDriveFile }> {
-	constructor(props: Readonly<{ onShowModal: Function; selDataFile: IDriveFile }>) {
-		super(props)
-	}
-
-	handleNewModal = e => {
-		this.props.onShowModal({
-			show: true,
-		})
-	}
-
-	handleEditEntryModal = e => {
-		this.props.onShowModal({
-			show: true,
-			editEntry: this.props.selDataFile.entries.filter(entry => {
-				return entry.entryDate == e.target.getAttribute('data-entry-key')
-			})[0],
-		})
-	}
-
-	// TODO: Show days with dreams and/or with Lucid success:
-	// @see: http://react-day-picker.js.org/examples/elements-cell
-
-	render() {
-		let tableFileList: JSX.Element = (
-			<table className='table'>
-				<thead className='thead'>
-					<tr>
-						<th>Entry Date</th>
-						<th className='text-center d-none d-md-table-cell'>Bed Time</th>
-						<th className='text-center d-none d-md-table-cell'>Dream Count</th>
-						<th className='text-center d-none d-md-table-cell'>Lucid Dream?</th>
-						<th className='text-center'>Action</th>
-					</tr>
-				</thead>
-				<tbody>
-					{(this.props.selDataFile && this.props.selDataFile.entries
-						? this.props.selDataFile.entries
-						: []
-					).map((entry: IJournalEntry, idx) => {
-						return (
-							<tr key={'journalrow' + idx}>
-								<td>{entry.entryDate}</td>
-								<td className='text-center d-none d-md-table-cell'>{entry.bedTime}</td>
-								<td className='text-center d-none d-md-table-cell'>{entry.dreams.length}</td>
-								<td className='text-center d-none d-md-table-cell'>
-									{entry.dreams.filter(dream => {
-										return dream.isLucidDream == true
-									}).length > 0 ? (
-										<div className='badge badge-success'>Yes</div>
-									) : (
-										''
-									)}
-								</td>
-								<td className='text-center'>
-									<button
-										className='btn btn-sm btn-primary px-4'
-										data-entry-key={entry.entryDate}
-										onClick={this.handleEditEntryModal}>
-										Edit
-									</button>
-								</td>
-							</tr>
-						)
-					})}
-				</tbody>
-				<tfoot>
-					{this.props.selDataFile &&
-						this.props.selDataFile.entries &&
-						this.props.selDataFile.entries.length == 0 && (
-							<tr>
-								<td colSpan={3} className='text-center p-3 text-muted'>
-									(No Dream Journal entries found - select "Add Journal Entry" above to create a new
-									one)
-								</td>
-							</tr>
-						)}
-					{!this.props.selDataFile && (
-						<tr>
-							<td colSpan={5} className='text-center p-3 text-muted'>
-								(Select a Dream Journal to see entries)
-							</td>
-						</tr>
-					)}
-				</tfoot>
-			</table>
-		)
-
-		return (
-			<div className='container mt-5'>
-				<div className='row justify-content-between'>
-					<div className='col-12'>
-						<div className='card'>
-							<div className='card-header bg-primary'>
-								<h5 className='card-title text-white mb-0'>Modify Journal</h5>
-							</div>
-							<div className='card-body bg-light'>
-								<div className='row mb-4 align-items-center'>
-									<div className='col'>
-										Your latest journal entries are shown by default. Use the date range search to
-										find specific entries.
-									</div>
-									<div className='col-auto'>
-										<button
-											type='button'
-											className='btn btn-success'
-											disabled={!this.props.selDataFile}
-											onClick={this.handleNewModal}>
-											Create Day
-										</button>
-									</div>
-								</div>
-								<div className='text-center d-block d-sm-none'>
-									<DateRangePicker numberOfMonths={1} />
-								</div>
-								<div className='text-center d-none d-sm-block d-md-none'>
-									<DateRangePicker numberOfMonths={2} />
-								</div>
-								<div className='text-center d-none d-md-block d-lg-none'>
-									<DateRangePicker numberOfMonths={2} />
-								</div>
-								<div className='text-center d-none d-lg-block d-xl-none'>
-									<DateRangePicker numberOfMonths={3} />
-								</div>
-								<div className='text-center d-none d-xl-block'>
-									<DateRangePicker numberOfMonths={4} />
-								</div>
-								{tableFileList}
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div className='row'>
-					<div className='col-12' />
-				</div>
-			</div>
-		)
-	}
-}
-
-// ============================================================================
-
 class AppTabs extends React.Component<{
 	activeTab: AppTab
 	authState: IAuthState
@@ -482,7 +336,7 @@ class AppTabs extends React.Component<{
 	render() {
 		switch (this.props.activeTab) {
 			case AppTab.view:
-				return <TabView onShowModal={this.props.onShowModal} selDataFile={this.props.selDataFile} />
+				return <TabModify onShowModal={this.props.onShowModal} selDataFile={this.props.selDataFile} />
 			case AppTab.search:
 				return <TabSearch />
 			case AppTab.import:
@@ -512,7 +366,7 @@ class AppTabs extends React.Component<{
 	}
 }
 
-// MAIN APP
+// App Logic
 class App extends React.Component<
 	{},
 	{
