@@ -29,7 +29,6 @@
 
 import * as React from 'react'
 import DateRangePicker from '../app/date-range-picker'
-import SVG_CHECK from '../img/svg_check'
 import { IJournalEntry, IDriveFile } from './app'
 
 class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDriveFile }> {

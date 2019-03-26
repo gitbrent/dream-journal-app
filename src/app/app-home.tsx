@@ -30,7 +30,6 @@
 import * as React from 'react'
 import { AuthState, IAuthState, IDriveFile, IDriveFiles } from './app'
 import LogoBase64 from '../img/logo_base64'
-import SVG_CHECK from '../img/svg_check'
 
 function getReadableFileSizeString(fileSizeInBytes: number) {
 	var i = -1
