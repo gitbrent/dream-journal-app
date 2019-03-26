@@ -10837,3 +10837,6 @@ legend {
 	background-color: #282828;
 	color: var(--white);
 }
+.cursor-pointer {
+	cursor: pointer;
+}
