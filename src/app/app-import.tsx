@@ -1,6 +1,7 @@
 import React from 'react'
-import ContentEditable from 'react-contenteditable'
 import { IDriveFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './app'
+import ContentEditable from 'react-contenteditable'
+import BootstrapSwitchButton from '../app/bootstrap-switch-button'
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
 const DEBUG = true
 
@@ -18,6 +19,7 @@ class TabImport extends React.Component<
 		_importHTML: string
 		_importText: string
 		_invalidSections: Array<IJournalEntry>
+		_isTime24Hour: boolean
 		_parsedSections: Array<IJournalEntry>
 		_selBreakType: string
 		_selDreamNotes: string
@@ -61,6 +63,7 @@ class TabImport extends React.Component<
 			_importHTML: config._importHTML || '<br>',
 			_importText: config._importText || '',
 			_invalidSections: config._invalidSections || [],
+			_isTime24Hour: config._isTime24Hour || false,
 			_parsedSections: config._parsedSections || [],
 			_selBreakType: config._selBreakType || 'blankLine',
 			_selDreamNotes: config._selDreamNotes || 'match',
@@ -791,12 +794,22 @@ class TabImport extends React.Component<
 					</div>
 				</div>
 
-				<div className='row align-items-center mb-4'>
-					<div className='col-5'>
+				<div className='row align-items-center mb-4 border-top border-bottom border-secondary py-3'>
+					<div className='col'>
+						<h5 className='text-primary'>Section Break</h5>
+						<label>Type of break your journal uses between entries</label>
+						<select
+							name='_selBreakType'
+							className='form-control'
+							onChange={this.handleInputChange}
+							value={this.state._selBreakType}>
+							<option value='blankLine'>Empty Line (paragraph style)</option>
+							<option value='entryDate'>Entry Date</option>
+						</select>
+					</div>
+					<div className='col'>
 						<h5 className='text-primary'>Default Year</h5>
 						<label>Used when no year is available (ex: "Date: 10/31")</label>
-					</div>
-					<div className='col-3'>
 						<input
 							name='_defaultYear'
 							type='number'
@@ -807,26 +820,30 @@ class TabImport extends React.Component<
 							value={this.state._defaultYear}
 						/>
 					</div>
-				</div>
-				<div className='row align-items-center mb-4'>
-					<div className='col-5'>
-						<h5 className='text-primary'>Section Break</h5>
-						<label>Type of break your journal uses between entries</label>
-					</div>
-					<div className='col-3'>
-						<select
-							name='_selBreakType'
+					<div className='col'>
+						<h5 className='text-primary'>Time Format</h5>
+						<label>Used to parse "12:30" in am/pm or 24-hour time</label>
+
+						<BootstrapSwitchButton
+						toggle={() => {console.log('yo')}}
+						onlabel="on label"
+						offlabel="off label"
+						style="w-50"
+						/>
+
+						<input
+							name='_isTime24Hour'
+							type='checkbox'
 							className='form-control'
 							onChange={this.handleInputChange}
-							value={this.state._selBreakType}>
-							<option value='blankLine'>Empty Line (paragraph style)</option>
-							<option value='entryDate'>Entry Date</option>
-						</select>
+							checked={this.state._isTime24Hour}
+						/>
 					</div>
 				</div>
 
 				<div className='row align-items-bottom'>
 					<div className='col-12 text-center'>
+						<hr />
 						<p>
 							Once the options above are functioning correctly, go to the next tab to import your dream
 							journal.
