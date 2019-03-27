@@ -331,10 +331,10 @@ class EntryModal extends React.Component<
 
 				<Modal.Footer>
 					<Button variant='outline-secondary' className='px-4 mr-2' onClick={this.modalClose}>
-						Close
+						Cancel
 					</Button>
 					<Button variant='success' className='w-25' onClick={this.handleSubmit}>
-						Add Entry
+						Save Entry
 					</Button>
 				</Modal.Footer>
 			</Modal>
