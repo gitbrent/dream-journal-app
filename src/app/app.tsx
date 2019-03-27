@@ -122,7 +122,6 @@ const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
 const FIREBASE_URL = 'https://brain-cloud-dream-journal.firebaseapp.com'
 const LOCALHOST_URL = 'http://localhost:8080'
 const JOURNAL_HEADER = {
-	name: 'dream-journal.json',
 	description: 'Brain Cloud Dream Journal data file',
 	mimeType: 'application/json',
 }
@@ -802,12 +801,16 @@ class App extends React.Component<
 				response
 					.json()
 					.then(fileResource => {
+						// A: update state
 						let newState = this.state.dataFiles
 						newState.selected._lastSaved = new Date()
 						newState.selected._isSaving = false
 						this.setState({
 							dataFiles: newState,
 						})
+
+						// B: refresh file list (to update "size", "modified")
+						this.driveGetFileList()
 					})
 					.catch(error => {
 						if (error.code == '401') {
