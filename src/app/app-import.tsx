@@ -1,11 +1,12 @@
 import React from 'react'
 import { IDriveFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './app'
+import BootstrapSwitchButton from 'bootstrap-switch-button-react'
 import ContentEditable from 'react-contenteditable'
-import BootstrapSwitchButton from '../app/bootstrap-switch-button'
+//import BootstrapSwitchButton from '../../../bootstrap-switch-button-react/src/bootstrap-switch-button'
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
 const DEBUG = true
 
-class TabImport extends React.Component<
+export default class TabImport extends React.Component<
 	{
 		doSaveImportState: Function
 		importState: object
@@ -794,7 +795,7 @@ class TabImport extends React.Component<
 					</div>
 				</div>
 
-				<div className='row align-items-center mb-4 border-top border-bottom border-secondary py-3'>
+				<div className='row align-items-center py-4 mb-4 border-top border-bottom border-secondary'>
 					<div className='col'>
 						<h5 className='text-primary'>Section Break</h5>
 						<label>Type of break your journal uses between entries</label>
@@ -825,25 +826,21 @@ class TabImport extends React.Component<
 						<label>Used to parse "12:30" in am/pm or 24-hour time</label>
 
 						<BootstrapSwitchButton
-						toggle={() => {console.log('yo')}}
-						onlabel="on label"
-						offlabel="off label"
-						style="w-50"
-						/>
-
-						<input
-							name='_isTime24Hour'
-							type='checkbox'
-							className='form-control'
-							onChange={this.handleInputChange}
-							checked={this.state._isTime24Hour}
+							onChange={(checked: boolean) => {
+								this.setState({ _isTime24Hour: checked })
+							}}
+							checked={false}
+							onlabel='24-Hour Format'
+							onstyle='primary'
+							offlabel='AM/PM Format'
+							offstyle='secondary'
+							style='w-50'
 						/>
 					</div>
 				</div>
 
 				<div className='row align-items-bottom'>
 					<div className='col-12 text-center'>
-						<hr />
 						<p>
 							Once the options above are functioning correctly, go to the next tab to import your dream
 							journal.
@@ -1175,5 +1172,3 @@ class TabImport extends React.Component<
 		)
 	}
 }
-
-export default TabImport

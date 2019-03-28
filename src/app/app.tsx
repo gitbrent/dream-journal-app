@@ -63,12 +63,6 @@ import TabModify from '../app/app-modify'
 import TabSearch from '../app/app-search'
 import EntryModal from '../app/app-modal-entry'
 
-/* WIP
-//import '../templates/bootstrap-switch-button.css'
-//import SwitchButton from './bootstrap-switch-button'
-//<SwitchButton/>
-*/
-
 export interface IAuthState {
 	status: AuthState
 	userName: ''
