@@ -4,7 +4,7 @@ import BootstrapSwitchButton from 'bootstrap-switch-button-react'
 import ContentEditable from 'react-contenteditable'
 //import BootstrapSwitchButton from '../../../bootstrap-switch-button-react/src/bootstrap-switch-button'
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
-const DEBUG = true
+const VERBOSE = false
 
 export default class TabImport extends React.Component<
 	{
@@ -291,7 +291,7 @@ export default class TabImport extends React.Component<
 		})
 
 		// D: parse text
-		if (DEBUG) {
+		if (VERBOSE) {
 			console.log('-------------------------------------------')
 			console.log('strImportText split into sections:')
 			console.log(strImportText.split(strSecBreak))
@@ -303,7 +303,7 @@ export default class TabImport extends React.Component<
 				return sect
 			})
 			.forEach(sect => {
-				//if (DEBUG) console.log('SECTION: ' + sect)
+				//if (VERBOSE) console.log('SECTION: ' + sect)
 
 				// 1: Divide text into dream sections
 				let objEntry: IJournalEntry = {
@@ -317,7 +317,7 @@ export default class TabImport extends React.Component<
 				let tmpDreamSigns: IJournalDream['dreamSigns']
 
 				// 2: Tokenize each section into our fields
-				//if (DEBUG) console.log('sect.split(`\\n`):')
+				//if (VERBOSE) console.log('sect.split(`\\n`):')
 				sect.split('\n').forEach((line, idx) => {
 					// DESIGN: dreams are 1+ lines that need to captured once they start, kind of a loop-within-loop
 					// As a initial algorithm, check for any `dream` array items, consider all other fields complete
@@ -331,7 +331,7 @@ export default class TabImport extends React.Component<
 							lucidMethod: null,
 						}
 						objEntry.dreams.push(objDream)
-						if (DEBUG) {
+						if (VERBOSE) {
 							console.log('NEW (objDream)')
 							console.log(objDream)
 						}
@@ -361,11 +361,11 @@ export default class TabImport extends React.Component<
 							let textParse = line.trim().match(new RegExp(this.state._entryDate, 'gm'))[0]
 							if (textParse) {
 								textParse = textParse.replace(/:|;/gi, '') // For "11/29/2019:"
-								if (DEBUG) console.log('textParse = ' + textParse)
+								if (VERBOSE) console.log('textParse = ' + textParse)
 								let dateParse = new Date(textParse)
 								if (this.state._defaultYear && textParse && textParse.length <= 5) {
 									// "12/31"
-									if (DEBUG) console.log('FYI using `_defaultYear`: ' + this.state._defaultYear)
+									if (VERBOSE) console.log('FYI using `_defaultYear`: ' + this.state._defaultYear)
 									dateParse.setFullYear(this.state._defaultYear)
 								}
 								if (
@@ -377,7 +377,19 @@ export default class TabImport extends React.Component<
 							}
 						} else if (line.trim().match(new RegExp(this.state._bedTime, 'g'))) {
 							let keyVal = line.trim().split(new RegExp(this.state._bedTime, 'g'))
-							if (keyVal[1].trim()) objEntry.bedTime = keyVal[1].trim()
+							if (keyVal[1].trim()) {
+								let time = keyVal[1].trim()
+								if ( this.state._isTime24Hour ) {
+									let arrTime = time.split(':')
+									let timeHour = Number(arrTime[0])
+									if ( timeHour && !isNaN(timeHour) ) {
+										timeHour += 12
+										if (timeHour >= 24) timeHour = 0
+										time = (timeHour < 10 ? "0"+timeHour : timeHour)+':'+arrTime[1]
+									}
+								}
+								objEntry.bedTime = time
+							}
 						} else if (line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
 							let keyVal = line.trim().split(new RegExp(this.state._notesPrep, 'g'))
 							if (keyVal[1].trim()) objEntry.notesPrep = keyVal[1].trim()
@@ -400,7 +412,7 @@ export default class TabImport extends React.Component<
 							if (keyVal[1]) objDream.title = keyVal[1].trim()
 						} else if (objDream.title && this.state._selDreamNotes == 'after' && line) {
 							objDream.notes += (line + '\n').replace(/\n\s*\n/g, '\n')
-							if (DEBUG) console.log('dream.notes:\n' + objDream.notes)
+							if (VERBOSE) console.log('dream.notes:\n' + objDream.notes)
 						} else if (this.state._selDreamNotes != 'after') {
 							// TODO: look for regex
 						}
@@ -437,7 +449,7 @@ export default class TabImport extends React.Component<
 		// F: save current setup to localStorage
 		localStorage.setItem('import-config', JSON.stringify(this.state))
 
-		if (DEBUG) {
+		if (VERBOSE) {
 			console.log(arrEntries)
 			console.log(this.state)
 		}
