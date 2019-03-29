@@ -804,7 +804,8 @@ class App extends React.Component<
 						})
 
 						// B: refresh file list (to update "size", "modified")
-						this.driveGetFileList()
+						//this.driveGetFileList()
+						// TODO: ^^^ nope! this resets the save date we just added!!!
 					})
 					.catch(error => {
 						if (error.code == '401') {

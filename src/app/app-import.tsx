@@ -1,8 +1,8 @@
 import React from 'react'
 import { IDriveFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './app'
 import BootstrapSwitchButton from 'bootstrap-switch-button-react'
+//import BootstrapSwitchButton from '../../../bootstrap-switch-button-react'
 import ContentEditable from 'react-contenteditable'
-//import BootstrapSwitchButton from '../../../bootstrap-switch-button-react/src/bootstrap-switch-button'
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
 const VERBOSE = false
 

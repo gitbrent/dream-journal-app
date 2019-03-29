@@ -28,8 +28,12 @@
 \*/
 
 import * as React from 'react'
-import Modal from 'react-bootstrap/Modal'
+import BootstrapSwitchButton from 'bootstrap-switch-button-react'
+//import BootstrapSwitchButton from '../../../bootstrap-switch-button-react'
+// FUTURE: `react-bootstrap` added hooks in 1.0.0-beta.6 which break the whole app (even with react-16.8)
+// FUTURE: swtich to: https://reactstrap.github.io/components/modals/#app
 import Button from 'react-bootstrap/Button'
+import Modal from 'react-bootstrap/Modal'
 import { IJournalEntry, IJournalDream, InductionTypes } from './app'
 
 const EMPTY_DREAM = {
@@ -211,13 +215,18 @@ class EntryModal extends React.Component<
 						</div>
 						<div className='col-6 col-md-3'>
 							<label className='text-muted text-uppercase text-sm d-block'>Lucid Dream?</label>
-							<input
-								name='isLucidDream'
-								type='checkbox'
-								data-toggle='switchbutton'
+							<BootstrapSwitchButton
+								onChange={(checked: boolean) => {
+									let newState = this.state.dailyEntry
+									newState.dreams[dreamIdx].isLucidDream = checked
+									this.setState({ dailyEntry:newState })
+								}}
 								checked={dream.isLucidDream}
-								onChange={this.handleInputDreamChange}
-								data-dream-idx={dreamIdx}
+								onlabel='Yes'
+								onstyle='success'
+								offlabel='No'
+								offstyle='secondary'
+								style='w-100'
 							/>
 						</div>
 						<div className='col-6 col-md-3'>
@@ -225,6 +234,7 @@ class EntryModal extends React.Component<
 							<select
 								name='lucidMethod'
 								value={dream.lucidMethod || InductionTypes.none}
+								disabled={!dream.isLucidDream}
 								data-dream-idx={dreamIdx}
 								onChange={this.handleInputDreamChange}
 								className='form-control'>
@@ -333,7 +343,7 @@ class EntryModal extends React.Component<
 					<Button variant='outline-secondary' className='px-4 mr-2' onClick={this.modalClose}>
 						Cancel
 					</Button>
-					<Button variant='success' className='w-25' onClick={this.handleSubmit}>
+					<Button variant='primary' className='w-25' onClick={this.handleSubmit}>
 						Save Entry
 					</Button>
 				</Modal.Footer>
