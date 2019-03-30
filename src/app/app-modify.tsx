@@ -31,9 +31,17 @@ import * as React from 'react'
 import DateRangePicker from '../app/date-range-picker'
 import { IJournalEntry, IDriveFile } from './app'
 
-class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDriveFile }> {
+class TabView extends React.Component<
+	{ onShowModal: Function; selDataFile: IDriveFile },
+	{ pagingCurrIdx: number; pagingPageSize: number }
+> {
 	constructor(props: Readonly<{ onShowModal: Function; selDataFile: IDriveFile }>) {
 		super(props)
+
+		this.state = {
+			pagingCurrIdx: 1,
+			pagingPageSize: 10,
+		}
 	}
 
 	handleNewModal = e => {
@@ -55,6 +63,19 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 	// @see: http://react-day-picker.js.org/examples/elements-cell
 
 	render() {
+		let pageCnt = (this.props.selDataFile && this.props.selDataFile.entries && this.props.selDataFile.entries.length > 0
+			? Math.ceil(this.props.selDataFile.entries.length / this.state.pagingPageSize)
+			: 0)
+		let pageArr = []
+		for (
+			let x = 1;
+			x <=pageCnt
+			;
+			x++
+		) {
+			pageArr.push(x)
+		}
+
 		let tableFileList: JSX.Element = (
 			<table className='table'>
 				<thead className='thead'>
@@ -67,35 +88,39 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 					</tr>
 				</thead>
 				<tbody>
-					{(this.props.selDataFile && this.props.selDataFile.entries
-						? this.props.selDataFile.entries
-						: []
-					).map((entry: IJournalEntry, idx) => {
-						return (
-							<tr key={'journalrow' + idx}>
-								<td>{entry.entryDate}</td>
-								<td className='text-center d-none d-md-table-cell'>{entry.bedTime}</td>
-								<td className='text-center d-none d-md-table-cell'>{entry.dreams.length}</td>
-								<td className='text-center d-none d-md-table-cell'>
-									{entry.dreams.filter(dream => {
-										return dream.isLucidDream == true
-									}).length > 0 ? (
-										<div className='iconSvg size24 circle check' title='Lucid Dream Success!'></div>
-									) : (
-										''
-									)}
-								</td>
-								<td className='text-center'>
-									<button
-										className='btn btn-sm btn-primary px-4'
-										data-entry-key={entry.entryDate}
-										onClick={this.handleEditEntryModal}>
-										Edit
-									</button>
-								</td>
-							</tr>
-						)
-					})}
+					{(this.props.selDataFile && this.props.selDataFile.entries ? this.props.selDataFile.entries : [])
+						.filter((entry, idx) => {
+							return (
+								idx >= this.state.pagingPageSize * (this.state.pagingCurrIdx - 1) &&
+								idx < this.state.pagingPageSize * this.state.pagingCurrIdx
+							)
+						})
+						.map((entry: IJournalEntry, idx) => {
+							return (
+								<tr key={'journalrow' + idx}>
+									<td>{entry.entryDate}</td>
+									<td className='text-center d-none d-md-table-cell'>{entry.bedTime}</td>
+									<td className='text-center d-none d-md-table-cell'>{entry.dreams.length}</td>
+									<td className='text-center d-none d-md-table-cell'>
+										{entry.dreams.filter(dream => {
+											return dream.isLucidDream == true
+										}).length > 0 ? (
+											<div className='iconSvg size24 circle check' title='Lucid Dream Success!' />
+										) : (
+											''
+										)}
+									</td>
+									<td className='text-center'>
+										<button
+											className='btn btn-sm btn-primary px-4'
+											data-entry-key={entry.entryDate}
+											onClick={this.handleEditEntryModal}>
+											Edit
+										</button>
+									</td>
+								</tr>
+							)
+						})}
 				</tbody>
 				<tfoot>
 					{this.props.selDataFile &&
@@ -117,6 +142,46 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 					)}
 				</tfoot>
 			</table>
+		)
+
+		let pagination: JSX.Element = (
+			<nav aria-label='Page navigation'>
+				<ul className='pagination justify-content-center'>
+					<li className={this.state.pagingCurrIdx == 1 ? 'page-item disabled' : 'page-item'}>
+						<a className='page-link' tabIndex={-1}
+						aria-disabled={this.state.pagingCurrIdx == 1 ? true : false}
+						onClick={() => {
+							this.setState({ pagingCurrIdx: this.state.pagingCurrIdx-1 })
+						}}>
+							Previous
+						</a>
+					</li>
+
+					{pageArr.map(page => (
+						<li className={this.state.pagingCurrIdx == page ? 'page-item active' : 'page-item'}>
+							<a
+								className='page-link'
+								href='javascript:void(0)'
+								onClick={() => {
+									this.setState({ pagingCurrIdx: page })
+								}}>
+								{page}
+								{this.state.pagingCurrIdx == page ? <span className="sr-only">(current)</span> : ''}
+							</a>
+						</li>
+					))}
+
+					<li className={this.state.pagingCurrIdx == pageCnt ? 'page-item disabled' : 'page-item'}>
+						<a className='page-link' href='javascript:void(0)'
+						aria-disabled={this.state.pagingCurrIdx == pageCnt ? true : false}
+						onClick={() => {
+							this.setState({ pagingCurrIdx: this.state.pagingCurrIdx+1 })
+						}}>
+							Next
+						</a>
+					</li>
+				</ul>
+			</nav>
 		)
 
 		return (
@@ -158,14 +223,13 @@ class TabView extends React.Component<{ onShowModal: Function; selDataFile: IDri
 								<div className='text-center d-none d-xl-block'>
 									<DateRangePicker numberOfMonths={4} />
 								</div>
+
 								{tableFileList}
+
+								{pagination}
 							</div>
 						</div>
 					</div>
-				</div>
-
-				<div className='row'>
-					<div className='col-12' />
 				</div>
 			</div>
 		)
