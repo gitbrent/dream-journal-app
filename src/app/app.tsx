@@ -297,6 +297,7 @@ class AppTabs extends React.Component<{
 	doAuthSignOut: Function
 	doCreateJournal: Function
 	doFileListRefresh: Function
+	doImportEntries: Function
 	doRenameFile: Function
 	doSaveImportState: Function
 	doSelectFileById: Function
@@ -314,6 +315,7 @@ class AppTabs extends React.Component<{
 			doAuthSignOut: Function
 			doCreateJournal: Function
 			doFileListRefresh: Function
+			doImportEntries: Function
 			doRenameFile: Function
 			doSaveImportState: Function
 			doSelectFileById: Function
@@ -334,6 +336,7 @@ class AppTabs extends React.Component<{
 			case AppTab.import:
 				return (
 					<TabImport
+						doImportEntries={this.props.doImportEntries}
 						doSaveImportState={this.props.doSaveImportState}
 						importState={this.props.importState}
 						selDataFile={this.props.selDataFile}
@@ -746,82 +749,115 @@ class App extends React.Component<
 	 * @see: https://developers.google.com/drive/api/v3/reference/files/update
 	 */
 	doSaveFile = () => {
-		let params = JSON.parse(localStorage.getItem('oauth2-params'))
+		return new Promise((resolve, reject) => {
+			let params = JSON.parse(localStorage.getItem('oauth2-params'))
 
-		// A:
-		if (!this.state.dataFiles.selected) {
-			// TODO: disable save button if no `selected` file exists
-			console.log('No file selected!')
-			return
-		}
-
-		// B: Update state
-		let newState = this.state.dataFiles
-		newState.selected._isSaving = true
-		this.setState({
-			dataFiles: newState,
-		})
-
-		let jsonBody: object = {
-			entries: this.state.dataFiles.selected.entries,
-		}
-
-		let reqBody: string =
-			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
-			JSON.stringify(JOURNAL_HEADER) +
-			'\n' +
-			'--foo_bar_baz\nContent-Type: application/json\n\n' +
-			JSON.stringify(jsonBody, null, 2) +
-			'\n' +
-			'--foo_bar_baz--'
-		let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
-
-		let requestHeaders: any = {
-			Authorization: 'Bearer ' + params['access_token'],
-			'Content-Type': 'multipart/related; boundary=foo_bar_baz',
-			'Content-Length': reqBody.length + reqEnd.length,
-		}
-
-		fetch(
-			'https://www.googleapis.com/upload/drive/v3/files/' +
-				this.state.dataFiles.selected.id +
-				'?uploadType=multipart',
-			{
-				method: 'PATCH',
-				headers: requestHeaders,
-				body: reqBody,
+			// A:
+			if (!this.state.dataFiles.selected) {
+				// TODO: disable save button if no `selected` file exists
+				console.log('No file selected!')
+				return
 			}
-		)
-			.then(response => {
-				response
-					.json()
-					.then(fileResource => {
-						// A: update state
-						let newState = this.state.dataFiles
-						newState.selected._isSaving = false
-						this.setState({
-							dataFiles: newState,
-						})
 
-						// B: refresh file list (to update "size", "modified")
-						this.driveGetFileList()
-					})
-					.catch(error => {
-						if (error.code == '401') {
-							oauth2SignIn()
-						} else {
-							// TODO: Show message onscreen
-							console.error ? console.error(error) : console.log(error)
-						}
-					})
+			// B: Update state
+			let newState = this.state.dataFiles
+			newState.selected._isSaving = true
+			this.setState({
+				dataFiles: newState,
 			})
-			.catch(error => {
-				if (error.code == '401') {
-					oauth2SignIn()
-				} else {
-					console.error ? console.error(error) : console.log(error)
+
+			let jsonBody: object = {
+				entries: this.state.dataFiles.selected.entries,
+			}
+
+			let reqBody: string =
+				'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
+				JSON.stringify(JOURNAL_HEADER) +
+				'\n' +
+				'--foo_bar_baz\nContent-Type: application/json\n\n' +
+				JSON.stringify(jsonBody, null, 2) +
+				'\n' +
+				'--foo_bar_baz--'
+			let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
+
+			let requestHeaders: any = {
+				Authorization: 'Bearer ' + params['access_token'],
+				'Content-Type': 'multipart/related; boundary=foo_bar_baz',
+				'Content-Length': reqBody.length + reqEnd.length,
+			}
+
+			fetch(
+				'https://www.googleapis.com/upload/drive/v3/files/' +
+					this.state.dataFiles.selected.id +
+					'?uploadType=multipart',
+				{
+					method: 'PATCH',
+					headers: requestHeaders,
+					body: reqBody,
 				}
-			})
+			)
+				.then(response => {
+					response
+						.json()
+						.then(fileResource => {
+							// A: update state
+							let newState = this.state.dataFiles
+							newState.selected._isSaving = false
+							this.setState({
+								dataFiles: newState,
+							})
+
+							// B: refresh file list (to update "size", "modified")
+							this.driveGetFileList()
+
+							resolve(true)
+						})
+						.catch(error => {
+							if (error.code == '401') {
+								oauth2SignIn()
+							} else {
+								// TODO: Show message onscreen
+								console.error ? console.error(error) : console.log(error)
+							}
+						})
+				})
+				.catch(error => {
+					if (error.code == '401') {
+						oauth2SignIn()
+					} else {
+						reject(error)
+					}
+				})
+		})
+	}
+
+	doImportEntries = (entries: Array<IJournalEntry>) => {
+		let newState = this.state.dataFiles
+
+		return new Promise((resolve, reject) => {
+			if (!newState || !newState.selected) {
+				reject('No data file currently selected')
+			} else {
+				// 1: Add new entries
+				newState.selected.entries = [...newState.selected.entries, ...entries].sort((a, b) => {
+					if (a.entryDate < b.entryDate) return -1
+					if (a.entryDate > b.entryDate) return 1
+					return 0
+				})
+
+				return this.doSaveFile()
+					.catch(err => {
+						throw err
+					})
+					.then(res => {
+						if (res != true) throw res
+						resolve(true)
+					})
+					.catch(err => {
+						reject(err)
+					})
+			}
+		})
 	}
 
 	/**
@@ -838,7 +874,18 @@ class App extends React.Component<
 				this.setState({
 					dataFiles: dataFiles,
 				})
-				resolve(true)
+
+				return this.doSaveFile()
+					.catch(err => {
+						throw err
+					})
+					.then(res => {
+						if (res != true) throw res
+						resolve(true)
+					})
+					.catch(err => {
+						reject(err)
+					})
 			}
 		})
 	}
@@ -867,7 +914,17 @@ class App extends React.Component<
 						dataFiles: newState,
 					})
 
-					resolve(true)
+					return this.doSaveFile()
+						.catch(err => {
+							throw err
+						})
+						.then(res => {
+							if (res != true) throw res
+							resolve(true)
+						})
+						.catch(err => {
+							reject(err)
+						})
 				}
 			}
 		})
@@ -894,6 +951,7 @@ class App extends React.Component<
 					doAuthSignOut={this.doAuthSignOut}
 					doCreateJournal={this.driveCreateNewJournal}
 					doFileListRefresh={this.driveGetFileList}
+					doImportEntries={this.doImportEntries}
 					doRenameFile={this.doRenameFile}
 					doSaveImportState={this.doSaveImportState}
 					doSelectFileById={this.doSelectFileById}

@@ -8,6 +8,7 @@ const VERBOSE = false
 
 export default class TabImport extends React.Component<
 	{
+		doImportEntries: Function
 		doSaveImportState: Function
 		importState: object
 		selDataFile: IDriveFile
@@ -53,7 +54,14 @@ export default class TabImport extends React.Component<
 	private refDemoData = React.createRef<HTMLDivElement>()
 	private refContentEditable = React.createRef<HTMLElement>()
 
-	constructor(props: Readonly<{ doSaveImportState: Function; importState: object; selDataFile: IDriveFile }>) {
+	constructor(
+		props: Readonly<{
+			doImportEntries: Function
+			doSaveImportState: Function
+			importState: object
+			selDataFile: IDriveFile
+		}>
+	) {
 		super(props)
 
 		let config = this.props.importState || JSON.parse(localStorage.getItem('import-config')) || {}
@@ -441,7 +449,11 @@ export default class TabImport extends React.Component<
 					}
 				})
 
-				// 3: Add section
+				// 3: default [bed time] if needed
+				if (this.state._useDefaultTime && !objEntry.bedTime)
+					objEntry.bedTime = this.state._defaultBedTime || '00:00'
+
+				// 4: add section
 				arrEntries.push(objEntry)
 			})
 
@@ -493,14 +505,17 @@ export default class TabImport extends React.Component<
 				_invalidSections: arrInvalidSects,
 			})
 		} else {
-			// 1: Add new entries
-			this.props.selDataFile.entries = [...this.props.selDataFile.entries, ...this.state._parsedSections].sort(
-				(a, b) => {
-					if (a.entryDate < b.entryDate) return -1
-					if (a.entryDate > b.entryDate) return 1
-					return 0
-				}
-			)
+			this.props.doImportEntries(this.state._parsedSections)
+			.catch(err => {
+				// TODO: show onscreen
+				console.error(err)
+
+				// TODO: what to do about expired session?
+				// `save` can can oauthLogin, but file still needs ot be saved - show a save button?
+			})
+			.then(result => {
+				alert('SUCCESS!\nAdded '+arrInvalidSects.length+' entries.')
+			})
 
 			// 2: Clear import text and parsed results
 			this.setState({
@@ -508,6 +523,9 @@ export default class TabImport extends React.Component<
 				_importText: '',
 				_parsedSections: [],
 			})
+
+			// 3: show success message
+			// TODO:
 		}
 	}
 
@@ -869,7 +887,7 @@ export default class TabImport extends React.Component<
 									onstyle='primary'
 									offlabel='No Default Time'
 									offstyle='secondary'
-									style='w-25'
+									style='w-100'
 								/>
 							</div>
 							<div className='col'>
@@ -946,23 +964,26 @@ export default class TabImport extends React.Component<
 
 		let importResults: JSX.Element = (
 			<form>
-				<div className='row'>
-					<div className='col'>
-						<h5 className='text-primary mb-3'>Parse Results</h5>
-						<ul>
-							<li>{'Found ' + this.state._parsedSections.length + ' entries'}</li>
-						</ul>
+				<div className='row align-items-middle justify-content-center'>
+					<div className='col-auto'>
+						<h2 className='text-primary mb-3'>
+							{'Parse Results: ' + this.state._parsedSections.length + ' daily entries'}
+						</h2>
 					</div>
-					<div className='col-auto pt-2'>
+					<div className='col-auto'>
 						<button
 							type='button'
 							className='btn btn-success'
 							onClick={this.handleImport}
 							disabled={this.state._parsedSections.length == 0}>
-							Import Entries into Journal
+							Import Entries
 						</button>
 					</div>
 				</div>
+				<p className='text-center'>
+					Review the results below and make changes as needed, then click Import Entries to add these new
+					entries to your current Dream Journal.
+				</p>
 
 				<ul className='list-group mb-4'>
 					{this.state._parsedSections.map((sect, idx) => {
