@@ -13,10 +13,12 @@ export default class TabImport extends React.Component<
 		selDataFile: IDriveFile
 	},
 	{
+		_defaultBedTime: string
 		_defaultYear: number
 		_demoData: string
 		_dreamSignsDelim: string
 		_entryDateInvalidMsg: string
+		_useDefaultTime: boolean
 		_importHTML: string
 		_importText: string
 		_invalidSections: Array<IJournalEntry>
@@ -57,14 +59,16 @@ export default class TabImport extends React.Component<
 		let config = this.props.importState || JSON.parse(localStorage.getItem('import-config')) || {}
 
 		this.state = {
+			_defaultBedTime: config._defaultBedTime || '00:00',
 			_defaultYear: config._defaultYear || new Date().getFullYear(),
 			_demoData: config._demoData || '',
 			_dreamSignsDelim: config._dreamSignsDelim || '',
 			_entryDateInvalidMsg: '',
+			_useDefaultTime: typeof config._useDefaultTime === 'boolean' ? config._useDefaultTime : true,
 			_importHTML: config._importHTML || '<br>',
 			_importText: config._importText || '',
 			_invalidSections: config._invalidSections || [],
-			_isTime24Hour: config._isTime24Hour || false,
+			_isTime24Hour: typeof config._isTime24Hour === 'boolean' ? config._isTime24Hour : false,
 			_parsedSections: config._parsedSections || [],
 			_selBreakType: config._selBreakType || 'blankLine',
 			_selDreamNotes: config._selDreamNotes || 'match',
@@ -379,13 +383,13 @@ export default class TabImport extends React.Component<
 							let keyVal = line.trim().split(new RegExp(this.state._bedTime, 'g'))
 							if (keyVal[1].trim()) {
 								let time = keyVal[1].trim()
-								if ( this.state._isTime24Hour ) {
+								if (this.state._isTime24Hour) {
 									let arrTime = time.split(':')
 									let timeHour = Number(arrTime[0])
-									if ( timeHour && !isNaN(timeHour) ) {
+									if (timeHour && !isNaN(timeHour)) {
 										timeHour += 12
 										if (timeHour >= 24) timeHour = 0
-										time = (timeHour < 10 ? "0"+timeHour : timeHour)+':'+arrTime[1]
+										time = (timeHour < 10 ? '0' + timeHour : timeHour) + ':' + arrTime[1]
 									}
 								}
 								objEntry.bedTime = time
@@ -807,13 +811,13 @@ export default class TabImport extends React.Component<
 					</div>
 				</div>
 
-				<div className='row align-items-center py-4 mb-4 border-top border-bottom border-secondary'>
+				<div className='row align-items-center py-4 border-top border-secondary'>
 					<div className='col'>
 						<h5 className='text-primary'>Section Break</h5>
 						<label>Type of break your journal uses between entries</label>
 						<select
 							name='_selBreakType'
-							className='form-control'
+							className='form-control w-50'
 							onChange={this.handleInputChange}
 							value={this.state._selBreakType}>
 							<option value='blankLine'>Empty Line (paragraph style)</option>
@@ -826,15 +830,17 @@ export default class TabImport extends React.Component<
 						<input
 							name='_defaultYear'
 							type='number'
-							className='form-control'
+							className='form-control w-50'
 							min='1950'
 							max={new Date().getFullYear()}
 							onChange={this.handleInputChange}
 							value={this.state._defaultYear}
 						/>
 					</div>
+				</div>
+				<div className='row align-items-center py-4 mb-4 border-bottom border-secondary'>
 					<div className='col'>
-						<h5 className='text-primary'>Time Format</h5>
+						<h5 className='text-primary'>Bed Time Format</h5>
 						<label>Used to parse "12:30" in am/pm or 24-hour time</label>
 
 						<BootstrapSwitchButton
@@ -848,6 +854,35 @@ export default class TabImport extends React.Component<
 							offstyle='secondary'
 							style='w-50'
 						/>
+					</div>
+					<div className='col'>
+						<h5 className='text-primary'>Default Bed Time</h5>
+						<label>The time to use when no value is found</label>
+						<div className='row'>
+							<div className='col'>
+								<BootstrapSwitchButton
+									onChange={(checked: boolean) => {
+										this.setState({ _useDefaultTime: checked })
+									}}
+									checked={false}
+									onlabel='Use Default Time'
+									onstyle='primary'
+									offlabel='No Default Time'
+									offstyle='secondary'
+									style='w-25'
+								/>
+							</div>
+							<div className='col'>
+								<input
+									name='_defaultBedTime'
+									type='time'
+									className='form-control'
+									onChange={this.handleInputChange}
+									value={this.state._defaultBedTime}
+									disabled={!this.state._useDefaultTime}
+								/>
+							</div>
+						</div>
 					</div>
 				</div>
 

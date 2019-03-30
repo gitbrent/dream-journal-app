@@ -52,7 +52,7 @@ const NEW_ENTRY = {
 	dreams: [EMPTY_DREAM],
 }
 
-class EntryModal extends React.Component<
+export default class EntryModal extends React.Component<
 	{
 		doCreateEntry: Function
 		doUpdateEntry: Function
@@ -202,7 +202,7 @@ class EntryModal extends React.Component<
 						</div>
 					</div>
 					<div className='row mb-3'>
-						<div className='col-12 col-md-6'>
+						<div className='col-12 col-lg-6 mb-3 mb-lg-0'>
 							<label className='text-muted text-uppercase text-sm d-block'>Dream Signs</label>
 							<input
 								name='dreamSigns'
@@ -213,13 +213,13 @@ class EntryModal extends React.Component<
 								data-dream-idx={dreamIdx}
 							/>
 						</div>
-						<div className='col-6 col-md-3'>
+						<div className='col-6 col-lg-3'>
 							<label className='text-muted text-uppercase text-sm d-block'>Lucid Dream?</label>
 							<BootstrapSwitchButton
 								onChange={(checked: boolean) => {
 									let newState = this.state.dailyEntry
 									newState.dreams[dreamIdx].isLucidDream = checked
-									this.setState({ dailyEntry:newState })
+									this.setState({ dailyEntry: newState })
 								}}
 								checked={dream.isLucidDream}
 								onlabel='Yes'
@@ -229,7 +229,7 @@ class EntryModal extends React.Component<
 								style='w-100'
 							/>
 						</div>
-						<div className='col-6 col-md-3'>
+						<div className='col-6 col-lg-3'>
 							<label className='text-muted text-uppercase text-sm d-block'>Lucid Method</label>
 							<select
 								name='lucidMethod'
@@ -250,11 +250,11 @@ class EntryModal extends React.Component<
 					</div>
 					<div className='row'>
 						<div className='col'>
-							<label className='text-muted text-uppercase text-sm'>Notes</label>
+							<label className='text-muted text-uppercase text-sm'>Dream Details</label>
 							<textarea
 								name='notes'
 								className='form-control'
-								rows={5}
+								rows={6}
 								value={dream.notes}
 								onChange={this.handleInputDreamChange}
 								data-dream-idx={dreamIdx}
@@ -283,7 +283,7 @@ class EntryModal extends React.Component<
 									type='date'
 									value={this.state.dailyEntry.entryDate}
 									onChange={this.handleInputChange}
-									className='form-control w-50'
+									className='form-control w-100'
 									disabled={this.props.editEntry ? true : false}
 									required
 								/>
@@ -296,7 +296,7 @@ class EntryModal extends React.Component<
 									type='time'
 									value={this.state.dailyEntry.bedTime}
 									onChange={this.handleInputChange}
-									className='form-control w-50'
+									className='form-control w-100'
 								/>
 							</div>
 						</div>
@@ -308,7 +308,7 @@ class EntryModal extends React.Component<
 									value={this.state.dailyEntry.notesPrep}
 									onChange={this.handleInputChange}
 									className='form-control'
-									rows={3}
+									rows={2}
 								/>
 							</div>
 							<div className='col-12 col-md-6'>
@@ -318,7 +318,7 @@ class EntryModal extends React.Component<
 									value={this.state.dailyEntry.notesWake}
 									onChange={this.handleInputChange}
 									className='form-control'
-									rows={3}
+									rows={2}
 								/>
 							</div>
 						</div>
@@ -351,5 +351,3 @@ class EntryModal extends React.Component<
 		)
 	}
 }
-
-export default EntryModal

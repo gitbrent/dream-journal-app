@@ -71,7 +71,6 @@ export interface IAuthState {
 export interface IDriveFile {
 	_isLoading: boolean
 	_isSaving: boolean
-	_lastSaved: Date
 	id: string
 	entries: Array<IJournalEntry>
 	modifiedTime: string
@@ -252,7 +251,7 @@ class AppNavBar extends React.Component<
 						</li>
 						<li className={this.state.activeTab == AppTab.import ? 'nav-item active' : 'nav-item'}>
 							<a
-								className='nav-link'
+								className='nav-link d-none d-lg-block'
 								href='javascript:void(0)'
 								data-name='import'
 								onClick={this.onShowTabHandler}>
@@ -264,8 +263,8 @@ class AppNavBar extends React.Component<
 				<div className='btn-group mr-3' role='group' aria-label='Selected Journal Name'>
 					<button type='button' className='btn btn-secondary' disabled>
 						{this.props.selDataFile
-							? this.props.selDataFile._lastSaved
-								? this.props.selDataFile._lastSaved.toLocaleString()
+							? this.props.selDataFile.modifiedTime
+								? new Date(this.props.selDataFile.modifiedTime).toLocaleString()
 								: '(unsaved)'
 							: '(no file selected)'}
 					</button>
@@ -592,7 +591,9 @@ class App extends React.Component<
 							let selFile = this.state.dataFiles.available.filter(file => {
 								return file.id === selFileId
 							})
-							if (selFile && selFile[0]) this.doSelectFileById(selFile[0].id)
+							if (selFile && selFile[0]) {
+								this.doSelectFileById(selFile[0].id)
+							}
 						}
 					})
 					.catch(error => {
@@ -797,15 +798,13 @@ class App extends React.Component<
 					.then(fileResource => {
 						// A: update state
 						let newState = this.state.dataFiles
-						newState.selected._lastSaved = new Date()
 						newState.selected._isSaving = false
 						this.setState({
 							dataFiles: newState,
 						})
 
 						// B: refresh file list (to update "size", "modified")
-						//this.driveGetFileList()
-						// TODO: ^^^ nope! this resets the save date we just added!!!
+						this.driveGetFileList()
 					})
 					.catch(error => {
 						if (error.code == '401') {
