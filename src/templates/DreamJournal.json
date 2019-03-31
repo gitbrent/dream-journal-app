@@ -1,22 +1,20 @@
 {
-	"entries": [
-		{
-			"2019-02-25": {
-				"entryDate": "2019-02-25",
-				"bedTime": "21:07:23.523Z",
-				"notesPrep": "had a bath",
-				"notesWake": "woke up at 4:00 for dog",
-				"dreams": [
-					{
-						"title": "Working at the mall again!",
-						"notes": "It was a dark and stormy night [...1 hour later...], done!",
-						"dreamSigns": ["Mall", "Lost Phone"],
-						"dreamImages": [],
-						"isLucidDream": false,
-						"lucidMethod": null
-					}
-				]
-			}
-		}
-	]
+  "entries": [
+    {
+      "entryDate": "2019-02-25",
+      "bedTime": "21:07:23.523Z",
+      "notesPrep": "had a bath",
+      "notesWake": "woke up at 4:00 for dog",
+      "dreams": [
+        {
+          "title": "Working at the mall again!",
+          "notes": "It was a dark and stormy night [...1 hour later...], done!",
+          "dreamSigns": ["Mall", "Lost Phone"],
+          "dreamImages": [],
+          "isLucidDream": false,
+          "lucidMethod": null
+        }
+      ]
+    }
+  ]
 }
