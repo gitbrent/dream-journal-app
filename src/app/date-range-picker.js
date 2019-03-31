@@ -51,6 +51,7 @@ export default class DateRangeSelector extends React.Component {
 					selectedDays={[from, { from, to }]}
 					modifiers={modifiers}
 					onDayClick={this.handleDayClick}
+					toMonth={new Date()}
 				/>
 				<Helmet>
 					<style>{`
