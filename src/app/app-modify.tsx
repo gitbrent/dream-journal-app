@@ -50,7 +50,7 @@ class TabView extends React.Component<
 		})
 	}
 
-	handleEditEntryModal = e => {
+	handleEntryEdit = e => {
 		this.props.onShowModal({
 			show: true,
 			editEntry: this.props.selDataFile.entries.filter(entry => {
@@ -63,16 +63,12 @@ class TabView extends React.Component<
 	// @see: http://react-day-picker.js.org/examples/elements-cell
 
 	render() {
-		let pageCnt = (this.props.selDataFile && this.props.selDataFile.entries && this.props.selDataFile.entries.length > 0
-			? Math.ceil(this.props.selDataFile.entries.length / this.state.pagingPageSize)
-			: 0)
+		let pageCnt =
+			this.props.selDataFile && this.props.selDataFile.entries && this.props.selDataFile.entries.length > 0
+				? Math.ceil(this.props.selDataFile.entries.length / this.state.pagingPageSize)
+				: 0
 		let pageArr = []
-		for (
-			let x = 1;
-			x <=pageCnt
-			;
-			x++
-		) {
+		for (let x = 1; x <= pageCnt; x++) {
 			pageArr.push(x)
 		}
 
@@ -89,6 +85,11 @@ class TabView extends React.Component<
 				</thead>
 				<tbody>
 					{(this.props.selDataFile && this.props.selDataFile.entries ? this.props.selDataFile.entries : [])
+						.sort((a, b) => {
+							if (a.entryDate < b.entryDate) return 1
+							if (a.entryDate > b.entryDate) return -1
+							return 0
+						})
 						.filter((entry, idx) => {
 							return (
 								idx >= this.state.pagingPageSize * (this.state.pagingCurrIdx - 1) &&
@@ -112,9 +113,9 @@ class TabView extends React.Component<
 									</td>
 									<td className='text-center'>
 										<button
-											className='btn btn-sm btn-primary px-4'
+											className='btn btn-sm btn-outline-primary'
 											data-entry-key={entry.entryDate}
-											onClick={this.handleEditEntryModal}>
+											onClick={this.handleEntryEdit}>
 											Edit
 										</button>
 									</td>
@@ -148,17 +149,21 @@ class TabView extends React.Component<
 			<nav aria-label='Page navigation'>
 				<ul className='pagination justify-content-center'>
 					<li className={this.state.pagingCurrIdx == 1 ? 'page-item disabled' : 'page-item'}>
-						<a className='page-link' tabIndex={-1}
-						aria-disabled={this.state.pagingCurrIdx == 1 ? true : false}
-						onClick={() => {
-							this.setState({ pagingCurrIdx: this.state.pagingCurrIdx-1 })
-						}}>
+						<a
+							className='page-link'
+							tabIndex={-1}
+							aria-disabled={this.state.pagingCurrIdx == 1 ? true : false}
+							onClick={() => {
+								this.setState({ pagingCurrIdx: this.state.pagingCurrIdx - 1 })
+							}}>
 							Previous
 						</a>
 					</li>
 
 					{pageArr.map(page => (
-						<li className={this.state.pagingCurrIdx == page ? 'page-item active' : 'page-item'}>
+						<li
+							className={this.state.pagingCurrIdx == page ? 'page-item active' : 'page-item'}
+							key={pagination + '-item-' + page}>
 							<a
 								className='page-link'
 								href='javascript:void(0)'
@@ -166,17 +171,19 @@ class TabView extends React.Component<
 									this.setState({ pagingCurrIdx: page })
 								}}>
 								{page}
-								{this.state.pagingCurrIdx == page ? <span className="sr-only">(current)</span> : ''}
+								{this.state.pagingCurrIdx == page ? <span className='sr-only'>(current)</span> : ''}
 							</a>
 						</li>
 					))}
 
 					<li className={this.state.pagingCurrIdx == pageCnt ? 'page-item disabled' : 'page-item'}>
-						<a className='page-link' href='javascript:void(0)'
-						aria-disabled={this.state.pagingCurrIdx == pageCnt ? true : false}
-						onClick={() => {
-							this.setState({ pagingCurrIdx: this.state.pagingCurrIdx+1 })
-						}}>
+						<a
+							className='page-link'
+							href='javascript:void(0)'
+							aria-disabled={this.state.pagingCurrIdx == pageCnt ? true : false}
+							onClick={() => {
+								this.setState({ pagingCurrIdx: this.state.pagingCurrIdx + 1 })
+							}}>
 							Next
 						</a>
 					</li>
