@@ -314,6 +314,7 @@ class AppTabs extends React.Component<{
 			doAuthSignIn: Function
 			doAuthSignOut: Function
 			doCreateJournal: Function
+			doDeleteEntry: Function
 			doFileListRefresh: Function
 			doImportEntries: Function
 			doRenameFile: Function
@@ -831,6 +832,13 @@ class App extends React.Component<
 		})
 	}
 
+	isExistingEntryDate = (checkDate: string) => {
+		return this.state.dataFiles.selected.entries.filter(ent => {
+			return ent.entryDate == checkDate
+		}).length > 0
+			? true
+			: false
+	}
 	doImportEntries = (entries: Array<IJournalEntry>) => {
 		let newState = this.state.dataFiles
 
@@ -840,8 +848,8 @@ class App extends React.Component<
 			} else {
 				// 1: Add new entries
 				newState.selected.entries = [...newState.selected.entries, ...entries].sort((a, b) => {
-					if (a.entryDate < b.entryDate) return -1
-					if (a.entryDate > b.entryDate) return 1
+					if (a.entryDate < b.entryDate) return 1
+					if (a.entryDate > b.entryDate) return -1
 					return 0
 				})
 
@@ -892,7 +900,7 @@ class App extends React.Component<
 	/**
 	 * Add new `IJournalEntry` into selected `IDriveFile`
 	 */
-	doUpdateEntry = (entry: IJournalEntry) => {
+	doUpdateEntry = (entry: IJournalEntry, origEntryDate: string) => {
 		let newState = this.state.dataFiles
 
 		return new Promise((resolve, reject) => {
@@ -900,7 +908,7 @@ class App extends React.Component<
 				reject('No data file currently selected')
 			} else {
 				let editEntry = newState.selected.entries.filter(ent => {
-					return ent.entryDate == entry.entryDate
+					return ent.entryDate == (origEntryDate != entry.entryDate ? origEntryDate : entry.entryDate)
 				})[0]
 
 				if (!editEntry) {
@@ -926,6 +934,46 @@ class App extends React.Component<
 							reject(err)
 						})
 				}
+			}
+		})
+	}
+	/**
+	 */
+	doDeleteEntry = (entryDate: IJournalEntry['entryDate']) => {
+		let dataFiles = this.state.dataFiles
+
+		return new Promise((resolve, reject) => {
+			if (!dataFiles || !dataFiles.selected) {
+				reject('No data file currently selected')
+			} else {
+				// A:
+				let delIdx = dataFiles.selected.entries.findIndex(ent => {
+					return ent.entryDate == entryDate
+				})
+
+				// B:
+				if (delIdx == -1) reject('Unable to find `entryDate` ' + entryDate)
+
+				// C:
+				dataFiles.selected.entries.splice(delIdx, 1)
+
+				// D:
+				this.setState({
+					dataFiles: dataFiles,
+				})
+
+				// E:
+				return this.doSaveFile()
+					.catch(err => {
+						throw err
+					})
+					.then(res => {
+						if (res != true) throw res
+						resolve(true)
+					})
+					.catch(err => {
+						reject(err)
+					})
 			}
 		})
 	}
@@ -963,8 +1011,10 @@ class App extends React.Component<
 				/>
 				<EntryModal
 					doCreateEntry={this.doCreateEntry}
+					doDeleteEntry={this.doDeleteEntry}
 					doUpdateEntry={this.doUpdateEntry}
 					editEntry={this.state.editEntry}
+					isExistingEntryDate={this.isExistingEntryDate}
 					onShowModal={this.chgShowModal}
 					show={this.state.showModal}
 				/>

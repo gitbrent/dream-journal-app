@@ -55,18 +55,22 @@ const NEW_ENTRY = {
 export default class EntryModal extends React.Component<
 	{
 		doCreateEntry: Function
+		doDeleteEntry: Function
 		doUpdateEntry: Function
 		editEntry?: IJournalEntry
+		isExistingEntryDate: Function
 		onShowModal: Function
 		show?: boolean
 	},
-	{ dailyEntry: IJournalEntry; show: boolean }
+	{ dailyEntry: IJournalEntry; isDateDupe: boolean; origEntryDate: string; show: boolean }
 > {
 	constructor(
 		props: Readonly<{
 			doCreateEntry: Function
+			doDeleteEntry: Function
 			doUpdateEntry: Function
 			editEntry?: IJournalEntry
+			isExistingEntryDate: Function
 			onShowModal: Function
 			show?: boolean
 		}>
@@ -75,6 +79,8 @@ export default class EntryModal extends React.Component<
 
 		this.state = {
 			dailyEntry: NEW_ENTRY,
+			isDateDupe: false,
+			origEntryDate: '',
 			show: props.show,
 		}
 	}
@@ -105,6 +111,7 @@ export default class EntryModal extends React.Component<
 			// SOLN: create a copy use json+json as `dreams` requires deep copy
 			this.setState({
 				dailyEntry: JSON.parse(JSON.stringify(nextProps.editEntry)),
+				origEntryDate: nextProps.editEntry.entryDate,
 			})
 		}
 	}
@@ -132,6 +139,12 @@ export default class EntryModal extends React.Component<
 		let newState = this.state.dailyEntry
 		newState[name] = value
 
+		// A: allow edit of Entry Date, but check for dupe date so PK isnt corrupted
+		if (this.props.editEntry && name == 'entryDate' && value != this.state.origEntryDate) {
+			this.setState({ isDateDupe: this.props.isExistingEntryDate(value) })
+		}
+
+		// B:
 		this.setState({
 			dailyEntry: newState,
 		})
@@ -142,17 +155,33 @@ export default class EntryModal extends React.Component<
 		const name = target.name
 
 		let newState = this.state.dailyEntry
+
 		newState.dreams[event.target.getAttribute('data-dream-idx')][name] = value
 
 		this.setState({
 			dailyEntry: newState,
 		})
 	}
+
+	handleDelete = event => {
+		if (confirm('Delete entry ' + this.state.dailyEntry.entryDate + '?')) {
+			this.props
+				.doDeleteEntry(this.state.dailyEntry.entryDate)
+				.catch(err => {
+					alert('Unable to delete!\n' + err)
+				})
+				.then(res => {
+					if (res == true) this.modalClose()
+				})
+		}
+
+		event.preventDefault()
+	}
 	handleSubmit = event => {
 		let arrPromises = []
 
 		if (this.props.editEntry) {
-			arrPromises.push(this.props.doUpdateEntry(this.state.dailyEntry))
+			arrPromises.push(this.props.doUpdateEntry(this.state.dailyEntry, this.state.origEntryDate))
 		} else {
 			arrPromises.push(this.props.doCreateEntry(this.state.dailyEntry))
 		}
@@ -168,7 +197,7 @@ export default class EntryModal extends React.Component<
 			})
 			.catch(ex => {
 				// TODO: Show error message somewhere on dialog! (20190324)
-				console.log(ex)
+				alert(ex)
 			})
 
 		event.preventDefault()
@@ -223,9 +252,9 @@ export default class EntryModal extends React.Component<
 								}}
 								checked={dream.isLucidDream}
 								onlabel='Yes'
-								onstyle='success'
+								onstyle='outline-success'
 								offlabel='No'
-								offstyle='secondary'
+								offstyle='outline-dark'
 								style='w-100'
 							/>
 						</div>
@@ -268,86 +297,98 @@ export default class EntryModal extends React.Component<
 
 	render() {
 		return (
-			<Modal size='lg' show={this.state.show} onHide={this.modalClose} backdrop='static'>
-				<Modal.Header className='bg-primary' closeButton>
-					<Modal.Title className='text-white'>Journal Entry</Modal.Title>
-				</Modal.Header>
+			<form>
+				<Modal size='lg' show={this.state.show} onHide={this.modalClose} backdrop='static'>
+					<Modal.Header className='bg-primary' closeButton>
+						<Modal.Title className='text-white'>Journal Entry</Modal.Title>
+					</Modal.Header>
 
-				<Modal.Body className='bg-light'>
-					<div className='container mb-4'>
-						<div className='row mb-3'>
-							<div className='col-12 col-md-6 required'>
-								<label className='text-muted text-uppercase text-sm'>Entry Date</label>
-								<input
-									name='entryDate'
-									type='date'
-									value={this.state.dailyEntry.entryDate}
-									onChange={this.handleInputChange}
-									className='form-control w-100'
-									disabled={this.props.editEntry ? true : false}
-									required
-								/>
-								<div className='invalid-feedback'>Please provide Entry Date</div>
+					<Modal.Body className='bg-light'>
+						<div className='container mb-4'>
+							<div className='row mb-3'>
+								<div className='col-12 col-md-6 required'>
+									<label className='text-muted text-uppercase text-sm'>Entry Date</label>
+									<input
+										name='entryDate'
+										type='date'
+										value={this.state.dailyEntry.entryDate}
+										onChange={this.handleInputChange}
+										className={
+											this.state.isDateDupe
+												? 'is-invalid form-control w-100'
+												: 'form-control w-100'
+										}
+										required
+									/>
+									<div className='invalid-feedback'>Entry Date already exists in Dream Journal!</div>
+								</div>
+								<div className='col-12 col-md-6'>
+									<label className='text-muted text-uppercase text-sm'>Bed Time</label>
+									<input
+										name='bedTime'
+										type='time'
+										value={this.state.dailyEntry.bedTime}
+										onChange={this.handleInputChange}
+										className='form-control w-100'
+									/>
+								</div>
 							</div>
-							<div className='col-12 col-md-6'>
-								<label className='text-muted text-uppercase text-sm'>Bed Time</label>
-								<input
-									name='bedTime'
-									type='time'
-									value={this.state.dailyEntry.bedTime}
-									onChange={this.handleInputChange}
-									className='form-control w-100'
-								/>
+							<div className='row'>
+								<div className='col-12 col-md-6'>
+									<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
+									<textarea
+										name='notesPrep'
+										value={this.state.dailyEntry.notesPrep}
+										onChange={this.handleInputChange}
+										className='form-control'
+										rows={2}
+									/>
+								</div>
+								<div className='col-12 col-md-6'>
+									<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
+									<textarea
+										name='notesWake'
+										value={this.state.dailyEntry.notesWake}
+										onChange={this.handleInputChange}
+										className='form-control'
+										rows={2}
+									/>
+								</div>
 							</div>
 						</div>
-						<div className='row'>
-							<div className='col-12 col-md-6'>
-								<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
-								<textarea
-									name='notesPrep'
-									value={this.state.dailyEntry.notesPrep}
-									onChange={this.handleInputChange}
-									className='form-control'
-									rows={2}
-								/>
-							</div>
-							<div className='col-12 col-md-6'>
-								<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
-								<textarea
-									name='notesWake'
-									value={this.state.dailyEntry.notesWake}
-									onChange={this.handleInputChange}
-									className='form-control'
-									rows={2}
-								/>
-							</div>
-						</div>
-					</div>
 
-					<div className='container'>
-						<div className='row mb-3'>
-							<div className='col'>
-								<h5 className='text-primary'>Dreams</h5>
+						<div className='container'>
+							<div className='row mb-3'>
+								<div className='col'>
+									<h5 className='text-primary'>Dreams</h5>
+								</div>
+								<div className='col-auto'>
+									<button className='btn btn-sm btn-outline-primary' onClick={this.addRowHandler}>
+										Add Dream Row
+									</button>
+								</div>
 							</div>
-							<div className='col-auto'>
-								<button className='btn btn-sm btn-outline-primary' onClick={this.addRowHandler}>
-									Add Dream Row
-								</button>
-							</div>
+							{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamRow(dream, idx))}
 						</div>
-						{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamRow(dream, idx))}
-					</div>
-				</Modal.Body>
+					</Modal.Body>
 
-				<Modal.Footer>
-					<Button variant='outline-secondary' className='px-4 mr-2' onClick={this.modalClose}>
-						Cancel
-					</Button>
-					<Button variant='primary' className='w-25' onClick={this.handleSubmit}>
-						Save Entry
-					</Button>
-				</Modal.Footer>
-			</Modal>
+					<Modal.Footer>
+						<Button type='button' variant='outline-danger' className='mr-5' onClick={this.handleDelete}>
+							Delete
+						</Button>
+						<Button
+							type='button'
+							variant='outline-secondary'
+							className='px-4 mr-2'
+							onClick={this.modalClose}>
+							Cancel
+						</Button>
+						<Button type='submit' variant='primary' className='w-25' onClick={this.handleSubmit}>
+							Save Entry
+						</Button>
+					</Modal.Footer>
+				</Modal>
+			</form>
 		)
 	}
 }
