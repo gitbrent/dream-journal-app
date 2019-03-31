@@ -955,7 +955,7 @@ export default class TabImport extends React.Component<
 							_importHTML: event.target.value,
 						})
 					} // handle innerHTML change
-					className='form-control bg-black mb-2'
+					className='form-control mb-2'
 					style={{ minHeight: '300px', height: 'auto' }}
 				/>
 				<div className='invalid-feedback'>Please paste your journal above</div>
@@ -1097,21 +1097,24 @@ export default class TabImport extends React.Component<
 															<label className='text-uppercase text-muted d-block'>
 																Lucid Dream?
 															</label>
-															<input
-																data-sect-idx={idx}
-																data-dream-idx={idy}
-																name='isLucidDream'
-																type='checkbox'
-																className='form-control'
+															<BootstrapSwitchButton
+																onChange={(checked: boolean) => {
+																	let newState = this.state._parsedSections
+																	if (idy) newState[idx].dreams[idy].isLucidDream = checked
+																	this.setState({ _parsedSections: newState })
+																}}
 																checked={dream.isLucidDream}
-																onChange={this.handleResultChange}
+																onlabel='Yes'
+																onstyle='outline-success'
+																offlabel='No'
+																offstyle='outline-dark'
+																style='w-100'
 															/>
 														</div>
 														<div className='col-auto'>
 															<label className='text-uppercase text-muted d-block'>
 																Lucid Method
 															</label>
-
 															<select
 																data-sect-idx={idx}
 																data-dream-idx={idy}
