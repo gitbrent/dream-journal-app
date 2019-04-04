@@ -86,8 +86,8 @@ class TabView extends React.Component<
 				<tbody>
 					{(this.props.selDataFile && this.props.selDataFile.entries ? this.props.selDataFile.entries : [])
 						.sort((a, b) => {
-							if (a.entryDate < b.entryDate) return 1
-							if (a.entryDate > b.entryDate) return -1
+							if (a.entryDate < b.entryDate) return -1
+							if (a.entryDate > b.entryDate) return 1
 							return 0
 						})
 						.filter((entry, idx) => {
@@ -113,7 +113,7 @@ class TabView extends React.Component<
 									</td>
 									<td className='text-center'>
 										<button
-											className='btn btn-sm btn-outline-primary'
+											className='btn btn-sm btn-outline-primary px-4'
 											data-entry-key={entry.entryDate}
 											onClick={this.handleEntryEdit}>
 											Edit
@@ -191,6 +191,12 @@ class TabView extends React.Component<
 			</nav>
 		)
 
+		// TODO: DateRangePicker: add prop for (earliest month of journal) `fromMonth={new Date(2018, 8)}`
+		/* TODO: Show days with LUCID==true!! - add prop for Array<Date>
+		<DayPicker
+			  initialMonth={new Date(2017, 3)}
+			  selectedDays={[ new Date(2017, 3, 12), ])
+		*/
 		return (
 			<div className='container mt-5'>
 				<div className='row justify-content-between'>
