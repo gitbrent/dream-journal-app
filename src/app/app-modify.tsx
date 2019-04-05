@@ -33,12 +33,14 @@ import { IJournalEntry, IDriveFile } from './app'
 
 class TabView extends React.Component<
 	{ onShowModal: Function; selDataFile: IDriveFile },
-	{ pagingCurrIdx: number; pagingPageSize: number }
+	{ dateRangeFrom:Date; dateRangeTo:Date; pagingCurrIdx: number; pagingPageSize: number }
 > {
 	constructor(props: Readonly<{ onShowModal: Function; selDataFile: IDriveFile }>) {
 		super(props)
 
 		this.state = {
+			dateRangeFrom: null,
+			dateRangeTo: null,
 			pagingCurrIdx: 1,
 			pagingPageSize: 10,
 		}
@@ -57,6 +59,14 @@ class TabView extends React.Component<
 				return entry.entryDate == e.target.getAttribute('data-entry-key')
 			})[0],
 		})
+	}
+
+	onDateRangeChange = opts => {
+		if (opts) {
+			if (opts.from) this.setState({ dateRangeFrom:opts.from })
+			if (opts.to) this.setState({ dateRangeFrom:opts.to })
+		}
+		console.log(opts)
 	}
 
 	// TODO: Show days with dreams and/or with Lucid success:
@@ -234,7 +244,7 @@ class TabView extends React.Component<
 									<DateRangePicker numberOfMonths={3} />
 								</div>
 								<div className='text-center d-none d-xl-block'>
-									<DateRangePicker numberOfMonths={4} />
+									<DateRangePicker numberOfMonths={4} onChange={opts => {this.onDateRangeChange(opts)}} />
 								</div>
 
 								{tableFileList}
