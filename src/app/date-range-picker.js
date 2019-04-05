@@ -25,6 +25,7 @@ export default class DateRangeSelector extends React.Component {
 	}
 	handleResetClick() {
 		this.setState(this.getInitialState())
+		if (this.props.onChange) this.props.onChange(this.getInitialState())
 	}
 
 	render() {

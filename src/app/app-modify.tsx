@@ -33,7 +33,7 @@ import { IJournalEntry, IDriveFile } from './app'
 
 class TabView extends React.Component<
 	{ onShowModal: Function; selDataFile: IDriveFile },
-	{ dateRangeFrom:Date; dateRangeTo:Date; pagingCurrIdx: number; pagingPageSize: number }
+	{ dateRangeFrom: Date; dateRangeTo: Date; pagingCurrIdx: number; pagingPageSize: number }
 > {
 	constructor(props: Readonly<{ onShowModal: Function; selDataFile: IDriveFile }>) {
 		super(props)
@@ -62,22 +62,37 @@ class TabView extends React.Component<
 	}
 
 	onDateRangeChange = opts => {
-		if (opts) {
-			if (opts.from) this.setState({ dateRangeFrom:opts.from })
-			if (opts.to) this.setState({ dateRangeFrom:opts.to })
-		}
-		console.log(opts)
+		this.setState({
+			dateRangeFrom: opts && opts.from ? opts.from : null,
+			dateRangeTo: opts && opts.to ? opts.to : null,
+		})
 	}
 
 	// TODO: Show days with dreams and/or with Lucid success:
 	// @see: http://react-day-picker.js.org/examples/elements-cell
-
 	render() {
-		let pageCnt =
-			this.props.selDataFile && this.props.selDataFile.entries && this.props.selDataFile.entries.length > 0
-				? Math.ceil(this.props.selDataFile.entries.length / this.state.pagingPageSize)
-				: 0
+		// A: filter entries
+		let arrEntries = (this.props.selDataFile && this.props.selDataFile.entries
+			? this.props.selDataFile.entries
+			: []
+		).filter(entry => {
+			let dateEntry = new Date(entry.entryDate + ' 00:00:00')
+
+			if (
+				this.state.dateRangeFrom &&
+				this.state.dateRangeTo &&
+				dateEntry >= this.state.dateRangeFrom &&
+				dateEntry <= this.state.dateRangeTo
+			)
+				return true
+			else if (this.state.dateRangeFrom && !this.state.dateRangeTo && dateEntry == this.state.dateRangeFrom)
+				return true
+			else if (!this.state.dateRangeFrom && !this.state.dateRangeTo) return true
+			else return false
+		})
+		console.log(arrEntries.length)
 		let pageArr = []
+		let pageCnt = arrEntries.length > 0 ? Math.ceil(arrEntries.length / this.state.pagingPageSize) : 0
 		for (let x = 1; x <= pageCnt; x++) {
 			pageArr.push(x)
 		}
@@ -94,7 +109,7 @@ class TabView extends React.Component<
 					</tr>
 				</thead>
 				<tbody>
-					{(this.props.selDataFile && this.props.selDataFile.entries ? this.props.selDataFile.entries : [])
+					{arrEntries
 						.sort((a, b) => {
 							if (a.entryDate < b.entryDate) return -1
 							if (a.entryDate > b.entryDate) return 1
@@ -190,7 +205,7 @@ class TabView extends React.Component<
 						<a
 							className='page-link'
 							href='javascript:void(0)'
-							aria-disabled={this.state.pagingCurrIdx == pageCnt ? true : false}
+							aria-disabled={this.state.pagingCurrIdx == pageCnt || pageCnt <= 1 ? true : false}
 							onClick={() => {
 								this.setState({ pagingCurrIdx: this.state.pagingCurrIdx + 1 })
 							}}>
@@ -218,7 +233,7 @@ class TabView extends React.Component<
 							<div className='card-body bg-light'>
 								<div className='row mb-4 align-items-center'>
 									<div className='col'>
-										Your latest journal entries are shown by default. Use the date range search to
+										All of your journal entries are shown by default. Use the date range search to
 										find specific entries.
 									</div>
 									<div className='col-auto'>
@@ -244,7 +259,12 @@ class TabView extends React.Component<
 									<DateRangePicker numberOfMonths={3} />
 								</div>
 								<div className='text-center d-none d-xl-block'>
-									<DateRangePicker numberOfMonths={4} onChange={opts => {this.onDateRangeChange(opts)}} />
+									<DateRangePicker
+										numberOfMonths={4}
+										onChange={opts => {
+											this.onDateRangeChange(opts)
+										}}
+									/>
 								</div>
 
 								{tableFileList}
