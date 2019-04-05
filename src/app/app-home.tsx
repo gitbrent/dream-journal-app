@@ -304,7 +304,7 @@ class TabHome extends React.Component<
 											)}
 										</td>
 										<td className='align-middle text-center text-nowrap d-none d-md-table-cell'>
-											{file['entries'] ? file['entries'].length : 0}
+											{file['entries'] ? file['entries'].length : '?'}
 										</td>
 										<td className='align-middle text-center text-nowrap d-none d-md-table-cell'>
 											{getReadableFileSizeString(Number(file['size']))}
