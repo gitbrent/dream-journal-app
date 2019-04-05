@@ -77,7 +77,7 @@ class TabView extends React.Component<
 			: []
 		).filter(entry => {
 			let dateEntry = new Date(entry.entryDate + ' 00:00:00')
-
+			// FIXME: doesnt work if you select the day of an entry (eg: jan1 - jan3 works, nut select jan 2 and nothing)
 			if (
 				this.state.dateRangeFrom &&
 				this.state.dateRangeTo &&
