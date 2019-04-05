@@ -17,13 +17,16 @@ export default class DateRangeSelector extends React.Component {
 			numberOfMonths: this.props.numberOfMonths || 3
 		}
 	}
+
 	handleDayClick(day) {
 		const range = DateUtils.addDayToRange(day, this.state)
 		this.setState(range)
+		if (this.props.onChange) this.props.onChange(range)
 	}
 	handleResetClick() {
 		this.setState(this.getInitialState())
 	}
+
 	render() {
 		const { from, to } = this.state
 		const modifiers = { start: from, end: to }
