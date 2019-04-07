@@ -205,7 +205,7 @@ class TabView extends React.Component<
 						<a
 							className='page-link'
 							href='javascript:void(0)'
-							aria-disabled={this.state.pagingCurrIdx == pageCnt || pageCnt <= 1 ? true : false}
+							aria-disabled={this.state.pagingCurrIdx == pageCnt && pageCnt > 1 ? true : false}
 							onClick={() => {
 								this.setState({ pagingCurrIdx: this.state.pagingCurrIdx + 1 })
 							}}>

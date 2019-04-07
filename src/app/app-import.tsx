@@ -508,24 +508,23 @@ export default class TabImport extends React.Component<
 			this.props.doImportEntries(this.state._parsedSections)
 			.catch(err => {
 				// TODO: show onscreen
+				alert('ERROR: '+err)
 				console.error(err)
-
 				// TODO: what to do about expired session?
 				// `save` can can oauthLogin, but file still needs ot be saved - show a save button?
 			})
 			.then(result => {
-				alert('SUCCESS!\nAdded '+arrInvalidSects.length+' entries.')
-			})
+				// 1: Clear import text and parsed results
+				this.setState({
+					_importHTML: '<br>',
+					_importText: '',
+					_parsedSections: [],
+				})
 
-			// 2: Clear import text and parsed results
-			this.setState({
-				_importHTML: '<br>',
-				_importText: '',
-				_parsedSections: [],
+				// 2:
+				// TODO: show onscreen
+				alert('SUCCESS!\nAdded '+this.state._parsedSections.length+' new entries into selected journal.')
 			})
-
-			// 3: show success message
-			// TODO:
 		}
 	}
 
@@ -865,7 +864,7 @@ export default class TabImport extends React.Component<
 							onChange={(checked: boolean) => {
 								this.setState({ _isTime24Hour: checked })
 							}}
-							checked={false}
+							checked={this.state._isTime24Hour}
 							onlabel='24-Hour Format'
 							onstyle='primary'
 							offlabel='AM/PM Format'
@@ -882,7 +881,7 @@ export default class TabImport extends React.Component<
 									onChange={(checked: boolean) => {
 										this.setState({ _useDefaultTime: checked })
 									}}
-									checked={false}
+									checked={this.state._useDefaultTime}
 									onlabel='Use Default Time'
 									onstyle='primary'
 									offlabel='No Default Time'
