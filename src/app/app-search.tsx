@@ -3,7 +3,7 @@ import { IJournalEntry, IDriveFile } from './app'
 
 export default class TabSearch extends React.Component<{ selDataFile: IDriveFile }> {
 	constructor(props: Readonly<{ selDataFile: IDriveFile }>) {
-		super(props)
+		super(props) 
 	}
 
 	render() {

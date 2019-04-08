@@ -97,6 +97,7 @@ export interface IJournalDream {
  */
 export interface IJournalEntry {
 	entryDate: string
+	starred?: boolean
 	bedTime?: string
 	notesPrep?: string
 	notesWake?: string
@@ -251,7 +252,7 @@ class AppNavBar extends React.Component<
 						</li>
 						<li className={this.state.activeTab == AppTab.import ? 'nav-item active' : 'nav-item'}>
 							<a
-								className='nav-link d-none d-lg-block'
+								className={!this.props.selDataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'}
 								href='javascript:void(0)'
 								data-name='import'
 								onClick={this.onShowTabHandler}>
@@ -278,7 +279,11 @@ class AppNavBar extends React.Component<
 							Saving...
 						</div>
 					) : (
-						<button type='button' onClick={this.onSaveFile} className='btn btn-outline-primary mr-2'>
+						<button
+							type='button'
+							onClick={this.onSaveFile}
+							className='btn btn-outline-primary mr-2'
+							disabled={!this.props.selDataFile ? true : false}>
 							Save
 						</button>
 					)}

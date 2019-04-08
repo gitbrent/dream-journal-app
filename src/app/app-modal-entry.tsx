@@ -163,6 +163,25 @@ export default class EntryModal extends React.Component<
 		})
 	}
 
+	handleDeleteDream = dreamIdx => {
+		if (confirm('Delete Dream #' + (dreamIdx + 1) + '?')) {
+			// TODO:
+			console.log('DELETE: ' + dreamIdx)
+			/*
+			this.props
+				.doDeleteEntry(this.state.dailyEntry.entryDate)
+				.catch(err => {
+					alert('Unable to delete!\n' + err)
+				})
+				.then(res => {
+					if (res == true) this.modalClose()
+				})
+			*/
+		}
+
+		event.preventDefault()
+	}
+
 	handleDelete = event => {
 		if (confirm('Delete entry ' + this.state.dailyEntry.entryDate + '?')) {
 			this.props
@@ -212,83 +231,90 @@ export default class EntryModal extends React.Component<
 	}
 	renderDreamRow = (dream: IJournalDream, dreamIdx: number) => {
 		return (
-			<div className='row pt-3 mb-4' key={'dreamrow' + dreamIdx}>
-				<div className='col-auto'>
-					<h1 className='text-primary font-weight-light'>{dreamIdx + 1}</h1>
+			<div className='border-left border-info pl-3' key={'dreamrow' + dreamIdx}>
+				<div className='row align-items-center mt-5 mb-2'>
+					<div className='col'>
+						<h4 className='text-info mb-0'>DREAM {dreamIdx + 1}</h4>
+					</div>
+					<div className='col-auto'>
+						<div
+							className='iconSvg size24 small circle no cursor-pointer'
+							title='Delete Dream'
+							onClick={() => this.handleDeleteDream(dreamIdx)}
+						/>
+					</div>
 				</div>
-				<div className='col'>
-					<div className='row mb-3'>
-						<div className='col'>
-							<label className='text-muted text-uppercase text-sm'>Title</label>
-							<input
-								name='title'
-								type='text'
-								className='form-control'
-								value={dream.title}
-								onChange={this.handleInputDreamChange}
-								data-dream-idx={dreamIdx}
-							/>
-						</div>
+				<div className='row mb-3'>
+					<div className='col'>
+						<label className='text-muted text-uppercase text-sm'>Title</label>
+						<input
+							name='title'
+							type='text'
+							className='form-control'
+							value={dream.title}
+							onChange={this.handleInputDreamChange}
+							data-dream-idx={dreamIdx}
+						/>
 					</div>
-					<div className='row mb-3'>
-						<div className='col-12 col-lg-6 mb-3 mb-lg-0'>
-							<label className='text-muted text-uppercase text-sm d-block'>Dream Signs</label>
-							<input
-								name='dreamSigns'
-								type='text'
-								className='form-control'
-								value={dream.dreamSigns}
-								onChange={this.handleInputDreamChange}
-								data-dream-idx={dreamIdx}
-							/>
-						</div>
-						<div className='col-6 col-lg-3'>
-							<label className='text-muted text-uppercase text-sm d-block'>Lucid Dream?</label>
-							<BootstrapSwitchButton
-								onChange={(checked: boolean) => {
-									let newState = this.state.dailyEntry
-									newState.dreams[dreamIdx].isLucidDream = checked
-									this.setState({ dailyEntry: newState })
-								}}
-								checked={dream.isLucidDream}
-								onlabel='Yes'
-								onstyle='outline-success'
-								offlabel='No'
-								offstyle='outline-dark'
-								style='w-100'
-							/>
-						</div>
-						<div className='col-6 col-lg-3'>
-							<label className='text-muted text-uppercase text-sm d-block'>Lucid Method</label>
-							<select
-								name='lucidMethod'
-								value={dream.lucidMethod || InductionTypes.none}
-								disabled={!dream.isLucidDream}
-								data-dream-idx={dreamIdx}
-								onChange={this.handleInputDreamChange}
-								className='form-control'>
-								{Object.keys(InductionTypes).map(type => {
-									return (
-										<option value={type} key={'lucid-' + type + '-' + dreamIdx}>
-											{InductionTypes[type]}
-										</option>
-									)
-								})}
-							</select>
-						</div>
+				</div>
+				<div className='row mb-3'>
+					<div className='col-12 col-lg-6 mb-3 mb-lg-0'>
+						<label className='text-muted text-uppercase text-sm d-block'>Dream Signs</label>
+						<input
+							name='dreamSigns'
+							type='text'
+							className='form-control'
+							value={dream.dreamSigns}
+							onChange={this.handleInputDreamChange}
+							data-dream-idx={dreamIdx}
+						/>
 					</div>
-					<div className='row'>
-						<div className='col'>
-							<label className='text-muted text-uppercase text-sm'>Dream Details</label>
-							<textarea
-								name='notes'
-								className='form-control'
-								rows={6}
-								value={dream.notes}
-								onChange={this.handleInputDreamChange}
-								data-dream-idx={dreamIdx}
-							/>
-						</div>
+					<div className='col-6 col-lg-3'>
+						<label className='text-muted text-uppercase text-sm d-block'>Lucid Dream?</label>
+						<BootstrapSwitchButton
+							onChange={(checked: boolean) => {
+								let newState = this.state.dailyEntry
+								newState.dreams[dreamIdx].isLucidDream = checked
+								this.setState({ dailyEntry: newState })
+							}}
+							checked={dream.isLucidDream}
+							onlabel='Yes'
+							onstyle='outline-success'
+							offlabel='No'
+							offstyle='outline-dark'
+							style='w-100'
+						/>
+					</div>
+					<div className='col-6 col-lg-3'>
+						<label className='text-muted text-uppercase text-sm d-block'>Lucid Method</label>
+						<select
+							name='lucidMethod'
+							value={dream.lucidMethod || InductionTypes.none}
+							disabled={!dream.isLucidDream}
+							data-dream-idx={dreamIdx}
+							onChange={this.handleInputDreamChange}
+							className='form-control'>
+							{Object.keys(InductionTypes).map(type => {
+								return (
+									<option value={type} key={'lucid-' + type + '-' + dreamIdx}>
+										{InductionTypes[type]}
+									</option>
+								)
+							})}
+						</select>
+					</div>
+				</div>
+				<div className='row'>
+					<div className='col'>
+						<label className='text-muted text-uppercase text-sm'>Dream Details</label>
+						<textarea
+							name='notes'
+							className='form-control'
+							rows={3}
+							value={dream.notes}
+							onChange={this.handleInputDreamChange}
+							data-dream-idx={dreamIdx}
+						/>
 					</div>
 				</div>
 			</div>
@@ -306,7 +332,7 @@ export default class EntryModal extends React.Component<
 					<Modal.Body className='bg-light'>
 						<div className='container mb-4'>
 							<div className='row mb-3'>
-								<div className='col-12 col-md-6 required'>
+								<div className='col-12 col-md-auto required'>
 									<label className='text-muted text-uppercase text-sm'>Entry Date</label>
 									<input
 										name='entryDate'
@@ -322,7 +348,7 @@ export default class EntryModal extends React.Component<
 									/>
 									<div className='invalid-feedback'>Entry Date already exists in Dream Journal!</div>
 								</div>
-								<div className='col-12 col-md-6'>
+								<div className='col-12 col-md-auto'>
 									<label className='text-muted text-uppercase text-sm'>Bed Time</label>
 									<input
 										name='bedTime'
@@ -332,49 +358,40 @@ export default class EntryModal extends React.Component<
 										className='form-control w-100'
 									/>
 								</div>
-							</div>
-							<div className='row'>
-								<div className='col-12 col-md-6'>
+								<div className='col-12 col-md'>
 									<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
 									<textarea
 										name='notesPrep'
 										value={this.state.dailyEntry.notesPrep}
 										onChange={this.handleInputChange}
 										className='form-control'
-										rows={2}
+										rows={1}
 									/>
 								</div>
-								<div className='col-12 col-md-6'>
+								<div className='col-12 col-md'>
 									<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
 									<textarea
 										name='notesWake'
 										value={this.state.dailyEntry.notesWake}
 										onChange={this.handleInputChange}
 										className='form-control'
-										rows={2}
+										rows={1}
 									/>
 								</div>
 							</div>
 						</div>
 
 						<div className='container'>
-							<div className='row mb-3'>
-								<div className='col'>
-									<h5 className='text-primary'>Dreams</h5>
-								</div>
-								<div className='col-auto'>
-									<button className='btn btn-sm btn-outline-primary' onClick={this.addRowHandler}>
-										Add Dream Row
-									</button>
-								</div>
-							</div>
 							{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamRow(dream, idx))}
 						</div>
 					</Modal.Body>
 
 					<Modal.Footer>
 						<Button type='button' variant='outline-danger' className='mr-5' onClick={this.handleDelete}>
-							Delete
+							Delete Entry
+						</Button>
+						<Button type='button' variant='outline-primary' className='mr-5' onClick={this.addRowHandler}>
+							Add Dream Row
 						</Button>
 						<Button
 							type='button'

@@ -261,7 +261,9 @@ class TabHome extends React.Component<
 												</td>
 											) : (
 												<td className='align-middle text-center'>
-												<div className='text-info text-center w-100'><small>Selected</small></div>
+													<div className='text-info text-center w-100'>
+														<small>Selected</small>
+													</div>
 												</td>
 											)
 										) : this.props.selDataFile &&
@@ -428,12 +430,20 @@ class TabHome extends React.Component<
 								<div className='col-12 col-md-6 text-center'>
 									<button
 										className='btn btn-outline-info w-100 mb-3 mb-md-0'
-										onClick={this.handleDriveFileList}>
+										onClick={this.handleDriveFileList}
+										disabled={
+											this.props.authState.status != AuthState.Authenticated ? true : false
+										}>
 										Refresh File List
 									</button>
 								</div>
 								<div className='col-12 col-md-6 text-center'>
-									<button className='btn btn-outline-info w-100' onClick={this.handleDriveFileCreate}>
+									<button
+										className='btn btn-outline-info w-100'
+										onClick={this.handleDriveFileCreate}
+										disabled={
+											this.props.authState.status != AuthState.Authenticated ? true : false
+										}>
 										New Dream Journal
 									</button>
 								</div>

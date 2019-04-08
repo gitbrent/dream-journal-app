@@ -161,8 +161,8 @@ class TabView extends React.Component<
 						)}
 					{!this.props.selDataFile && (
 						<tr>
-							<td colSpan={5} className='text-center p-3 text-muted'>
-								(Select a Dream Journal to see entries)
+							<td colSpan={5} className='text-center p-3'>
+								<h5 className='text-secondary'>(no Dream Journal is currently selected)</h5>
 							</td>
 						</tr>
 					)}
@@ -201,11 +201,11 @@ class TabView extends React.Component<
 						</li>
 					))}
 
-					<li className={this.state.pagingCurrIdx == pageCnt ? 'page-item disabled' : 'page-item'}>
+					<li className={this.state.pagingCurrIdx == pageCnt || pageCnt <= 1 ? 'page-item disabled' : 'page-item'}>
 						<a
 							className='page-link'
 							href='javascript:void(0)'
-							aria-disabled={this.state.pagingCurrIdx == pageCnt && pageCnt > 1 ? true : false}
+							aria-disabled={this.state.pagingCurrIdx == pageCnt || pageCnt <= 1 ? true : false}
 							onClick={() => {
 								this.setState({ pagingCurrIdx: this.state.pagingCurrIdx + 1 })
 							}}>
