@@ -165,18 +165,9 @@ export default class EntryModal extends React.Component<
 
 	handleDeleteDream = dreamIdx => {
 		if (confirm('Delete Dream #' + (dreamIdx + 1) + '?')) {
-			// TODO:
-			console.log('DELETE: ' + dreamIdx)
-			/*
-			this.props
-				.doDeleteEntry(this.state.dailyEntry.entryDate)
-				.catch(err => {
-					alert('Unable to delete!\n' + err)
-				})
-				.then(res => {
-					if (res == true) this.modalClose()
-				})
-			*/
+			let dailyEntryNew = this.state.dailyEntry
+			dailyEntryNew.dreams.splice(dreamIdx,1)
+			this.setState({ dailyEntry: dailyEntryNew })
 		}
 
 		event.preventDefault()
@@ -321,6 +312,15 @@ export default class EntryModal extends React.Component<
 		)
 	}
 
+	/*
+	<div className='col-12 col-md-auto'>
+		<div
+			className='iconSvg size24 star-on'
+			title='Star'
+			onClick={() => this.state.starred}
+		/>
+	</div>
+	*/
 	render() {
 		return (
 			<form>
@@ -384,14 +384,15 @@ export default class EntryModal extends React.Component<
 						<div className='container'>
 							{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamRow(dream, idx))}
 						</div>
+
 					</Modal.Body>
 
 					<Modal.Footer>
+						<Button type='button' variant='outline-info' className='mr-5' onClick={this.addRowHandler}>
+							Add Dream Row
+						</Button>
 						<Button type='button' variant='outline-danger' className='mr-5' onClick={this.handleDelete}>
 							Delete Entry
-						</Button>
-						<Button type='button' variant='outline-primary' className='mr-5' onClick={this.addRowHandler}>
-							Add Dream Row
 						</Button>
 						<Button
 							type='button'
