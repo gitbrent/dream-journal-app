@@ -1,10 +1,15 @@
 import React from 'react'
 import { IJournalDream, IJournalEntry, IDriveFile } from './app'
+
+interface ISearchMatch {
+	entryDate: IJournalEntry['entryDate']
+	dream: IJournalDream
+}
 const _MS_PER_DAY = 1000 * 60 * 60 * 24
 
 export default class TabSearch extends React.Component<
 	{ selDataFile: IDriveFile },
-	{ searchMatches: Array<IJournalDream>; searchTerm: string }
+	{ searchMatches: Array<ISearchMatch>; searchTerm: string }
 > {
 	constructor(props: Readonly<{ selDataFile: IDriveFile }>) {
 		super(props)
@@ -34,13 +39,17 @@ export default class TabSearch extends React.Component<
 
 	doKeywordSearch = () => {
 		let arrFound = []
-		let regex = new RegExp(this.state.searchTerm, 'gi')
+		let regex = new RegExp('\\b' + this.state.searchTerm + '\\b', 'gi')
 
 		if (!this.props.selDataFile || this.props.selDataFile.entries.length <= 0) return
 
 		this.props.selDataFile.entries.forEach(entry => {
 			;(entry.dreams || []).forEach(dream => {
-				if ((dream.notes || '').match(regex)) arrFound.push(dream)
+				if ((dream.notes || '').match(regex))
+					arrFound.push({
+						entryDate: entry.entryDate,
+						dream: dream,
+					})
 			})
 		})
 
@@ -49,17 +58,38 @@ export default class TabSearch extends React.Component<
 		})
 	}
 
+	/**
+	 * @see: https://stackoverflow.com/questions/29652862/highlight-text-using-reactjs
+	 */
+	getHighlightedText(text: string, highlight: string) {
+		// Split on highlight term and include term into parts, ignore case
+		//let parts = text.split(new RegExp(`(${highlight})`, 'gi'));
+		let parts = text.split(new RegExp('\\b(' + highlight + ')\\b', 'gi'))
+		return (
+			<span>
+				{' '}
+				{parts.map((part, i) => (
+					<span
+						key={i}
+						className={part.toLowerCase() === highlight.toLowerCase() ? 'badge badge-warning' : ''}>
+						{part}
+					</span>
+				))}{' '}
+			</span>
+		)
+	}
+
 	render() {
 		let searchMatches: JSX.Element = (
 			<div className='container bg-light my-5'>
-				{this.state.searchMatches.map((dream, idx) => {
+				{this.state.searchMatches.map((obj, idx) => {
 					return (
 						<div className='row p-4' key={'searchResultRow' + idx}>
-							<div className='col-auto'>
-								<div className='iconSvg size24 dream' />
+							<div className='col-auto'>{new Date(obj.entryDate).toLocaleDateString()}</div>
+							<div className='col-2'>{obj.dream.title}</div>
+							<div className='col' style={{ whiteSpace: 'pre-line' }}>
+								{this.getHighlightedText(obj.dream.notes, this.state.searchTerm)}
 							</div>
-							<div className='col-auto'>{dream.title}</div>
-							<div className='col'>{dream.notes}</div>
 						</div>
 					)
 				})}
@@ -134,6 +164,9 @@ export default class TabSearch extends React.Component<
 							<input
 								type='text'
 								className='form-control'
+								onKeyPress={event => {
+									if (event.key == 'Enter') this.doKeywordSearch()
+								}}
 								onChange={event => {
 									this.setState({ searchTerm: event.target.value })
 								}}
