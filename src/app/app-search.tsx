@@ -1,41 +1,46 @@
 import React from 'react'
+import Alert from 'react-bootstrap/Alert'
 import { IJournalDream, IJournalEntry, IDriveFile } from './app'
 
 interface ISearchMatch {
 	entryDate: IJournalEntry['entryDate']
 	dream: IJournalDream
 }
-const _MS_PER_DAY = 1000 * 60 * 60 * 24
 
 export default class TabSearch extends React.Component<
 	{ selDataFile: IDriveFile },
-	{ searchMatches: Array<ISearchMatch>; searchTerm: string }
+	{ searchMatches: Array<ISearchMatch>; searchTerm: string; showAlert: boolean }
 > {
 	constructor(props: Readonly<{ selDataFile: IDriveFile }>) {
 		super(props)
 
+		let localShowAlert = JSON.parse(localStorage.getItem('show-alert-search'))
+
 		this.state = {
 			searchMatches: [],
 			searchTerm: '',
+			showAlert: typeof localShowAlert === 'boolean' ? localShowAlert : true,
 		}
 	}
 
-	/*
-
-	// a and b are javascript Date objects
-	function dateDiffInDays(a, b) {
-	  // Discard the time and time-zone information.
-	  const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
-	  const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
-
-	  return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+	handleHideAlert = event => {
+		localStorage.setItem('show-alert-search', 'false')
+		this.setState({ showAlert: false })
 	}
 
-	// test it
-	const a = new Date("2017-01-01"),
-	    b = new Date("2017-07-25"),
-	    difference = dateDiffInDays(a, b);
-	*/
+	getTotalMonths = () => {
+		if (!this.props.selDataFile || (this.props.selDataFile.entries || []).length == 0) return 0
+
+		let d1 = new Date(this.props.selDataFile.entries[0].entryDate)
+		let d2 = new Date(this.props.selDataFile.entries[this.props.selDataFile.entries.length - 1].entryDate)
+		let months
+		months = (d2.getFullYear() - d1.getFullYear()) * 12
+		months -= d1.getMonth() + 1
+		months += d2.getMonth()
+		months += 2 // include both first and last months
+
+		return months <= 0 ? 0 : months
+	}
 
 	doKeywordSearch = () => {
 		let arrFound = []
@@ -80,8 +85,21 @@ export default class TabSearch extends React.Component<
 	}
 
 	render() {
+		let totalDreams = 0
+		let totalLucids = 0
+
+		if (this.props.selDataFile && this.props.selDataFile.entries) {
+			this.props.selDataFile.entries.forEach(entry => {
+				totalDreams += entry.dreams.length
+
+				totalLucids += entry.dreams.filter(dream => {
+					return dream.isLucidDream
+				}).length
+			})
+		}
+
 		let searchMatches: JSX.Element = (
-			<div className='container bg-light my-5'>
+			<div className='container bg-light my-1'>
 				{this.state.searchMatches.map((obj, idx) => {
 					return (
 						<div className='row p-4' key={'searchResultRow' + idx}>
@@ -93,94 +111,111 @@ export default class TabSearch extends React.Component<
 						</div>
 					)
 				})}
-				{this.state.searchMatches.length == 0 ? <h3>(No Dreams Found)</h3> : ''}
+				{this.state.searchTerm && this.state.searchMatches.length == 0 ? (
+					<h3 className='text-center'>(No Dreams Found)</h3>
+				) : (
+					''
+				)}
 			</div>
 		)
 
 		return (
 			<div>
 				<div className='container mt-5'>
-					<div className='card mb-5'>
+					{this.state.showAlert ? (
+						<Alert variant='success'>
+							<Alert.Heading>Make good use of your Dream Journal</Alert.Heading>
+							<p>
+								Analyze your journal to learn more about yourself, spot common themes/dreamsigns and
+								improve your lucid dreaming ability.
+							</p>
+							<ul>
+								<li>How many lucid dreams have you had?</li>
+								<li>What are your common dream signs?</li>
+								<li>How many times have you dreamed about school?</li>
+							</ul>
+							<p>Let's find out!</p>
+							<hr />
+							<div className='d-flex justify-content-end'>
+								<button className='btn btn-light' onClick={this.handleHideAlert}>
+									Dismiss
+								</button>
+							</div>
+						</Alert>
+					) : (
+						''
+					)}
+					<div className='card my-5'>
 						<div className='card-header bg-primary'>
-							<h5 className='card-title text-white mb-0'>Search / Analyize Dream Journal Entries</h5>
+							<h5 className='card-title text-white mb-0'>Dream Journal Metrics</h5>
 						</div>
 						<div className='card-body bg-light'>
-							<div className='row align-items-top'>
+							<div className='row align-items-center'>
 								<div className='col-auto'>
-									<div className='iconSvg size96 wizard' />
+									<div className='iconSvg size96 analyze' />
 								</div>
-								<div className='col'>
-									<p className='card-text'>
-										The best feature of a well-formatted dream journal is the ability to analyze its
-										contents.
-									</p>
-									<p className='card-text'>
-										How many lucid dreams have you had?
-										<br />
-										What are your common dream signs?
-										<br />
-										How many times have you dreamed about school?
-										<br />
-									</p>
+								<div className='col text-center'>
+									<label className='text-primary text-uppercase'>Total Months</label>
+									<h1 className='text-primary mb-0'>{this.getTotalMonths() || '-'}</h1>
+								</div>
+								<div className='col text-center'>
+									<label className='text-primary text-uppercase'>Total Daily Entries</label>
+									<h1 className='text-primary mb-0'>
+										{this.props.selDataFile && this.props.selDataFile.entries
+											? this.props.selDataFile.entries.length
+											: '-'}
+									</h1>
+								</div>
+								<div className='col text-center'>
+									<label className='text-info text-uppercase'>Total Dreams</label>
+									<h1 className='text-info mb-0'>{totalDreams || '-'}</h1>
+								</div>
+								<div className='col text-center'>
+									<label className='text-success text-uppercase'>Lucid Dreams</label>
+									<h1 className='text-success mb-0'>{totalLucids || '-'}</h1>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<div className='container bg-light mt-5'>
-					<div className='row p-4'>
-						<div className='col text-center border-secondary border-right'>
-							<label className='text-muted text-uppercase'>Daily Entries</label>
-							<h1 className='text-primary'>
-								{this.props.selDataFile && this.props.selDataFile.entries
-									? this.props.selDataFile.entries.length
-									: '-'}
-							</h1>
+				<div className='container mt-5'>
+					<div className='card my-5'>
+						<div className='card-header bg-primary'>
+							<h5 className='card-title text-white mb-0'>Keyword Search</h5>
 						</div>
-						<div className='col text-center'>
-							<label className='text-muted text-uppercase'>Lucid Dreams</label>
-							<h1 className='text-primary'>
-								{this.props.selDataFile && this.props.selDataFile.entries
-									? this.props.selDataFile.entries.filter(entry => {
-											return (
-												entry.dreams.filter(dream => {
-													return dream.isLucidDream
-												}).length > 0
-											)
-									  }).length
-									: '-'}
-							</h1>
-						</div>
-					</div>
-				</div>
-
-				<div className='container bg-light mt-5'>
-					<div className='row p-4'>
-						<div className='col-auto'>
-							<div className='iconSvg size24 search' />
-						</div>
-						<div className='col'>
-							<input
-								type='text'
-								className='form-control'
-								onKeyPress={event => {
-									if (event.key == 'Enter') this.doKeywordSearch()
-								}}
-								onChange={event => {
-									this.setState({ searchTerm: event.target.value })
-								}}
-							/>
-						</div>
-						<div className='col-auto'>
-							<button type='button' className='btn btn-primary' onClick={this.doKeywordSearch}>
-								Search
-							</button>
+						<div className='card-body bg-light'>
+							<div className='row align-items-center p-4'>
+								<div className='col-auto'>
+									<div className='iconSvg size32 search' />
+								</div>
+								<div className='col'>
+									<input
+										type='text'
+										className='form-control'
+										onKeyPress={event => {
+											if (event.key == 'Enter') this.doKeywordSearch()
+										}}
+										onChange={event => {
+											this.setState({ searchTerm: event.target.value })
+										}}
+										disabled={!this.props.selDataFile ? true : false}
+									/>
+								</div>
+								<div className='col-auto'>
+									<button
+										type='button'
+										className='btn btn-primary'
+										onClick={this.doKeywordSearch}
+										disabled={!this.props.selDataFile ? true : false}>
+										Search
+									</button>
+								</div>
+							</div>
+							{searchMatches}
 						</div>
 					</div>
 				</div>
-
-				{searchMatches}
 			</div>
 		)
 	}
