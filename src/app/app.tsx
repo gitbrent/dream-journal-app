@@ -773,7 +773,11 @@ class App extends React.Component<
 			})
 
 			let jsonBody: object = {
-				entries: this.state.dataFiles.selected.entries,
+				entries: this.state.dataFiles.selected.entries.sort((a, b) => {
+					if (a.entryDate > b.entryDate) return 1
+					if (a.entryDate < b.entryDate) return -1
+					return 0
+				}),
 			}
 
 			let reqBody: string =
