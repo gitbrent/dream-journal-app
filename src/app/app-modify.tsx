@@ -68,7 +68,7 @@ class TabView extends React.Component<
 		})
 	}
 
-	// TODO: Show days with dreams and/or with Lucid success:
+	// TODO: Flag/highlight days with dreams and/or with Lucid success (also show "starred" days) - maybe green and yellow colors?
 	// @see: http://react-day-picker.js.org/examples/elements-cell
 	render() {
 		// A: filter entries
@@ -90,7 +90,6 @@ class TabView extends React.Component<
 			else if (!this.state.dateRangeFrom && !this.state.dateRangeTo) return true
 			else return false
 		})
-		console.log(arrEntries.length)
 		let pageArr = []
 		let pageCnt = arrEntries.length > 0 ? Math.ceil(arrEntries.length / this.state.pagingPageSize) : 0
 		for (let x = 1; x <= pageCnt; x++) {

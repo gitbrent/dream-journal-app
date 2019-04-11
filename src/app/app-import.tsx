@@ -477,6 +477,7 @@ export default class TabImport extends React.Component<
 	 */
 	handleImport = () => {
 		let arrInvalidSects = []
+		let cntImported = this.state._parsedSections.length
 
 		// A:
 		if (!this.props.selDataFile || !this.props.selDataFile.name) {
@@ -514,16 +515,21 @@ export default class TabImport extends React.Component<
 				// `save` can can oauthLogin, but file still needs ot be saved - show a save button?
 			})
 			.then(result => {
-				// 1: Clear import text and parsed results
-				this.setState({
+				let newState = {
 					_importHTML: '<br>',
 					_importText: '',
 					_parsedSections: [],
-				})
+				}
+
+				// 1: Clear import text and parsed results
+				this.setState(newState)
 
 				// 2:
+				localStorage.setItem('import-config', JSON.stringify(newState))
+
+				// 3:
 				// TODO: show onscreen
-				alert('SUCCESS!\nAdded '+this.state._parsedSections.length+' new entries into selected journal.')
+				alert('SUCCESS!\nAdded '+cntImported+' new entries into selected journal.')
 			})
 		}
 	}
