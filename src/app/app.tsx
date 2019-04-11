@@ -338,7 +338,7 @@ class AppTabs extends React.Component<{
 			case AppTab.view:
 				return <TabModify onShowModal={this.props.onShowModal} selDataFile={this.props.selDataFile} />
 			case AppTab.search:
-				return <TabSearch selDataFile={this.props.selDataFile} />
+				return <TabSearch onShowModal={this.props.onShowModal} selDataFile={this.props.selDataFile} />
 			case AppTab.import:
 				return (
 					<TabImport

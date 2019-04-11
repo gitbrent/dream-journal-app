@@ -1,5 +1,6 @@
 import React from 'react'
 import Alert from 'react-bootstrap/Alert'
+import BootstrapSwitchButton from 'bootstrap-switch-button-react'
 import { IJournalDream, IJournalEntry, IDriveFile } from './app'
 
 interface ISearchMatch {
@@ -8,15 +9,16 @@ interface ISearchMatch {
 }
 
 export default class TabSearch extends React.Component<
-	{ selDataFile: IDriveFile },
-	{ searchMatches: Array<ISearchMatch>; searchTerm: string; showAlert: boolean }
+	{ onShowModal: Function; selDataFile: IDriveFile },
+	{ filterShowLucid: boolean; searchMatches: Array<ISearchMatch>; searchTerm: string; showAlert: boolean }
 > {
-	constructor(props: Readonly<{ selDataFile: IDriveFile }>) {
+	constructor(props: Readonly<{ onShowModal: Function; selDataFile: IDriveFile }>) {
 		super(props)
 
 		let localShowAlert = JSON.parse(localStorage.getItem('show-alert-search'))
 
 		this.state = {
+			filterShowLucid: false,
 			searchMatches: [],
 			searchTerm: '',
 			showAlert: typeof localShowAlert === 'boolean' ? localShowAlert : true,
@@ -84,6 +86,15 @@ export default class TabSearch extends React.Component<
 		)
 	}
 
+	handleEntryEdit = e => {
+		this.props.onShowModal({
+			show: true,
+			editEntry: this.props.selDataFile.entries.filter(entry => {
+				return entry.entryDate == e.target.getAttribute('data-entry-key')
+			})[0],
+		})
+	}
+
 	render() {
 		let totalDreams = 0
 		let totalLucids = 0
@@ -98,30 +109,39 @@ export default class TabSearch extends React.Component<
 			})
 		}
 
+		// TODO: Show Lucid/Succes check icon and star icon when found
 		let searchMatches: JSX.Element = (
-			<div className='container bg-light my-1'>
-				{this.state.searchMatches.map((obj, idx) => {
+			<div>
+				{this.state.searchMatches.map((entry, idx) => {
 					return (
-						<div className='row p-4' key={'searchResultRow' + idx}>
-							<div className='col-auto'>{new Date(obj.entryDate).toLocaleDateString()}</div>
-							<div className='col-2'>{obj.dream.title}</div>
-							<div className='col' style={{ whiteSpace: 'pre-line' }}>
-								{this.getHighlightedText(obj.dream.notes, this.state.searchTerm)}
+						<div className='card' key={'searchResultCard' + idx}>
+							<div className='card-body'>
+								<a
+									href='javascript:void(0)'
+									title='View Entry'
+									className='card-link'
+									data-entry-key={entry.entryDate}
+									onClick={this.handleEntryEdit}>
+									<h5 className='card-title'> {entry.dream.title}</h5>
+								</a>
+								<p className='card-text' style={{ whiteSpace: 'pre-line' }}>
+									{this.getHighlightedText(entry.dream.notes, this.state.searchTerm)}
+								</p>
+								<p className='card-text'>
+									<small className='text-muted'>
+										{new Date(entry.entryDate).toLocaleDateString()}
+									</small>
+								</p>
 							</div>
 						</div>
 					)
 				})}
-				{this.state.searchTerm && this.state.searchMatches.length == 0 ? (
-					<h3 className='text-center'>(No Dreams Found)</h3>
-				) : (
-					''
-				)}
 			</div>
 		)
 
 		return (
 			<div>
-				<div className='container mt-5'>
+				<div className='container my-5'>
 					{this.state.showAlert ? (
 						<Alert variant='success'>
 							<Alert.Heading>Make good use of your Dream Journal</Alert.Heading>
@@ -150,9 +170,9 @@ export default class TabSearch extends React.Component<
 							<h5 className='card-title text-white mb-0'>Dream Journal Metrics</h5>
 						</div>
 						<div className='card-body bg-light'>
-							<div className='row align-items-center'>
+							<div className='row align-items-center p-2'>
 								<div className='col-auto'>
-									<div className='iconSvg size96 analyze' />
+									<div className='iconSvg size80 analyze' />
 								</div>
 								<div className='col text-center'>
 									<label className='text-primary text-uppercase'>Total Months</label>
@@ -179,42 +199,105 @@ export default class TabSearch extends React.Component<
 					</div>
 				</div>
 
-				<div className='container mt-5'>
-					<div className='card my-5'>
-						<div className='card-header bg-primary'>
-							<h5 className='card-title text-white mb-0'>Keyword Search</h5>
-						</div>
-						<div className='card-body bg-light'>
-							<div className='row align-items-center p-4'>
-								<div className='col-auto'>
-									<div className='iconSvg size32 search' />
+				<div className='container my-5'>
+					<div className='row'>
+						<div className='col-12 col-md-6'>
+							<div className='card'>
+								<div className='card-header bg-info'>
+									<h5 className='card-title text-white mb-0'>Search</h5>
 								</div>
-								<div className='col'>
-									<input
-										type='text'
-										className='form-control'
-										onKeyPress={event => {
-											if (event.key == 'Enter') this.doKeywordSearch()
-										}}
-										onChange={event => {
-											this.setState({ searchTerm: event.target.value })
-										}}
-										disabled={!this.props.selDataFile ? true : false}
-									/>
-								</div>
-								<div className='col-auto'>
-									<button
-										type='button'
-										className='btn btn-primary'
-										onClick={this.doKeywordSearch}
-										disabled={!this.props.selDataFile ? true : false}>
-										Search
-									</button>
+								<div className='card-body bg-light p-4'>
+									<div className='row align-items-center'>
+										<div className='col-auto'>
+											<div className='iconSvg size32 search' />
+										</div>
+										<div className='col'>
+											<input
+												type='text'
+												className='form-control'
+												placeholder='keyword or phrase'
+												onKeyPress={event => {
+													if (event.key == 'Enter') this.doKeywordSearch()
+												}}
+												onChange={event => {
+													this.setState({ searchTerm: event.target.value })
+													if (!event.target.value) this.setState({ searchMatches: [] })
+												}}
+												disabled={!this.props.selDataFile ? true : false}
+											/>
+										</div>
+										<div className='col-auto'>
+											<button
+												type='button'
+												className='btn btn-outline-primary'
+												onClick={this.doKeywordSearch}
+												disabled={!this.props.selDataFile ? true : false}>
+												Search
+											</button>
+										</div>
+									</div>
 								</div>
 							</div>
-							{searchMatches}
+						</div>
+						<div className='col-12 col-md-6'>
+							<div className='card'>
+								<div className='card-header bg-secondary'>
+									<h5 className='card-title text-white mb-0'>Filter</h5>
+								</div>
+								<div className='card-body bg-light p-4'>
+									<div className='row align-items-center'>
+										<div className='col-auto'>
+											<div className='iconSvg size32 filter' />
+										</div>
+										<div className='col'>
+											<BootstrapSwitchButton
+												onChange={(checked: boolean) => {
+													this.setState({ filterShowLucid: checked })
+												}}
+												checked={this.state.filterShowLucid}
+												onlabel='Show Lucid Dreams'
+												onstyle='outline-success'
+												offlabel='Dont Show Lucid Dreams'
+												offstyle='outline-dark'
+												style='w-100'
+											/>
+										</div>
+										<div className='col'>
+											<BootstrapSwitchButton
+												onChange={(checked: boolean) => {
+													this.setState({ filterShowLucid: checked })
+												}}
+												checked={this.state.filterShowLucid}
+												onlabel='Show Starred'
+												onstyle='outline-warning'
+												offlabel='Dont Show Starred'
+												offstyle='outline-dark'
+												disabled={true}
+												style='w-100'
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
+				</div>
+
+				<div className='container bg-light pt-3 my-5'>
+					{this.state.searchTerm && this.state.searchMatches.length > 0 ? (
+						<h5 className='text-info ml-3 mb-3'>
+							Found {this.state.searchMatches.length} Dreams (
+							{Math.round((this.state.searchMatches.length / totalDreams) * 100)}
+							%)
+						</h5>
+					) : (
+						''
+					)}
+					{this.state.searchTerm ? (
+						<div className='card-columns'>{searchMatches}</div>
+					) : (
+						<h3 className='text-center'>(enter a keyword above to search)</h3>
+					)}
 				</div>
 			</div>
 		)
