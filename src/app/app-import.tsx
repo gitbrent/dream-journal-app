@@ -1,10 +1,9 @@
 import React from 'react'
 import { IDriveFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './app'
-import BootstrapSwitchButton from 'bootstrap-switch-button-react'
-//import BootstrapSwitchButton from '../../../bootstrap-switch-button-react'
+import BootstrapSwitchButton from 'bootstrap-switch-button-react' // '../../../bootstrap-switch-button-react'
 import ContentEditable from 'react-contenteditable'
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
-const VERBOSE = false
+const VERBOSE = true
 
 export default class TabImport extends React.Component<
 	{
@@ -28,6 +27,7 @@ export default class TabImport extends React.Component<
 		_selBreakType: string
 		_selDreamNotes: string
 		_selEntryType: string
+		_selPrepNoteType: string
 		_showImporter: ImportTypes
 
 		_bedTime: string
@@ -37,6 +37,7 @@ export default class TabImport extends React.Component<
 		_isLucidDream: string
 		_notes: Array<string>
 		_notesPrep: string
+		_notesPrepEnd: string
 		_notesWake: string
 		_title: string
 		bedTime: string
@@ -81,6 +82,7 @@ export default class TabImport extends React.Component<
 			_selBreakType: config._selBreakType || 'blankLine',
 			_selDreamNotes: config._selDreamNotes || 'match',
 			_selEntryType: config._selEntryType || 'match',
+			_selPrepNoteType: config._selPrepNoteType || 'multi',
 			_showImporter: ImportTypes.docx,
 
 			_bedTime: config._bedTime || '',
@@ -90,6 +92,7 @@ export default class TabImport extends React.Component<
 			_isLucidDream: config._isLucidDream || '',
 			_notes: config._notes || [],
 			_notesPrep: config._notesPrep || '',
+			_notesPrepEnd: config._notesPrepEnd || '',
 			_notesWake: config._notesWake || '',
 			_title: config._title || '',
 
@@ -187,6 +190,27 @@ export default class TabImport extends React.Component<
 			this.setState({ dreamBreak: arrMatch })
 		}
 
+		// C: "Prep Notes" (multi-line)
+		if (this.state._selPrepNoteType == 'multi' && this.state._notesPrepEnd) {
+			let isCapturing = false
+			let strNotesPrep = ''
+			;(demoData.split('\n') || []).forEach(line => {
+				if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
+					isCapturing = false
+				} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
+					isCapturing = true
+				}
+
+				if (line && line.replace(this.state._notesPrep, '').trim() && isCapturing) {
+					strNotesPrep += line.replace(this.state._notesPrep, '').trim() + '\n'
+				}
+			})
+
+			this.setState({
+				notesPrep: strNotesPrep,
+			})
+		}
+
 		// C: all other fields
 		;(demoData.split('\n') || []).forEach(line => {
 			arrOtherFields.forEach(name => {
@@ -233,6 +257,10 @@ export default class TabImport extends React.Component<
 		if (name == '_selEntryType') {
 			this.setState({
 				entryDate: '',
+			})
+		} else if (name == '_selPrepNoteType') {
+			this.setState({
+				notesPrep: '',
 			})
 		}
 
@@ -382,9 +410,16 @@ export default class TabImport extends React.Component<
 								}
 								if (
 									Object.prototype.toString.call(dateParse) === '[object Date]' &&
-									dateParse.getDay() > 0
+									dateParse.getDay() >= 0
 								) {
 									objEntry.entryDate = dateParse.toISOString().substring(0, 10)
+								} else {
+									if (VERBOSE) {
+										console.log('---> ATTN: unable to parse `entryDate` ')
+										console.log(dateParse)
+										console.log(Object.prototype.toString.call(dateParse))
+										console.log(dateParse.getDay())
+									}
 								}
 							}
 						} else if (line.trim().match(new RegExp(this.state._bedTime, 'g'))) {
@@ -414,7 +449,7 @@ export default class TabImport extends React.Component<
 							if (keyVal[1].trim())
 								tmpDreamSigns = keyVal[1].trim().split(this.state._dreamSignsDelim || strDreamSignDelim)
 						}
-					} else {
+					} else if (line) {
 						// DESIGN: the last `else if` above created an item in `objEntry.dreams`
 						// Regardless of its index, closures allow us to address `objDream` and ensure the correct "Dream"
 
@@ -424,7 +459,7 @@ export default class TabImport extends React.Component<
 							if (keyVal[1]) objDream.title = keyVal[1].trim()
 						} else if (objDream.title && this.state._selDreamNotes == 'after' && line) {
 							objDream.notes += (line + '\n').replace(/\n\s*\n/g, '\n')
-							if (VERBOSE) console.log('dream.notes:\n' + objDream.notes)
+							//if (VERBOSE) console.log('dream.notes:\n' + objDream.notes)
 						} else if (this.state._selDreamNotes != 'after') {
 							// TODO: look for regex
 						}
@@ -432,6 +467,8 @@ export default class TabImport extends React.Component<
 						// B: Capture other `dream` fields
 						if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
 							let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
+							// FIXME: TODO:
+							if (!keyVal[1]) console.log(line)
 							if (keyVal[1].trim())
 								objDream.dreamSigns =
 									tmpDreamSigns ||
@@ -506,31 +543,32 @@ export default class TabImport extends React.Component<
 				_invalidSections: arrInvalidSects,
 			})
 		} else {
-			this.props.doImportEntries(this.state._parsedSections)
-			.catch(err => {
-				// TODO: show onscreen
-				alert('ERROR: '+err)
-				console.error(err)
-				// TODO: what to do about expired session?
-				// `save` can can oauthLogin, but file still needs ot be saved - show a save button?
-			})
-			.then(result => {
-				let newState = {
-					_importHTML: '<br>',
-					_importText: '',
-					_parsedSections: [],
-				}
+			this.props
+				.doImportEntries(this.state._parsedSections)
+				.catch(err => {
+					// TODO: show onscreen
+					alert('ERROR: ' + err)
+					console.error(err)
+					// TODO: what to do about expired session?
+					// `save` can can oauthLogin, but file still needs ot be saved - show a save button?
+				})
+				.then(result => {
+					let newState = {
+						_importHTML: '<br>',
+						_importText: '',
+						_parsedSections: [],
+					}
 
-				// 1: Clear import text and parsed results
-				this.setState(newState)
+					// 1: Clear import text and parsed results
+					this.setState(newState)
 
-				// 2:
-				localStorage.setItem('import-config', JSON.stringify(newState))
+					// 2:
+					localStorage.setItem('import-config', JSON.stringify(newState))
 
-				// 3:
-				// TODO: show onscreen
-				alert('SUCCESS!\nAdded '+cntImported+' new entries into selected journal.')
-			})
+					// 3:
+					// TODO: show onscreen
+					alert('SUCCESS!\nAdded ' + cntImported + ' new entries into selected journal.')
+				})
 		}
 	}
 
@@ -545,7 +583,12 @@ export default class TabImport extends React.Component<
 						<span className='text-white'>BEDTIME:</span> 11:30
 					</li>
 					<li>
-						<span className='text-white'>PREP:</span> Bath
+						<span className='text-white'>PREP:</span>
+						<ul>
+							<li>Watched Netflix from 8-10</li>
+							<li>Talked to mom</li>
+							<li>Bubble bath</li>
+						</ul>
 					</li>
 					<li>
 						<span className='text-white'>WAKES:</span> 06:00 for bio break
@@ -604,7 +647,7 @@ export default class TabImport extends React.Component<
 								<label className='text-muted text-uppercase'>Result</label>
 							</div>
 						</div>
-						<div className='row align-items-top mb-2'>
+						<div className='row align-items-top mb-3'>
 							<div className='col-3'>
 								Entry Date
 								<span className='text-danger mx-1' title='required field'>
@@ -623,7 +666,7 @@ export default class TabImport extends React.Component<
 											<option value='first'>First line is the Entry Date</option>
 										</select>
 									</div>
-									<div className={this.state._selEntryType == 'first' ? 'd-none' : 'col-7 pl-2'}>
+									<div className={this.state._selEntryType == 'first' ? 'd-none' : 'col-7 pl-1'}>
 										<input
 											name='_entryDate'
 											value={this.state._entryDate}
@@ -649,7 +692,7 @@ export default class TabImport extends React.Component<
 								</div>
 							</div>
 						</div>
-						<div className='row align-items-center mb-2'>
+						<div className='row align-items-center mb-3'>
 							<div className='col-3'>Bed Time</div>
 							<div className='col'>
 								<input
@@ -665,20 +708,49 @@ export default class TabImport extends React.Component<
 								<div className='form-output p-2'>{this.state.bedTime}</div>
 							</div>
 						</div>
-						<div className='row align-items-center mb-2'>
+						<div className='row align-items-top mb-3'>
 							<div className='col-3'>Prep Notes</div>
 							<div className='col'>
-								<input
-									name='_notesPrep'
-									value={this.state._notesPrep}
-									type='text'
-									className='form-control'
-									onChange={this.handleInputChange}
-									placeholder='PREP'
-								/>
+								<div className='row no-gutters'>
+									<div className='col-auto'>
+										<select
+											name='_selPrepNoteType'
+											className='form-control'
+											onChange={this.handleInputChange}
+											value={this.state._selPrepNoteType}>
+											<option value='single'>Single-line</option>
+											<option value='multi'>Multi-line</option>
+										</select>
+									</div>
+									<div className='col pl-1'>
+										<input
+											name='_notesPrep'
+											value={this.state._notesPrep}
+											type='text'
+											className='form-control'
+											onChange={this.handleInputChange}
+											placeholder='PREP'
+										/>
+									</div>
+								</div>
+								<div
+									className={
+										this.state._selPrepNoteType == 'multi' ? 'row no-gutters mt-1' : 'd-none'
+									}>
+									<input
+										name='_notesPrepEnd'
+										value={this.state._notesPrepEnd}
+										type='text'
+										className='form-control'
+										onChange={this.handleInputChange}
+										placeholder='("Prep Notes" ends with)'
+									/>
+								</div>
 							</div>
 							<div className='col'>
-								<div className='form-output p-2'>{this.state.notesPrep}</div>
+								<div className='form-output p-2' style={{ whiteSpace: 'pre-line' }}>
+									{this.state.notesPrep}
+								</div>
 							</div>
 						</div>
 						<div className='row align-items-center mb-3'>
@@ -716,17 +788,15 @@ export default class TabImport extends React.Component<
 								<div className='form-output p-2'>
 									{(this.state.dreamBreak || []).map((dream, idx) => {
 										return (
-											<div
-												className='badge badge-primary mb-1 w-100 text-left font-weight-light p-2'
-												key={'dreambreak' + idx}>
-												{dream}
+											<div key={'dreambreak' + idx}>
+												{idx + 1}:&nbsp;{dream}
 											</div>
 										)
 									})}
 								</div>
 							</div>
 						</div>
-						<div className='row align-items-center mb-2'>
+						<div className='row align-items-center mb-3'>
 							<div className='col-3'>Lucid Dream?</div>
 							<div className='col'>
 								<input
@@ -746,7 +816,7 @@ export default class TabImport extends React.Component<
 								</div>
 							</div>
 						</div>
-						<div className='row align-items-center mb-2'>
+						<div className='row align-items-center mb-3'>
 							<div className='col-3'>Dream Signs</div>
 							<div className='col'>
 								<div className='row no-gutters'>
@@ -777,7 +847,7 @@ export default class TabImport extends React.Component<
 								<div className='form-output p-2'>{this.state.dreamSigns}</div>
 							</div>
 						</div>
-						<div className='row align-items-center mb-2'>
+						<div className='row align-items-center mb-3'>
 							<div className='col-3'>Dream Title</div>
 							<div className='col'>
 								<input
@@ -793,7 +863,7 @@ export default class TabImport extends React.Component<
 								<div className='form-output p-2'>{this.state.title}</div>
 							</div>
 						</div>
-						<div className='row align-items-top mb-2'>
+						<div className='row align-items-top mb-3'>
 							<div className='col-3'>Dream Notes</div>
 							<div className='col'>
 								<div className='row no-gutters'>
@@ -1105,7 +1175,8 @@ export default class TabImport extends React.Component<
 															<BootstrapSwitchButton
 																onChange={(checked: boolean) => {
 																	let newState = this.state._parsedSections
-																	if (idy) newState[idx].dreams[idy].isLucidDream = checked
+																	if (idy)
+																		newState[idx].dreams[idy].isLucidDream = checked
 																	this.setState({ _parsedSections: newState })
 																}}
 																checked={dream.isLucidDream}
