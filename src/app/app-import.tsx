@@ -27,7 +27,8 @@ export default class TabImport extends React.Component<
 		_selBreakType: string
 		_selDreamNotes: string
 		_selEntryType: string
-		_selPrepNoteType: string
+		_selNotePrepType: string
+		_selNoteWakeType: string
 		_showImporter: ImportTypes
 
 		_bedTime: string
@@ -39,6 +40,7 @@ export default class TabImport extends React.Component<
 		_notesPrep: string
 		_notesPrepEnd: string
 		_notesWake: string
+		_notesWakeEnd: string
 		_title: string
 		bedTime: string
 		dreamBreak: Array<string>
@@ -82,7 +84,8 @@ export default class TabImport extends React.Component<
 			_selBreakType: config._selBreakType || 'blankLine',
 			_selDreamNotes: config._selDreamNotes || 'match',
 			_selEntryType: config._selEntryType || 'match',
-			_selPrepNoteType: config._selPrepNoteType || 'multi',
+			_selNotePrepType: config._selNotePrepType || 'multi',
+			_selNoteWakeType: config._selNoteWakeType || 'single',
 			_showImporter: ImportTypes.docx,
 
 			_bedTime: config._bedTime || '',
@@ -94,6 +97,7 @@ export default class TabImport extends React.Component<
 			_notesPrep: config._notesPrep || '',
 			_notesPrepEnd: config._notesPrepEnd || '',
 			_notesWake: config._notesWake || '',
+			_notesWakeEnd: config._notesWake || '',
 			_title: config._title || '',
 
 			bedTime: null,
@@ -191,7 +195,7 @@ export default class TabImport extends React.Component<
 		}
 
 		// C: "Prep Notes" (multi-line)
-		if (this.state._selPrepNoteType == 'multi' && this.state._notesPrepEnd) {
+		if (this.state._selNotePrepType == 'multi' && this.state._notesPrepEnd) {
 			let isCapturing = false
 			let strNotesPrep = ''
 			;(demoData.split('\n') || []).forEach(line => {
@@ -211,7 +215,28 @@ export default class TabImport extends React.Component<
 			})
 		}
 
-		// C: all other fields
+		// D: "Wake Notes" (multi-line)
+		if (this.state._selNoteWakeType == 'multi' && this.state._notesWakeEnd) {
+			let isCapturing = false
+			let strNotesWake = ''
+			;(demoData.split('\n') || []).forEach(line => {
+				if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
+					isCapturing = false
+				} else if (line && line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
+					isCapturing = true
+				}
+
+				if (line && line.replace(this.state._notesWake, '').trim() && isCapturing) {
+					strNotesWake += line.replace(this.state._notesWake, '').trim() + '\n'
+				}
+			})
+
+			this.setState({
+				notesWake: strNotesWake,
+			})
+		}
+
+		// E: all other fields
 		;(demoData.split('\n') || []).forEach(line => {
 			arrOtherFields.forEach(name => {
 				if (line.trim().match(new RegExp(this.state[name], 'g'))) {
@@ -225,7 +250,7 @@ export default class TabImport extends React.Component<
 			})
 		})
 
-		// C: Update "Dream Notes"
+		// F: Update "Dream Notes"
 		if (this.state._selDreamNotes == 'after') {
 			if (!this.state._dreamBreak) {
 				this.setState({ notes: ['(add text to Dream Section)'] })
@@ -258,9 +283,13 @@ export default class TabImport extends React.Component<
 			this.setState({
 				entryDate: '',
 			})
-		} else if (name == '_selPrepNoteType') {
+		} else if (name == '_selNotePrepType') {
 			this.setState({
 				notesPrep: '',
+			})
+		} else if (name == '_selNoteWakeType') {
+			this.setState({
+				notesWake: '',
 			})
 		}
 
@@ -438,8 +467,10 @@ export default class TabImport extends React.Component<
 								objEntry.bedTime = time
 							}
 						} else if (line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
-							let keyVal = line.trim().split(new RegExp(this.state._notesPrep, 'g'))
-							if (keyVal[1].trim()) objEntry.notesPrep = keyVal[1].trim()
+							if (this.state._selNotePrepType == 'single') {
+								let keyVal = line.trim().split(new RegExp(this.state._notesPrep, 'g'))
+								if (keyVal[1].trim()) objEntry.notesPrep = keyVal[1].trim()
+							}
 						} else if (line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
 							let keyVal = line.trim().split(new RegExp(this.state._notesWake, 'g'))
 							if (keyVal[1].trim()) objEntry.notesWake = keyVal[1].trim()
@@ -485,6 +516,34 @@ export default class TabImport extends React.Component<
 						*/
 					}
 				})
+
+				// 3: Handle fields that can be multi-line
+				if (this.state._selNotePrepType == 'multi' && this.state._notesPrepEnd) {
+					let isCapturing = false
+					;(sect.split('\n') || []).forEach(line => {
+						if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
+							isCapturing = false
+						} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
+							isCapturing = true
+						}
+						if (line && line.replace(this.state._notesPrep, '').trim() && isCapturing) {
+							objEntry.notesPrep += line.replace(this.state._notesPrep, '').trim() + '\n'
+						}
+					})
+				}
+				if (this.state._selNoteWakeType == 'multi' && this.state._notesWakeEnd) {
+					let isCapturing = false
+					;(sect.split('\n') || []).forEach(line => {
+						if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
+							isCapturing = false
+						} else if (line && line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
+							isCapturing = true
+						}
+						if (line && line.replace(this.state._notesWake, '').trim() && isCapturing) {
+							objEntry.notesWake += line.replace(this.state._notesWake, '').trim() + '\n'
+						}
+					})
+				}
 
 				// 3: default [bed time] if needed
 				if (this.state._useDefaultTime && !objEntry.bedTime)
@@ -553,17 +612,17 @@ export default class TabImport extends React.Component<
 					// `save` can can oauthLogin, but file still needs ot be saved - show a save button?
 				})
 				.then(result => {
-					let newState = {
+					// 1: Clear import text and parsed results
+					this.setState({
 						_importHTML: '<br>',
 						_importText: '',
 						_parsedSections: [],
-					}
-
-					// 1: Clear import text and parsed results
-					this.setState(newState)
+					})
 
 					// 2:
-					localStorage.setItem('import-config', JSON.stringify(newState))
+					setTimeout(() => {
+						localStorage.setItem('import-config', JSON.stringify(this.state))
+					}, 100)
 
 					// 3:
 					// TODO: show onscreen
@@ -714,10 +773,10 @@ export default class TabImport extends React.Component<
 								<div className='row no-gutters'>
 									<div className='col-auto'>
 										<select
-											name='_selPrepNoteType'
+											name='_selNotePrepType'
 											className='form-control'
 											onChange={this.handleInputChange}
-											value={this.state._selPrepNoteType}>
+											value={this.state._selNotePrepType}>
 											<option value='single'>Single-line</option>
 											<option value='multi'>Multi-line</option>
 										</select>
@@ -735,7 +794,7 @@ export default class TabImport extends React.Component<
 								</div>
 								<div
 									className={
-										this.state._selPrepNoteType == 'multi' ? 'row no-gutters mt-1' : 'd-none'
+										this.state._selNotePrepType == 'multi' ? 'row no-gutters mt-1' : 'd-none'
 									}>
 									<input
 										name='_notesPrepEnd'
@@ -753,17 +812,44 @@ export default class TabImport extends React.Component<
 								</div>
 							</div>
 						</div>
-						<div className='row align-items-center mb-3'>
+						<div className='row align-items-top mb-3'>
 							<div className='col-3'>Wake Notes</div>
 							<div className='col'>
-								<input
-									name='_notesWake'
-									value={this.state._notesWake}
-									type='text'
-									className='form-control'
-									onChange={this.handleInputChange}
-									placeholder='WAKES'
-								/>
+								<div className='row no-gutters'>
+									<div className='col-auto'>
+										<select
+											name='_selNoteWakeType'
+											className='form-control'
+											onChange={this.handleInputChange}
+											value={this.state._selNoteWakeType}>
+											<option value='single'>Single-line</option>
+											<option value='multi'>Multi-line</option>
+										</select>
+									</div>
+									<div className='col pl-1'>
+										<input
+											name='_notesWake'
+											value={this.state._notesWake}
+											type='text'
+											className='form-control'
+											onChange={this.handleInputChange}
+											placeholder='WAKES'
+										/>
+									</div>
+								</div>
+								<div
+									className={
+										this.state._selNoteWakeType == 'multi' ? 'row no-gutters mt-1' : 'd-none'
+									}>
+									<input
+										name='_notesWakeEnd'
+										value={this.state._notesWakeEnd}
+										type='text'
+										className='form-control'
+										onChange={this.handleInputChange}
+										placeholder='("Wake Notes" ends with)'
+									/>
+								</div>
 							</div>
 							<div className='col'>
 								<div className='form-output p-2'>{this.state.notesWake}</div>
@@ -1110,24 +1196,24 @@ export default class TabImport extends React.Component<
 									</div>
 									<div className='col'>
 										<label className='text-uppercase text-muted d-block'>Prep Notes</label>
-										<input
+										<textarea
 											data-sect-idx={idx}
 											name='notesPrep'
-											type='text'
-											className='form-control'
 											value={sect.notesPrep}
+											className='form-control'
 											onChange={this.handleResultChange}
+											rows={2}
 										/>
 									</div>
 									<div className='col'>
 										<label className='text-uppercase text-muted d-block'>Wake Notes</label>
-										<input
+										<textarea
 											data-sect-idx={idx}
 											name='notesWake'
-											type='text'
 											className='form-control'
 											value={sect.notesWake}
 											onChange={this.handleResultChange}
+											rows={2}
 										/>
 									</div>
 								</div>
