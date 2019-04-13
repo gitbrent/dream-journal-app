@@ -296,7 +296,7 @@ export default class TabSearch extends React.Component<
 					{this.state.searchTerm ? (
 						<div className='card-columns'>{searchMatches}</div>
 					) : (
-						<h3 className='text-center'>(enter a keyword above to search)</h3>
+						<h4 className='text-center mb-0 pb-3'>(enter a keyword above to search)</h4>
 					)}
 				</div>
 			</div>
