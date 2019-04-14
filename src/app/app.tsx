@@ -261,16 +261,7 @@ class AppNavBar extends React.Component<
 						</li>
 					</ul>
 				</div>
-				<div className='btn-group mr-3' role='group' aria-label='Selected Journal Name'>
-					<button type='button' className='btn btn-secondary' disabled>
-						{this.props.selDataFile
-							? this.props.selDataFile.modifiedTime
-								? new Date(this.props.selDataFile.modifiedTime).toLocaleString()
-								: '(unsaved)'
-							: '(no file selected)'}
-					</button>
-				</div>
-				<form className='form-inline mb-0'>
+				<form className='form-inline h6 text-secondary mb-0'>
 					{this.props.selDataFile && this.props.selDataFile._isSaving ? (
 						<div>
 							<div className='spinner-border spinner-border-sm mr-2' role='status'>
@@ -278,14 +269,14 @@ class AppNavBar extends React.Component<
 							</div>
 							Saving...
 						</div>
+					) : this.props.selDataFile ? (
+						this.props.selDataFile.modifiedTime ? (
+							'Last Saved @ ' + new Date(this.props.selDataFile.modifiedTime).toLocaleString()
+						) : (
+							'(unsaved)'
+						)
 					) : (
-						<button
-							type='button'
-							onClick={this.onSaveFile}
-							className='btn btn-outline-primary mr-2'
-							disabled={!this.props.selDataFile ? true : false}>
-							Save
-						</button>
+						'(no file selected)'
 					)}
 				</form>
 			</nav>
