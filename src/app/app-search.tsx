@@ -10,7 +10,13 @@ interface ISearchMatch {
 
 export default class TabSearch extends React.Component<
 	{ onShowModal: Function; selDataFile: IDriveFile },
-	{ filterShowLucid: boolean; searchMatches: Array<ISearchMatch>; searchTerm: string; showAlert: boolean }
+	{
+		filterShowLucid: boolean
+		searchMatches: Array<ISearchMatch>
+		searchTerm: string
+		searchTermInvalidMsg: string
+		showAlert: boolean
+	}
 > {
 	constructor(props: Readonly<{ onShowModal: Function; selDataFile: IDriveFile }>) {
 		super(props)
@@ -21,6 +27,7 @@ export default class TabSearch extends React.Component<
 			filterShowLucid: false,
 			searchMatches: [],
 			searchTerm: '',
+			searchTermInvalidMsg: '',
 			showAlert: typeof localShowAlert === 'boolean' ? localShowAlert : true,
 		}
 	}
@@ -71,7 +78,13 @@ export default class TabSearch extends React.Component<
 	getHighlightedText(text: string, highlight: string) {
 		// Split on highlight term and include term into parts, ignore case
 		//let parts = text.split(new RegExp(`(${highlight})`, 'gi'));
-		let parts = text.split(new RegExp('\\b(' + highlight + ')\\b', 'gi'))
+		let parts = []
+		try {
+			parts = text.split(new RegExp('\\b(' + highlight + ')\\b', 'gi'))
+		} catch (ex) {
+			//this.setState({ searchTermInvalidMsg: ex }) // TODO: FIXME: cannot set state bc were called inside `render()` !!
+			console.warn(ex)
+		}
 		return (
 			<span>
 				{' '}
@@ -225,6 +238,14 @@ export default class TabSearch extends React.Component<
 												}}
 												disabled={!this.props.selDataFile ? true : false}
 											/>
+											<div
+												className={
+													this.state.searchTermInvalidMsg
+														? 'invalid-feedback d-block'
+														: 'invalid-feedback'
+												}>
+												{this.state.searchTermInvalidMsg}
+											</div>
 										</div>
 										<div className='col-auto'>
 											<button
