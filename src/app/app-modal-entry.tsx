@@ -156,7 +156,13 @@ export default class EntryModal extends React.Component<
 
 		let newState = this.state.dailyEntry
 
-		newState.dreams[event.target.getAttribute('data-dream-idx')][name] = value
+		if ( name == 'dreamSigns' ) {
+			// `dreamSigns` is an array and must be maintained as such
+			newState.dreams[event.target.getAttribute('data-dream-idx')].dreamSigns = value ? value.split(',') : []
+		}
+		else {
+			newState.dreams[event.target.getAttribute('data-dream-idx')][name] = value
+		}
 
 		this.setState({
 			dailyEntry: newState,
