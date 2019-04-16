@@ -275,7 +275,13 @@ export default class TabImport extends React.Component<
 
 		// A: Capture regex field value
 		let newState = {}
-		newState[name] = value
+		if ( name == 'dreamSigns' ) {
+			// `dreamSigns` is an array and must be maintained as such
+			newState['dreamSigns'] = value ? value.split(',') : []
+		}
+		else {
+			newState[name] = value
+		}
 		this.setState(newState)
 
 		// B:
