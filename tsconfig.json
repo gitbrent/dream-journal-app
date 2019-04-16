@@ -5,6 +5,7 @@
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
 		"experimentalDecorators": true,
+		"downlevelIteration": true,
 		"target": "es5",
 		"jsx": "react",
 		"lib": [
