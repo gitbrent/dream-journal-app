@@ -103,6 +103,7 @@ class TabView extends React.Component<
 						<th>Entry Date</th>
 						<th className='text-center d-none d-md-table-cell'>Bed Time</th>
 						<th className='text-center d-none d-md-table-cell'>Dream Count</th>
+						<th className='text-center d-none d-md-table-cell'>Dream Signs</th>
 						<th className='text-center d-none d-md-table-cell'>Lucid Dream?</th>
 						<th className='text-center'>Action</th>
 					</tr>
@@ -114,18 +115,31 @@ class TabView extends React.Component<
 							if (a.entryDate > b.entryDate) return 1
 							return 0
 						})
-						.filter((entry, idx) => {
+						.filter((_entry, idx) => {
 							return (
 								idx >= this.state.pagingPageSize * (this.state.pagingCurrIdx - 1) &&
 								idx < this.state.pagingPageSize * this.state.pagingCurrIdx
 							)
 						})
 						.map((entry: IJournalEntry, idx) => {
+							// This is a harsh thing to compile inline below, so do it here
+							let dreamSignsUnq: Array<string> = []
+							entry.dreams.forEach(dream =>
+								Array.isArray(dream.dreamSigns)
+									? (dreamSignsUnq = [...new Set(dream.dreamSigns.concat(dreamSignsUnq))])
+									: dream.dreamSigns ? dreamSignsUnq.push(dream.dreamSigns+' (FIXME)') : ''
+							)
+
 							return (
 								<tr key={'journalrow' + idx}>
 									<td>{entry.entryDate}</td>
 									<td className='text-center d-none d-md-table-cell'>{entry.bedTime}</td>
 									<td className='text-center d-none d-md-table-cell'>{entry.dreams.length}</td>
+									<td className='text-center d-none d-md-table-cell'>
+										{dreamSignsUnq.map(sign => {
+											return <div className='badge badge-info text-lowercase mr-2 mb-2'>{sign}</div>
+										})}
+									</td>
 									<td className='text-center d-none d-md-table-cell'>
 										{entry.dreams.filter(dream => {
 											return dream.isLucidDream == true
@@ -200,7 +214,10 @@ class TabView extends React.Component<
 						</li>
 					))}
 
-					<li className={this.state.pagingCurrIdx == pageCnt || pageCnt <= 1 ? 'page-item disabled' : 'page-item'}>
+					<li
+						className={
+							this.state.pagingCurrIdx == pageCnt || pageCnt <= 1 ? 'page-item disabled' : 'page-item'
+						}>
 						<a
 							className='page-link'
 							href='javascript:void(0)'
@@ -216,7 +233,7 @@ class TabView extends React.Component<
 		)
 
 		// TODO: DateRangePicker: add prop for (earliest month of journal) `fromMonth={new Date(2018, 8)}`
-		/* TODO: Show days with LUCID==true!! - add prop for Array<Date>
+		/* TODO: circle days on cal where LUCID==true!! (soln: add prop for Array<Date>)
 		<DayPicker
 			  initialMonth={new Date(2017, 3)}
 			  selectedDays={[ new Date(2017, 3, 12), ])
