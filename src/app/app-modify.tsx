@@ -132,10 +132,10 @@ class TabView extends React.Component<
 
 							return (
 								<tr key={'journalrow' + idx}>
-									<td>{entry.entryDate}</td>
+									<td className='text-nowrap'>{entry.entryDate}</td>
 									<td className='text-center d-none d-md-table-cell'>{entry.bedTime}</td>
 									<td className='text-center d-none d-md-table-cell'>{entry.dreams.length}</td>
-									<td className='text-center d-none d-md-table-cell'>
+									<td className='text-left d-none d-md-table-cell'>
 										{dreamSignsUnq.map(sign => {
 											return <div className='badge badge-info text-lowercase mr-2 mb-2'>{sign}</div>
 										})}
