@@ -7,12 +7,12 @@
 * Safely stored into your Google Drive
 * Import wizard to convert your existing dreams into clean, searchable format
 
-**************************************************************************************************
+
 # Online Dream Journal
 
 Hosted on Google Firebase: [Brain Cloud Dream Journal](https://brain-cloud-dream-journal.firebaseapp.com/)
 
-**************************************************************************************************
+
 # Application Screens
 
 ![Home](https://raw.githubusercontent.com/gitbrent/dream-journal-app/master/src/img/app-screencap-home.png)
@@ -21,13 +21,13 @@ Hosted on Google Firebase: [Brain Cloud Dream Journal](https://brain-cloud-dream
 
 ![Import](https://raw.githubusercontent.com/gitbrent/dream-journal-app/master/src/img/app-screencap-import.png)
 
-**************************************************************************************************
+
 # Credits
 
 Based on [react-typescript](https://github.com/basarat/react-typescript)
 App Icon made by [Nhor Phai](https://www.flaticon.com/authors/nhor-phai) from [Flaticon](https://www.flaticon.com/) [Creative Commons BY 3.0](http://creativecommons.org/licenses/by/3.0/")
 
-**************************************************************************************************
+
 # License
 
 Copyright &copy; 2019 [Brent Ely](https://github.com/gitbrent/dream-journal-app)
