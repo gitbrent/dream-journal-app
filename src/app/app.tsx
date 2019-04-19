@@ -296,9 +296,11 @@ class AppTabs extends React.Component<{
 	doImportEntries: Function
 	doRenameFile: Function
 	doSaveImportState: Function
+	doSaveSearchState: Function
 	doSelectFileById: Function
 	importState: object
 	onShowModal: Function
+	searchState: object
 	selDataFile: IDriveFile
 }> {
 	constructor(
@@ -315,9 +317,11 @@ class AppTabs extends React.Component<{
 			doImportEntries: Function
 			doRenameFile: Function
 			doSaveImportState: Function
+			doSaveSearchState: Function
 			doSelectFileById: Function
 			importState: object
 			onShowModal: Function
+			searchState: object
 			selDataFile: IDriveFile
 		}>
 	) {
@@ -329,7 +333,14 @@ class AppTabs extends React.Component<{
 			case AppTab.view:
 				return <TabModify onShowModal={this.props.onShowModal} selDataFile={this.props.selDataFile} />
 			case AppTab.search:
-				return <TabSearch onShowModal={this.props.onShowModal} selDataFile={this.props.selDataFile} />
+				return (
+					<TabSearch
+						doSaveSearchState={this.props.doSaveSearchState}
+						onShowModal={this.props.onShowModal}
+						searchState={this.props.searchState}
+						selDataFile={this.props.selDataFile}
+					/>
+				)
 			case AppTab.import:
 				return (
 					<TabImport
@@ -364,6 +375,7 @@ class App extends React.Component<
 	{
 		auth: IAuthState
 		childImportState: object
+		childSearchState: object
 		dataFiles: IDriveFiles
 		editEntry: IJournalEntry
 		showModal: boolean
@@ -380,6 +392,7 @@ class App extends React.Component<
 				userPhoto: '',
 			},
 			childImportState: null,
+			childSearchState: null,
 			dataFiles: {
 				available: [],
 				selected: null,
@@ -399,6 +412,14 @@ class App extends React.Component<
 	doSaveImportState = (newState: object) => {
 		this.setState({
 			childImportState: newState,
+		})
+	}
+	/**
+	 * Retain state between tab changes
+	 */
+	doSaveSearchState = (newState: object) => {
+		this.setState({
+			childSearchState: newState,
 		})
 	}
 
@@ -1002,9 +1023,11 @@ class App extends React.Component<
 					doImportEntries={this.doImportEntries}
 					doRenameFile={this.doRenameFile}
 					doSaveImportState={this.doSaveImportState}
+					doSaveSearchState={this.doSaveSearchState}
 					doSelectFileById={this.doSelectFileById}
 					importState={this.state.childImportState}
 					onShowModal={this.chgShowModal}
+					searchState={this.state.childSearchState}
 					selDataFile={
 						this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
 					}
