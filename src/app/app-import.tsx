@@ -124,7 +124,7 @@ export default class TabImport extends React.Component<
 	}
 
 	/**
-	 * this constructor is called whenever tab is hidden/shown, so state must be preserved by parent
+	 * this constructor is called whenever tab is hidden/shown, so state must be preserved by parent (lifting state up)
 	 */
 	componentWillUnmount = () => {
 		this.props.doSaveImportState(this.state)

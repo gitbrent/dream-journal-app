@@ -136,8 +136,8 @@ class TabView extends React.Component<
 									<td className='text-center d-none d-md-table-cell'>{entry.bedTime}</td>
 									<td className='text-center d-none d-md-table-cell'>{entry.dreams.length}</td>
 									<td className='text-left d-none d-md-table-cell'>
-										{dreamSignsUnq.map(sign => {
-											return <div className='badge badge-info text-lowercase mr-2 mb-2'>{sign}</div>
+										{dreamSignsUnq.map((sign,idy) => {
+											return <div className='badge badge-info text-lowercase mr-2 mb-2' key={idx+'-'+idy}>{sign}</div>
 										})}
 									</td>
 									<td className='text-center d-none d-md-table-cell'>
@@ -166,7 +166,7 @@ class TabView extends React.Component<
 						this.props.selDataFile.entries &&
 						this.props.selDataFile.entries.length == 0 && (
 							<tr>
-								<td colSpan={3} className='text-center p-3 text-muted'>
+								<td colSpan={6} className='text-center p-3 text-muted'>
 									(No Dream Journal entries found - select "Add Journal Entry" above to create a new
 									one)
 								</td>
@@ -174,7 +174,7 @@ class TabView extends React.Component<
 						)}
 					{!this.props.selDataFile && (
 						<tr>
-							<td colSpan={5} className='text-center p-3'>
+							<td colSpan={6} className='text-center p-3'>
 								<h5 className='text-secondary'>(no Dream Journal is currently selected)</h5>
 							</td>
 						</tr>
