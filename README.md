@@ -1,5 +1,25 @@
 # Dream Journal App
-Records daily dream journal entires into JSON for easy searching.
+
+## Well-formatted, cloud-based Dream Journal
+
+* Records daily dream journal entries into plain-text, well-formatted JSON format
+* Easy to search and gain insight into your dream signs
+* Safely stored into your Google Drive
+* Import wizard to convert your existing dreams into clean, searchable format
+
+**************************************************************************************************
+# Online Dream Journal
+
+Hosted on Google Firebase: [Brain Cloud Dream Journal](https://brain-cloud-dream-journal.firebaseapp.com/)
+
+**************************************************************************************************
+# Application Screens
+
+![Home](https://raw.githubusercontent.com/gitbrent/dream-journal-app/master/src/img/app-screencap-home.png)
+
+![Modify](https://raw.githubusercontent.com/gitbrent/dream-journal-app/master/src/img/app-screencap-modify.png)
+
+![Import](https://raw.githubusercontent.com/gitbrent/dream-journal-app/master/src/img/app-screencap-import.png)
 
 **************************************************************************************************
 # Credits
