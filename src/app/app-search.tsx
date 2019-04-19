@@ -1,7 +1,13 @@
 import React from 'react'
 import Alert from 'react-bootstrap/Alert'
-import BootstrapSwitchButton from 'bootstrap-switch-button-react'
+//import BootstrapSwitchButton from 'bootstrap-switch-button-react'
 import { IJournalDream, IJournalEntry, IDriveFile } from './app'
+
+enum SearchMatchTypes {
+	contains = 'Contains',
+	starts = 'Starts With',
+	whole = 'Whole Word',
+}
 
 interface ISearchMatch {
 	entryDate: IJournalEntry['entryDate']
@@ -9,27 +15,58 @@ interface ISearchMatch {
 }
 
 export default class TabSearch extends React.Component<
-	{ onShowModal: Function; selDataFile: IDriveFile },
 	{
-		filterShowLucid: boolean
+		doSaveSearchState: Function
+		onShowModal: Function
+		searchState: object
+		selDataFile: IDriveFile
+	},
+	{
 		searchMatches: Array<ISearchMatch>
+		searchOptMatchType: SearchMatchTypes
 		searchTerm: string
 		searchTermInvalidMsg: string
 		showAlert: boolean
 	}
 > {
-	constructor(props: Readonly<{ onShowModal: Function; selDataFile: IDriveFile }>) {
+	constructor(
+		props: Readonly<{
+			doSaveSearchState: Function
+			onShowModal: Function
+			searchState: object
+			selDataFile: IDriveFile
+		}>
+	) {
 		super(props)
 
 		let localShowAlert = JSON.parse(localStorage.getItem('show-alert-search'))
 
 		this.state = {
-			filterShowLucid: false,
-			searchMatches: [],
-			searchTerm: '',
-			searchTermInvalidMsg: '',
+			searchOptMatchType:
+				this.props.searchState && this.props.searchState['searchOptMatchType']
+					? this.props.searchState['searchOptMatchType']
+					: SearchMatchTypes.whole,
+			searchMatches:
+				this.props.searchState && this.props.searchState['searchMatches']
+					? this.props.searchState['searchMatches']
+					: [],
+			searchTerm:
+				this.props.searchState && this.props.searchState['searchTerm']
+					? this.props.searchState['searchTerm']
+					: '',
+			searchTermInvalidMsg:
+				this.props.searchState && this.props.searchState['searchTermInvalidMsg']
+					? this.props.searchState['searchTermInvalidMsg']
+					: '',
 			showAlert: typeof localShowAlert === 'boolean' ? localShowAlert : true,
 		}
+	}
+
+	/**
+	 * this constructor is called whenever tab is hidden/shown, so state must be preserved by parent (lifting state up)
+	 */
+	componentWillUnmount = () => {
+		this.props.doSaveSearchState(this.state)
 	}
 
 	handleHideAlert = event => {
@@ -51,10 +88,24 @@ export default class TabSearch extends React.Component<
 		return months <= 0 ? 0 : months
 	}
 
+	handleTypeChange = event => {
+		let newState = { searchOptMatchType: null }
+
+		if (event.target.value == SearchMatchTypes.contains) newState.searchOptMatchType = SearchMatchTypes.contains
+		else if (event.target.value == SearchMatchTypes.starts) newState.searchOptMatchType = SearchMatchTypes.starts
+		else if (event.target.value == SearchMatchTypes.whole) newState.searchOptMatchType = SearchMatchTypes.whole
+		this.setState(newState)
+
+		setTimeout(this.doKeywordSearch, 100)
+	}
+
 	doKeywordSearch = () => {
 		let arrFound = []
-		let regex = new RegExp('\\b' + this.state.searchTerm + '\\b', 'gi')
-
+		let regex = new RegExp(this.state.searchTerm, 'gi') // SearchMatchTypes.contains
+		if (this.state.searchOptMatchType == SearchMatchTypes.whole)
+			regex = new RegExp('\\b' + this.state.searchTerm + '\\b', 'gi')
+		else if (this.state.searchOptMatchType == SearchMatchTypes.starts)
+			regex = new RegExp('\\b' + this.state.searchTerm, 'gi')
 		if (!this.props.selDataFile || this.props.selDataFile.entries.length <= 0) return
 
 		this.props.selDataFile.entries.forEach(entry => {
@@ -80,7 +131,12 @@ export default class TabSearch extends React.Component<
 		//let parts = text.split(new RegExp(`(${highlight})`, 'gi'));
 		let parts = []
 		try {
-			parts = text.split(new RegExp('\\b(' + highlight + ')\\b', 'gi'))
+			if (this.state.searchOptMatchType == SearchMatchTypes.contains)
+				parts = text.split(new RegExp('(' + highlight + ')', 'gi'))
+			else if (this.state.searchOptMatchType == SearchMatchTypes.whole)
+				parts = text.split(new RegExp('\\b(' + highlight + ')\\b', 'gi'))
+			else if (this.state.searchOptMatchType == SearchMatchTypes.starts)
+				parts = text.split(new RegExp('\\b(' + highlight + ')', 'gi'))
 		} catch (ex) {
 			//this.setState({ searchTermInvalidMsg: ex }) // TODO: FIXME: cannot set state bc were called inside `render()` !!
 			console.warn(ex)
@@ -129,14 +185,16 @@ export default class TabSearch extends React.Component<
 					return (
 						<div className='card' key={'searchResultCard' + idx}>
 							<div className='card-body'>
-								<a
-									href='javascript:void(0)'
-									title='View Entry'
-									className='card-link'
-									data-entry-key={entry.entryDate}
-									onClick={this.handleEntryEdit}>
-									<h5 className='card-title'> {entry.dream.title}</h5>
-								</a>
+								<h5 className='card-title'>
+									<a
+										href='javascript:void(0)'
+										title='View Entry'
+										className='card-link'
+										data-entry-key={entry.entryDate}
+										onClick={this.handleEntryEdit}>
+										{entry.dream.title}
+									</a>
+								</h5>
 								<p className='card-text' style={{ whiteSpace: 'pre-line' }}>
 									{this.getHighlightedText(entry.dream.notes, this.state.searchTerm)}
 								</p>
@@ -214,7 +272,7 @@ export default class TabSearch extends React.Component<
 
 				<div className='container my-5'>
 					<div className='row'>
-						<div className='col-12 col-md-6'>
+						<div className='col-12 col-md-8'>
 							<div className='card'>
 								<div className='card-header bg-info'>
 									<h5 className='card-title text-white mb-0'>Search</h5>
@@ -227,6 +285,7 @@ export default class TabSearch extends React.Component<
 										<div className='col'>
 											<input
 												type='text'
+												value={this.state.searchTerm}
 												className='form-control'
 												placeholder='keyword or phrase'
 												onKeyPress={event => {
@@ -260,42 +319,29 @@ export default class TabSearch extends React.Component<
 								</div>
 							</div>
 						</div>
-						<div className='col-12 col-md-6'>
+						<div className='col-12 col-md-4'>
 							<div className='card'>
 								<div className='card-header bg-secondary'>
-									<h5 className='card-title text-white mb-0'>Filter</h5>
+									<h5 className='card-title text-white mb-0'>Options</h5>
 								</div>
 								<div className='card-body bg-light p-4'>
 									<div className='row align-items-center'>
 										<div className='col-auto'>
-											<div className='iconSvg size32 filter' />
+											<div className='iconSvg size32 gears' />
 										</div>
 										<div className='col'>
-											<BootstrapSwitchButton
-												onChange={(checked: boolean) => {
-													this.setState({ filterShowLucid: checked })
-												}}
-												checked={this.state.filterShowLucid}
-												onlabel='Show Lucid Dreams'
-												onstyle='outline-success'
-												offlabel='Dont Show Lucid Dreams'
-												offstyle='outline-dark'
-												style='w-100'
-											/>
-										</div>
-										<div className='col'>
-											<BootstrapSwitchButton
-												onChange={(checked: boolean) => {
-													this.setState({ filterShowLucid: checked })
-												}}
-												checked={this.state.filterShowLucid}
-												onlabel='Show Starred'
-												onstyle='outline-warning'
-												offlabel='Dont Show Starred'
-												offstyle='outline-dark'
-												disabled={true}
-												style='w-100'
-											/>
+											<select
+												className='form-control'
+												defaultValue={this.state.searchOptMatchType}
+												onChange={this.handleTypeChange}>
+												{Object.keys(SearchMatchTypes).map(val => {
+													return (
+														<option value={SearchMatchTypes[val]} key={'enum' + val}>
+															{SearchMatchTypes[val]}
+														</option>
+													)
+												})}
+											</select>
 										</div>
 									</div>
 								</div>
