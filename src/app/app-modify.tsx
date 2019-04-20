@@ -29,6 +29,7 @@
 
 import * as React from 'react'
 import DateRangePicker from '../app/date-range-picker'
+import Pagination from '../app/pagination'
 import { IJournalEntry, IDriveFile } from './app'
 
 class TabView extends React.Component<
@@ -90,11 +91,6 @@ class TabView extends React.Component<
 			else if (!this.state.dateRangeFrom && !this.state.dateRangeTo) return true
 			else return false
 		})
-		let pageArr = []
-		let pageCnt = arrEntries.length > 0 ? Math.ceil(arrEntries.length / this.state.pagingPageSize) : 0
-		for (let x = 1; x <= pageCnt; x++) {
-			pageArr.push(x)
-		}
 
 		let tableFileList: JSX.Element = (
 			<table className='table'>
@@ -127,7 +123,9 @@ class TabView extends React.Component<
 							entry.dreams.forEach(dream =>
 								Array.isArray(dream.dreamSigns)
 									? (dreamSignsUnq = [...new Set(dream.dreamSigns.concat(dreamSignsUnq))])
-									: dream.dreamSigns ? dreamSignsUnq.push(dream.dreamSigns+' (FIXME)') : ''
+									: dream.dreamSigns
+									? dreamSignsUnq.push(dream.dreamSigns + ' (FIXME)')
+									: ''
 							)
 
 							return (
@@ -136,8 +134,14 @@ class TabView extends React.Component<
 									<td className='text-center d-none d-md-table-cell'>{entry.bedTime}</td>
 									<td className='text-center d-none d-md-table-cell'>{entry.dreams.length}</td>
 									<td className='text-left d-none d-md-table-cell'>
-										{dreamSignsUnq.map((sign,idy) => {
-											return <div className='badge badge-info text-lowercase mr-2 mb-2' key={idx+'-'+idy}>{sign}</div>
+										{dreamSignsUnq.map((sign, idy) => {
+											return (
+												<div
+													className='badge badge-info text-lowercase mr-2 mb-2'
+													key={idx + '-' + idy}>
+													{sign}
+												</div>
+											)
 										})}
 									</td>
 									<td className='text-center d-none d-md-table-cell'>
@@ -181,55 +185,6 @@ class TabView extends React.Component<
 					)}
 				</tfoot>
 			</table>
-		)
-
-		let pagination: JSX.Element = (
-			<nav aria-label='Page navigation'>
-				<ul className='pagination justify-content-center'>
-					<li className={this.state.pagingCurrIdx == 1 ? 'page-item disabled' : 'page-item'}>
-						<a
-							className='page-link'
-							tabIndex={-1}
-							aria-disabled={this.state.pagingCurrIdx == 1 ? true : false}
-							onClick={() => {
-								this.setState({ pagingCurrIdx: this.state.pagingCurrIdx - 1 })
-							}}>
-							Previous
-						</a>
-					</li>
-
-					{pageArr.map(page => (
-						<li
-							className={this.state.pagingCurrIdx == page ? 'page-item active' : 'page-item'}
-							key={pagination + '-item-' + page}>
-							<a
-								className='page-link'
-								href='javascript:void(0)'
-								onClick={() => {
-									this.setState({ pagingCurrIdx: page })
-								}}>
-								{page}
-								{this.state.pagingCurrIdx == page ? <span className='sr-only'>(current)</span> : ''}
-							</a>
-						</li>
-					))}
-
-					<li
-						className={
-							this.state.pagingCurrIdx == pageCnt || pageCnt <= 1 ? 'page-item disabled' : 'page-item'
-						}>
-						<a
-							className='page-link'
-							href='javascript:void(0)'
-							aria-disabled={this.state.pagingCurrIdx == pageCnt || pageCnt <= 1 ? true : false}
-							onClick={() => {
-								this.setState({ pagingCurrIdx: this.state.pagingCurrIdx + 1 })
-							}}>
-							Next
-						</a>
-					</li>
-				</ul>
-			</nav>
 		)
 
 		// TODO: DateRangePicker: add prop for (earliest month of journal) `fromMonth={new Date(2018, 8)}`
@@ -285,7 +240,12 @@ class TabView extends React.Component<
 
 								{tableFileList}
 
-								{pagination}
+								<Pagination
+									totalRecords={arrEntries.length}
+									pageLimit={this.state.pagingPageSize}
+									pageNeighbours={2}
+									onPageChanged={event => this.setState({ pagingCurrIdx: event.currentPage })}
+								/>
 							</div>
 						</div>
 					</div>
