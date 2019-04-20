@@ -243,7 +243,7 @@ class TabView extends React.Component<
 								<Pagination
 									totalRecords={arrEntries.length}
 									pageLimit={this.state.pagingPageSize}
-									pageNeighbours={2}
+									pageNeighbours={4}
 									onPageChanged={event => this.setState({ pagingCurrIdx: event.currentPage })}
 								/>
 							</div>
