@@ -8,6 +8,12 @@ enum SearchMatchTypes {
 	starts = 'Starts With',
 	whole = 'Whole Word',
 }
+enum SearchScopes {
+	all = 'All Fields',
+	signs = 'Dream Signs',
+	notes = 'Dream Notes',
+	title = 'Dream Title',
+}
 
 interface ISearchMatch {
 	entryDate: IJournalEntry['entryDate']
@@ -24,6 +30,7 @@ export default class TabSearch extends React.Component<
 	{
 		searchMatches: Array<ISearchMatch>
 		searchOptMatchType: SearchMatchTypes
+		searchOptScope: SearchScopes
 		searchTerm: string
 		searchTermInvalidMsg: string
 		showAlert: boolean
@@ -46,6 +53,10 @@ export default class TabSearch extends React.Component<
 				this.props.searchState && this.props.searchState['searchOptMatchType']
 					? this.props.searchState['searchOptMatchType']
 					: SearchMatchTypes.whole,
+			searchOptScope:
+				this.props.searchState && this.props.searchState['searchOptScope']
+					? this.props.searchState['searchOptScope']
+					: SearchScopes.all,
 			searchMatches:
 				this.props.searchState && this.props.searchState['searchMatches']
 					? this.props.searchState['searchMatches']
@@ -96,7 +107,18 @@ export default class TabSearch extends React.Component<
 		else if (event.target.value == SearchMatchTypes.whole) newState.searchOptMatchType = SearchMatchTypes.whole
 		this.setState(newState)
 
-		setTimeout(this.doKeywordSearch, 100)
+		setTimeout(this.doKeywordSearch, 100) // TODO: no use, state change
+	}
+	handleScopeChange = event => {
+		let newState = { searchOptScope: null }
+
+		if (event.target.value == SearchScopes.all) newState.searchOptScope = SearchScopes.all
+		else if (event.target.value == SearchScopes.notes) newState.searchOptScope = SearchScopes.notes
+		else if (event.target.value == SearchScopes.signs) newState.searchOptScope = SearchScopes.signs
+		else if (event.target.value == SearchScopes.title) newState.searchOptScope = SearchScopes.title
+		this.setState(newState)
+
+		setTimeout(this.doKeywordSearch, 100) // TODO: no use, state change
 	}
 
 	doKeywordSearch = () => {
@@ -110,11 +132,48 @@ export default class TabSearch extends React.Component<
 
 		this.props.selDataFile.entries.forEach(entry => {
 			;(entry.dreams || []).forEach(dream => {
-				if ((dream.notes || '').match(regex))
-					arrFound.push({
-						entryDate: entry.entryDate,
-						dream: dream,
-					})
+				// searchOptScope
+				if (this.state.searchOptScope == SearchScopes.all) {
+					if (
+						(dream.notes || '').match(regex) ||
+						(dream.title || '').match(regex) ||
+						(Array.isArray(dream.dreamSigns) &&
+							dream.dreamSigns.filter(sign => {
+								return sign.match(regex)
+							}).length > 0)
+					) {
+						arrFound.push({
+							entryDate: entry.entryDate,
+							dream: dream,
+						})
+					}
+				} else if (this.state.searchOptScope == SearchScopes.notes) {
+					if ((dream.notes || '').match(regex)) {
+						arrFound.push({
+							entryDate: entry.entryDate,
+							dream: dream,
+						})
+					}
+				} else if (this.state.searchOptScope == SearchScopes.signs) {
+					if (
+						Array.isArray(dream.dreamSigns) &&
+						dream.dreamSigns.filter(sign => {
+							return sign.match(regex)
+						}).length > 0
+					) {
+						arrFound.push({
+							entryDate: entry.entryDate,
+							dream: dream,
+						})
+					}
+				} else if (this.state.searchOptScope == SearchScopes.title) {
+					if ((dream.title || '').match(regex)) {
+						arrFound.push({
+							entryDate: entry.entryDate,
+							dream: dream,
+						})
+					}
+				}
 			})
 		})
 
@@ -184,25 +243,46 @@ export default class TabSearch extends React.Component<
 				{this.state.searchMatches.map((entry, idx) => {
 					return (
 						<div className='card' key={'searchResultCard' + idx}>
-							<div className='card-body'>
-								<h5 className='card-title'>
-									<a
-										href='javascript:void(0)'
-										title='View Entry'
-										className='card-link'
-										data-entry-key={entry.entryDate}
-										onClick={this.handleEntryEdit}>
-										{entry.dream.title}
-									</a>
-								</h5>
-								<p className='card-text' style={{ whiteSpace: 'pre-line' }}>
-									{this.getHighlightedText(entry.dream.notes, this.state.searchTerm)}
-								</p>
-								<p className='card-text'>
-									<small className='text-muted'>
-										{new Date(entry.entryDate).toLocaleDateString()}
-									</small>
-								</p>
+							<h5 className='card-header'>
+								<a
+									href='javascript:void(0)'
+									title='View Entry'
+									className='card-link'
+									data-entry-key={entry.entryDate}
+									onClick={this.handleEntryEdit}>
+									{entry.dream.title}
+								</a>
+							</h5>
+							{this.state.searchOptScope == SearchScopes.all ||
+							this.state.searchOptScope == SearchScopes.notes ? (
+								<div className='card-body'>
+									<p className='card-text' style={{ whiteSpace: 'pre-line' }}>
+										{this.getHighlightedText(entry.dream.notes, this.state.searchTerm)}
+									</p>
+								</div>
+							) : (
+								''
+							)}
+							<div className='card-footer text-muted'>
+								{this.state.searchOptScope == SearchScopes.all ||
+								this.state.searchOptScope == SearchScopes.signs ? (
+									<div>
+										{entry.dream.dreamSigns && Array.isArray(entry.dream.dreamSigns)
+											? entry.dream.dreamSigns.map((sign, idx) => {
+													return (
+														<div
+															className='badge badge-info text-lowercase p-2 mr-2 mb-2'
+															key={'sign' + idx}>
+															{sign}
+														</div>
+													)
+											  })
+											: ''}
+									</div>
+								) : (
+									''
+								)}
+								<small>{new Date(entry.entryDate).toLocaleDateString()}</small>
 							</div>
 						</div>
 					)
@@ -282,6 +362,20 @@ export default class TabSearch extends React.Component<
 										<div className='col-auto'>
 											<div className='iconSvg size32 search' />
 										</div>
+										<div className='col-auto'>
+											<select
+												className='form-control'
+												defaultValue={this.state.searchOptMatchType}
+												onChange={this.handleTypeChange}>
+												{Object.keys(SearchMatchTypes).map(val => {
+													return (
+														<option value={SearchMatchTypes[val]} key={'enum' + val}>
+															{SearchMatchTypes[val]}
+														</option>
+													)
+												})}
+											</select>
+										</div>
 										<div className='col'>
 											<input
 												type='text'
@@ -325,19 +419,19 @@ export default class TabSearch extends React.Component<
 									<h5 className='card-title text-white mb-0'>Options</h5>
 								</div>
 								<div className='card-body bg-light p-4'>
-									<div className='row align-items-center'>
+									<div className='row align-items-center no-gutters'>
 										<div className='col-auto'>
-											<div className='iconSvg size32 gears' />
+											<label className='text-uppercase text-muted mb-0 mr-3'>Search Fields</label>
 										</div>
 										<div className='col'>
 											<select
 												className='form-control'
-												defaultValue={this.state.searchOptMatchType}
-												onChange={this.handleTypeChange}>
-												{Object.keys(SearchMatchTypes).map(val => {
+												defaultValue={this.state.searchOptScope}
+												onChange={this.handleScopeChange}>
+												{Object.keys(SearchScopes).map(val => {
 													return (
-														<option value={SearchMatchTypes[val]} key={'enum' + val}>
-															{SearchMatchTypes[val]}
+														<option value={SearchScopes[val]} key={'enum' + val}>
+															{SearchScopes[val]}
 														</option>
 													)
 												})}
@@ -350,9 +444,9 @@ export default class TabSearch extends React.Component<
 					</div>
 				</div>
 
-				<div className='container bg-light pt-3 my-5'>
+				<div className='container bg-light my-5'>
 					{this.state.searchTerm && this.state.searchMatches.length > 0 ? (
-						<h5 className='text-info ml-3 mb-3'>
+						<h5 className='text-info pt-3 ml-3 my-3'>
 							Found {this.state.searchMatches.length} Dreams (
 							{Math.round((this.state.searchMatches.length / totalDreams) * 100)}
 							%)
@@ -363,7 +457,7 @@ export default class TabSearch extends React.Component<
 					{this.state.searchTerm ? (
 						<div className='card-columns'>{searchMatches}</div>
 					) : (
-						<h4 className='text-center mb-0 pb-3'>(enter a keyword above to search)</h4>
+						<h4 className='text-center text-muted mb-0 py-5'>(enter a keyword above to search)</h4>
 					)}
 				</div>
 			</div>
