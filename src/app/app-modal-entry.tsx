@@ -156,11 +156,10 @@ export default class EntryModal extends React.Component<
 
 		let newState = this.state.dailyEntry
 
-		if ( name == 'dreamSigns' ) {
+		if (name == 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
 			newState.dreams[event.target.getAttribute('data-dream-idx')].dreamSigns = value ? value.split(',') : []
-		}
-		else {
+		} else {
 			newState.dreams[event.target.getAttribute('data-dream-idx')][name] = value
 		}
 
@@ -172,7 +171,7 @@ export default class EntryModal extends React.Component<
 	handleDeleteDream = dreamIdx => {
 		if (confirm('Delete Dream #' + (dreamIdx + 1) + '?')) {
 			let dailyEntryNew = this.state.dailyEntry
-			dailyEntryNew.dreams.splice(dreamIdx,1)
+			dailyEntryNew.dreams.splice(dreamIdx, 1)
 			this.setState({ dailyEntry: dailyEntryNew })
 		}
 
@@ -228,20 +227,13 @@ export default class EntryModal extends React.Component<
 	}
 	renderDreamRow = (dream: IJournalDream, dreamIdx: number) => {
 		return (
-			<div className='border-left border-info pl-3' key={'dreamrow' + dreamIdx}>
-				<div className='row align-items-center mt-5 mb-2'>
-					<div className='col'>
-						<h4 className='text-info mb-0'>DREAM {dreamIdx + 1}</h4>
-					</div>
-					<div className='col-auto'>
-						<div
-							className='iconSvg size24 small circle no cursor-pointer'
-							title='Delete Dream'
-							onClick={() => this.handleDeleteDream(dreamIdx)}
-						/>
-					</div>
-				</div>
-				<div className='row mb-3'>
+			<div
+				className={'tab-pane py-2' + (dreamIdx == 0 ? ' active' : '')}
+				id={'drmtab' + dreamIdx}
+				role='tabpanel'
+				aria-labelledby={'drmtab' + dreamIdx + '-tab'}
+				key={'dreamrow' + dreamIdx}>
+				<div className='row align-items-center mb-3'>
 					<div className='col'>
 						<label className='text-muted text-uppercase text-sm'>Title</label>
 						<input
@@ -251,6 +243,13 @@ export default class EntryModal extends React.Component<
 							value={dream.title}
 							onChange={this.handleInputDreamChange}
 							data-dream-idx={dreamIdx}
+						/>
+					</div>
+					<div className='col-auto'>
+						<div
+							className='iconSvg size24 small circle no cursor-pointer'
+							title='Delete Dream'
+							onClick={() => this.handleDeleteDream(dreamIdx)}
 						/>
 					</div>
 				</div>
@@ -307,7 +306,7 @@ export default class EntryModal extends React.Component<
 						<textarea
 							name='notes'
 							className='form-control'
-							rows={3}
+							rows={8}
 							value={dream.notes}
 							onChange={this.handleInputDreamChange}
 							data-dream-idx={dreamIdx}
@@ -336,8 +335,8 @@ export default class EntryModal extends React.Component<
 					</Modal.Header>
 
 					<Modal.Body className='bg-light'>
-						<div className='container mb-4'>
-							<div className='row mb-3'>
+						<div className='container'>
+							<div className='row mb-4'>
 								<div className='col-12 col-md-auto required'>
 									<label className='text-muted text-uppercase text-sm'>Entry Date</label>
 									<input
@@ -385,18 +384,41 @@ export default class EntryModal extends React.Component<
 									/>
 								</div>
 							</div>
-						</div>
 
-						<div className='container'>
-							{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamRow(dream, idx))}
+							<div className='row align-items-center'>
+								<div className='col'>
+									<ul className='nav nav-tabs border-bottom border-secondary' role='tablist'>
+										{this.state.dailyEntry.dreams.map((dream, idx) => (
+											<li className='nav-item' key={'dreamtab' + idx}>
+												<a
+													className='nav-link'
+													id={'drmtab' + idx + '-tab'}
+													data-toggle='tab'
+													href={'#drmtab' + idx}
+													role='tab'
+													aria-controls={'drmtab' + idx}>
+													Dream {idx + 1}
+												</a>
+											</li>
+										))}
+									</ul>
+								</div>
+								<div className='col-auto'>
+									<button
+										type='button'
+										className='btn btn-sm btn-outline-info'
+										onClick={this.addRowHandler}>
+										Add Dream Row
+									</button>
+								</div>
+							</div>
+							<div className='tab-content'>
+								{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamRow(dream, idx))}
+							</div>
 						</div>
-
 					</Modal.Body>
 
 					<Modal.Footer>
-						<Button type='button' variant='outline-info' className='mr-5' onClick={this.addRowHandler}>
-							Add Dream Row
-						</Button>
 						<Button type='button' variant='outline-danger' className='mr-5' onClick={this.handleDelete}>
 							Delete Entry
 						</Button>
