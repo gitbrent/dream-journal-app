@@ -32,7 +32,7 @@ import DateRangePicker from '../app/date-range-picker'
 import Pagination from '../app/pagination'
 import { IJournalEntry, IDriveFile } from './app'
 
-class TabView extends React.Component<
+export default class TabView extends React.Component<
 	{ onShowModal: Function; selDataFile: IDriveFile },
 	{ dateRangeFrom: Date; dateRangeTo: Date; pagingCurrIdx: number; pagingPageSize: number }
 > {
@@ -137,7 +137,7 @@ class TabView extends React.Component<
 										{dreamSignsUnq.map((sign, idy) => {
 											return (
 												<div
-													className='badge badge-info text-lowercase mr-2 mb-2'
+													className='badge badge-info text-lowercase p-2 mr-2 mb-1'
 													key={idx + '-' + idy}>
 													{sign}
 												</div>
@@ -240,6 +240,10 @@ class TabView extends React.Component<
 
 								{tableFileList}
 
+								{
+									/* TODO: paging doesnt re-render when date range changes */
+									console.log(arrEntries.length)
+								}
 								<Pagination
 									totalRecords={arrEntries.length}
 									pageLimit={this.state.pagingPageSize}
@@ -254,5 +258,3 @@ class TabView extends React.Component<
 		)
 	}
 }
-
-export default TabView
