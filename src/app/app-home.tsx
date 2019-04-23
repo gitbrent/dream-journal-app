@@ -240,7 +240,7 @@ class TabHome extends React.Component<
 							<th className='text-center d-none d-md-table-cell'>Entries</th>
 							<th className='text-center d-none d-md-table-cell'>Size</th>
 							<th className='text-center d-none d-md-table-cell'>Modified&nbsp;▼</th>
-							<th>&nbsp;</th>
+							<th className='text-center d-none d-md-table-cell'>&nbsp;</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -314,7 +314,7 @@ class TabHome extends React.Component<
 										<td className='align-middle text-center text-nowrap d-none d-md-table-cell'>
 											{new Date(file['modifiedTime']).toLocaleString()}
 										</td>
-										<td className='align-middle'>
+										<td className='align-middle text-center text-nowrap d-none d-md-table-cell'>
 											{this.state.fileBeingRenamed &&
 											this.state.fileBeingRenamed.id === file.id ? (
 												this.state.isRenaming ? (
