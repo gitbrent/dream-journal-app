@@ -240,16 +240,24 @@ export default class TabView extends React.Component<
 
 								{tableFileList}
 
-								{
-									/* TODO: paging doesnt re-render when date range changes */
-									console.log(arrEntries.length)
-								}
-								<Pagination
-									totalRecords={arrEntries.length}
-									pageLimit={this.state.pagingPageSize}
-									pageNeighbours={4}
-									onPageChanged={event => this.setState({ pagingCurrIdx: event.currentPage })}
-								/>
+								{/* TODO: paging doesnt re-render when date range changes */
+								console.log(arrEntries.length)}
+								<div className='text-center d-block d-sm-none'>
+									<Pagination
+										totalRecords={arrEntries.length}
+										pageLimit={this.state.pagingPageSize}
+										pageNeighbours={2}
+										onPageChanged={event => this.setState({ pagingCurrIdx: event.currentPage })}
+									/>
+								</div>
+								<div className='text-center d-none d-sm-block'>
+									<Pagination
+										totalRecords={arrEntries.length}
+										pageLimit={this.state.pagingPageSize}
+										pageNeighbours={4}
+										onPageChanged={event => this.setState({ pagingCurrIdx: event.currentPage })}
+									/>
+								</div>
 							</div>
 						</div>
 					</div>
