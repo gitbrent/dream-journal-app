@@ -62,7 +62,7 @@ export default class EntryModal extends React.Component<
 		onShowModal: Function
 		show?: boolean
 	},
-	{ dailyEntry: IJournalEntry; isDateDupe: boolean; origEntryDate: string; show: boolean }
+	{ dailyEntry: IJournalEntry; isDateDupe: boolean; origEntryDate: string; selectedTab: number; show: boolean }
 > {
 	constructor(
 		props: Readonly<{
@@ -81,6 +81,7 @@ export default class EntryModal extends React.Component<
 			dailyEntry: NEW_ENTRY,
 			isDateDupe: false,
 			origEntryDate: '',
+			selectedTab: 0,
 			show: props.show,
 		}
 	}
@@ -112,13 +113,14 @@ export default class EntryModal extends React.Component<
 			this.setState({
 				dailyEntry: JSON.parse(JSON.stringify(nextProps.editEntry)),
 				origEntryDate: nextProps.editEntry.entryDate,
+				selectedTab: 0,
 			})
 		}
 	}
 
 	// ============================================================================
 
-	addRowHandler = event => {
+	handleAddDream = event => {
 		let dailyEntryNew = this.state.dailyEntry
 		dailyEntryNew.dreams.push({
 			title: '',
@@ -128,7 +130,10 @@ export default class EntryModal extends React.Component<
 			isLucidDream: false,
 			lucidMethod: null,
 		})
-		this.setState({ dailyEntry: dailyEntryNew })
+		this.setState({
+			dailyEntry: dailyEntryNew,
+			selectedTab: dailyEntryNew.dreams.length - 1,
+		})
 	}
 
 	handleInputChange = event => {
@@ -225,10 +230,10 @@ export default class EntryModal extends React.Component<
 		this.setState({ show: false })
 		this.props.onShowModal({ show: false })
 	}
-	renderDreamRow = (dream: IJournalDream, dreamIdx: number) => {
+	renderDreamTab = (dream: IJournalDream, dreamIdx: number) => {
 		return (
 			<div
-				className={'tab-pane py-2' + (dreamIdx == 0 ? ' active' : '')}
+				className={'tab-pane pt-3' + (dreamIdx == this.state.selectedTab ? ' active' : '')}
 				id={'drmtab' + dreamIdx}
 				role='tabpanel'
 				aria-labelledby={'drmtab' + dreamIdx + '-tab'}
@@ -330,14 +335,14 @@ export default class EntryModal extends React.Component<
 		return (
 			<form>
 				<Modal size='lg' show={this.state.show} onHide={this.modalClose} backdrop='static'>
-					<Modal.Header className='bg-primary' closeButton>
-						<Modal.Title className='text-white'>Journal Entry</Modal.Title>
+					<Modal.Header className='bg-info' closeButton>
+						<Modal.Title className='text-white h6'>Journal Entry</Modal.Title>
 					</Modal.Header>
 
 					<Modal.Body className='bg-light'>
 						<div className='container'>
 							<div className='row mb-4'>
-								<div className='col-12 col-md-auto required'>
+								<div className='col-6 mb-2 required'>
 									<label className='text-muted text-uppercase text-sm'>Entry Date</label>
 									<input
 										name='entryDate'
@@ -353,7 +358,7 @@ export default class EntryModal extends React.Component<
 									/>
 									<div className='invalid-feedback'>Entry Date already exists in Dream Journal!</div>
 								</div>
-								<div className='col-12 col-md-auto'>
+								<div className='col-6 mb-2'>
 									<label className='text-muted text-uppercase text-sm'>Bed Time</label>
 									<input
 										name='bedTime'
@@ -363,7 +368,7 @@ export default class EntryModal extends React.Component<
 										className='form-control w-100'
 									/>
 								</div>
-								<div className='col-12 col-md'>
+								<div className='col-12 col-md-6 mb-2'>
 									<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
 									<textarea
 										name='notesPrep'
@@ -373,7 +378,7 @@ export default class EntryModal extends React.Component<
 										rows={1}
 									/>
 								</div>
-								<div className='col-12 col-md'>
+								<div className='col-12 col-md-6 mb-2'>
 									<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
 									<textarea
 										name='notesWake'
@@ -386,12 +391,14 @@ export default class EntryModal extends React.Component<
 							</div>
 
 							<div className='row align-items-center'>
-								<div className='col'>
+								<div className='col pr-0'>
 									<ul className='nav nav-tabs border-bottom border-secondary' role='tablist'>
 										{this.state.dailyEntry.dreams.map((dream, idx) => (
 											<li className='nav-item' key={'dreamtab' + idx}>
 												<a
-													className='nav-link'
+													className={
+														'nav-link' + (idx == this.state.selectedTab ? ' active' : '')
+													}
 													id={'drmtab' + idx + '-tab'}
 													data-toggle='tab'
 													href={'#drmtab' + idx}
@@ -407,21 +414,28 @@ export default class EntryModal extends React.Component<
 									<button
 										type='button'
 										className='btn btn-sm btn-outline-info'
-										onClick={this.addRowHandler}>
-										Add Dream Row
+										onClick={this.handleAddDream}>
+										New Dream
 									</button>
 								</div>
 							</div>
 							<div className='tab-content'>
-								{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamRow(dream, idx))}
+								{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamTab(dream, idx))}
 							</div>
 						</div>
 					</Modal.Body>
 
 					<Modal.Footer>
-						<Button type='button' variant='outline-danger' className='mr-5' onClick={this.handleDelete}>
-							Delete Entry
-						</Button>
+						<div className='d-block d-sm-none'>
+							<button type='button' className='btn btn-outline-danger' onClick={this.handleDelete}>
+								Delete
+							</button>
+						</div>
+						<div className='d-none d-sm-block'>
+							<button type='button' className='btn btn-outline-danger mr-5' onClick={this.handleDelete}>
+								Delete Entry
+							</button>
+						</div>
 						<Button
 							type='button'
 							variant='outline-secondary'
@@ -429,9 +443,16 @@ export default class EntryModal extends React.Component<
 							onClick={this.modalClose}>
 							Cancel
 						</Button>
-						<Button type='submit' variant='primary' className='w-25' onClick={this.handleSubmit}>
-							Save Entry
-						</Button>
+						<div className='d-block d-sm-none'>
+							<button type='submit' className='btn btn-primary' onClick={this.handleSubmit}>
+								Save
+							</button>
+						</div>
+						<div className='d-none d-sm-block'>
+							<button type='submit' className='btn btn-primary px-4' onClick={this.handleSubmit}>
+								Save Entry
+							</button>
+						</div>
 					</Modal.Footer>
 				</Modal>
 			</form>
