@@ -1,6 +1,6 @@
 /**
-* @see: https://github.com/gladchinda/build-react-pagination-demo
-*/
+ * @see: https://github.com/gladchinda/build-react-pagination-demo
+ */
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 
@@ -31,28 +31,34 @@ class Pagination extends Component {
 		this.pageLimit = typeof pageLimit === 'number' ? pageLimit : 30
 		this.totalRecords = typeof totalRecords === 'number' ? totalRecords : 0
 
-		// pageNeighbours can be: 0, 1 or 2 [ed:bde:nope!]
+		// pageNeighbours can be: 0, 1 or 2 [ed:(bde) expanded!]
 		this.pageNeighbours = typeof pageNeighbours === 'number' ? Math.max(0, Math.min(pageNeighbours, 4)) : 0
 
-		this.totalPages = Math.ceil(this.totalRecords / this.pageLimit)
-
-		this.state = { currentPage: 1 }
+		this.state = {
+			currentPage: 1,
+			pageLimit: this.pageLimit,
+			totalRecords: this.totalRecords,
+		}
 	}
 
 	componentDidMount() {
 		this.gotoPage(1)
 	}
+	componentWillReceiveProps(nextProps) {
+		if (nextProps.totalRecords && this.state.totalRecords !== nextProps.totalRecords) {
+			this.setState({ totalRecords: nextProps.totalRecords })
+		}
+	}
 
 	gotoPage = page => {
 		const { onPageChanged = f => f } = this.props
-
-		const currentPage = Math.max(0, Math.min(page, this.totalPages))
+		const totalPages = Math.ceil(this.state.totalRecords / this.state.pageLimit)
+		const currentPage = Math.max(0, Math.min(page, totalPages))
 
 		const paginationData = {
 			currentPage,
-			totalPages: this.totalPages,
 			pageLimit: this.pageLimit,
-			totalRecords: this.totalRecords,
+			totalRecords: this.state.totalRecords,
 		}
 
 		this.setState({ currentPage }, () => onPageChanged(paginationData))
@@ -85,7 +91,8 @@ class Pagination extends Component {
 	 * {...x} => represents page neighbours
 	 */
 	fetchPageNumbers = () => {
-		const totalPages = this.totalPages
+		const totalPages = Math.ceil(this.state.totalRecords / this.state.pageLimit)
+		//const totalPages = this.totalPages
 		const currentPage = this.state.currentPage
 		const pageNeighbours = this.pageNeighbours
 
@@ -141,8 +148,7 @@ class Pagination extends Component {
 	}
 
 	render() {
-		if (!this.totalRecords || this.totalPages === 1) return null
-
+		if (!this.state.totalRecords || this.totalPages === 1) return null
 		const { currentPage } = this.state
 		const pages = this.fetchPageNumbers()
 
