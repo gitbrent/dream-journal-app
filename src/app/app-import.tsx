@@ -1086,7 +1086,7 @@ export default class TabImport extends React.Component<
 			<div>
 				<div className='row'>
 					<div className='col'>
-						<h5 className='text-primary'>Instructions</h5>
+						<h3 className='text-primary'>Instructions</h3>
 						<ul>
 							<li>
 								Copy one or more entries from your Dream Journal, then paste them below and click the
@@ -1131,7 +1131,7 @@ export default class TabImport extends React.Component<
 
 		let importResults: JSX.Element = (
 			<form>
-				<div className='row align-items-middle justify-content-center'>
+				<div className='row align-items-middle justify-content-between'>
 					<div className='col-auto'>
 						<h2 className='text-primary mb-3'>
 							{'Parse Results: ' + this.state._parsedSections.length + ' daily entries'}
@@ -1143,7 +1143,7 @@ export default class TabImport extends React.Component<
 							className='btn btn-success'
 							onClick={this.handleImport}
 							disabled={this.state._parsedSections.length == 0}>
-							Import Entries
+							Import Journal Entries
 						</button>
 					</div>
 				</div>
