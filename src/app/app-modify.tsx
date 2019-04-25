@@ -96,12 +96,13 @@ export default class TabView extends React.Component<
 			<table className='table'>
 				<thead className='thead'>
 					<tr>
-						<th>Entry Date</th>
-						<th className='text-center d-none d-md-table-cell'>Bed Time</th>
-						<th className='text-center d-none d-md-table-cell'>Dream Count</th>
+						<th>Date</th>
+						<th className='text-center d-none d-md-table-cell'>Bed</th>
+						<th className='text-center d-none d-md-table-cell'>Dreams</th>
 						<th className='text-center d-none d-md-table-cell'>Dream Signs</th>
-						<th className='text-center d-none d-md-table-cell'>Lucid Dream?</th>
-						<th className='text-center'>Action</th>
+						<th className='text-center d-none d-md-table-cell'>Starred?</th>
+						<th className='text-center d-none d-md-table-cell'>Lucid?</th>
+						<th className='text-center'>&nbsp;</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -143,6 +144,9 @@ export default class TabView extends React.Component<
 												</div>
 											)
 										})}
+									</td>
+									<td className='text-center d-none d-md-table-cell'>
+										{entry.starred ? <div className='iconSvg star-on size16' /> : ''}
 									</td>
 									<td className='text-center d-none d-md-table-cell'>
 										{entry.dreams.filter(dream => {
@@ -240,8 +244,6 @@ export default class TabView extends React.Component<
 
 								{tableFileList}
 
-								{/* TODO: paging doesnt re-render when date range changes */
-								console.log(arrEntries.length)}
 								<div className='text-center d-block d-sm-none'>
 									<Pagination
 										totalRecords={arrEntries.length}
