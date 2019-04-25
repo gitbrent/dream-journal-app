@@ -49,6 +49,7 @@ const NEW_ENTRY = {
 	bedTime: '',
 	notesPrep: '',
 	notesWake: '',
+	starred: false,
 	dreams: [EMPTY_DREAM],
 }
 
@@ -168,16 +169,14 @@ export default class EntryModal extends React.Component<
 			newState.dreams[event.target.getAttribute('data-dream-idx')][name] = value
 		}
 
-		this.setState({
-			dailyEntry: newState,
-		})
+		this.setState({ dailyEntry: newState })
 	}
 
 	handleDeleteDream = dreamIdx => {
 		if (confirm('Delete Dream #' + (dreamIdx + 1) + '?')) {
 			let dailyEntryNew = this.state.dailyEntry
 			dailyEntryNew.dreams.splice(dreamIdx, 1)
-			this.setState({ dailyEntry: dailyEntryNew })
+			this.setState({ dailyEntry: dailyEntryNew, selectedTab: 0 })
 		}
 
 		event.preventDefault()
@@ -251,6 +250,7 @@ export default class EntryModal extends React.Component<
 						/>
 					</div>
 					<div className='col-auto'>
+					<label className='text-muted text-uppercase text-sm d-block'>&nbsp;</label>
 						<div
 							className='iconSvg size24 small circle no cursor-pointer'
 							title='Delete Dream'
@@ -322,15 +322,6 @@ export default class EntryModal extends React.Component<
 		)
 	}
 
-	/*
-	<div className='col-12 col-md-auto'>
-		<div
-			className='iconSvg size24 star-on'
-			title='Star'
-			onClick={() => this.state.starred}
-		/>
-	</div>
-	*/
 	render() {
 		return (
 			<form>
@@ -358,7 +349,7 @@ export default class EntryModal extends React.Component<
 									/>
 									<div className='invalid-feedback'>Entry Date already exists in Dream Journal!</div>
 								</div>
-								<div className='col-6 mb-2'>
+								<div className='col mb-2'>
 									<label className='text-muted text-uppercase text-sm'>Bed Time</label>
 									<input
 										name='bedTime'
@@ -366,6 +357,20 @@ export default class EntryModal extends React.Component<
 										value={this.state.dailyEntry.bedTime}
 										onChange={this.handleInputChange}
 										className='form-control w-100'
+									/>
+								</div>
+								<div className='col-auto px-0 mb-2'>
+									<label className='text-muted text-uppercase text-sm'>&nbsp;</label>
+									<div
+										className={
+											'd-block iconSvg size32 cursor-pointer ' + (this.state.dailyEntry.starred ? 'star-on' : 'star-off')
+										}
+										title={this.state.dailyEntry.starred ? 'Un-Star Entry' : 'Star Entry'}
+										onClick={() => {
+											let newState = this.state.dailyEntry
+											newState.starred = this.state.dailyEntry.starred ? false : true
+											this.setState({ dailyEntry: newState })
+										}}
 									/>
 								</div>
 								<div className='col-12 col-md-6 mb-2'>
