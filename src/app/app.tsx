@@ -97,10 +97,10 @@ export interface IJournalDream {
  */
 export interface IJournalEntry {
 	entryDate: string
-	starred?: boolean
 	bedTime?: string
 	notesPrep?: string
 	notesWake?: string
+	starred?: boolean
 	dreams?: Array<IJournalDream>
 }
 
