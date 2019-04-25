@@ -3,7 +3,7 @@ import { IDriveFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes }
 import BootstrapSwitchButton from 'bootstrap-switch-button-react' // '../../../bootstrap-switch-button-react'
 import ContentEditable from 'react-contenteditable'
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
-const VERBOSE = true
+const VERBOSE = false
 
 export default class TabImport extends React.Component<
 	{
@@ -73,7 +73,7 @@ export default class TabImport extends React.Component<
 			_defaultBedTime: config._defaultBedTime || '00:00',
 			_defaultYear: config._defaultYear || new Date().getFullYear(),
 			_demoData: config._demoData || '',
-			_dreamSignsDelim: config._dreamSignsDelim || '',
+			_dreamSignsDelim: config._dreamSignsDelim || ',',
 			_entryDateInvalidMsg: '',
 			_useDefaultTime: typeof config._useDefaultTime === 'boolean' ? config._useDefaultTime : true,
 			_importHTML: config._importHTML || '<br>',
@@ -556,6 +556,8 @@ export default class TabImport extends React.Component<
 					objEntry.bedTime = this.state._defaultBedTime || '00:00'
 
 				// 4: add section
+				objEntry.notesPrep = objEntry.notesPrep.trim()
+				objEntry.notesWake = objEntry.notesWake.trim()
 				arrEntries.push(objEntry)
 			})
 
