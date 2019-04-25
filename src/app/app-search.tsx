@@ -1,7 +1,7 @@
 import React from 'react'
 import Alert from 'react-bootstrap/Alert'
 //import BootstrapSwitchButton from 'bootstrap-switch-button-react'
-import { IJournalDream, IJournalEntry, IDriveFile } from './app'
+import { IDriveFile, IJournalDream, IJournalEntry } from './app'
 
 enum SearchMatchTypes {
 	contains = 'Contains',
@@ -292,7 +292,7 @@ export default class TabSearch extends React.Component<
 
 		return (
 			<div>
-				<div className='container my-5'>
+				<header className='container my-5'>
 					{this.state.showAlert ? (
 						<Alert variant='success'>
 							<Alert.Heading>Make good use of your Dream Journal</Alert.Heading>
@@ -328,29 +328,52 @@ export default class TabSearch extends React.Component<
 								<div className='col text-center'>
 									<label className='text-primary text-uppercase'>Total Months</label>
 									<h1 className='text-primary mb-0'>{this.getTotalMonths() || '-'}</h1>
+									<small className='text-50-white text-uppercase'>&nbsp;</small>
 								</div>
 								<div className='col text-center'>
-									<label className='text-primary text-uppercase'>Total Daily Entries</label>
-									<h1 className='text-primary mb-0'>
+									<label className='text-primary text-uppercase'>Total Entries</label>
+									<h1 className='text-primary mb-1'>
 										{this.props.selDataFile && this.props.selDataFile.entries
 											? this.props.selDataFile.entries.length
 											: '-'}
 									</h1>
+									<small className='text-50-white text-uppercase'>
+										{this.getTotalMonths() * 30 > 0 &&
+										this.props.selDataFile &&
+										this.props.selDataFile.entries
+											? (this.props.selDataFile.entries.length / this.getTotalMonths()).toFixed(
+													2
+											  ) + ' / month'
+											: '-'}
+									</small>
 								</div>
 								<div className='col text-center'>
 									<label className='text-info text-uppercase'>Total Dreams</label>
-									<h1 className='text-info mb-0'>{totalDreams || '-'}</h1>
+									<h1 className='text-info mb-1'>{totalDreams || '-'}</h1>
+									<small className='text-50-white text-uppercase'>
+										{this.getTotalMonths() * 30 > 0 &&
+										this.props.selDataFile &&
+										this.props.selDataFile.entries
+											? (totalDreams / this.props.selDataFile.entries.length).toFixed(2) +
+											  ' / entry'
+											: '-'}
+									</small>
 								</div>
 								<div className='col text-center'>
 									<label className='text-success text-uppercase'>Lucid Dreams</label>
-									<h1 className='text-success mb-0'>{totalLucids || '-'}</h1>
+									<h1 className='text-success mb-1'>{totalLucids || '-'}</h1>
+									<small className='text-50-white text-uppercase'>
+										{totalDreams && totalLucids
+											? ((totalLucids / totalDreams) * 100).toFixed(2) + '% Success'
+											: '-'}
+									</small>
 								</div>
 							</div>
 						</div>
 					</div>
-				</div>
+				</header>
 
-				<div className='container my-5'>
+				<section className='container my-5'>
 					<div className='row'>
 						<div className='col-12 col-md-8'>
 							<div className='card'>
@@ -442,9 +465,9 @@ export default class TabSearch extends React.Component<
 							</div>
 						</div>
 					</div>
-				</div>
+				</section>
 
-				<div className='container bg-light my-5'>
+				<main className='container bg-light my-5'>
 					{this.state.searchTerm && this.state.searchMatches.length > 0 ? (
 						<h5 className='text-info pt-3 ml-3 my-3'>
 							Found {this.state.searchMatches.length} Dreams (
@@ -459,7 +482,7 @@ export default class TabSearch extends React.Component<
 					) : (
 						<h4 className='text-center text-muted mb-0 py-5'>(enter a keyword above to search)</h4>
 					)}
-				</div>
+				</main>
 			</div>
 		)
 	}
