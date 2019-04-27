@@ -277,7 +277,7 @@ export default class TabImport extends React.Component<
 		let newState = {}
 		if ( name == 'dreamSigns' ) {
 			// `dreamSigns` is an array and must be maintained as such
-			newState['dreamSigns'] = value ? value.split(',') : []
+			newState['dreamSigns'] = value ? value.split(this.state._dreamSignsDelim || ',') : []
 		}
 		else {
 			newState[name] = value
@@ -311,8 +311,7 @@ export default class TabImport extends React.Component<
 		const idy = event.target.getAttribute('data-dream-idx')
 
 		let newState = this.state._parsedSections
-
-		if (idy) newState[idx].dreams[idy][name] = value
+		if (idy) newState[idx].dreams[idy][name] = (name == 'dreamSigns' ? value.split(this.state._dreamSignsDelim || ',') : value)
 		else newState[idx][name] = value
 
 		this.setState({
@@ -1332,7 +1331,7 @@ export default class TabImport extends React.Component<
 		return (
 			<div className='container mt-5'>
 				<div className='card mb-5'>
-					<div className='card-header bg-primary'>
+					<div className='card-header bg-info'>
 						<h5 className='card-title text-white mb-0'>Import Dream Journal Entries</h5>
 					</div>
 					<div className='card-body bg-light'>
@@ -1348,8 +1347,8 @@ export default class TabImport extends React.Component<
 								</p>
 								<p className='card-text'>
 									The importer interface allows you to import your free-form journal into the
-									well-formatted Brain Cloud JSON format which is a universal, flat-file database and
-									is supported by a myriad of apps (Microsoft Access, etc.).
+									well-formatted Brain Cloud JSON format which is a universal, plain text, flat-file database
+									readable by a myriad of apps (databases, text editors, etc.)
 								</p>
 							</div>
 						</div>
