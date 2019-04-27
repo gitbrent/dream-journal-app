@@ -94,10 +94,10 @@ export default class TabView extends React.Component<
 
 		let tableFileList: JSX.Element =
 			this.props.selDataFile && this.props.selDataFile._isLoading ? (
-				<div className='align-middle text-center text-warning'>
+				<div className='align-middle text-center text-warning mb-4'>
 					<div className='spinner-border spinner-border-sm mr-2' role='status'>
 						<span className='sr-only' />
-					</div>
+					</div>Saving/Loading...
 				</div>
 			) : (
 				<table className='table'>
