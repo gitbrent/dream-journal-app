@@ -92,104 +92,114 @@ export default class TabView extends React.Component<
 			else return false
 		})
 
-		let tableFileList: JSX.Element = (
-			<table className='table'>
-				<thead className='thead'>
-					<tr>
-						<th>Date</th>
-						<th className='text-center d-none d-md-table-cell'>Bed</th>
-						<th className='text-center d-none d-md-table-cell'>Dreams</th>
-						<th className='text-center d-none d-md-table-cell'>Dream Signs</th>
-						<th className='text-center d-none d-md-table-cell'>Starred?</th>
-						<th className='text-center d-none d-md-table-cell'>Lucid?</th>
-						<th className='text-center'>&nbsp;</th>
-					</tr>
-				</thead>
-				<tbody>
-					{arrEntries
-						.sort((a, b) => {
-							if (a.entryDate < b.entryDate) return -1
-							if (a.entryDate > b.entryDate) return 1
-							return 0
-						})
-						.filter((_entry, idx) => {
-							return (
-								idx >= this.state.pagingPageSize * (this.state.pagingCurrIdx - 1) &&
-								idx < this.state.pagingPageSize * this.state.pagingCurrIdx
-							)
-						})
-						.map((entry: IJournalEntry, idx) => {
-							// This is a harsh thing to compile inline below, so do it here
-							let dreamSignsUnq: Array<string> = []
-							entry.dreams.forEach(dream =>
-								Array.isArray(dream.dreamSigns)
-									? (dreamSignsUnq = [...new Set(dream.dreamSigns.concat(dreamSignsUnq))])
-									: dream.dreamSigns
-									? dreamSignsUnq.push(dream.dreamSigns + ' (FIXME)')
-									: ''
-							)
+		let tableFileList: JSX.Element =
+			this.props.selDataFile && this.props.selDataFile._isLoading ? (
+				<div className='align-middle text-center text-warning'>
+					<div className='spinner-border spinner-border-sm mr-2' role='status'>
+						<span className='sr-only' />
+					</div>
+				</div>
+			) : (
+				<table className='table'>
+					<thead className='thead'>
+						<tr>
+							<th>Date</th>
+							<th className='text-center d-none d-md-table-cell'>Bed</th>
+							<th className='text-center d-none d-md-table-cell'>Dreams</th>
+							<th className='text-center d-none d-md-table-cell'>Dream Signs</th>
+							<th className='text-center d-none d-md-table-cell'>Starred?</th>
+							<th className='text-center d-none d-md-table-cell'>Lucid?</th>
+							<th className='text-center'>&nbsp;</th>
+						</tr>
+					</thead>
+					<tbody>
+						{arrEntries
+							.sort((a, b) => {
+								if (a.entryDate < b.entryDate) return -1
+								if (a.entryDate > b.entryDate) return 1
+								return 0
+							})
+							.filter((_entry, idx) => {
+								return (
+									idx >= this.state.pagingPageSize * (this.state.pagingCurrIdx - 1) &&
+									idx < this.state.pagingPageSize * this.state.pagingCurrIdx
+								)
+							})
+							.map((entry: IJournalEntry, idx) => {
+								// This is a harsh thing to compile inline below, so do it here
+								let dreamSignsUnq: Array<string> = []
+								entry.dreams.forEach(dream =>
+									Array.isArray(dream.dreamSigns)
+										? (dreamSignsUnq = [...new Set(dream.dreamSigns.concat(dreamSignsUnq))])
+										: dream.dreamSigns
+										? dreamSignsUnq.push(dream.dreamSigns + ' (FIXME)')
+										: ''
+								)
 
-							return (
-								<tr key={'journalrow' + idx}>
-									<td className='text-nowrap'>{entry.entryDate}</td>
-									<td className='text-center d-none d-md-table-cell'>{entry.bedTime}</td>
-									<td className='text-center d-none d-md-table-cell'>{entry.dreams.length}</td>
-									<td className='text-left d-none d-md-table-cell'>
-										{dreamSignsUnq.map((sign, idy) => {
-											return (
+								return (
+									<tr key={'journalrow' + idx}>
+										<td className='text-nowrap'>{entry.entryDate}</td>
+										<td className='text-center d-none d-md-table-cell'>{entry.bedTime}</td>
+										<td className='text-center d-none d-md-table-cell'>{entry.dreams.length}</td>
+										<td className='text-left d-none d-md-table-cell'>
+											{dreamSignsUnq.map((sign, idy) => {
+												return (
+													<div
+														className='badge badge-info text-lowercase p-2 mr-2 mb-1'
+														key={idx + '-' + idy}>
+														{sign}
+													</div>
+												)
+											})}
+										</td>
+										<td className='text-center d-none d-md-table-cell'>
+											{entry.starred ? <div className='iconSvg star-on size16' /> : ''}
+										</td>
+										<td className='text-center d-none d-md-table-cell'>
+											{entry.dreams.filter(dream => {
+												return dream.isLucidDream == true
+											}).length > 0 ? (
 												<div
-													className='badge badge-info text-lowercase p-2 mr-2 mb-1'
-													key={idx + '-' + idy}>
-													{sign}
-												</div>
-											)
-										})}
-									</td>
-									<td className='text-center d-none d-md-table-cell'>
-										{entry.starred ? <div className='iconSvg star-on size16' /> : ''}
-									</td>
-									<td className='text-center d-none d-md-table-cell'>
-										{entry.dreams.filter(dream => {
-											return dream.isLucidDream == true
-										}).length > 0 ? (
-											<div className='iconSvg size24 circle check' title='Lucid Dream Success!' />
-										) : (
-											''
-										)}
-									</td>
-									<td className='text-center'>
-										<button
-											className='btn btn-sm btn-outline-primary px-4'
-											data-entry-key={entry.entryDate}
-											onClick={this.handleEntryEdit}>
-											Edit
-										</button>
+													className='iconSvg size24 circle check'
+													title='Lucid Dream Success!'
+												/>
+											) : (
+												''
+											)}
+										</td>
+										<td className='text-center'>
+											<button
+												className='btn btn-sm btn-outline-primary px-4'
+												data-entry-key={entry.entryDate}
+												onClick={this.handleEntryEdit}>
+												Edit
+											</button>
+										</td>
+									</tr>
+								)
+							})}
+					</tbody>
+					<tfoot>
+						{this.props.selDataFile &&
+							this.props.selDataFile.entries &&
+							this.props.selDataFile.entries.length == 0 && (
+								<tr>
+									<td colSpan={6} className='text-center p-3 text-muted'>
+										(No Dream Journal entries found - select "Add Journal Entry" above to create a
+										new one)
 									</td>
 								</tr>
-							)
-						})}
-				</tbody>
-				<tfoot>
-					{this.props.selDataFile &&
-						this.props.selDataFile.entries &&
-						this.props.selDataFile.entries.length == 0 && (
+							)}
+						{!this.props.selDataFile && (
 							<tr>
-								<td colSpan={6} className='text-center p-3 text-muted'>
-									(No Dream Journal entries found - select "Add Journal Entry" above to create a new
-									one)
+								<td colSpan={6} className='text-center p-3'>
+									<h5 className='text-secondary'>(no Dream Journal is currently selected)</h5>
 								</td>
 							</tr>
 						)}
-					{!this.props.selDataFile && (
-						<tr>
-							<td colSpan={6} className='text-center p-3'>
-								<h5 className='text-secondary'>(no Dream Journal is currently selected)</h5>
-							</td>
-						</tr>
-					)}
-				</tfoot>
-			</table>
-		)
+					</tfoot>
+				</table>
+			)
 
 		// TODO: DateRangePicker: add prop for (earliest month of journal) `fromMonth={new Date(2018, 8)}`
 		/* TODO: circle days on cal where LUCID==true!! (soln: add prop for Array<Date>)
