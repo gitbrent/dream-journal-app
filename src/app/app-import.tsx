@@ -348,7 +348,7 @@ export default class TabImport extends React.Component<
 		// A: reality check
 		if (!this.state._importText) {
 			// TODO: invalid-response div shown
-			console.log('Bro, add some text!')
+			alert('Bro, add some text!')
 			return
 		}
 
@@ -646,7 +646,7 @@ export default class TabImport extends React.Component<
 				<span className='text-white'>03/08:</span>
 				<ul>
 					<li>
-						<span className='text-white'>BEDTIME:</span> 11:30
+						<span className='text-white'>BED:</span> 11:30
 					</li>
 					<li>
 						<span className='text-white'>PREP:</span>
