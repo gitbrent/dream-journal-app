@@ -13,10 +13,13 @@ enum SearchScopes {
 	signs = 'Dream Signs',
 	notes = 'Dream Notes',
 	title = 'Dream Title',
+	_starred = 'starred',
+	_isLucid = 'isLucidDream',
 }
 
 interface ISearchMatch {
 	entryDate: IJournalEntry['entryDate']
+	starred: IJournalEntry['starred']
 	dream: IJournalDream
 }
 
@@ -132,7 +135,6 @@ export default class TabSearch extends React.Component<
 
 		this.props.selDataFile.entries.forEach(entry => {
 			;(entry.dreams || []).forEach(dream => {
-				// searchOptScope
 				if (this.state.searchOptScope == SearchScopes.all) {
 					if (
 						(dream.notes || '').match(regex) ||
@@ -144,6 +146,7 @@ export default class TabSearch extends React.Component<
 					) {
 						arrFound.push({
 							entryDate: entry.entryDate,
+							starred: entry.starred,
 							dream: dream,
 						})
 					}
@@ -151,6 +154,7 @@ export default class TabSearch extends React.Component<
 					if ((dream.notes || '').match(regex)) {
 						arrFound.push({
 							entryDate: entry.entryDate,
+							starred: entry.starred,
 							dream: dream,
 						})
 					}
@@ -163,6 +167,7 @@ export default class TabSearch extends React.Component<
 					) {
 						arrFound.push({
 							entryDate: entry.entryDate,
+							starred: entry.starred,
 							dream: dream,
 						})
 					}
@@ -170,12 +175,51 @@ export default class TabSearch extends React.Component<
 					if ((dream.title || '').match(regex)) {
 						arrFound.push({
 							entryDate: entry.entryDate,
+							starred: entry.starred,
 							dream: dream,
 						})
 					}
 				}
 			})
 		})
+
+		this.setState({
+			searchMatches: arrFound,
+		})
+	}
+
+	doShowByType = type => {
+		let arrFound = []
+
+		if (!this.props.selDataFile || this.props.selDataFile.entries.length <= 0) return
+
+		if (type == SearchScopes._starred) {
+			this.props.selDataFile.entries
+				.filter(entry => {
+					return entry.starred
+				})
+				.forEach(entry => {
+					;(entry.dreams || []).forEach(dream => {
+						arrFound.push({
+							entryDate: entry.entryDate,
+							starred: entry.starred,
+							dream: dream,
+						})
+					})
+				})
+		} else {
+			this.props.selDataFile.entries.forEach(entry => {
+				;(entry.dreams || []).forEach(dream => {
+					if (dream.isLucidDream) {
+						arrFound.push({
+							entryDate: entry.entryDate,
+							starred: entry.starred,
+							dream: dream,
+						})
+					}
+				})
+			})
+		}
 
 		this.setState({
 			searchMatches: arrFound,
@@ -226,10 +270,13 @@ export default class TabSearch extends React.Component<
 	render() {
 		let totalDreams = 0
 		let totalLucids = 0
+		let totalStarred = 0
 
 		if (this.props.selDataFile && this.props.selDataFile.entries) {
 			this.props.selDataFile.entries.forEach(entry => {
 				totalDreams += entry.dreams.length
+
+				if (entry.starred) totalStarred++
 
 				totalLucids += entry.dreams.filter(dream => {
 					return dream.isLucidDream
@@ -243,16 +290,23 @@ export default class TabSearch extends React.Component<
 				{this.state.searchMatches.map((entry, idx) => {
 					return (
 						<div className='card' key={'searchResultCard' + idx}>
-							<h5 className='card-header'>
-								<a
-									href='javascript:void(0)'
-									title='View Entry'
-									className='card-link'
-									data-entry-key={entry.entryDate}
-									onClick={this.handleEntryEdit}>
-									{entry.dream.title}
-								</a>
-							</h5>
+							<div className='row'>
+								<div className='col'>
+									<h5 className='card-header'>
+										<a
+											href='javascript:void(0)'
+											title='View Entry'
+											className='card-link'
+											data-entry-key={entry.entryDate}
+											onClick={this.handleEntryEdit}>
+											{entry.dream.title}
+										</a>
+									</h5>
+								</div>
+								<div className='col-auto'>
+									{entry.starred ? <div className='iconSvg star-on size16 mt-2 mx-2' /> : ''}
+								</div>
+							</div>
 							{this.state.searchOptScope == SearchScopes.all ||
 							this.state.searchOptScope == SearchScopes.notes ? (
 								<div className='card-body'>
@@ -326,12 +380,12 @@ export default class TabSearch extends React.Component<
 									<div className='iconSvg size80 analyze' />
 								</div>
 								<div className='col text-center'>
-									<label className='text-primary text-uppercase'>Total Months</label>
+									<label className='text-primary text-uppercase'>Months</label>
 									<h1 className='text-primary mb-0'>{this.getTotalMonths() || '-'}</h1>
 									<small className='text-50-white text-uppercase'>&nbsp;</small>
 								</div>
 								<div className='col text-center'>
-									<label className='text-primary text-uppercase'>Total Entries</label>
+									<label className='text-primary text-uppercase'>Entries</label>
 									<h1 className='text-primary mb-1'>
 										{this.props.selDataFile && this.props.selDataFile.entries
 											? this.props.selDataFile.entries.length
@@ -348,7 +402,7 @@ export default class TabSearch extends React.Component<
 									</small>
 								</div>
 								<div className='col text-center'>
-									<label className='text-info text-uppercase'>Total Dreams</label>
+									<label className='text-info text-uppercase'>Dreams</label>
 									<h1 className='text-info mb-1'>{totalDreams || '-'}</h1>
 									<small className='text-50-white text-uppercase'>
 										{this.getTotalMonths() * 30 > 0 &&
@@ -359,8 +413,21 @@ export default class TabSearch extends React.Component<
 											: '-'}
 									</small>
 								</div>
-								<div className='col text-center'>
-									<label className='text-success text-uppercase'>Lucid Dreams</label>
+								<div
+									className='col text-center'
+									onClick={() => this.doShowByType(SearchScopes._starred)}>
+									<label className='text-warning text-uppercase'>Starred</label>
+									<h1 className='text-warning mb-1'>{totalStarred || '-'}</h1>
+									<small className='text-50-white text-uppercase'>
+										{totalDreams && totalStarred
+											? ((totalStarred / totalDreams) * 100).toFixed(2) + '% Starred'
+											: '-'}
+									</small>
+								</div>
+								<div
+									className='col text-center'
+									onClick={() => this.doShowByType(SearchScopes._isLucid)}>
+									<label className='text-success text-uppercase'>Lucids</label>
 									<h1 className='text-success mb-1'>{totalLucids || '-'}</h1>
 									<small className='text-50-white text-uppercase'>
 										{totalDreams && totalLucids
