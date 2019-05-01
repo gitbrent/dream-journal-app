@@ -27,13 +27,8 @@
 |*|  SOFTWARE.
 \*/
 
+// TODO: [Auth redirect](https://reacttraining.com/react-router/web/example/auth-workflow)
 // FUTURE: https://github.com/FortAwesome/react-fontawesome
-enum AppTab {
-	home = 'home',
-	view = 'view',
-	search = 'search',
-	import = 'import',
-}
 export enum AuthState {
 	Authenticated = 'Authenticated',
 	Unauthenticated = 'Unauthenticated',
@@ -54,6 +49,7 @@ export enum InductionTypes {
 
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import { BrowserRouter as Router, Route, Link, NavLink } from 'react-router-dom'
 import '../css/bootstrap.yeticyborg.css'
 import '../css/svg-images.css'
 import LogoBase64 from '../img/logo_base64'
@@ -173,202 +169,6 @@ function parseStoreAccessKey() {
 	}
 }
 
-class AppNavBar extends React.Component<
-	{ onSaveFile: Function; onShowTab: Function; selDataFile: IDriveFile },
-	{ activeTab: AppTab }
-> {
-	constructor(
-		props: Readonly<{
-			onSaveFile: Function
-			onShowTab: Function
-			selDataFile: IDriveFile
-		}>
-	) {
-		super(props)
-
-		this.state = {
-			activeTab: AppTab.home,
-		}
-	}
-
-	onSaveFile = e => {
-		this.props.onSaveFile()
-	}
-	onShowTabHandler = e => {
-		let clickedTabName = e.target.getAttribute('data-name')
-
-		this.setState({
-			activeTab: clickedTabName,
-		})
-
-		this.props.onShowTab(clickedTabName)
-	}
-
-	render() {
-		return (
-			<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
-				<a className='navbar-brand' href='/'>
-					<img src={LogoBase64} width='30' height='30' className='d-inline-block align-top mr-3' alt='' />
-					Brain Cloud
-				</a>
-				<button
-					className='navbar-toggler'
-					type='button'
-					data-toggle='collapse'
-					data-target='#navbarNav'
-					aria-controls='navbarNav'
-					aria-expanded='false'
-					aria-label='Toggle navigation'>
-					<span className='navbar-toggler-icon' />
-				</button>
-				<div className='collapse navbar-collapse' id='navbarNav'>
-					<ul className='navbar-nav'>
-						<li className={this.state.activeTab == AppTab.home ? 'nav-item active' : 'nav-item'}>
-							<a
-								className='nav-link'
-								href='javascript:void(0)'
-								data-name='home'
-								onClick={this.onShowTabHandler}>
-								Home <span className='sr-only'>(current)</span>
-							</a>
-						</li>
-						<li className={this.state.activeTab == AppTab.view ? 'nav-item active' : 'nav-item'}>
-							<a
-								className='nav-link'
-								href='javascript:void(0)'
-								data-name='view'
-								onClick={this.onShowTabHandler}>
-								Modify Journal
-							</a>
-						</li>
-						<li className={this.state.activeTab == AppTab.search ? 'nav-item active' : 'nav-item'}>
-							<a
-								className='nav-link'
-								href='javascript:void(0)'
-								data-name='search'
-								onClick={this.onShowTabHandler}>
-								Search Journal
-							</a>
-						</li>
-						<li className={this.state.activeTab == AppTab.import ? 'nav-item active' : 'nav-item'}>
-							<a
-								className={!this.props.selDataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'}
-								href='javascript:void(0)'
-								data-name='import'
-								onClick={this.onShowTabHandler}>
-								Import Entries
-							</a>
-						</li>
-					</ul>
-				</div>
-				<form className='form-inline h6 text-secondary mb-0'>
-					{this.props.selDataFile && this.props.selDataFile._isSaving ? (
-						<div>
-							<div className='spinner-border spinner-border-sm mr-2' role='status'>
-								<span className='sr-only' />
-							</div>
-							Saving...
-						</div>
-					) : this.props.selDataFile ? (
-						this.props.selDataFile.modifiedTime ? (
-							'Last Saved @ ' + new Date(this.props.selDataFile.modifiedTime).toLocaleString()
-						) : (
-							'(unsaved)'
-						)
-					) : (
-						'(no file selected)'
-					)}
-				</form>
-			</nav>
-		)
-	}
-}
-
-class AppTabs extends React.Component<{
-	activeTab: AppTab
-	authState: IAuthState
-	availDataFiles: IDriveFiles['available']
-	doCreateEntry: Function
-	doAuthSignIn: Function
-	doAuthSignOut: Function
-	doCreateJournal: Function
-	doFileListRefresh: Function
-	doImportEntries: Function
-	doRenameFile: Function
-	doSaveImportState: Function
-	doSaveSearchState: Function
-	doSelectFileById: Function
-	importState: object
-	onShowModal: Function
-	searchState: object
-	selDataFile: IDriveFile
-}> {
-	constructor(
-		props: Readonly<{
-			activeTab: AppTab
-			authState: IAuthState
-			availDataFiles: IDriveFiles['available']
-			doCreateEntry: Function
-			doAuthSignIn: Function
-			doAuthSignOut: Function
-			doCreateJournal: Function
-			doDeleteEntry: Function
-			doFileListRefresh: Function
-			doImportEntries: Function
-			doRenameFile: Function
-			doSaveImportState: Function
-			doSaveSearchState: Function
-			doSelectFileById: Function
-			importState: object
-			onShowModal: Function
-			searchState: object
-			selDataFile: IDriveFile
-		}>
-	) {
-		super(props)
-	}
-
-	render() {
-		switch (this.props.activeTab) {
-			case AppTab.view:
-				return <TabModify onShowModal={this.props.onShowModal} selDataFile={this.props.selDataFile} />
-			case AppTab.search:
-				return (
-					<TabSearch
-						doSaveSearchState={this.props.doSaveSearchState}
-						onShowModal={this.props.onShowModal}
-						searchState={this.props.searchState}
-						selDataFile={this.props.selDataFile}
-					/>
-				)
-			case AppTab.import:
-				return (
-					<TabImport
-						doImportEntries={this.props.doImportEntries}
-						doSaveImportState={this.props.doSaveImportState}
-						importState={this.props.importState}
-						selDataFile={this.props.selDataFile}
-					/>
-				)
-			case AppTab.home:
-			default:
-				return (
-					<TabHome
-						authState={this.props.authState}
-						availDataFiles={this.props.availDataFiles}
-						doAuthSignIn={this.props.doAuthSignIn}
-						doAuthSignOut={this.props.doAuthSignOut}
-						doCreateJournal={this.props.doCreateJournal}
-						doFileListRefresh={this.props.doFileListRefresh}
-						doRenameFile={this.props.doRenameFile}
-						doSelectFileById={this.props.doSelectFileById}
-						selDataFile={this.props.selDataFile}
-					/>
-				)
-		}
-	}
-}
-
 // App Logic
 class App extends React.Component<
 	{},
@@ -379,7 +179,6 @@ class App extends React.Component<
 		dataFiles: IDriveFiles
 		editEntry: IJournalEntry
 		showModal: boolean
-		showTab: AppTab
 	}
 > {
 	constructor(props: Readonly<{ showModal: boolean }>) {
@@ -399,7 +198,6 @@ class App extends React.Component<
 			},
 			editEntry: null,
 			showModal: typeof props.showModal === 'boolean' ? props.showModal : false,
-			showTab: AppTab.home,
 		}
 
 		this.updateAuthState()
@@ -477,11 +275,6 @@ class App extends React.Component<
 		this.setState({
 			editEntry: options.editEntry,
 			showModal: options.show,
-		})
-	}
-	chgShowTab = (value: AppTab) => {
-		this.setState({
-			showTab: value,
 		})
 	}
 
@@ -999,39 +792,138 @@ class App extends React.Component<
 		})
 	}
 
+	// App Pages
+
+	Home = () => {
+		return (
+			<TabHome
+				authState={this.state.auth}
+				availDataFiles={
+					this.state.dataFiles && this.state.dataFiles.available ? this.state.dataFiles.available : null
+				}
+				doAuthSignIn={this.doAuthSignIn}
+				doAuthSignOut={this.doAuthSignOut}
+				doCreateJournal={this.driveCreateNewJournal}
+				doFileListRefresh={this.driveGetFileList}
+				doRenameFile={this.doRenameFile}
+				doSelectFileById={this.doSelectFileById}
+				selDataFile={
+					this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
+				}
+			/>
+		)
+	}
+	Modify = () => {
+		return (
+			<TabModify
+				onShowModal={this.chgShowModal}
+				selDataFile={
+					this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
+				}
+			/>
+		)
+	}
+	Search = () => {
+		return (
+			<TabSearch
+				doSaveSearchState={this.doSaveSearchState}
+				onShowModal={this.chgShowModal}
+				searchState={this.state.childSearchState}
+				selDataFile={
+					this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
+				}
+			/>
+		)
+	}
+	Import = () => {
+		return (
+			<TabImport
+				doImportEntries={this.doImportEntries}
+				doSaveImportState={this.doSaveImportState}
+				importState={this.state.childImportState}
+				selDataFile={
+					this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
+				}
+			/>
+		)
+	}
+
 	render() {
 		return (
-			<main>
-				<AppNavBar
-					selDataFile={
-						this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
-					}
-					onSaveFile={this.doSaveFile}
-					onShowTab={this.chgShowTab}
-				/>
-				<AppTabs
-					activeTab={this.state.showTab}
-					authState={this.state.auth}
-					availDataFiles={
-						this.state.dataFiles && this.state.dataFiles.available ? this.state.dataFiles.available : null
-					}
-					doCreateEntry={this.doCreateEntry}
-					doAuthSignIn={this.doAuthSignIn}
-					doAuthSignOut={this.doAuthSignOut}
-					doCreateJournal={this.driveCreateNewJournal}
-					doFileListRefresh={this.driveGetFileList}
-					doImportEntries={this.doImportEntries}
-					doRenameFile={this.doRenameFile}
-					doSaveImportState={this.doSaveImportState}
-					doSaveSearchState={this.doSaveSearchState}
-					doSelectFileById={this.doSelectFileById}
-					importState={this.state.childImportState}
-					onShowModal={this.chgShowModal}
-					searchState={this.state.childSearchState}
-					selDataFile={
-						this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
-					}
-				/>
+			<Router>
+				<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
+					<a className='navbar-brand' href='/'>
+						<img src={LogoBase64} width='30' height='30' className='d-inline-block align-top mr-3' alt='' />
+						Brain Cloud
+					</a>
+					<button
+						className='navbar-toggler'
+						type='button'
+						data-toggle='collapse'
+						data-target='#navbarNav'
+						aria-controls='navbarNav'
+						aria-expanded='false'
+						aria-label='Toggle navigation'>
+						<span className='navbar-toggler-icon' />
+					</button>
+					<div className='collapse navbar-collapse' id='navbarNav'>
+						<ul className='navbar-nav'>
+							<li className='nav-item'>
+								<NavLink to='/' exact={true} className='nav-link' activeClassName='active'>
+									Home
+								</NavLink>
+							</li>
+							<li className='nav-item'>
+								<NavLink to='/modify' className='nav-link' activeClassName='active'>
+									Modify
+								</NavLink>
+							</li>
+							<li className='nav-item'>
+								<NavLink to='/search' className='nav-link' activeClassName='active'>
+									Search Journal
+								</NavLink>
+							</li>
+							<li className='nav-item'>
+								<NavLink
+									to='/import'
+									activeClassName='active'
+									className={
+										!this.state.dataFiles || !this.state.dataFiles.selected
+											? 'nav-link disabled'
+											: 'nav-link d-none d-lg-block'
+									}>
+									Import Entries
+								</NavLink>
+							</li>
+						</ul>
+					</div>
+					<form className='form-inline h6 text-secondary mb-0'>
+						{this.state.dataFiles &&
+						this.state.dataFiles.selected &&
+						this.state.dataFiles.selected._isSaving ? (
+							<div>
+								<div className='spinner-border spinner-border-sm mr-2' role='status'>
+									<span className='sr-only' />
+								</div>
+								Saving...
+							</div>
+						) : this.state.dataFiles && this.state.dataFiles.selected ? (
+							this.state.dataFiles.selected.modifiedTime ? (
+								'Last Saved @ ' + new Date(this.state.dataFiles.selected.modifiedTime).toLocaleString()
+							) : (
+								'(unsaved)'
+							)
+						) : (
+							'(no file selected)'
+						)}
+					</form>
+				</nav>
+
+				<Route path='/' exact render={this.Home} />
+				<Route path='/modify' render={this.Modify} />
+				<Route path='/search' render={this.Search} />
+				<Route path='/import' render={this.Import} />
+
 				<EntryModal
 					doCreateEntry={this.doCreateEntry}
 					doDeleteEntry={this.doDeleteEntry}
@@ -1041,7 +933,7 @@ class App extends React.Component<
 					onShowModal={this.chgShowModal}
 					show={this.state.showModal}
 				/>
-			</main>
+			</Router>
 		)
 	}
 }
