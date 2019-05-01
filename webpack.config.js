@@ -14,7 +14,8 @@ module.exports = {
   ],
   output: {
     path: __dirname + "/public",
-    filename: "build/[name].[contenthash].js"
+    filename: "build/[name].[contenthash].js",
+    publicPath: "/"
   },
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".json"]
@@ -66,5 +67,8 @@ module.exports = {
         ]
       }
     ]
+  },
+  devServer: {
+    historyApiFallback: true
   }
 };

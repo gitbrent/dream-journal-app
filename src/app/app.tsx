@@ -875,7 +875,7 @@ class App extends React.Component<
 							</li>
 							<li className='nav-item'>
 								<NavLink to='/modify' className='nav-link' activeClassName='active'>
-									Modify
+									Modify Journal
 								</NavLink>
 							</li>
 							<li className='nav-item'>
