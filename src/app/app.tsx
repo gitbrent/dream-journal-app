@@ -256,6 +256,8 @@ class App extends React.Component<
 								userPhoto: json.user.photoLink || null,
 							}
 							this.setState({ auth: newState })
+							// B: Get files (so Route pages have data)
+							this.driveGetFileList()
 						}
 					})
 					.catch(error => {
