@@ -376,10 +376,10 @@ export default class TabSearch extends React.Component<
 						</div>
 						<div className='card-body bg-light'>
 							<div className='row align-items-center p-2'>
-								<div className='col-auto'>
+								<div className='col-auto d-none d-lg-block'>
 									<div className='iconSvg size80 analyze' />
 								</div>
-								<div className='col text-center'>
+								<div className='col text-center d-none d-md-block'>
 									<label className='text-primary text-uppercase'>Months</label>
 									<h1 className='text-primary mb-0'>{this.getTotalMonths() || '-'}</h1>
 									<small className='text-50-white text-uppercase'>&nbsp;</small>
@@ -391,7 +391,7 @@ export default class TabSearch extends React.Component<
 											? this.props.selDataFile.entries.length
 											: '-'}
 									</h1>
-									<small className='text-50-white text-uppercase'>
+									<small className='text-50-white text-uppercase d-none d-md-block'>
 										{this.getTotalMonths() * 30 > 0 &&
 										this.props.selDataFile &&
 										this.props.selDataFile.entries
@@ -404,7 +404,7 @@ export default class TabSearch extends React.Component<
 								<div className='col text-center'>
 									<label className='text-info text-uppercase'>Dreams</label>
 									<h1 className='text-info mb-1'>{totalDreams || '-'}</h1>
-									<small className='text-50-white text-uppercase'>
+									<small className='text-50-white text-uppercase d-none d-md-block'>
 										{this.getTotalMonths() * 30 > 0 &&
 										this.props.selDataFile &&
 										this.props.selDataFile.entries
@@ -418,7 +418,7 @@ export default class TabSearch extends React.Component<
 									onClick={() => this.doShowByType(SearchScopes._starred)}>
 									<label className='text-warning text-uppercase'>Starred</label>
 									<h1 className='text-warning mb-1'>{totalStarred || '-'}</h1>
-									<small className='text-50-white text-uppercase'>
+									<small className='text-50-white text-uppercase d-none d-md-block'>
 										{totalDreams && totalStarred
 											? ((totalStarred / totalDreams) * 100).toFixed(2) + '% Starred'
 											: '-'}
@@ -429,7 +429,7 @@ export default class TabSearch extends React.Component<
 									onClick={() => this.doShowByType(SearchScopes._isLucid)}>
 									<label className='text-success text-uppercase'>Lucids</label>
 									<h1 className='text-success mb-1'>{totalLucids || '-'}</h1>
-									<small className='text-50-white text-uppercase'>
+									<small className='text-50-white text-uppercase d-none d-md-block'>
 										{totalDreams && totalLucids
 											? ((totalLucids / totalDreams) * 100).toFixed(2) + '% Success'
 											: '-'}
@@ -442,17 +442,17 @@ export default class TabSearch extends React.Component<
 
 				<section className='container my-5'>
 					<div className='row'>
-						<div className='col-12 col-md-8'>
-							<div className='card'>
+						<div className='col-12 col-lg-8'>
+							<div className='card mb-3'>
 								<div className='card-header bg-info'>
 									<h5 className='card-title text-white mb-0'>Search</h5>
 								</div>
 								<div className='card-body bg-light p-4'>
 									<div className='row align-items-center'>
-										<div className='col-auto'>
+										<div className='col-auto d-none d-md-block'>
 											<div className='iconSvg size32 search' />
 										</div>
-										<div className='col-auto'>
+										<div className='col-3 col-md-auto'>
 											<select
 												className='form-control'
 												defaultValue={this.state.searchOptMatchType}
@@ -490,10 +490,11 @@ export default class TabSearch extends React.Component<
 												{this.state.searchTermInvalidMsg}
 											</div>
 										</div>
-										<div className='col-auto'>
+										<div className='w-100 mb-3 d-md-none' />
+										<div className='col-12 col-md-auto'>
 											<button
 												type='button'
-												className='btn btn-outline-primary'
+												className='btn btn-outline-primary w-100'
 												onClick={this.doKeywordSearch}
 												disabled={!this.props.selDataFile ? true : false}>
 												Search
@@ -503,7 +504,7 @@ export default class TabSearch extends React.Component<
 								</div>
 							</div>
 						</div>
-						<div className='col-12 col-md-4'>
+						<div className='col-12 col-lg-4'>
 							<div className='card'>
 								<div className='card-header bg-secondary'>
 									<h5 className='card-title text-white mb-0'>Options</h5>
