@@ -104,11 +104,11 @@ export default class TabView extends React.Component<
 					<thead className='thead'>
 						<tr>
 							<th>Date</th>
-							<th className='text-center d-none d-md-table-cell'>Bed</th>
-							<th className='text-center d-none d-md-table-cell'>Dreams</th>
+							<th className='text-center d-none d-lg-table-cell'>Bed</th>
+							<th className='text-center'>Dreams</th>
 							<th className='text-center d-none d-md-table-cell'>Dream Signs</th>
 							<th className='text-center d-none d-md-table-cell'>Starred?</th>
-							<th className='text-center d-none d-md-table-cell'>Lucid?</th>
+							<th className='text-center'>Lucid?</th>
 							<th className='text-center'>&nbsp;</th>
 						</tr>
 					</thead>
@@ -139,8 +139,8 @@ export default class TabView extends React.Component<
 								return (
 									<tr key={'journalrow' + idx}>
 										<td className='text-nowrap'>{entry.entryDate}</td>
-										<td className='text-center d-none d-md-table-cell'>{entry.bedTime}</td>
-										<td className='text-center d-none d-md-table-cell'>{entry.dreams.length}</td>
+										<td className='text-center d-none d-lg-table-cell'>{entry.bedTime}</td>
+										<td className='text-center'>{entry.dreams.length}</td>
 										<td className='text-left d-none d-md-table-cell'>
 											{dreamSignsUnq.map((sign, idy) => {
 												return (
@@ -155,7 +155,7 @@ export default class TabView extends React.Component<
 										<td className='text-center d-none d-md-table-cell'>
 											{entry.starred ? <div className='iconSvg star-on size16' /> : ''}
 										</td>
-										<td className='text-center d-none d-md-table-cell'>
+										<td className='text-center'>
 											{entry.dreams.filter(dream => {
 												return dream.isLucidDream == true
 											}).length > 0 ? (
