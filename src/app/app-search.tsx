@@ -102,6 +102,14 @@ export default class TabSearch extends React.Component<
 		return months <= 0 ? 0 : months
 	}
 
+	monthDiff = (d1, d2) => {
+		let months
+		months = (d2.getFullYear() - d1.getFullYear()) * 12
+		months -= d1.getMonth() + 1
+		months += d2.getMonth()
+		return months <= 0 ? 0 : months
+	}
+
 	handleTypeChange = event => {
 		let newState = { searchOptMatchType: null }
 
@@ -296,7 +304,7 @@ export default class TabSearch extends React.Component<
 										<a
 											href='javascript:void(0)'
 											title='View Entry'
-											className='card-link'
+											className={'card-link' + (entry.dream.isLucidDream ? ' text-success' : '')}
 											data-entry-key={entry.entryDate}
 											onClick={this.handleEntryEdit}>
 											{entry.dream.title}
@@ -304,7 +312,12 @@ export default class TabSearch extends React.Component<
 									</h5>
 								</div>
 								<div className='col-auto'>
-									{entry.starred ? <div className='iconSvg star-on size16 mt-2 mx-2' /> : ''}
+									{entry.starred ? <div className='iconSvg size16 star-on mt-2 mx-2' /> : ''}
+									{entry.dream.isLucidDream ? (
+										<div className='iconSvg size24 circle check mt-2 mx-2' />
+									) : (
+										''
+									)}
 								</div>
 							</div>
 							{this.state.searchOptScope == SearchScopes.all ||
@@ -317,7 +330,7 @@ export default class TabSearch extends React.Component<
 							) : (
 								''
 							)}
-							<div className='card-footer text-muted'>
+							<div className='card-footer text-info'>
 								{this.state.searchOptScope == SearchScopes.all ||
 								this.state.searchOptScope == SearchScopes.signs ? (
 									<div>
@@ -336,7 +349,12 @@ export default class TabSearch extends React.Component<
 								) : (
 									''
 								)}
-								<small>{new Date(entry.entryDate).toLocaleDateString()}</small>
+								<small>
+									{new Date(entry.entryDate).toLocaleDateString()}
+									<span className='ml-2'>
+										({this.monthDiff(new Date(entry.entryDate), new Date())} months ago)
+									</span>
+								</small>
 							</div>
 						</div>
 					)
@@ -455,7 +473,6 @@ export default class TabSearch extends React.Component<
 												type='text'
 												value={this.state.searchTerm}
 												className='form-control'
-												placeholder='keyword or phrase'
 												onKeyPress={event => {
 													if (event.key == 'Enter') this.doKeywordSearch()
 												}}
@@ -534,11 +551,11 @@ export default class TabSearch extends React.Component<
 
 				<main className='container bg-light my-5'>
 					{this.state.searchTerm && this.state.searchMatches.length > 0 ? (
-						<h5 className='text-info pt-3 ml-3 my-3'>
+						<h3 className='text-primary py-3 text-center mb-3'>
 							Found {this.state.searchMatches.length} Dreams (
 							{Math.round((this.state.searchMatches.length / totalDreams) * 100)}
 							%)
-						</h5>
+						</h3>
 					) : (
 						''
 					)}
