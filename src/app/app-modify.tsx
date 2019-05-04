@@ -213,7 +213,7 @@ export default class TabView extends React.Component<
 					<div className='col-12'>
 						<div className='card'>
 							<div className='card-header bg-primary'>
-								<h5 className='card-title text-white mb-0'>Modify Journal</h5>
+								<h5 className='card-title text-white mb-0'>View Dream Journal</h5>
 							</div>
 							<div className='card-body bg-light'>
 								<div className='row mb-4 align-items-center'>

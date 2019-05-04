@@ -876,8 +876,8 @@ class App extends React.Component<
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/modify' className='nav-link' activeClassName='active'>
-									Modify Journal
+								<NavLink to='/journal' className='nav-link' activeClassName='active'>
+									View Journal
 								</NavLink>
 							</li>
 							<li className='nav-item'>
@@ -894,7 +894,7 @@ class App extends React.Component<
 											? 'nav-link disabled'
 											: 'nav-link d-none d-lg-block'
 									}>
-									Import Entries
+									Import Journal
 								</NavLink>
 							</li>
 						</ul>
@@ -922,7 +922,7 @@ class App extends React.Component<
 				</nav>
 
 				<Route path='/' exact render={this.Home} />
-				<Route path='/modify' render={this.Modify} />
+				<Route path='/journal' render={this.Modify} />
 				<Route path='/search' render={this.Search} />
 				<Route path='/import' render={this.Import} />
 

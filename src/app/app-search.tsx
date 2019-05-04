@@ -372,20 +372,17 @@ export default class TabSearch extends React.Component<
 					)}
 					<div className='card my-5'>
 						<div className='card-header bg-primary'>
-							<h5 className='card-title text-white mb-0'>Dream Journal Metrics</h5>
+							<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
 						</div>
 						<div className='card-body bg-light'>
 							<div className='row align-items-center p-2'>
-								<div className='col-auto d-none d-lg-block'>
-									<div className='iconSvg size80 analyze' />
-								</div>
 								<div className='col text-center d-none d-md-block'>
 									<label className='text-primary text-uppercase'>Months</label>
 									<h1 className='text-primary mb-0'>{this.getTotalMonths() || '-'}</h1>
 									<small className='text-50-white text-uppercase'>&nbsp;</small>
 								</div>
 								<div className='col text-center'>
-									<label className='text-primary text-uppercase'>Entries</label>
+									<label className='text-primary text-uppercase'>Days</label>
 									<h1 className='text-primary mb-1'>
 										{this.props.selDataFile && this.props.selDataFile.entries
 											? this.props.selDataFile.entries.length
@@ -409,7 +406,7 @@ export default class TabSearch extends React.Component<
 										this.props.selDataFile &&
 										this.props.selDataFile.entries
 											? (totalDreams / this.props.selDataFile.entries.length).toFixed(2) +
-											  ' / entry'
+											  ' / day'
 											: '-'}
 									</small>
 								</div>
@@ -445,28 +442,15 @@ export default class TabSearch extends React.Component<
 						<div className='col-12 col-lg-8'>
 							<div className='card mb-3'>
 								<div className='card-header bg-info'>
-									<h5 className='card-title text-white mb-0'>Search</h5>
+									<h5 className='card-title text-white mb-0'>Keyword Search</h5>
 								</div>
 								<div className='card-body bg-light p-4'>
-									<div className='row align-items-center'>
+									<div className='row align-items-end'>
 										<div className='col-auto d-none d-md-block'>
-											<div className='iconSvg size32 search' />
-										</div>
-										<div className='col-3 col-md-auto'>
-											<select
-												className='form-control'
-												defaultValue={this.state.searchOptMatchType}
-												onChange={this.handleTypeChange}>
-												{Object.keys(SearchMatchTypes).map(val => {
-													return (
-														<option value={SearchMatchTypes[val]} key={'enum' + val}>
-															{SearchMatchTypes[val]}
-														</option>
-													)
-												})}
-											</select>
+											<div className='iconSvg size48 search' />
 										</div>
 										<div className='col'>
+											<label className='text-uppercase text-muted'>Keyword or Phrase</label>
 											<input
 												type='text'
 												value={this.state.searchTerm}
@@ -507,14 +491,12 @@ export default class TabSearch extends React.Component<
 						<div className='col-12 col-lg-4'>
 							<div className='card'>
 								<div className='card-header bg-secondary'>
-									<h5 className='card-title text-white mb-0'>Options</h5>
+									<h5 className='card-title text-white mb-0'>Search Options</h5>
 								</div>
 								<div className='card-body bg-light p-4'>
-									<div className='row align-items-center no-gutters'>
-										<div className='col-auto'>
-											<label className='text-uppercase text-muted mb-0 mr-3'>Search Fields</label>
-										</div>
-										<div className='col'>
+									<div className='row align-items-center'>
+										<div className='col-12 col-md-6'>
+											<label className='text-uppercase text-muted'>Fields</label>
 											<select
 												className='form-control'
 												defaultValue={this.state.searchOptScope}
@@ -523,6 +505,21 @@ export default class TabSearch extends React.Component<
 													return (
 														<option value={SearchScopes[val]} key={'enum' + val}>
 															{SearchScopes[val]}
+														</option>
+													)
+												})}
+											</select>
+										</div>
+										<div className='col-12 col-md-6'>
+											<label className='text-uppercase text-muted'>Type</label>
+											<select
+												className='form-control'
+												defaultValue={this.state.searchOptMatchType}
+												onChange={this.handleTypeChange}>
+												{Object.keys(SearchMatchTypes).map(val => {
+													return (
+														<option value={SearchMatchTypes[val]} key={'enum' + val}>
+															{SearchMatchTypes[val]}
 														</option>
 													)
 												})}
