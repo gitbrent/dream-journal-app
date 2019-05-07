@@ -97,7 +97,7 @@ export default class TabImport extends React.Component<
 			_notesPrep: config._notesPrep || '',
 			_notesPrepEnd: config._notesPrepEnd || '',
 			_notesWake: config._notesWake || '',
-			_notesWakeEnd: config._notesWake || '',
+			_notesWakeEnd: config._notesWakeEnd || '',
 			_title: config._title || '',
 
 			bedTime: null,
