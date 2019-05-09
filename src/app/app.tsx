@@ -49,7 +49,7 @@ export enum InductionTypes {
 
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { BrowserRouter as Router, Route, Link, NavLink } from 'react-router-dom'
+import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom'
 import '../css/bootstrap.yeticyborg.css'
 import '../css/svg-images.css'
 import LogoBase64 from '../img/logo_base64'
@@ -72,10 +72,6 @@ export interface IDriveFile {
 	modifiedTime: string
 	name: string
 	size: string
-}
-export interface IDriveFiles {
-	available: Array<IDriveFile>
-	selected: IDriveFile
 }
 /**
  * A single dream entry - there are 1+ of these in every IJournalEntry
@@ -176,7 +172,7 @@ class App extends React.Component<
 		auth: IAuthState
 		childImportState: object
 		childSearchState: object
-		dataFiles: IDriveFiles
+		dataFile: IDriveFile
 		editEntry: IJournalEntry
 		showModal: boolean
 	}
@@ -192,10 +188,7 @@ class App extends React.Component<
 			},
 			childImportState: null,
 			childSearchState: null,
-			dataFiles: {
-				available: [],
-				selected: null,
-			},
+			dataFile: null,
 			editEntry: null,
 			showModal: typeof props.showModal === 'boolean' ? props.showModal : false,
 		}
@@ -304,10 +297,7 @@ class App extends React.Component<
 						userName: '',
 						userPhoto: '',
 					},
-					dataFiles: {
-						available: [],
-						selected: null,
-					},
+					dataFile: null,
 				})
 				localStorage.setItem('journal-selected-fileid', null)
 			})
@@ -369,7 +359,8 @@ class App extends React.Component<
 			})
 	}
 	driveGetFileList = () => {
-		var params = JSON.parse(localStorage.getItem('oauth2-params'))
+		const FILENAME = 'dream-journal.json'
+		let params = JSON.parse(localStorage.getItem('oauth2-params'))
 		if (!params || !params['access_token']) {
 			oauth2SignIn()
 			return
@@ -390,27 +381,20 @@ class App extends React.Component<
 					.json()
 					.then(json => {
 						let data = json
-						// STEP 1: Check for errors
+						// A: Check for errors
 						// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
 						if (data && data.error && data.error.code) throw data.error
 
-						// STEP 2: Update data
-						let newState = this.state.dataFiles
-						newState.available = data.files
+						// B: Capture datafile
 						this.setState({
-							dataFiles: newState,
+							dataFile:
+								data.files.filter(file => {
+									return file.name == FILENAME
+								})[0] || null,
 						})
 
-						// STEP 3: Re-select previously selected file (if any)
-						let selFileId = localStorage.getItem('journal-selected-fileid')
-						if (selFileId && this.state.dataFiles.available.length > 0) {
-							let selFile = this.state.dataFiles.available.filter(file => {
-								return file.id === selFileId
-							})
-							if (selFile && selFile[0]) {
-								this.doSelectFileById(selFile[0].id)
-							}
-						}
+						// C: Load file data
+						this.doSelectFile()
 					})
 					.catch(error => {
 						if (error.code == '401') {
@@ -432,36 +416,19 @@ class App extends React.Component<
 	/**
 	 * @see: https://developers.google.com/drive/api/v3/manage-downloads
 	 */
-	doSelectFileById = (fileId: IDriveFile['id']) => {
+	doSelectFile = () => {
+		// A
 		let params = JSON.parse(localStorage.getItem('oauth2-params'))
-		let selFile =
-			fileId &&
-			this.state.dataFiles &&
-			this.state.dataFiles.available &&
-			this.state.dataFiles.available.filter(file => {
-				return file.id === fileId
-			}).length > 0
-				? this.state.dataFiles.available.filter(file => {
-						return file.id === fileId
-				  })[0]
-				: null
 
-		// A:
-		if (!selFile) {
-			console.error ? console.error('NO SUCH FILE') : console.log('WTH?!')
-			return
-		}
-
-		// B:
-		let newState = this.state.dataFiles
-		newState.selected = selFile
-		newState.selected._isLoading = true
+		// B
+		let newState = this.state.dataFile
+		newState._isLoading = true
 		this.setState({
-			dataFiles: newState,
+			dataFile: newState,
 		})
 
-		// C:
-		fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', {
+		// C
+		fetch('https://www.googleapis.com/drive/v3/files/' + this.state.dataFile.id + '?alt=media', {
 			method: 'GET',
 			headers: {
 				Authorization: 'Bearer ' + params['access_token'],
@@ -488,16 +455,12 @@ class App extends React.Component<
 						}
 
 						// B:
-						let newState = this.state.dataFiles
-						newState.selected = selFile
-						newState.selected._isLoading = false
-						newState.selected.entries = entries || []
+						let newState = this.state.dataFile
+						newState._isLoading = false
+						newState.entries = entries || []
 						this.setState({
-							dataFiles: newState,
+							dataFile: newState,
 						})
-
-						// C:
-						localStorage.setItem('journal-selected-fileid', selFile.id)
 					})
 					.catch(error => {
 						throw error
@@ -507,56 +470,15 @@ class App extends React.Component<
 				if (error.code == '401') {
 					oauth2SignIn()
 				} else if (error.code == '503') {
-					let newState = this.state.dataFiles
-					newState.selected._isLoading = false
+					let newState = this.state.dataFile
+					newState._isLoading = false
 					// TODO: new field like `hasError` to hold "Service Unavailable" etc
 				} else {
-					let newState = this.state.dataFiles
-					newState.selected._isLoading = false
+					let newState = this.state.dataFile
+					newState._isLoading = false
 					console.error ? console.error(error) : console.log(error)
 				}
 			})
-	}
-	doRenameFile = (file: IDriveFile, name: string) => {
-		let params = JSON.parse(localStorage.getItem('oauth2-params'))
-
-		return new Promise((resolve, reject) => {
-			// NOTE: 'Content-Type' is *required* (other a parse error is returned)
-			fetch('https://www.googleapis.com/drive/v3/files/' + file.id, {
-				method: 'PATCH',
-				headers: {
-					Authorization: 'Bearer ' + params['access_token'],
-					'Content-Type': 'application/json; charset=UTF-8',
-				},
-				body: JSON.stringify({
-					name: name,
-				}),
-			})
-				.then(response => {
-					response
-						.json()
-						.then(json => {
-							// NOTE: Google-api will return an `{error:{}}` object, so check!
-							if (!json.error && json.name) {
-								let newState = this.state.dataFiles
-								let dataFile = newState.available.filter(file => {
-									return file.id === json.id
-								})[0]
-								dataFile.name = json.name
-								this.setState({
-									dataFiles: newState,
-								})
-							}
-							resolve(json)
-						})
-						.catch(error => {
-							reject(error)
-						})
-				})
-				.catch(error => {
-					reject(error)
-				})
-		})
 	}
 	/**
 	 * @see: https://developers.google.com/drive/api/v3/reference/files/update
@@ -565,28 +487,23 @@ class App extends React.Component<
 		return new Promise((resolve, reject) => {
 			let params = JSON.parse(localStorage.getItem('oauth2-params'))
 
-			// A:
-			if (!this.state.dataFiles.selected) {
-				// TODO: disable save button if no `selected` file exists
-				console.log('No file selected!')
-				return
-			}
-
-			// B: Update state
-			let newState = this.state.dataFiles
-			newState.selected._isSaving = true
+			// A
+			let newState = this.state.dataFile
+			newState._isSaving = true
 			this.setState({
-				dataFiles: newState,
+				dataFile: newState,
 			})
 
+			// B: Sort by `entryDate`
 			let jsonBody: object = {
-				entries: this.state.dataFiles.selected.entries.sort((a, b) => {
+				entries: this.state.dataFile.entries.sort((a, b) => {
 					if (a.entryDate > b.entryDate) return 1
 					if (a.entryDate < b.entryDate) return -1
 					return 0
 				}),
 			}
 
+			// C
 			let reqBody: string =
 				'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
 				JSON.stringify(JOURNAL_HEADER) +
@@ -604,9 +521,7 @@ class App extends React.Component<
 			}
 
 			fetch(
-				'https://www.googleapis.com/upload/drive/v3/files/' +
-					this.state.dataFiles.selected.id +
-					'?uploadType=multipart',
+				'https://www.googleapis.com/upload/drive/v3/files/' + this.state.dataFile.id + '?uploadType=multipart',
 				{
 					method: 'PATCH',
 					headers: requestHeaders,
@@ -618,10 +533,10 @@ class App extends React.Component<
 						.json()
 						.then(fileResource => {
 							// A: update state
-							let newState = this.state.dataFiles
-							newState.selected._isSaving = false
+							let newState = this.state.dataFile
+							newState._isSaving = false
 							this.setState({
-								dataFiles: newState,
+								dataFile: newState,
 							})
 
 							// B: refresh file list (to update "size", "modified")
@@ -649,21 +564,21 @@ class App extends React.Component<
 	}
 
 	isExistingEntryDate = (checkDate: string) => {
-		return this.state.dataFiles.selected.entries.filter(ent => {
+		return this.state.dataFile.entries.filter(ent => {
 			return ent.entryDate == checkDate
 		}).length > 0
 			? true
 			: false
 	}
 	doImportEntries = (entries: Array<IJournalEntry>) => {
-		let newState = this.state.dataFiles
+		let newState = this.state.dataFile
 
 		return new Promise((resolve, reject) => {
-			if (!newState || !newState.selected) {
+			if (!newState || !newState.id) {
 				reject('No data file currently selected')
 			} else {
 				// 1: Add new entries
-				newState.selected.entries = [...newState.selected.entries, ...entries].sort((a, b) => {
+				newState.entries = [...newState.entries, ...entries].sort((a, b) => {
 					if (a.entryDate < b.entryDate) return 1
 					if (a.entryDate > b.entryDate) return -1
 					return 0
@@ -688,15 +603,15 @@ class App extends React.Component<
 	 * Add new `IJournalEntry` into selected `IDriveFile`
 	 */
 	doCreateEntry = (entry: IJournalEntry) => {
-		let dataFiles = this.state.dataFiles
+		let newState = this.state.dataFile
 
 		return new Promise((resolve, reject) => {
-			if (!dataFiles || !dataFiles.selected) {
+			if (!newState || !newState.id) {
 				reject('No data file currently selected')
 			} else {
-				dataFiles.selected.entries.push(entry)
+				newState.entries.push(entry)
 				this.setState({
-					dataFiles: dataFiles,
+					dataFile: newState,
 				})
 
 				return this.doSaveFile()
@@ -717,13 +632,13 @@ class App extends React.Component<
 	 * Add new `IJournalEntry` into selected `IDriveFile`
 	 */
 	doUpdateEntry = (entry: IJournalEntry, origEntryDate: string) => {
-		let newState = this.state.dataFiles
+		let newState = this.state.dataFile
 
 		return new Promise((resolve, reject) => {
-			if (!newState || !newState.selected) {
+			if (!newState || !newState.id) {
 				reject('No data file currently selected')
 			} else {
-				let editEntry = newState.selected.entries.filter(ent => {
+				let editEntry = newState.entries.filter(ent => {
 					return ent.entryDate == (origEntryDate != entry.entryDate ? origEntryDate : entry.entryDate)
 				})[0]
 
@@ -735,7 +650,7 @@ class App extends React.Component<
 					})
 
 					this.setState({
-						dataFiles: newState,
+						dataFile: newState,
 					})
 
 					return this.doSaveFile()
@@ -756,14 +671,14 @@ class App extends React.Component<
 	/**
 	 */
 	doDeleteEntry = (entryDate: IJournalEntry['entryDate']) => {
-		let dataFiles = this.state.dataFiles
+		let newState = this.state.dataFile
 
 		return new Promise((resolve, reject) => {
-			if (!dataFiles || !dataFiles.selected) {
+			if (!newState || !newState.id) {
 				reject('No data file currently selected')
 			} else {
 				// A:
-				let delIdx = dataFiles.selected.entries.findIndex(ent => {
+				let delIdx = newState.entries.findIndex(ent => {
 					return ent.entryDate == entryDate
 				})
 
@@ -771,11 +686,11 @@ class App extends React.Component<
 				if (delIdx == -1) reject('Unable to find `entryDate` ' + entryDate)
 
 				// C:
-				dataFiles.selected.entries.splice(delIdx, 1)
+				newState.entries.splice(delIdx, 1)
 
 				// D:
 				this.setState({
-					dataFiles: dataFiles,
+					dataFile: newState,
 				})
 
 				// E:
@@ -800,52 +715,32 @@ class App extends React.Component<
 		return (
 			<TabHome
 				authState={this.state.auth}
-				availDataFiles={
-					this.state.dataFiles && this.state.dataFiles.available ? this.state.dataFiles.available : null
-				}
+				dataFile={this.state.dataFile || null}
 				doAuthSignIn={this.doAuthSignIn}
 				doAuthSignOut={this.doAuthSignOut}
-				doCreateJournal={this.driveCreateNewJournal}
-				doFileListRefresh={this.driveGetFileList}
-				doRenameFile={this.doRenameFile}
-				doSelectFileById={this.doSelectFileById}
-				selDataFile={
-					this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
-				}
 			/>
 		)
 	}
 	Modify = () => {
-		return (
-			<TabModify
-				onShowModal={this.chgShowModal}
-				selDataFile={
-					this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
-				}
-			/>
-		)
+		return <TabModify dataFile={this.state.dataFile || null} onShowModal={this.chgShowModal} />
 	}
 	Search = () => {
 		return (
 			<TabSearch
+				dataFile={this.state.dataFile || null}
 				doSaveSearchState={this.doSaveSearchState}
 				onShowModal={this.chgShowModal}
 				searchState={this.state.childSearchState}
-				selDataFile={
-					this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
-				}
 			/>
 		)
 	}
 	Import = () => {
 		return (
 			<TabImport
+				dataFile={this.state.dataFile || null}
 				doImportEntries={this.doImportEntries}
 				doSaveImportState={this.doSaveImportState}
 				importState={this.state.childImportState}
-				selDataFile={
-					this.state.dataFiles && this.state.dataFiles.selected ? this.state.dataFiles.selected : null
-				}
 			/>
 		)
 	}
@@ -890,9 +785,7 @@ class App extends React.Component<
 									to='/import'
 									activeClassName='active'
 									className={
-										!this.state.dataFiles || !this.state.dataFiles.selected
-											? 'nav-link disabled'
-											: 'nav-link d-none d-lg-block'
+										!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'
 									}>
 									Import Journal
 								</NavLink>
@@ -900,18 +793,16 @@ class App extends React.Component<
 						</ul>
 					</div>
 					<form className='form-inline h6 text-secondary mb-0'>
-						{this.state.dataFiles &&
-						this.state.dataFiles.selected &&
-						this.state.dataFiles.selected._isSaving ? (
+						{this.state.dataFile && this.state.dataFile._isSaving ? (
 							<div>
 								<div className='spinner-border spinner-border-sm mr-2' role='status'>
 									<span className='sr-only' />
 								</div>
 								Saving...
 							</div>
-						) : this.state.dataFiles && this.state.dataFiles.selected ? (
-							this.state.dataFiles.selected.modifiedTime ? (
-								'Last Saved @ ' + new Date(this.state.dataFiles.selected.modifiedTime).toLocaleString()
+						) : this.state.dataFile ? (
+							this.state.dataFile.modifiedTime ? (
+								'Last Saved @ ' + new Date(this.state.dataFile.modifiedTime).toLocaleString()
 							) : (
 								'(unsaved)'
 							)

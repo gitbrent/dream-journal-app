@@ -28,7 +28,7 @@
 \*/
 
 import * as React from 'react'
-import { AuthState, IAuthState, IDriveFile, IDriveFiles } from './app'
+import { AuthState, IAuthState, IDriveFile } from './app'
 import LogoBase64 from '../img/logo_base64'
 
 function getReadableFileSizeString(fileSizeInBytes: number) {
@@ -45,14 +45,9 @@ function getReadableFileSizeString(fileSizeInBytes: number) {
 class TabHome extends React.Component<
 	{
 		authState: IAuthState
-		availDataFiles: IDriveFiles['available']
+		dataFile: IDriveFile
 		doAuthSignIn: Function
 		doAuthSignOut: Function
-		doCreateJournal: Function
-		doFileListRefresh: Function
-		doRenameFile: Function
-		doSelectFileById: Function
-		selDataFile: IDriveFile
 	},
 	{
 		errorMessage: string
@@ -64,14 +59,13 @@ class TabHome extends React.Component<
 	constructor(
 		props: Readonly<{
 			authState: IAuthState
-			availDataFiles: IDriveFiles['available']
+			dataFile: IDriveFile
 			doAuthSignIn: Function
 			doAuthSignOut: Function
 			doCreateJournal: Function
 			doFileListRefresh: Function
 			doRenameFile: Function
 			doSelectFileById: Function
-			selDataFile: IDriveFile
 		}>
 	) {
 		super(props)
@@ -89,7 +83,7 @@ class TabHome extends React.Component<
 	 */
 	componentDidUpdate(prevProps) {
 		if (this.props.authState.status !== prevProps.authState.status) {
-			this.handleDriveFileList(null)
+			// TODO: (?): this.handleDriveFileList(null)
 		}
 	}
 
@@ -100,104 +94,23 @@ class TabHome extends React.Component<
 		this.props.doAuthSignOut()
 	}
 
-	handleDriveFileList = e => {
-		this.props.doFileListRefresh()
-	}
-	handleDriveFileCreate = e => {
-		this.props.doCreateJournal()
-	}
-	handleDriveFileGet = e => {
-		this.props.doSelectFileById(e.target.getAttribute('data-file-id'))
-	}
-	/**
-	 * @see:
-
-	handleDriveFileCopy = e => {
-		// TODO:
-		// Use for "Make backup" (?)
-		// POST https://www.googleapis.com/drive/v3/files/fileId/copy
-	}
-	*/
-
-	handleCancelRename = event => {
-		this.setState({
-			errorMessage: '',
-			fileBeingRenamed: null,
-			newFileName: '',
-			isRenaming: false,
-		})
-	}
-	handleRenameInputChange = event => {
-		this.setState({
-			newFileName: event && event.target ? event.target.value : '',
-		})
-	}
-	/**
-	 * @see: https://developers.google.com/drive/api/v3/reference/files
-	 * @see: https://stackoverflow.com/questions/43705453/how-do-i-rename-a-file-to-google-drive-rest-api-retrofit2
-	 */
-	handleDriveFileRename = e => {
-		this.setState({
-			errorMessage: '',
-			fileBeingRenamed: this.props.availDataFiles.filter(file => {
-				return file.id == e.target.getAttribute('data-file-id')
-			})[0],
-			newFileName: this.props.availDataFiles.filter(file => {
-				return file.id == e.target.getAttribute('data-file-id')
-			})[0].name,
-		})
-	}
-	doRenameFile = e => {
-		this.setState({
-			isRenaming: true,
-		})
-		this.props
-			.doRenameFile(
-				this.props.availDataFiles.filter(file => {
-					return file.id == e.target.getAttribute('data-file-id')
-				})[0],
-				this.state.newFileName
-			)
-			.catch(ex => {
-				throw ex
-			})
-			.then(file => {
-				// NOTE: Google-API will return an error object as a result
-				if (file.error) throw file.error
-				else {
-					this.setState({
-						errorMessage: '',
-						fileBeingRenamed: null,
-						newFileName: '',
-						isRenaming: false,
-					})
-				}
-			})
-			.catch(error => {
-				this.setState({
-					errorMessage: error && error.message ? error.message : (error || '').toString(),
-					isRenaming: false,
-				})
-			})
-	}
-
 	/**
 	 * @see: https://developers.google.com/drive/api/v3/appdata
 	 * @see: https://developers.google.com/drive/api/v3/search-parameters#file_fields
 	 */
 	render() {
-		let cardbody: JSX.Element
+		let cardAuthUser: JSX.Element
 		if (this.props.authState.status == AuthState.Authenticated) {
-			cardbody = (
+			cardAuthUser = (
 				<div>
-					<p className='card-text'>
+					<p className='card-text mb-4'>
 						<label className='text-muted text-uppercase d-block'>User Name:</label>
 						{this.props.authState.userName}
 					</p>
 					<div className='row'>
-						<div className='col-12 col-lg-6 mb-md-3'>
+						<div className='col-12 col-lg-6 mb-3 mb-lg-0'>
 							<button
-								className='btn btn-outline-primary w-100 mb-3 mb-md-0'
+								className='btn btn-outline-primary w-100 mb-2 mb-md-0'
 								onClick={this.handleAuthSignIn}>
 								Renew
 							</button>
@@ -211,18 +124,18 @@ class TabHome extends React.Component<
 				</div>
 			)
 		} else if (this.props.authState.status == AuthState.Expired) {
-			cardbody = (
+			cardAuthUser = (
 				<div>
-					<p className='card-text'>Your session has expired. Please re-authenticate to continue.</p>
+					<p className='card-text mb-4'>Your session has expired. Please re-authenticate to continue.</p>
 					<button className='btn btn-primary' onClick={this.handleAuthSignIn}>
 						Sign In
 					</button>
 				</div>
 			)
 		} else {
-			cardbody = (
+			cardAuthUser = (
 				<div>
-					<p className='card-text'>Please sign-in to allow access to Google Drive space.</p>
+					<p className='card-text mb-4'>Please sign-in to allow access to Google Drive space.</p>
 					<button className='btn btn-primary' onClick={this.handleAuthSignIn}>
 						Sign In/Authorize
 					</button>
@@ -230,136 +143,32 @@ class TabHome extends React.Component<
 			)
 		}
 
-		let tableFileList: JSX.Element = (
-			<form onSubmit={this.handleDriveFileRename}>
-				<table className='table'>
-					<thead className='thead'>
-						<tr>
-							<th style={{ width: '5%' }}>&nbsp;</th>
-							<th style={{ width: '50%' }}>Name</th>
-							<th className='text-center d-none d-md-table-cell'>Entries</th>
-							<th className='text-center d-none d-lg-table-cell'>Size</th>
-							<th className='text-center d-none d-md-table-cell'>Modified&nbsp;▼</th>
-							<th className='text-center d-none d-md-table-cell'>&nbsp;</th>
-						</tr>
-					</thead>
-					<tbody>
-						{this.props.authState.status == AuthState.Authenticated &&
-							this.props.availDataFiles.map((file, idx) => {
-								return (
-									<tr key={'filerow' + idx}>
-										{this.props.selDataFile &&
-										this.props.selDataFile.id &&
-										this.props.selDataFile.id === file.id ? (
-											this.props.selDataFile._isLoading ? (
-												<td className='align-middle text-center text-warning'>
-													<div
-														className='spinner-border spinner-border-sm mr-2'
-														role='status'>
-														<span className='sr-only' />
-													</div>
-												</td>
-											) : (
-												<td className='align-middle text-center'>
-													<div className='text-info text-center w-100'>
-														<small>Selected</small>
-													</div>
-												</td>
-											)
-										) : this.props.selDataFile &&
-										  this.props.selDataFile.id &&
-										  file.id === this.props.selDataFile.id ? (
-											<td />
-										) : !this.state.fileBeingRenamed ? (
-											<td>
-												<button
-													className='btn btn-sm btn-info w-100'
-													data-file-id={file['id']}
-													onClick={this.handleDriveFileGet}>
-													Select
-												</button>
-											</td>
-										) : (
-											<td />
-										)}
-										<td className='align-middle'>
-											{this.state.fileBeingRenamed &&
-											this.state.fileBeingRenamed.id === file.id ? (
-												<input
-													name='newFileName'
-													value={this.state.newFileName}
-													type='text'
-													className='form-control'
-													onChange={this.handleRenameInputChange}
-													disabled={this.state.isRenaming}
-													required
-												/>
-											) : (
-												file.name
-											)}
-											{this.state.errorMessage ? (
-												<div className='invalid-feedback d-block'>
-													{this.state.errorMessage}
-												</div>
-											) : (
-												''
-											)}
-										</td>
-										<td className='align-middle text-center text-nowrap d-none d-md-table-cell'>
-											{file['entries'] ? file['entries'].length : '?'}
-										</td>
-										<td className='align-middle text-center text-nowrap d-none d-lg-table-cell'>
-											{getReadableFileSizeString(Number(file['size']))}
-										</td>
-										<td className='align-middle text-center text-nowrap d-none d-md-table-cell'>
-											{new Date(file['modifiedTime']).toLocaleString()}
-										</td>
-										<td className='align-middle text-center text-nowrap d-none d-md-table-cell'>
-											{this.state.fileBeingRenamed &&
-											this.state.fileBeingRenamed.id === file.id ? (
-												this.state.isRenaming ? (
-													<div
-														className='spinner-border text-warning spinner-border-sm mr-2'
-														role='status'>
-														<span className='sr-only' />
-													</div>
-												) : (
-													<div>
-														<button
-															type='button'
-															className='btn btn-sm btn-success mr-2'
-															data-file-id={file['id']}
-															onClick={this.doRenameFile}>
-															Save
-														</button>
-														<button
-															type='button'
-															className='btn btn-sm btn-outline-secondary'
-															data-file-id={file['id']}
-															onClick={this.handleCancelRename}>
-															Cancel
-														</button>
-													</div>
-												)
-											) : (
-												!this.state.fileBeingRenamed && (
-													<button
-														type='button'
-														className='btn btn-sm btn-secondary mr-2'
-														data-file-id={file['id']}
-														onClick={this.handleDriveFileRename}>
-														Rename
-													</button>
-												)
-											)}
-										</td>
-									</tr>
-								)
-							})}
-					</tbody>
-				</table>
-			</form>
-		)
+		let cardDataFile: JSX.Element =
+			this.props.dataFile && (this.props.dataFile._isSaving || this.props.dataFile._isLoading) ? (
+				<div className='text-center'>
+					<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
+						<span className='sr-only' />
+					</div>
+					<div>Loading/Saving...</div>
+				</div>
+			) : this.props.dataFile ? (
+				<div className='row'>
+					<div className='col-12 col-lg-6 mb-3 mb-lg-0'>
+						<label className='text-muted text-uppercase d-block'>File Name</label>
+						{this.props.dataFile.name}
+					</div>
+					<div className='col-6 col-lg-3'>
+						<label className='text-muted text-uppercase d-block'>Entries</label>
+						{this.props.dataFile.entries ? this.props.dataFile.entries.length : '?'}
+					</div>
+					<div className='col-6 col-lg-3'>
+						<label className='text-muted text-uppercase d-block'>File Size</label>
+						{getReadableFileSizeString(Number(this.props.dataFile.size))}
+					</div>
+				</div>
+			) : (
+				<div className='text-muted'>(none)</div>
+			)
 
 		return (
 			<div className='container mt-5'>
@@ -387,24 +196,7 @@ class TabHome extends React.Component<
 					<hr className='my-4' />
 
 					<div className='row mb-5'>
-						<div className='col-12 col-md-8 d-flex mb-5 mb-md-0'>
-							<div className='card flex-fill'>
-								<div className='card-header bg-primary'>
-									<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
-								</div>
-								<div className='card-body bg-light text-dark'>
-									<p className='card-text'>
-										This application uses your Google Drive to store dream journals so they are
-										safe, secure, and accessible on any of your devices.
-									</p>
-									<p className='card-text'>
-										Signing In will request permissions to create and modify
-										<strong> only its own files</strong> on your Google Drive.
-									</p>
-								</div>
-							</div>
-						</div>
-						<div className='col-12 col-md-4 d-flex'>
+						<div className='col-12 col-md-6 d-flex mb-5 mb-md-0'>
 							<div className='card flex-fill'>
 								<div
 									className={
@@ -415,39 +207,36 @@ class TabHome extends React.Component<
 									}>
 									<h5 className='card-title text-white mb-0'>{this.props.authState.status}</h5>
 								</div>
-								<div className='card-body bg-light text-dark'>{cardbody}</div>
+								<div className='card-body bg-light text-dark'>{cardAuthUser}</div>
+							</div>
+						</div>
+						<div className='col-12 col-md-6 d-flex'>
+							<div className='card flex-fill'>
+								<div className='card-header bg-primary'>
+									<h5 className='card-title text-white mb-0'>Dream Journal</h5>
+								</div>
+								<div className='card-body bg-light text-dark'>{cardDataFile}</div>
 							</div>
 						</div>
 					</div>
 
 					<div className='card'>
 						<div className='card-header bg-info'>
-							<h5 className='card-title text-white mb-0'>Available Dream Journals</h5>
+							<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
 						</div>
 						<div className='card-body bg-light text-dark'>
-							{tableFileList}
-							<div className='row'>
-								<div className='col-12 col-md-6 text-center'>
-									<button
-										className='btn btn-outline-info w-100 mb-3 mb-md-0'
-										onClick={this.handleDriveFileList}
-										disabled={
-											this.props.authState.status != AuthState.Authenticated ? true : false
-										}>
-										Refresh File List
-									</button>
-								</div>
-								<div className='col-12 col-md-6 text-center'>
-									<button
-										className='btn btn-outline-info w-100'
-										onClick={this.handleDriveFileCreate}
-										disabled={
-											this.props.authState.status != AuthState.Authenticated ? true : false
-										}>
-										New Dream Journal
-									</button>
-								</div>
-							</div>
+							<p className='card-text'>
+								This application uses your Google Drive to store dream journals so they are safe,
+								secure, and accessible on any of your devices.
+							</p>
+							<p className='card-text'>
+								Click "Sign In", select the Google account to use with this app, view the request
+								permissions page asking to create and modify{' '}
+								<strong>
+									<u>only its own files</u>
+								</strong>{' '}
+								on your Google Drive. (This app cannot access your other Google Drive files)
+							</p>
 						</div>
 					</div>
 				</div>

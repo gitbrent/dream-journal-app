@@ -33,10 +33,10 @@ import Pagination from '../app/pagination'
 import { IJournalEntry, IDriveFile } from './app'
 
 export default class TabView extends React.Component<
-	{ onShowModal: Function; selDataFile: IDriveFile },
+	{ dataFile: IDriveFile; onShowModal: Function },
 	{ dateRangeFrom: Date; dateRangeTo: Date; pagingCurrIdx: number; pagingPageSize: number }
 > {
-	constructor(props: Readonly<{ onShowModal: Function; selDataFile: IDriveFile }>) {
+	constructor(props: Readonly<{ dataFile: IDriveFile; onShowModal: Function }>) {
 		super(props)
 
 		this.state = {
@@ -56,7 +56,7 @@ export default class TabView extends React.Component<
 	handleEntryEdit = e => {
 		this.props.onShowModal({
 			show: true,
-			editEntry: this.props.selDataFile.entries.filter(entry => {
+			editEntry: this.props.dataFile.entries.filter(entry => {
 				return entry.entryDate == e.target.getAttribute('data-entry-key')
 			})[0],
 		})
@@ -73,31 +73,31 @@ export default class TabView extends React.Component<
 	// @see: http://react-day-picker.js.org/examples/elements-cell
 	render() {
 		// A: filter entries
-		let arrEntries = (this.props.selDataFile && this.props.selDataFile.entries
-			? this.props.selDataFile.entries
-			: []
-		).filter(entry => {
-			let dateEntry = new Date(entry.entryDate + ' 00:00:00')
-			// FIXME: doesnt work if you select the day of an entry (eg: jan1 - jan3 works, nut select jan 2 and nothing)
-			if (
-				this.state.dateRangeFrom &&
-				this.state.dateRangeTo &&
-				dateEntry >= this.state.dateRangeFrom &&
-				dateEntry <= this.state.dateRangeTo
-			)
-				return true
-			else if (this.state.dateRangeFrom && !this.state.dateRangeTo && dateEntry == this.state.dateRangeFrom)
-				return true
-			else if (!this.state.dateRangeFrom && !this.state.dateRangeTo) return true
-			else return false
-		})
+		let arrEntries = (this.props.dataFile && this.props.dataFile.entries ? this.props.dataFile.entries : []).filter(
+			entry => {
+				let dateEntry = new Date(entry.entryDate + ' 00:00:00')
+				// FIXME: doesnt work if you select the day of an entry (eg: jan1 - jan3 works, nut select jan 2 and nothing)
+				if (
+					this.state.dateRangeFrom &&
+					this.state.dateRangeTo &&
+					dateEntry >= this.state.dateRangeFrom &&
+					dateEntry <= this.state.dateRangeTo
+				)
+					return true
+				else if (this.state.dateRangeFrom && !this.state.dateRangeTo && dateEntry == this.state.dateRangeFrom)
+					return true
+				else if (!this.state.dateRangeFrom && !this.state.dateRangeTo) return true
+				else return false
+			}
+		)
 
 		let tableFileList: JSX.Element =
-			this.props.selDataFile && this.props.selDataFile._isLoading ? (
+			this.props.dataFile && this.props.dataFile._isLoading ? (
 				<div className='align-middle text-center text-warning mb-4'>
 					<div className='spinner-border spinner-border-sm mr-2' role='status'>
 						<span className='sr-only' />
-					</div>Saving/Loading...
+					</div>
+					Saving/Loading...
 				</div>
 			) : (
 				<table className='table'>
@@ -180,17 +180,15 @@ export default class TabView extends React.Component<
 							})}
 					</tbody>
 					<tfoot>
-						{this.props.selDataFile &&
-							this.props.selDataFile.entries &&
-							this.props.selDataFile.entries.length == 0 && (
-								<tr>
-									<td colSpan={6} className='text-center p-3 text-muted'>
-										(No Dream Journal entries found - select "Add Journal Entry" above to create a
-										new one)
-									</td>
-								</tr>
-							)}
-						{!this.props.selDataFile && (
+						{this.props.dataFile && this.props.dataFile.entries && this.props.dataFile.entries.length == 0 && (
+							<tr>
+								<td colSpan={6} className='text-center p-3 text-muted'>
+									(No Dream Journal entries found - select "Add Journal Entry" above to create a new
+									one)
+								</td>
+							</tr>
+						)}
+						{!this.props.dataFile && (
 							<tr>
 								<td colSpan={6} className='text-center p-3'>
 									<h5 className='text-secondary'>(no Dream Journal is currently selected)</h5>
@@ -225,7 +223,7 @@ export default class TabView extends React.Component<
 										<button
 											type='button'
 											className='btn btn-success'
-											disabled={!this.props.selDataFile}
+											disabled={!this.props.dataFile}
 											onClick={this.handleNewModal}>
 											Create Day
 										</button>

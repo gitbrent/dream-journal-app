@@ -25,10 +25,10 @@ interface ISearchMatch {
 
 export default class TabSearch extends React.Component<
 	{
+		dataFile: IDriveFile
 		doSaveSearchState: Function
 		onShowModal: Function
 		searchState: object
-		selDataFile: IDriveFile
 	},
 	{
 		searchMatches: Array<ISearchMatch>
@@ -41,10 +41,10 @@ export default class TabSearch extends React.Component<
 > {
 	constructor(
 		props: Readonly<{
+			dataFile: IDriveFile
 			doSaveSearchState: Function
 			onShowModal: Function
 			searchState: object
-			selDataFile: IDriveFile
 		}>
 	) {
 		super(props)
@@ -89,10 +89,10 @@ export default class TabSearch extends React.Component<
 	}
 
 	getTotalMonths = () => {
-		if (!this.props.selDataFile || (this.props.selDataFile.entries || []).length == 0) return 0
+		if (!this.props.dataFile || (this.props.dataFile.entries || []).length == 0) return 0
 
-		let d1 = new Date(this.props.selDataFile.entries[0].entryDate)
-		let d2 = new Date(this.props.selDataFile.entries[this.props.selDataFile.entries.length - 1].entryDate)
+		let d1 = new Date(this.props.dataFile.entries[0].entryDate)
+		let d2 = new Date(this.props.dataFile.entries[this.props.dataFile.entries.length - 1].entryDate)
 		let months
 		months = (d2.getFullYear() - d1.getFullYear()) * 12
 		months -= d1.getMonth() + 1
@@ -139,9 +139,9 @@ export default class TabSearch extends React.Component<
 			regex = new RegExp('\\b' + this.state.searchTerm + '\\b', 'gi')
 		else if (this.state.searchOptMatchType == SearchMatchTypes.starts)
 			regex = new RegExp('\\b' + this.state.searchTerm, 'gi')
-		if (!this.props.selDataFile || this.props.selDataFile.entries.length <= 0) return
+		if (!this.props.dataFile || this.props.dataFile.entries.length <= 0) return
 
-		this.props.selDataFile.entries.forEach(entry => {
+		this.props.dataFile.entries.forEach(entry => {
 			;(entry.dreams || []).forEach(dream => {
 				if (this.state.searchOptScope == SearchScopes.all) {
 					if (
@@ -199,10 +199,10 @@ export default class TabSearch extends React.Component<
 	doShowByType = type => {
 		let arrFound = []
 
-		if (!this.props.selDataFile || this.props.selDataFile.entries.length <= 0) return
+		if (!this.props.dataFile || this.props.dataFile.entries.length <= 0) return
 
 		if (type == SearchScopes._starred) {
-			this.props.selDataFile.entries
+			this.props.dataFile.entries
 				.filter(entry => {
 					return entry.starred
 				})
@@ -216,7 +216,7 @@ export default class TabSearch extends React.Component<
 					})
 				})
 		} else {
-			this.props.selDataFile.entries.forEach(entry => {
+			this.props.dataFile.entries.forEach(entry => {
 				;(entry.dreams || []).forEach(dream => {
 					if (dream.isLucidDream) {
 						arrFound.push({
@@ -269,7 +269,7 @@ export default class TabSearch extends React.Component<
 	handleEntryEdit = e => {
 		this.props.onShowModal({
 			show: true,
-			editEntry: this.props.selDataFile.entries.filter(entry => {
+			editEntry: this.props.dataFile.entries.filter(entry => {
 				return entry.entryDate == e.target.getAttribute('data-entry-key')
 			})[0],
 		})
@@ -280,8 +280,8 @@ export default class TabSearch extends React.Component<
 		let totalLucids = 0
 		let totalStarred = 0
 
-		if (this.props.selDataFile && this.props.selDataFile.entries) {
-			this.props.selDataFile.entries.forEach(entry => {
+		if (this.props.dataFile && this.props.dataFile.entries) {
+			this.props.dataFile.entries.forEach(entry => {
 				totalDreams += entry.dreams.length
 
 				if (entry.starred) totalStarred++
@@ -402,17 +402,16 @@ export default class TabSearch extends React.Component<
 								<div className='col text-center'>
 									<label className='text-primary text-uppercase'>Days</label>
 									<h1 className='text-primary mb-1'>
-										{this.props.selDataFile && this.props.selDataFile.entries
-											? this.props.selDataFile.entries.length
+										{this.props.dataFile && this.props.dataFile.entries
+											? this.props.dataFile.entries.length
 											: '-'}
 									</h1>
 									<small className='text-50-white text-uppercase d-none d-md-block'>
 										{this.getTotalMonths() * 30 > 0 &&
-										this.props.selDataFile &&
-										this.props.selDataFile.entries
-											? (this.props.selDataFile.entries.length / this.getTotalMonths()).toFixed(
-													2
-											  ) + ' / month'
+										this.props.dataFile &&
+										this.props.dataFile.entries
+											? (this.props.dataFile.entries.length / this.getTotalMonths()).toFixed(2) +
+											  ' / month'
 											: '-'}
 									</small>
 								</div>
@@ -421,10 +420,9 @@ export default class TabSearch extends React.Component<
 									<h1 className='text-info mb-1'>{totalDreams || '-'}</h1>
 									<small className='text-50-white text-uppercase d-none d-md-block'>
 										{this.getTotalMonths() * 30 > 0 &&
-										this.props.selDataFile &&
-										this.props.selDataFile.entries
-											? (totalDreams / this.props.selDataFile.entries.length).toFixed(2) +
-											  ' / day'
+										this.props.dataFile &&
+										this.props.dataFile.entries
+											? (totalDreams / this.props.dataFile.entries.length).toFixed(2) + ' / day'
 											: '-'}
 									</small>
 								</div>
@@ -480,7 +478,7 @@ export default class TabSearch extends React.Component<
 													this.setState({ searchTerm: event.target.value })
 													if (!event.target.value) this.setState({ searchMatches: [] })
 												}}
-												disabled={!this.props.selDataFile ? true : false}
+												disabled={!this.props.dataFile ? true : false}
 											/>
 											<div
 												className={
@@ -497,7 +495,7 @@ export default class TabSearch extends React.Component<
 												type='button'
 												className='btn btn-outline-primary w-100'
 												onClick={this.doKeywordSearch}
-												disabled={!this.props.selDataFile ? true : false}>
+												disabled={!this.props.dataFile ? true : false}>
 												Search
 											</button>
 										</div>

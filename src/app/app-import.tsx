@@ -7,10 +7,10 @@ const VERBOSE = false
 
 export default class TabImport extends React.Component<
 	{
+		dataFile: IDriveFile
 		doImportEntries: Function
 		doSaveImportState: Function
 		importState: object
-		selDataFile: IDriveFile
 	},
 	{
 		_defaultBedTime: string
@@ -59,10 +59,10 @@ export default class TabImport extends React.Component<
 
 	constructor(
 		props: Readonly<{
+			dataFile: IDriveFile
 			doImportEntries: Function
 			doSaveImportState: Function
 			importState: object
-			selDataFile: IDriveFile
 		}>
 	) {
 		super(props)
@@ -275,11 +275,10 @@ export default class TabImport extends React.Component<
 
 		// A: Capture regex field value
 		let newState = {}
-		if ( name == 'dreamSigns' ) {
+		if (name == 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
 			newState['dreamSigns'] = value ? value.split(this.state._dreamSignsDelim || ',') : []
-		}
-		else {
+		} else {
 			newState[name] = value
 		}
 		this.setState(newState)
@@ -311,7 +310,9 @@ export default class TabImport extends React.Component<
 		const idy = event.target.getAttribute('data-dream-idx')
 
 		let newState = this.state._parsedSections
-		if (idy) newState[idx].dreams[idy][name] = (name == 'dreamSigns' ? value.split(this.state._dreamSignsDelim || ',') : value)
+		if (idy)
+			newState[idx].dreams[idy][name] =
+				name == 'dreamSigns' ? value.split(this.state._dreamSignsDelim || ',') : value
 		else newState[idx][name] = value
 
 		this.setState({
@@ -583,7 +584,7 @@ export default class TabImport extends React.Component<
 		let cntImported = this.state._parsedSections.length
 
 		// A:
-		if (!this.props.selDataFile || !this.props.selDataFile.name) {
+		if (!this.props.dataFile || !this.props.dataFile.name) {
 			console.log('ERROR: No file selected')
 		}
 
@@ -595,7 +596,7 @@ export default class TabImport extends React.Component<
 		// C: flag entries with duplicate `entryDate` (already exists in selected journal)
 		this.state._parsedSections.forEach(sect => {
 			if (
-				this.props.selDataFile.entries.filter(entry => {
+				this.props.dataFile.entries.filter(entry => {
 					return entry.entryDate == sect.entryDate
 				}).length > 0
 			) {
@@ -1347,8 +1348,8 @@ export default class TabImport extends React.Component<
 								</p>
 								<p className='card-text'>
 									The importer interface allows you to import your free-form journal into the
-									well-formatted Brain Cloud JSON format which is a universal, plain text, flat-file database
-									readable by a myriad of apps (databases, text editors, etc.)
+									well-formatted Brain Cloud JSON format which is a universal, plain text, flat-file
+									database readable by a myriad of apps (databases, text editors, etc.)
 								</p>
 							</div>
 						</div>
