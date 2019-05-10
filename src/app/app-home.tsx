@@ -107,15 +107,13 @@ class TabHome extends React.Component<
 						<label className='text-muted text-uppercase d-block'>User Name:</label>
 						{this.props.authState.userName}
 					</p>
-					<div className='row'>
-						<div className='col-12 col-lg-6 mb-3 mb-lg-0'>
-							<button
-								className='btn btn-outline-primary w-100 mb-2 mb-md-0'
-								onClick={this.handleAuthSignIn}>
+					<div className='row align-items-end'>
+						<div className='col'>
+							<button className='btn btn-outline-primary w-100' onClick={this.handleAuthSignIn}>
 								Renew
 							</button>
 						</div>
-						<div className='col-12 col-lg-6 text-right'>
+						<div className='col'>
 							<button className='btn btn-outline-secondary w-100' onClick={this.handleAuthSignOut}>
 								Sign Out
 							</button>
@@ -152,18 +150,26 @@ class TabHome extends React.Component<
 					<div>Loading/Saving...</div>
 				</div>
 			) : this.props.dataFile ? (
-				<div className='row'>
-					<div className='col-12 col-lg-6 mb-3 mb-lg-0'>
-						<label className='text-muted text-uppercase d-block'>File Name</label>
-						{this.props.dataFile.name}
+				<div>
+					<div className='row mb-3'>
+						<div className='col'>
+							<label className='text-muted text-uppercase d-block'>File Name</label>
+							{this.props.dataFile.name}
+						</div>
+						<div className='col-auto text-right'>
+							<label className='text-muted text-uppercase d-block'>Entries</label>
+							{this.props.dataFile.entries ? this.props.dataFile.entries.length : '?'}
+						</div>
 					</div>
-					<div className='col-6 col-lg-3'>
-						<label className='text-muted text-uppercase d-block'>Entries</label>
-						{this.props.dataFile.entries ? this.props.dataFile.entries.length : '?'}
-					</div>
-					<div className='col-6 col-lg-3'>
-						<label className='text-muted text-uppercase d-block'>File Size</label>
-						{getReadableFileSizeString(Number(this.props.dataFile.size))}
+					<div className='row'>
+						<div className='col'>
+							<label className='text-muted text-uppercase d-block'>Last Saved</label>
+							{this.props.dataFile ? new Date(this.props.dataFile.modifiedTime).toLocaleString() : '-'}
+						</div>
+						<div className='col-auto text-right'>
+							<label className='text-muted text-uppercase d-block'>File Size</label>
+							{getReadableFileSizeString(Number(this.props.dataFile.size))}
+						</div>
 					</div>
 				</div>
 			) : (
@@ -212,7 +218,7 @@ class TabHome extends React.Component<
 						</div>
 						<div className='col-12 col-md-6 d-flex'>
 							<div className='card flex-fill'>
-								<div className='card-header bg-primary'>
+								<div className='card-header bg-info'>
 									<h5 className='card-title text-white mb-0'>Dream Journal</h5>
 								</div>
 								<div className='card-body bg-light text-dark'>{cardDataFile}</div>
@@ -221,7 +227,7 @@ class TabHome extends React.Component<
 					</div>
 
 					<div className='card'>
-						<div className='card-header bg-info'>
+						<div className='card-header bg-secondary'>
 							<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
 						</div>
 						<div className='card-body bg-light text-dark'>

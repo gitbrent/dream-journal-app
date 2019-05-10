@@ -108,6 +108,7 @@ const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
 const FIREBASE_URL = 'https://brain-cloud-dream-journal.firebaseapp.com'
 const LOCALHOST_URL = 'http://localhost:8080'
 const JOURNAL_HEADER = {
+	name: 'dream-journal.json',
 	description: 'Brain Cloud Dream Journal data file',
 	mimeType: 'application/json',
 }
@@ -306,13 +307,65 @@ class App extends React.Component<
 			})
 	}
 
+	driveGetFileList = () => {
+		let params = JSON.parse(localStorage.getItem('oauth2-params'))
+		if (!params || !params['access_token']) {
+			oauth2SignIn()
+			return
+		}
+
+		// GET https://www.googleapis.com/drive/v3/files/
+		// Authorization: Bearer [YOUR_ACCESS_TOKEN]
+		// Accept: application/json
+		fetch('https://www.googleapis.com/drive/v3/files?fields=files/id,files/name,files/size,files/modifiedTime', {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json',
+				Authorization: 'Bearer ' + params['access_token'],
+			},
+		})
+			.then(response => {
+				response
+					.json()
+					.then(json => {
+						let data = json
+
+						// A: Check for errors
+						// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
+						if (data && data.error && data.error.code) throw data.error
+
+						// B: Capture datafile
+						let driveDataFile =
+							data.files.filter(file => {
+								return file.name == JOURNAL_HEADER.name
+							})[0] || null
+						this.setState({
+							dataFile: driveDataFile,
+						})
+
+						// C: Load or Create data file
+						driveDataFile ? this.doSelectFile() : this.doCreateFile()
+					})
+					.catch(error => {
+						if (error.code == '401') {
+							oauth2SignIn()
+						} else {
+							console.error ? console.error(error) : console.log(error)
+						}
+					})
+			})
+			.catch(error => {
+				if (error.code == '401') {
+					oauth2SignIn()
+				} else {
+					console.error ? console.error(error) : console.log(error)
+				}
+			})
+	}
 	/**
 	 * @see: https://developers.google.com/drive/api/v3/multipart-upload
 	 */
-	driveCreateNewJournal = () => {
-		// TODO: prompt for name on create click
-		//JOURNAL_HEADER.name = 'MY JOURNAL'
-
+	doCreateFile = () => {
 		let params = JSON.parse(localStorage.getItem('oauth2-params'))
 		let reqBody =
 			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
@@ -342,12 +395,7 @@ class App extends React.Component<
 						this.driveGetFileList()
 					})
 					.catch(error => {
-						if (error.code == '401') {
-							oauth2SignIn()
-						} else {
-							// TODO: Show message onscreen
-							console.error ? console.error(error) : console.log(error)
-						}
+						throw error
 					})
 			})
 			.catch(error => {
@@ -358,61 +406,6 @@ class App extends React.Component<
 				}
 			})
 	}
-	driveGetFileList = () => {
-		const FILENAME = 'dream-journal.json'
-		let params = JSON.parse(localStorage.getItem('oauth2-params'))
-		if (!params || !params['access_token']) {
-			oauth2SignIn()
-			return
-		}
-
-		// GET https://www.googleapis.com/drive/v3/files/
-		// Authorization: Bearer [YOUR_ACCESS_TOKEN]
-		// Accept: application/json
-		fetch('https://www.googleapis.com/drive/v3/files?fields=files/id,files/name,files/size,files/modifiedTime', {
-			method: 'GET',
-			headers: {
-				Accept: 'application/json',
-				Authorization: 'Bearer ' + params['access_token'],
-			},
-		})
-			.then(response => {
-				response
-					.json()
-					.then(json => {
-						let data = json
-						// A: Check for errors
-						// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
-						if (data && data.error && data.error.code) throw data.error
-
-						// B: Capture datafile
-						this.setState({
-							dataFile:
-								data.files.filter(file => {
-									return file.name == FILENAME
-								})[0] || null,
-						})
-
-						// C: Load file data
-						this.doSelectFile()
-					})
-					.catch(error => {
-						if (error.code == '401') {
-							oauth2SignIn()
-						} else {
-							console.error ? console.error(error) : console.log(error)
-						}
-					})
-			})
-			.catch(error => {
-				if (error.code == '401') {
-					oauth2SignIn()
-				} else {
-					console.error ? console.error(error) : console.log(error)
-				}
-			})
-	}
-
 	/**
 	 * @see: https://developers.google.com/drive/api/v3/manage-downloads
 	 */
@@ -792,24 +785,6 @@ class App extends React.Component<
 							</li>
 						</ul>
 					</div>
-					<form className='form-inline h6 text-secondary mb-0'>
-						{this.state.dataFile && this.state.dataFile._isSaving ? (
-							<div>
-								<div className='spinner-border spinner-border-sm mr-2' role='status'>
-									<span className='sr-only' />
-								</div>
-								Saving...
-							</div>
-						) : this.state.dataFile ? (
-							this.state.dataFile.modifiedTime ? (
-								'Last Saved @ ' + new Date(this.state.dataFile.modifiedTime).toLocaleString()
-							) : (
-								'(unsaved)'
-							)
-						) : (
-							'(no file selected)'
-						)}
-					</form>
 				</nav>
 
 				<Route path='/' exact render={this.Home} />
