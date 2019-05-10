@@ -366,7 +366,7 @@ export default class TabSearch extends React.Component<
 			<div>
 				<header className='container my-5'>
 					{this.state.showAlert ? (
-						<Alert variant='success'>
+						<Alert variant='secondary'>
 							<Alert.Heading>Make good use of your Dream Journal</Alert.Heading>
 							<p>
 								Analyze your journal to learn more about yourself, spot common themes/dreamsigns and
