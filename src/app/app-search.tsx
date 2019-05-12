@@ -426,7 +426,7 @@ export default class TabSearch extends React.Component<
 											: '-'}
 									</small>
 								</div>
-								<div className="w-100 d-md-none"></div>
+								<div className='w-100 d-md-none' />
 								<div
 									className='col text-center'
 									onClick={() => this.doShowByType(SearchScopes._starred)}>
@@ -517,13 +517,17 @@ export default class TabSearch extends React.Component<
 												className='form-control'
 												defaultValue={this.state.searchOptScope}
 												onChange={this.handleScopeChange}>
-												{Object.keys(SearchScopes).map(val => {
-													return (
-														<option value={SearchScopes[val]} key={'enum' + val}>
-															{SearchScopes[val]}
-														</option>
-													)
-												})}
+												{Object.keys(SearchScopes)
+													.filter(key => {
+														return key.indexOf('_') == -1
+													})
+													.map(val => {
+														return (
+															<option value={SearchScopes[val]} key={'enum' + val}>
+																{SearchScopes[val]}
+															</option>
+														)
+													})}
 											</select>
 										</div>
 										<div className='col-12 col-md-6'>
