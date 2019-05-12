@@ -426,6 +426,7 @@ export default class TabSearch extends React.Component<
 											: '-'}
 									</small>
 								</div>
+								<div className="w-100 d-md-none"></div>
 								<div
 									className='col text-center'
 									onClick={() => this.doShowByType(SearchScopes._starred)}>
@@ -456,7 +457,7 @@ export default class TabSearch extends React.Component<
 				<section className='container my-5'>
 					<div className='row'>
 						<div className='col-12 col-lg-8'>
-							<div className='card mb-3'>
+							<div className='card mb-5 mb-lg-0'>
 								<div className='card-header bg-info'>
 									<h5 className='card-title text-white mb-0'>Keyword Search</h5>
 								</div>
@@ -547,9 +548,9 @@ export default class TabSearch extends React.Component<
 					</div>
 				</section>
 
-				<main className='container bg-light my-5'>
+				<main className='container my-5'>
 					{this.state.searchTerm && this.state.searchMatches.length > 0 ? (
-						<h3 className='text-primary py-3 text-center mb-3'>
+						<h3 className='text-center text-primary pt-0 pb-3 mb-3'>
 							Found {this.state.searchMatches.length} Dreams (
 							{Math.round((this.state.searchMatches.length / totalDreams) * 100)}
 							%)
@@ -560,7 +561,7 @@ export default class TabSearch extends React.Component<
 					{this.state.searchTerm ? (
 						<div className='card-columns'>{searchMatches}</div>
 					) : (
-						<h4 className='text-center text-muted mb-0 py-5'>(enter a keyword above to search)</h4>
+						<h4 className='bg-light text-center text-muted mb-0 py-5'>(enter a keyword above to search)</h4>
 					)}
 				</main>
 			</div>
