@@ -64,7 +64,7 @@ export default class EntryModal extends React.Component<
 		show?: boolean
 	},
 	{ dailyEntry: IJournalEntry; isDateDupe: boolean; origEntryDate: string; selectedTab: number; show: boolean }
-	> {
+> {
 	constructor(
 		props: Readonly<{
 			doCreateEntry: Function
@@ -91,7 +91,7 @@ export default class EntryModal extends React.Component<
 	 * Handle show/no-show and clearing of form data
 	 * React-Design: Allow `props` changes from other Components to change state/render
 	 */
-	componentWillReceiveProps(nextProps) {
+	componentWillReceiveProps(nextProps:any) {
 		// A:
 		if (
 			typeof nextProps.show !== 'undefined' &&
@@ -121,7 +121,7 @@ export default class EntryModal extends React.Component<
 
 	// ============================================================================
 
-	handleAddDream = event => {
+	handleAddDream = (_event: React.ChangeEvent<HTMLInputElement>) => {
 		let dailyEntryNew = this.state.dailyEntry
 		dailyEntryNew.dreams.push({
 			title: '',
@@ -137,7 +137,7 @@ export default class EntryModal extends React.Component<
 		})
 	}
 
-	handleInputChange = event => {
+	handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const target = event.target
 		const value = target.type === 'checkbox' ? target.checked : target.value
 		const name = target.name
@@ -155,7 +155,7 @@ export default class EntryModal extends React.Component<
 			dailyEntry: newState,
 		})
 	}
-	handleInputDreamChange = event => {
+	handleInputDreamChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const target = event.target
 		const value = target.type === 'checkbox' ? target.checked : target.value
 		const name = target.name
@@ -164,7 +164,9 @@ export default class EntryModal extends React.Component<
 
 		if (name == 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
-			newState.dreams[event.target.getAttribute('data-dream-idx')].dreamSigns = value ? value.split(',') : []
+			newState.dreams[event.target.getAttribute('data-dream-idx')].dreamSigns = value
+				? value.toString().split(',')
+				: []
 		} else {
 			newState.dreams[event.target.getAttribute('data-dream-idx')][name] = value
 		}
@@ -172,7 +174,7 @@ export default class EntryModal extends React.Component<
 		this.setState({ dailyEntry: newState })
 	}
 
-	handleDeleteDream = dreamIdx => {
+	handleDeleteDream = (dreamIdx: number) => {
 		if (confirm('Delete Dream #' + (dreamIdx + 1) + '?')) {
 			let dailyEntryNew = this.state.dailyEntry
 			dailyEntryNew.dreams.splice(dreamIdx, 1)
@@ -182,21 +184,21 @@ export default class EntryModal extends React.Component<
 		event.preventDefault()
 	}
 
-	handleDelete = event => {
+	handleDelete = (event: React.ChangeEvent<HTMLInputElement>) => {
 		if (confirm('Delete entry ' + this.state.dailyEntry.entryDate + '?')) {
 			this.props
 				.doDeleteEntry(this.state.dailyEntry.entryDate)
-				.catch(err => {
+				.catch((err: any) => {
 					alert('Unable to delete!\n' + err)
 				})
-				.then(res => {
+				.then((res: Boolean) => {
 					if (res == true) this.modalClose()
 				})
 		}
 
 		event.preventDefault()
 	}
-	handleSubmit = event => {
+	handleSubmit = (event: React.ChangeEvent<HTMLInputElement>) => {
 		let arrPromises = []
 
 		if (this.props.editEntry) {
@@ -293,7 +295,7 @@ export default class EntryModal extends React.Component<
 							value={dream.lucidMethod || InductionTypes.none}
 							disabled={!dream.isLucidDream}
 							data-dream-idx={dreamIdx}
-							onChange={this.handleInputDreamChange}
+							onChange={() => this.handleInputDreamChange}
 							className='form-control'>
 							{Object.keys(InductionTypes).map(type => {
 								return (
@@ -313,7 +315,7 @@ export default class EntryModal extends React.Component<
 							className='form-control'
 							rows={8}
 							value={dream.notes}
-							onChange={this.handleInputDreamChange}
+							onChange={() => this.handleInputDreamChange}
 							data-dream-idx={dreamIdx}
 						/>
 					</div>
@@ -363,7 +365,8 @@ export default class EntryModal extends React.Component<
 									<label className='text-muted text-uppercase text-sm'>&nbsp;</label>
 									<div
 										className={
-											'd-block iconSvg size32 cursor-pointer ' + (this.state.dailyEntry.starred ? 'star-on' : 'star-off')
+											'd-block iconSvg size32 cursor-pointer ' +
+											(this.state.dailyEntry.starred ? 'star-on' : 'star-off')
 										}
 										title={this.state.dailyEntry.starred ? 'Un-Star Entry' : 'Star Entry'}
 										onClick={() => {
@@ -378,7 +381,7 @@ export default class EntryModal extends React.Component<
 									<textarea
 										name='notesPrep'
 										value={this.state.dailyEntry.notesPrep}
-										onChange={this.handleInputChange}
+										onChange={() => this.handleInputChange}
 										className='form-control'
 										rows={1}
 									/>
@@ -388,7 +391,7 @@ export default class EntryModal extends React.Component<
 									<textarea
 										name='notesWake'
 										value={this.state.dailyEntry.notesWake}
-										onChange={this.handleInputChange}
+										onChange={() => this.handleInputChange}
 										className='form-control'
 										rows={1}
 									/>
@@ -398,7 +401,7 @@ export default class EntryModal extends React.Component<
 							<div className='row align-items-center'>
 								<div className='col pr-0'>
 									<ul className='nav nav-tabs border-bottom border-secondary' role='tablist'>
-										{this.state.dailyEntry.dreams.map((dream, idx) => (
+										{this.state.dailyEntry.dreams.map((_dream, idx) => (
 											<li className='nav-item' key={'dreamtab' + idx}>
 												<a
 													className={
@@ -419,7 +422,7 @@ export default class EntryModal extends React.Component<
 									<button
 										type='button'
 										className='btn btn-sm btn-outline-info'
-										onClick={this.handleAddDream}>
+										onClick={() => this.handleAddDream}>
 										New Dream
 									</button>
 								</div>
@@ -432,12 +435,15 @@ export default class EntryModal extends React.Component<
 
 					<Modal.Footer>
 						<div className='d-block d-sm-none'>
-							<button type='button' className='btn btn-outline-danger' onClick={this.handleDelete}>
+							<button type='button' className='btn btn-outline-danger' onClick={() => this.handleDelete}>
 								Delete
 							</button>
 						</div>
 						<div className='d-none d-sm-block'>
-							<button type='button' className='btn btn-outline-danger mr-5' onClick={this.handleDelete}>
+							<button
+								type='button'
+								className='btn btn-outline-danger mr-5'
+								onClick={() => this.handleDelete}>
 								Delete Entry
 							</button>
 						</div>
@@ -449,12 +455,12 @@ export default class EntryModal extends React.Component<
 							Cancel
 						</Button>
 						<div className='d-block d-sm-none'>
-							<button type='submit' className='btn btn-primary' onClick={this.handleSubmit}>
+							<button type='submit' className='btn btn-primary' onClick={() => this.handleSubmit}>
 								Save
 							</button>
 						</div>
 						<div className='d-none d-sm-block'>
-							<button type='submit' className='btn btn-primary px-4' onClick={this.handleSubmit}>
+							<button type='submit' className='btn btn-primary px-4' onClick={() => this.handleSubmit}>
 								Save Entry
 							</button>
 						</div>
