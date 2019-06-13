@@ -83,7 +83,7 @@ export default class TabSearch extends React.Component<
 		this.props.doSaveSearchState(this.state)
 	}
 
-	handleHideAlert = event => {
+	handleHideAlert = _event => {
 		localStorage.setItem('show-alert-search', 'false')
 		this.setState({ showAlert: false })
 	}

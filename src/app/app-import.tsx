@@ -1,3 +1,32 @@
+/*\
+|*|  :: Brain Cloud Dream Journal ::
+|*|
+|*|  Dream Journal App - Record and Search Daily Dream Entries
+|*|  https://github.com/gitbrent/dream-journal-app
+|*|
+|*|  This library is released under the MIT Public License (MIT)
+|*|
+|*|  Dream Journal App (C) 2019-present Brent Ely (https://github.com/gitbrent)
+|*|
+|*|  Permission is hereby granted, free of charge, to any person obtaining a copy
+|*|  of this software and associated documentation files (the "Software"), to deal
+|*|  in the Software without restriction, including without limitation the rights
+|*|  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+|*|  copies of the Software, and to permit persons to whom the Software is
+|*|  furnished to do so, subject to the following conditions:
+|*|
+|*|  The above copyright notice and this permission notice shall be included in all
+|*|  copies or substantial portions of the Software.
+|*|
+|*|  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+|*|  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+|*|  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+|*|  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+|*|  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+|*|  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+|*|  SOFTWARE.
+\*/
+
 import React from 'react'
 import { IDriveFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './app'
 import BootstrapSwitchButton from 'bootstrap-switch-button-react' // '../../../bootstrap-switch-button-react'
@@ -52,7 +81,7 @@ export default class TabImport extends React.Component<
 		notesWake: string
 		title: string
 	}
-> {
+	> {
 	// @see: https://medium.com/@martin_hotell/react-refs-with-typescript-a32d56c4d315
 	private refDemoData = React.createRef<HTMLDivElement>()
 	private refContentEditable = React.createRef<HTMLElement>()
@@ -158,7 +187,7 @@ export default class TabImport extends React.Component<
 				}
 			}
 		} else if (this.state._selEntryType == 'match' && this.state._entryDate) {
-			;(demoData.split('\n') || []).forEach(line => {
+			; (demoData.split('\n') || []).forEach(line => {
 				try {
 					if (line.trim().match(new RegExp(this.state._entryDate, 'g'))) {
 						let keyVal = line.trim().split(new RegExp(this.state._entryDate, 'g'))
@@ -198,17 +227,17 @@ export default class TabImport extends React.Component<
 		if (this.state._selNotePrepType == 'multi' && this.state._notesPrepEnd) {
 			let isCapturing = false
 			let strNotesPrep = ''
-			;(demoData.split('\n') || []).forEach(line => {
-				if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
-					isCapturing = false
-				} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
-					isCapturing = true
-				}
+				; (demoData.split('\n') || []).forEach(line => {
+					if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
+						isCapturing = false
+					} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
+						isCapturing = true
+					}
 
-				if (line && line.replace(this.state._notesPrep, '').trim() && isCapturing) {
-					strNotesPrep += line.replace(this.state._notesPrep, '').trim() + '\n'
-				}
-			})
+					if (line && line.replace(this.state._notesPrep, '').trim() && isCapturing) {
+						strNotesPrep += line.replace(this.state._notesPrep, '').trim() + '\n'
+					}
+				})
 
 			this.setState({
 				notesPrep: strNotesPrep,
@@ -219,17 +248,17 @@ export default class TabImport extends React.Component<
 		if (this.state._selNoteWakeType == 'multi' && this.state._notesWakeEnd) {
 			let isCapturing = false
 			let strNotesWake = ''
-			;(demoData.split('\n') || []).forEach(line => {
-				if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
-					isCapturing = false
-				} else if (line && line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
-					isCapturing = true
-				}
+				; (demoData.split('\n') || []).forEach(line => {
+					if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
+						isCapturing = false
+					} else if (line && line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
+						isCapturing = true
+					}
 
-				if (line && line.replace(this.state._notesWake, '').trim() && isCapturing) {
-					strNotesWake += line.replace(this.state._notesWake, '').trim() + '\n'
-				}
-			})
+					if (line && line.replace(this.state._notesWake, '').trim() && isCapturing) {
+						strNotesWake += line.replace(this.state._notesWake, '').trim() + '\n'
+					}
+				})
 
 			this.setState({
 				notesWake: strNotesWake,
@@ -237,7 +266,7 @@ export default class TabImport extends React.Component<
 		}
 
 		// E: all other fields
-		;(demoData.split('\n') || []).forEach(line => {
+		; (demoData.split('\n') || []).forEach(line => {
 			arrOtherFields.forEach(name => {
 				if (line.trim().match(new RegExp(this.state[name], 'g'))) {
 					let keyVal = line.trim().split(new RegExp(this.state[name], 'g'))
@@ -526,29 +555,29 @@ export default class TabImport extends React.Component<
 				// 3: Handle fields that can be multi-line
 				if (this.state._selNotePrepType == 'multi' && this.state._notesPrepEnd) {
 					let isCapturing = false
-					;(sect.split('\n') || []).forEach(line => {
-						if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
-							isCapturing = false
-						} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
-							isCapturing = true
-						}
-						if (line && line.replace(this.state._notesPrep, '').trim() && isCapturing) {
-							objEntry.notesPrep += line.replace(this.state._notesPrep, '').trim() + '\n'
-						}
-					})
+						; (sect.split('\n') || []).forEach(line => {
+							if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
+								isCapturing = false
+							} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
+								isCapturing = true
+							}
+							if (line && line.replace(this.state._notesPrep, '').trim() && isCapturing) {
+								objEntry.notesPrep += line.replace(this.state._notesPrep, '').trim() + '\n'
+							}
+						})
 				}
 				if (this.state._selNoteWakeType == 'multi' && this.state._notesWakeEnd) {
 					let isCapturing = false
-					;(sect.split('\n') || []).forEach(line => {
-						if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
-							isCapturing = false
-						} else if (line && line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
-							isCapturing = true
-						}
-						if (line && line.replace(this.state._notesWake, '').trim() && isCapturing) {
-							objEntry.notesWake += line.replace(this.state._notesWake, '').trim() + '\n'
-						}
-					})
+						; (sect.split('\n') || []).forEach(line => {
+							if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
+								isCapturing = false
+							} else if (line && line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
+								isCapturing = true
+							}
+							if (line && line.replace(this.state._notesWake, '').trim() && isCapturing) {
+								objEntry.notesWake += line.replace(this.state._notesWake, '').trim() + '\n'
+							}
+						})
 				}
 
 				// 3: default [bed time] if needed
@@ -619,7 +648,7 @@ export default class TabImport extends React.Component<
 					// TODO: what to do about expired session?
 					// `save` can can oauthLogin, but file still needs ot be saved - show a save button?
 				})
-				.then(result => {
+				.then(_result => {
 					// 1: Clear import text and parsed results
 					this.setState({
 						_importHTML: '<br>',

@@ -104,7 +104,7 @@ class TabHome extends React.Component<
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>
-						<label className='text-muted text-uppercase d-block'>User Name:</label>
+						<label className='text-muted text-uppercase d-block'>User Name</label>
 						{this.props.authState.userName}
 					</p>
 					<div className='row align-items-end'>
