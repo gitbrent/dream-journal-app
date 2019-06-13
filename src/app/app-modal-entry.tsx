@@ -64,7 +64,7 @@ export default class EntryModal extends React.Component<
 		show?: boolean
 	},
 	{ dailyEntry: IJournalEntry; isDateDupe: boolean; origEntryDate: string; selectedTab: number; show: boolean }
-> {
+	> {
 	constructor(
 		props: Readonly<{
 			doCreateEntry: Function
@@ -250,7 +250,7 @@ export default class EntryModal extends React.Component<
 						/>
 					</div>
 					<div className='col-auto'>
-					<label className='text-muted text-uppercase text-sm d-block'>&nbsp;</label>
+						<label className='text-muted text-uppercase text-sm d-block'>&nbsp;</label>
 						<div
 							className='iconSvg size24 small circle no cursor-pointer'
 							title='Delete Dream'
