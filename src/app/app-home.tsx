@@ -81,16 +81,16 @@ export default class TabHome extends React.Component<
 	/**
 	 * Detect prop (auth) changes, then re-render file list
 	 */
-	componentDidUpdate(prevProps) {
+	componentDidUpdate(prevProps:any) {
 		if (this.props.authState.status !== prevProps.authState.status) {
 			// TODO: (?): this.handleDriveFileList(null)
 		}
 	}
 
-	handleAuthSignIn = e => {
+	handleAuthSignIn = (_event: React.MouseEvent<HTMLButtonElement>) => {
 		this.props.doAuthSignIn()
 	}
-	handleAuthSignOut = e => {
+	handleAuthSignOut = (_event: React.MouseEvent<HTMLButtonElement>) => {
 		this.props.doAuthSignOut()
 	}
 
