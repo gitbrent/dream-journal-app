@@ -29,6 +29,7 @@
 
 // TODO: [Auth redirect](https://reacttraining.com/react-router/web/example/auth-workflow)
 // FUTURE: https://github.com/FortAwesome/react-fontawesome
+
 export enum AuthState {
 	Authenticated = 'Authenticated',
 	Unauthenticated = 'Unauthenticated',
@@ -807,7 +808,7 @@ class App extends React.Component<
 }
 
 // App Container
-const AppMain: React.SFC<{ compiler: string; framework: string }> = props => {
+const AppMain: React.SFC<{ compiler: string; framework: string }> = _props => {
 	return <App />
 }
 

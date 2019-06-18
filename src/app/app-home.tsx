@@ -42,7 +42,7 @@ function getReadableFileSizeString(fileSizeInBytes: number) {
 	return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i]
 }
 
-class TabHome extends React.Component<
+export default class TabHome extends React.Component<
 	{
 		authState: IAuthState
 		dataFile: IDriveFile
@@ -250,5 +250,3 @@ class TabHome extends React.Component<
 		)
 	}
 }
-
-export default TabHome
