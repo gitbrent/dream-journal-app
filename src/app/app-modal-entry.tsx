@@ -28,13 +28,12 @@
 \*/
 
 import * as React from 'react'
-import BootstrapSwitchButton from 'bootstrap-switch-button-react'
-//import BootstrapSwitchButton from '../../../bootstrap-switch-button-react'
-// FUTURE: `react-bootstrap` added hooks in 1.0.0-beta.6 which break the whole app (even with react-16.8)
-// FUTURE: swtich to: https://reactstrap.github.io/components/modals/#app
+import { IJournalDream, IJournalEntry, InductionTypes } from './app'
+import BootstrapSwitchButton from 'bootstrap-switch-button-react' // '../../../bootstrap-switch-button-react'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
-import { IJournalEntry, IJournalDream, InductionTypes } from './app'
+// FUTURE: `react-bootstrap` added hooks in 1.0.0-beta.6 which break the whole app (even with react-16.8)
+// FUTURE: swtich to: https://reactstrap.github.io/components/modals/#app
 
 const EMPTY_DREAM = {
 	title: '',
@@ -44,14 +43,16 @@ const EMPTY_DREAM = {
 	isLucidDream: false,
 	lucidMethod: InductionTypes.none,
 }
-const NEW_ENTRY = {
+const NEW_ENTRY = Object.freeze({
+	// TODO: need better idea - UTC shows wrong date half the time (1 day ahead)
+	//entryDate: new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDay(), // TODO: mon/day both need zero-padding (eg: "06")
 	entryDate: new Date().toISOString().substring(0, 10),
 	bedTime: '',
 	notesPrep: '',
 	notesWake: '',
 	starred: false,
 	dreams: [EMPTY_DREAM],
-}
+})
 
 export default class EntryModal extends React.Component<
 	{
@@ -79,7 +80,7 @@ export default class EntryModal extends React.Component<
 		super(props)
 
 		this.state = {
-			dailyEntry: NEW_ENTRY,
+			dailyEntry: JSON.parse(JSON.stringify(NEW_ENTRY)),
 			isDateDupe: false,
 			origEntryDate: '',
 			selectedTab: 0,
@@ -92,22 +93,23 @@ export default class EntryModal extends React.Component<
 	 * React-Design: Allow `props` changes from other Components to change state/render
 	 */
 	componentWillReceiveProps(nextProps: any) {
-		// A:
+		// A: Update `show` when needed
 		if (
 			typeof nextProps.show !== 'undefined' &&
 			typeof nextProps.show === 'boolean' &&
 			this.state.show !== nextProps.show
 		) {
 			this.setState({ show: nextProps.show })
-
-			if (!this.state.show && !this.props.editEntry) {
-				this.setState({
-					dailyEntry: NEW_ENTRY,
-				})
-			}
 		}
 
-		// B:
+		// B: Clear form when "Create" is used to open modal
+		if (nextProps.show && !nextProps.editEntry) {
+			this.setState({
+				dailyEntry: JSON.parse(JSON.stringify(NEW_ENTRY)),
+			})
+		}
+
+		// C: Load corresponding day for Edits
 		if (nextProps.editEntry && this.state.dailyEntry !== nextProps.editEntry) {
 			// NOTE: React Feb-2019 wont do: `dailyEntry: nextProps.editEntry`
 			// SOLN: create a copy use json+json as `dreams` requires deep copy
