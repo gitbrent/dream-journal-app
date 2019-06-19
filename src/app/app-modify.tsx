@@ -47,22 +47,22 @@ export default class TabView extends React.Component<
 		}
 	}
 
-	handleNewModal = _e => {
+	handleNewModal = (_event: React.MouseEvent<HTMLInputElement>) => {
 		this.props.onShowModal({
 			show: true,
 		})
 	}
 
-	handleEntryEdit = e => {
+	handleEntryEdit = (_event: React.MouseEvent<HTMLButtonElement>, editEntryDate:IJournalEntry['entryDate']) => {
 		this.props.onShowModal({
 			show: true,
 			editEntry: this.props.dataFile.entries.filter(entry => {
-				return entry.entryDate == e.target.getAttribute('data-entry-key')
+				return entry.entryDate == editEntryDate
 			})[0],
 		})
 	}
 
-	onDateRangeChange = opts => {
+	onDateRangeChange = (opts:any) => {
 		this.setState({
 			dateRangeFrom: opts && opts.from ? opts.from : null,
 			dateRangeTo: opts && opts.to ? opts.to : null,
@@ -170,8 +170,7 @@ export default class TabView extends React.Component<
 											<td className='text-center'>
 												<button
 													className='btn btn-sm btn-outline-primary px-4'
-													data-entry-key={entry.entryDate}
-													onClick={this.handleEntryEdit}>
+													onClick={(event) => this.handleEntryEdit(event, entry.entryDate)}>
 													Edit
 											</button>
 											</td>
@@ -244,7 +243,7 @@ export default class TabView extends React.Component<
 								<div className='text-center d-none d-xl-block'>
 									<DateRangePicker
 										numberOfMonths={4}
-										onChange={opts => {
+										onChange={(opts:any) => {
 											this.onDateRangeChange(opts)
 										}}
 									/>
@@ -257,7 +256,7 @@ export default class TabView extends React.Component<
 										totalRecords={arrEntries.length}
 										pageLimit={this.state.pagingPageSize}
 										pageNeighbours={2}
-										onPageChanged={event => this.setState({ pagingCurrIdx: event.currentPage })}
+										onPageChanged={(event:any) => this.setState({ pagingCurrIdx: event.currentPage })}
 									/>
 								</div>
 								<div className='text-center d-none d-sm-block'>
@@ -265,7 +264,7 @@ export default class TabView extends React.Component<
 										totalRecords={arrEntries.length}
 										pageLimit={this.state.pagingPageSize}
 										pageNeighbours={4}
-										onPageChanged={event => this.setState({ pagingCurrIdx: event.currentPage })}
+										onPageChanged={(event:any) => this.setState({ pagingCurrIdx: event.currentPage })}
 									/>
 								</div>
 							</div>
