@@ -555,7 +555,7 @@ export default class TabSearch extends React.Component<
 				<main className='container my-5'>
 					{this.state.searchTerm && this.state.searchMatches.length > 0 ? (
 						<h3 className='text-center text-primary pt-0 pb-3 mb-3'>
-							Found {this.state.searchMatches.length} Dreams (
+							Search Results: {this.state.searchMatches.length} Dreams (
 							{Math.round((this.state.searchMatches.length / totalDreams) * 100)}
 							%)
 						</h3>
