@@ -84,6 +84,12 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 		this.props.doAuthSignOut()
 	}
 
+	handleNewModal = (_event: React.MouseEvent<HTMLInputElement>) => {
+		this.props.onShowModal({
+			show: true,
+		})
+	}
+
 	/**
 	 * @see: https://developers.google.com/drive/api/v3/appdata
 	 * @see: https://developers.google.com/drive/api/v3/search-parameters#file_fields
@@ -115,7 +121,7 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Your session has expired. Please re-authenticate to continue.</p>
-					<button className='btn btn-primary' onClick={this.handleAuthSignIn}>
+					<button className='btn btn-warning' onClick={this.handleAuthSignIn}>
 						Sign In
 					</button>
 				</div>
@@ -169,22 +175,39 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 		return (
 			<div className='container mt-5'>
 				<div className='jumbotron'>
-					<h1 className='display-4 text-primary d-none d-md-none d-xl-block'>
-						<img src={LogoBase64} width='150' height='150' className='mr-4' alt='Logo' />
-						Brain Cloud - Dream Journal
-					</h1>
-					<h1 className='display-4 text-primary d-none d-md-none d-lg-block d-xl-none'>
-						<img src={LogoBase64} width='75' height='75' className='mr-4' alt='Logo' />
-						Brain Cloud - Dream Journal
-					</h1>
-					<h1 className='display-5 text-primary d-none d-md-block d-lg-none'>
-						<img src={LogoBase64} width='50' height='50' className='mr-4' alt='Logo' />
-						Brain Cloud - Dream Journal
-					</h1>
-					<h1 className='display-5 text-primary d-block d-md-none'>
-						<img src={LogoBase64} width='50' height='50' className='mr-4' alt='Logo' />
-						Brain Cloud
-					</h1>
+					<div className='row align-items-center no-gutters'>
+						<div className='col'>
+							<h1 className='display-4 text-primary mb-0 d-none d-md-none d-xl-block'>
+								<img src={LogoBase64} width='150' height='150' className='mr-4' alt='Logo' />
+								Brain Cloud - Dream Journal
+							</h1>
+							<h1 className='text-primary mb-0 d-none d-md-none d-lg-block d-xl-none'>
+								<img src={LogoBase64} width='75' height='75' className='mr-4' alt='Logo' />
+								Brain Cloud - Dream Journal
+							</h1>
+							<h1 className='text-primary mb-0 d-none d-md-block d-lg-none'>
+								Brain Cloud - Dream Journal
+							</h1>
+							<h1 className='text-primary mb-0 d-block d-md-none'>Brain Cloud</h1>
+						</div>
+						<div className='col-auto'>
+							<button
+								className='btn btn-primary px-4 text-uppercase'
+								type='button'
+								disabled={!this.props.dataFile}
+								onClick={this.handleNewModal}>
+								Create
+								<br />
+								Entry
+								<div
+									className='d-none d-md-none d-xl-block'
+									style={{ fontSize: '4rem', lineHeight: '3rem' }}>
+									&#43;
+								</div>
+							</button>
+						</div>
+					</div>
+
 					<p className='lead mt-3'>
 						Record your daily dream journal entries into well-formatted JSON, enabling keyword searches,
 						metrics and more.
@@ -192,7 +215,7 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 					<hr className='my-4' />
 
 					<div className='row mb-5'>
-						<div className='col-12 col-md-6 d-flex mb-5 mb-md-0'>
+						<div className='col-12 col-md d-flex mb-5 mb-md-0'>
 							<div className='card flex-fill'>
 								<div
 									className={
@@ -206,7 +229,7 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 								<div className='card-body bg-light text-dark'>{cardAuthUser}</div>
 							</div>
 						</div>
-						<div className='col-12 col-md-6 d-flex'>
+						<div className='col-12 col-md d-flex'>
 							<div className='card flex-fill'>
 								<div className='card-header bg-info'>
 									<h5 className='card-title text-white mb-0'>Dream Journal</h5>
@@ -216,23 +239,27 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 						</div>
 					</div>
 
-					<div className='card'>
-						<div className='card-header bg-secondary'>
-							<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
-						</div>
-						<div className='card-body bg-light text-dark'>
-							<p className='card-text'>
-								This application uses your Google Drive to store dream journals so they are safe,
-								secure, and accessible on any of your devices.
-							</p>
-							<p className='card-text'>
-								Click "Sign In", select the Google account to use with this app, view the request
-								permissions page asking to create and modify{' '}
-								<strong>
-									<u>only its own files</u>
-								</strong>{' '}
-								on your Google Drive. (This app cannot access your other Google Drive files)
-							</p>
+					<div className='row mb-5'>
+						<div className='col-12 col-md d-flex'>
+							<div className='card'>
+								<div className='card-header bg-secondary'>
+									<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
+								</div>
+								<div className='card-body bg-light text-dark'>
+									<p className='card-text'>
+										This application uses your Google Drive to store dream journals so they are
+										safe, secure, and accessible on any of your devices.
+									</p>
+									<p className='card-text'>
+										Click "Sign In", select the Google account to use with this app, view the
+										request permissions page asking to create and modify{' '}
+										<strong>
+											<u>only its own files</u>
+										</strong>{' '}
+										on your Google Drive. (This app cannot access your other Google Drive files)
+									</p>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

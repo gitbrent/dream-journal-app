@@ -712,6 +712,7 @@ class App extends React.Component<
 				dataFile={this.state.dataFile || null}
 				doAuthSignIn={this.doAuthSignIn}
 				doAuthSignOut={this.doAuthSignOut}
+				onShowModal={this.chgShowModal}
 			/>
 		)
 	}
