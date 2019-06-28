@@ -42,32 +42,22 @@ function getReadableFileSizeString(fileSizeInBytes: number) {
 	return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i]
 }
 
-export default class TabHome extends React.Component<
-	{
-		authState: IAuthState
-		dataFile: IDriveFile
-		doAuthSignIn: Function
-		doAuthSignOut: Function
-	},
-	{
-		errorMessage: string
-		fileBeingRenamed: IDriveFile
-		newFileName: string
-		isRenaming: boolean
-	}
-> {
-	constructor(
-		props: Readonly<{
-			authState: IAuthState
-			dataFile: IDriveFile
-			doAuthSignIn: Function
-			doAuthSignOut: Function
-			doCreateJournal: Function
-			doFileListRefresh: Function
-			doRenameFile: Function
-			doSelectFileById: Function
-		}>
-	) {
+export interface IHomeProps {
+	authState: IAuthState
+	dataFile: IDriveFile
+	doAuthSignIn: Function
+	doAuthSignOut: Function
+	onShowModal: Function
+}
+interface IHomeState {
+	errorMessage: string
+	fileBeingRenamed: IDriveFile
+	newFileName: string
+	isRenaming: boolean
+}
+
+export default class TabHome extends React.Component<IHomeProps, IHomeState> {
+	constructor(props: Readonly<IHomeProps>) {
 		super(props)
 
 		this.state = {
@@ -81,7 +71,7 @@ export default class TabHome extends React.Component<
 	/**
 	 * Detect prop (auth) changes, then re-render file list
 	 */
-	componentDidUpdate(prevProps:any) {
+	componentDidUpdate(prevProps: any) {
 		if (this.props.authState.status !== prevProps.authState.status) {
 			// TODO: (?): this.handleDriveFileList(null)
 		}
