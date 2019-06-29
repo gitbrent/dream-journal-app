@@ -53,7 +53,7 @@ class Pagination extends Component {
 	gotoPage = page => {
 		const { onPageChanged = f => f } = this.props
 		const totalPages = Math.ceil(this.state.totalRecords / this.state.pageLimit)
-		const currentPage = Math.max(0, Math.min(page, totalPages))
+		const currentPage = Math.max(0, Math.min(page, totalPages)) || 1
 
 		const paginationData = {
 			currentPage,

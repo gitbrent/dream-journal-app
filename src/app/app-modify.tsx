@@ -32,11 +32,19 @@ import DateRangePicker from '../app/date-range-picker'
 import Pagination from '../app/pagination'
 import { IJournalEntry, IDriveFile } from './app'
 
-export default class TabView extends React.Component<
-	{ dataFile: IDriveFile; onShowModal: Function },
-	{ dateRangeFrom: Date; dateRangeTo: Date; pagingCurrIdx: number; pagingPageSize: number }
-> {
-	constructor(props: Readonly<{ dataFile: IDriveFile; onShowModal: Function }>) {
+export interface IAppModifyProps {
+	dataFile: IDriveFile
+	onShowModal: Function
+}
+interface IAppModifyState {
+	dateRangeFrom: Date
+	dateRangeTo: Date
+	pagingCurrIdx: number
+	pagingPageSize: number
+}
+
+export default class TabView extends React.Component<IAppModifyProps, IAppModifyState> {
+	constructor(props: Readonly<IAppModifyProps>) {
 		super(props)
 
 		this.state = {
