@@ -54,29 +54,26 @@ const NEW_ENTRY = Object.freeze({
 	dreams: [EMPTY_DREAM],
 })
 
-export default class EntryModal extends React.Component<
-	{
-		doCreateEntry: Function
-		doDeleteEntry: Function
-		doUpdateEntry: Function
-		editEntry?: IJournalEntry
-		isExistingEntryDate: Function
-		onShowModal: Function
-		show?: boolean
-	},
-	{ dailyEntry: IJournalEntry; isDateDupe: boolean; origEntryDate: string; selectedTab: number; show: boolean }
-> {
-	constructor(
-		props: Readonly<{
-			doCreateEntry: Function
-			doDeleteEntry: Function
-			doUpdateEntry: Function
-			editEntry?: IJournalEntry
-			isExistingEntryDate: Function
-			onShowModal: Function
-			show?: boolean
-		}>
-	) {
+export interface IAppModalProps {
+	doCreateEntry: Function
+	doDeleteEntry: Function
+	doUpdateEntry: Function
+	editEntry?: IJournalEntry
+	isExistingEntryDate: Function
+	onShowModal: Function
+	show?: boolean
+}
+export interface IAppModalState {
+	dailyEntry: IJournalEntry
+	isDateDupe: boolean
+	origEntryDate: string
+	selectedTab: number
+	show: boolean
+	isBusy: boolean
+}
+
+export default class EntryModal extends React.Component<IAppModalProps, IAppModalState> {
+	constructor(props: Readonly<IAppModalProps>) {
 		super(props)
 
 		this.state = {
@@ -85,6 +82,7 @@ export default class EntryModal extends React.Component<
 			origEntryDate: '',
 			selectedTab: 0,
 			show: props.show,
+			isBusy: false,
 		}
 	}
 
@@ -257,6 +255,9 @@ export default class EntryModal extends React.Component<
 	handleSubmit = (event: React.MouseEvent<HTMLButtonElement>) => {
 		let arrPromises = []
 
+		// 1
+		this.setState({ isBusy: true })
+
 		if (this.props.editEntry) {
 			arrPromises.push(this.props.doUpdateEntry(this.state.dailyEntry, this.state.origEntryDate))
 		} else {
@@ -276,6 +277,7 @@ export default class EntryModal extends React.Component<
 				// TODO: Show error message somewhere on dialog! (20190324)
 				alert(ex)
 			})
+			.finally(() => this.setState({ isBusy: false }))
 
 		event.preventDefault()
 	}
@@ -489,35 +491,46 @@ export default class EntryModal extends React.Component<
 						</div>
 					</Modal.Body>
 
-					<Modal.Footer>
-						<div className='d-block d-sm-none'>
-							<button type='button' className='btn btn-outline-danger' onClick={this.handleDelete}>
-								Delete
-							</button>
-						</div>
-						<div className='d-none d-sm-block'>
-							<button type='button' className='btn btn-outline-danger mr-5' onClick={this.handleDelete}>
-								Delete Entry
-							</button>
-						</div>
-						<Button
-							type='button'
-							variant='outline-secondary'
-							className='px-4 mr-2'
-							onClick={this.modalClose}>
-							Cancel
-						</Button>
-						<div className='d-block d-sm-none'>
-							<button type='submit' className='btn btn-primary' onClick={this.handleSubmit}>
-								Save
-							</button>
-						</div>
-						<div className='d-none d-sm-block'>
-							<button type='submit' className='btn btn-primary px-4' onClick={this.handleSubmit}>
-								Save Entry
-							</button>
-						</div>
-					</Modal.Footer>
+					{this.state.isBusy ? (
+						<Modal.Footer>
+							<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
+								<span className='sr-only' />
+							</div>
+						</Modal.Footer>
+					) : (
+						<Modal.Footer>
+							<div className='d-block d-sm-none'>
+								<button type='button' className='btn btn-outline-danger' onClick={this.handleDelete}>
+									Delete
+								</button>
+							</div>
+							<div className='d-none d-sm-block'>
+								<button
+									type='button'
+									className='btn btn-outline-danger mr-5'
+									onClick={this.handleDelete}>
+									Delete Entry
+								</button>
+							</div>
+							<Button
+								type='button'
+								variant='outline-secondary'
+								className='px-4 mr-2'
+								onClick={this.modalClose}>
+								Cancel
+							</Button>
+							<div className='d-block d-sm-none'>
+								<button type='submit' className='btn btn-primary' onClick={this.handleSubmit}>
+									Save
+								</button>
+							</div>
+							<div className='d-none d-sm-block'>
+								<button type='submit' className='btn btn-primary px-4' onClick={this.handleSubmit}>
+									Save Entry
+								</button>
+							</div>
+						</Modal.Footer>
+					)}
 				</Modal>
 			</form>
 		)
