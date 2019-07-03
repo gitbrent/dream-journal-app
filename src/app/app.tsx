@@ -55,10 +55,10 @@ import '../css/bootstrap.yeticyborg.css'
 import '../css/svg-images.css'
 import LogoBase64 from '../img/logo_base64'
 import TabHome from '../app/app-home'
+import TabView from '../app/app-view'
 import TabImport from '../app/app-import'
-import TabModify from '../app/app-modify'
 import TabSearch from '../app/app-search'
-import EntryModal from '../app/app-modal-entry'
+import EntryModal from '../app/app-entry-modal'
 
 export interface IAuthState {
 	status: AuthState
@@ -717,7 +717,7 @@ class App extends React.Component<
 		)
 	}
 	Modify = () => {
-		return <TabModify dataFile={this.state.dataFile || null} onShowModal={this.chgShowModal} />
+		return <TabView dataFile={this.state.dataFile || null} onShowModal={this.chgShowModal} />
 	}
 	Search = () => {
 		return (
