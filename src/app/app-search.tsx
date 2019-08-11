@@ -17,36 +17,28 @@ enum SearchScopes {
 	_isLucid = 'isLucidDream',
 }
 
+export interface IAppSearchProps {
+	dataFile: IDriveFile
+	doSaveSearchState: Function
+	onShowModal: Function
+	searchState: IAppSearchState
+}
+export interface IAppSearchState {
+	searchMatches: ISearchMatch[]
+	searchOptMatchType: SearchMatchTypes
+	searchOptScope: SearchScopes
+	searchTerm: string
+	searchTermInvalidMsg: string
+	showAlert: boolean
+}
 interface ISearchMatch {
 	entryDate: IJournalEntry['entryDate']
 	starred: IJournalEntry['starred']
 	dream: IJournalDream
 }
 
-export default class TabSearch extends React.Component<
-	{
-		dataFile: IDriveFile
-		doSaveSearchState: Function
-		onShowModal: Function
-		searchState: object
-	},
-	{
-		searchMatches: Array<ISearchMatch>
-		searchOptMatchType: SearchMatchTypes
-		searchOptScope: SearchScopes
-		searchTerm: string
-		searchTermInvalidMsg: string
-		showAlert: boolean
-	}
-> {
-	constructor(
-		props: Readonly<{
-			dataFile: IDriveFile
-			doSaveSearchState: Function
-			onShowModal: Function
-			searchState: object
-		}>
-	) {
+export default class TabSearch extends React.Component<IAppSearchProps, IAppSearchState> {
+	constructor(props: Readonly<IAppSearchProps>) {
 		super(props)
 
 		let localShowAlert = JSON.parse(localStorage.getItem('show-alert-search'))
