@@ -235,20 +235,50 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 									specific entries.
 								</p>
 								<div className='text-center d-block d-sm-none'>
-									<DateRangePicker numberOfMonths={1} />
+									<DateRangePicker
+										numberOfMonths={1}
+										dateRangeFrom={this.state.dateRangeFrom}
+										dateRangeTo={this.state.dateRangeTo}
+										onChange={(opts: any) => {
+											this.onDateRangeChange(opts)
+										}}
+									/>
 								</div>
 								<div className='text-center d-none d-sm-block d-md-none'>
-									<DateRangePicker numberOfMonths={2} />
+									<DateRangePicker
+										numberOfMonths={2}
+										dateRangeFrom={this.state.dateRangeFrom}
+										dateRangeTo={this.state.dateRangeTo}
+										onChange={(opts: any) => {
+											this.onDateRangeChange(opts)
+										}}
+									/>
 								</div>
 								<div className='text-center d-none d-md-block d-lg-none'>
-									<DateRangePicker numberOfMonths={2} />
+									<DateRangePicker
+										numberOfMonths={2}
+										dateRangeFrom={this.state.dateRangeFrom}
+										dateRangeTo={this.state.dateRangeTo}
+										onChange={(opts: any) => {
+											this.onDateRangeChange(opts)
+										}}
+									/>
 								</div>
 								<div className='text-center d-none d-lg-block d-xl-none'>
-									<DateRangePicker numberOfMonths={3} />
+									<DateRangePicker
+										numberOfMonths={3}
+										dateRangeFrom={this.state.dateRangeFrom}
+										dateRangeTo={this.state.dateRangeTo}
+										onChange={(opts: any) => {
+											this.onDateRangeChange(opts)
+										}}
+									/>
 								</div>
 								<div className='text-center d-none d-xl-block'>
 									<DateRangePicker
 										numberOfMonths={4}
+										dateRangeFrom={this.state.dateRangeFrom}
+										dateRangeTo={this.state.dateRangeTo}
 										onChange={(opts: any) => {
 											this.onDateRangeChange(opts)
 										}}

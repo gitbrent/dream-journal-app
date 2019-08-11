@@ -1,3 +1,7 @@
+/**
+ * Date Range Picker
+ */
+
 import React from 'react'
 import Helmet from 'react-helmet'
 import DayPicker, { DateUtils } from 'react-day-picker'
@@ -12,9 +16,9 @@ export default class DateRangeSelector extends React.Component {
 	}
 	getInitialState() {
 		return {
-			from: undefined,
-			to: undefined,
-			numberOfMonths: this.props.numberOfMonths || 3
+			from: this.props.dateRangeFrom || undefined,
+			to: this.props.dateRangeTo || undefined,
+			numberOfMonths: this.props.numberOfMonths || 3,
 		}
 	}
 
@@ -24,8 +28,12 @@ export default class DateRangeSelector extends React.Component {
 		if (this.props.onChange) this.props.onChange(range)
 	}
 	handleResetClick() {
-		this.setState(this.getInitialState())
-		if (this.props.onChange) this.props.onChange(this.getInitialState())
+		let newState = {
+			from: undefined,
+			to: undefined,
+		}
+		this.setState(newState)
+		if (this.props.onChange) this.props.onChange(newState)
 	}
 
 	render() {
