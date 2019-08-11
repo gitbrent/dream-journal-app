@@ -34,66 +34,59 @@ import ContentEditable from 'react-contenteditable'
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
 const VERBOSE = false
 
-export default class TabImport extends React.Component<
-	{
-		dataFile: IDriveFile
-		doImportEntries: Function
-		doSaveImportState: Function
-		importState: object
-	},
-	{
-		_defaultBedTime: string
-		_defaultYear: number
-		_demoData: string
-		_dreamSignsDelim: string
-		_entryDateInvalidMsg: string
-		_useDefaultTime: boolean
-		_importHTML: string
-		_importText: string
-		_invalidSections: Array<IJournalEntry>
-		_isTime24Hour: boolean
-		_parsedSections: Array<IJournalEntry>
-		_selBreakType: string
-		_selDreamNotes: string
-		_selEntryType: string
-		_selNotePrepType: string
-		_selNoteWakeType: string
-		_showImporter: ImportTypes
+export interface IAppTabProps {
+	dataFile: IDriveFile
+	doImportEntries: Function
+	doSaveImportState: Function
+	importState: object
+}
+interface IAppTabState {
+	_defaultBedTime: string
+	_defaultYear: number
+	_demoData: string
+	_dreamSignsDelim: string
+	_entryDateInvalidMsg: string
+	_useDefaultTime: boolean
+	_importHTML: string
+	_importText: string
+	_invalidSections: Array<IJournalEntry>
+	_isTime24Hour: boolean
+	_parsedSections: Array<IJournalEntry>
+	_selBreakType: string
+	_selDreamNotes: string
+	_selEntryType: string
+	_selNotePrepType: string
+	_selNoteWakeType: string
+	_showImporter: ImportTypes
 
-		_bedTime: string
-		_dreamBreak: string
-		_dreamSigns: string
-		_entryDate: string
-		_isLucidDream: string
-		_notes: Array<string>
-		_notesPrep: string
-		_notesPrepEnd: string
-		_notesWake: string
-		_notesWakeEnd: string
-		_title: string
-		bedTime: string
-		dreamBreak: Array<string>
-		dreamSigns: string
-		entryDate: string
-		isLucidDream: boolean
-		notes: Array<string>
-		notesPrep: string
-		notesWake: string
-		title: string
-	}
-	> {
+	_bedTime: string
+	_dreamBreak: string
+	_dreamSigns: string
+	_entryDate: string
+	_isLucidDream: string
+	_notes: Array<string>
+	_notesPrep: string
+	_notesPrepEnd: string
+	_notesWake: string
+	_notesWakeEnd: string
+	_title: string
+	bedTime: string
+	dreamBreak: Array<string>
+	dreamSigns: string
+	entryDate: string
+	isLucidDream: boolean
+	notes: Array<string>
+	notesPrep: string
+	notesWake: string
+	title: string
+}
+
+export default class TabImport extends React.Component<IAppTabProps, IAppTabState> {
 	// @see: https://medium.com/@martin_hotell/react-refs-with-typescript-a32d56c4d315
 	private refDemoData = React.createRef<HTMLDivElement>()
 	private refContentEditable = React.createRef<HTMLElement>()
 
-	constructor(
-		props: Readonly<{
-			dataFile: IDriveFile
-			doImportEntries: Function
-			doSaveImportState: Function
-			importState: object
-		}>
-	) {
+	constructor(props: Readonly<IAppTabProps>) {
 		super(props)
 
 		let config = this.props.importState || JSON.parse(localStorage.getItem('import-config')) || {}
@@ -187,7 +180,7 @@ export default class TabImport extends React.Component<
 				}
 			}
 		} else if (this.state._selEntryType == 'match' && this.state._entryDate) {
-			; (demoData.split('\n') || []).forEach(line => {
+			;(demoData.split('\n') || []).forEach(line => {
 				try {
 					if (line.trim().match(new RegExp(this.state._entryDate, 'g'))) {
 						let keyVal = line.trim().split(new RegExp(this.state._entryDate, 'g'))
@@ -227,17 +220,17 @@ export default class TabImport extends React.Component<
 		if (this.state._selNotePrepType == 'multi' && this.state._notesPrepEnd) {
 			let isCapturing = false
 			let strNotesPrep = ''
-				; (demoData.split('\n') || []).forEach(line => {
-					if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
-						isCapturing = false
-					} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
-						isCapturing = true
-					}
+			;(demoData.split('\n') || []).forEach(line => {
+				if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
+					isCapturing = false
+				} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
+					isCapturing = true
+				}
 
-					if (line && line.replace(this.state._notesPrep, '').trim() && isCapturing) {
-						strNotesPrep += line.replace(this.state._notesPrep, '').trim() + '\n'
-					}
-				})
+				if (line && line.replace(this.state._notesPrep, '').trim() && isCapturing) {
+					strNotesPrep += line.replace(this.state._notesPrep, '').trim() + '\n'
+				}
+			})
 
 			this.setState({
 				notesPrep: strNotesPrep,
@@ -248,17 +241,17 @@ export default class TabImport extends React.Component<
 		if (this.state._selNoteWakeType == 'multi' && this.state._notesWakeEnd) {
 			let isCapturing = false
 			let strNotesWake = ''
-				; (demoData.split('\n') || []).forEach(line => {
-					if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
-						isCapturing = false
-					} else if (line && line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
-						isCapturing = true
-					}
+			;(demoData.split('\n') || []).forEach(line => {
+				if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
+					isCapturing = false
+				} else if (line && line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
+					isCapturing = true
+				}
 
-					if (line && line.replace(this.state._notesWake, '').trim() && isCapturing) {
-						strNotesWake += line.replace(this.state._notesWake, '').trim() + '\n'
-					}
-				})
+				if (line && line.replace(this.state._notesWake, '').trim() && isCapturing) {
+					strNotesWake += line.replace(this.state._notesWake, '').trim() + '\n'
+				}
+			})
 
 			this.setState({
 				notesWake: strNotesWake,
@@ -266,7 +259,7 @@ export default class TabImport extends React.Component<
 		}
 
 		// E: all other fields
-		; (demoData.split('\n') || []).forEach(line => {
+		;(demoData.split('\n') || []).forEach(line => {
 			arrOtherFields.forEach(name => {
 				if (line.trim().match(new RegExp(this.state[name], 'g'))) {
 					let keyVal = line.trim().split(new RegExp(this.state[name], 'g'))
@@ -555,29 +548,29 @@ export default class TabImport extends React.Component<
 				// 3: Handle fields that can be multi-line
 				if (this.state._selNotePrepType == 'multi' && this.state._notesPrepEnd) {
 					let isCapturing = false
-						; (sect.split('\n') || []).forEach(line => {
-							if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
-								isCapturing = false
-							} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
-								isCapturing = true
-							}
-							if (line && line.replace(this.state._notesPrep, '').trim() && isCapturing) {
-								objEntry.notesPrep += line.replace(this.state._notesPrep, '').trim() + '\n'
-							}
-						})
+					;(sect.split('\n') || []).forEach(line => {
+						if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
+							isCapturing = false
+						} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
+							isCapturing = true
+						}
+						if (line && line.replace(this.state._notesPrep, '').trim() && isCapturing) {
+							objEntry.notesPrep += line.replace(this.state._notesPrep, '').trim() + '\n'
+						}
+					})
 				}
 				if (this.state._selNoteWakeType == 'multi' && this.state._notesWakeEnd) {
 					let isCapturing = false
-						; (sect.split('\n') || []).forEach(line => {
-							if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
-								isCapturing = false
-							} else if (line && line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
-								isCapturing = true
-							}
-							if (line && line.replace(this.state._notesWake, '').trim() && isCapturing) {
-								objEntry.notesWake += line.replace(this.state._notesWake, '').trim() + '\n'
-							}
-						})
+					;(sect.split('\n') || []).forEach(line => {
+						if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
+							isCapturing = false
+						} else if (line && line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
+							isCapturing = true
+						}
+						if (line && line.replace(this.state._notesWake, '').trim() && isCapturing) {
+							objEntry.notesWake += line.replace(this.state._notesWake, '').trim() + '\n'
+						}
+					})
 				}
 
 				// 3: default [bed time] if needed

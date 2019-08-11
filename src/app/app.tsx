@@ -55,7 +55,7 @@ import '../css/bootstrap.yeticyborg.css'
 import '../css/svg-images.css'
 import LogoBase64 from '../img/logo_base64'
 import TabHome from '../app/app-home'
-import TabView from '../app/app-view'
+import TabView, { IAppViewState } from '../app/app-view'
 import TabImport from '../app/app-import'
 import TabSearch from '../app/app-search'
 import EntryModal from '../app/app-entry-modal'
@@ -174,6 +174,7 @@ class App extends React.Component<
 		auth: IAuthState
 		childImportState: object
 		childSearchState: object
+		childViewState: IAppViewState
 		dataFile: IDriveFile
 		editEntry: IJournalEntry
 		showModal: boolean
@@ -190,6 +191,7 @@ class App extends React.Component<
 			},
 			childImportState: null,
 			childSearchState: null,
+			childViewState: null,
 			dataFile: null,
 			editEntry: null,
 			showModal: typeof props.showModal === 'boolean' ? props.showModal : false,
@@ -213,6 +215,14 @@ class App extends React.Component<
 	doSaveSearchState = (newState: object) => {
 		this.setState({
 			childSearchState: newState,
+		})
+	}
+	/**
+	 * Retain state between tab changes
+	 */
+	doSaveViewState = (newState: IAppViewState) => {
+		this.setState({
+			childViewState: newState,
 		})
 	}
 
@@ -716,15 +726,22 @@ class App extends React.Component<
 			/>
 		)
 	}
-	Modify = () => {
-		return <TabView dataFile={this.state.dataFile || null} onShowModal={this.chgShowModal} />
+	Journal = () => {
+		return (
+			<TabView
+				dataFile={this.state.dataFile || null}
+				onShowModal={this.chgShowModal}
+				doSaveViewState={this.doSaveViewState}
+				viewState={this.state.childViewState}
+			/>
+		)
 	}
 	Search = () => {
 		return (
 			<TabSearch
 				dataFile={this.state.dataFile || null}
-				doSaveSearchState={this.doSaveSearchState}
 				onShowModal={this.chgShowModal}
+				doSaveSearchState={this.doSaveSearchState}
 				searchState={this.state.childSearchState}
 			/>
 		)
@@ -790,7 +807,7 @@ class App extends React.Component<
 				</nav>
 
 				<Route path='/' exact render={this.Home} />
-				<Route path='/journal' render={this.Modify} />
+				<Route path='/journal' render={this.Journal} />
 				<Route path='/search' render={this.Search} />
 				<Route path='/import' render={this.Import} />
 

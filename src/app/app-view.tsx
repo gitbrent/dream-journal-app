@@ -35,8 +35,10 @@ import { IJournalEntry, IDriveFile } from './app'
 export interface IAppViewProps {
 	dataFile: IDriveFile
 	onShowModal: Function
+	doSaveViewState: Function
+	viewState: IAppViewState
 }
-interface IAppViewState {
+export interface IAppViewState {
 	dateRangeFrom: Date
 	dateRangeTo: Date
 	pagingCurrIdx: number
@@ -48,11 +50,18 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 		super(props)
 
 		this.state = {
-			dateRangeFrom: null,
-			dateRangeTo: null,
-			pagingCurrIdx: 1,
-			pagingPageSize: 10,
+			dateRangeFrom: props.viewState && props.viewState.dateRangeFrom ? props.viewState.dateRangeFrom : null,
+			dateRangeTo: props.viewState && props.viewState.dateRangeTo ? props.viewState.dateRangeTo : null,
+			pagingCurrIdx: props.viewState && props.viewState.pagingCurrIdx ? props.viewState.pagingCurrIdx : 1,
+			pagingPageSize: props.viewState && props.viewState.pagingPageSize ? props.viewState.pagingPageSize : 10,
 		}
+	}
+
+	/**
+	 * this constructor is called whenever tab is hidden/shown, so state must be preserved by parent (lifting state up)
+	 */
+	componentWillUnmount = () => {
+		this.props.doSaveViewState(this.state)
 	}
 
 	handleNewModal = (_event: React.MouseEvent<HTMLInputElement>) => {
@@ -253,6 +262,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 										totalRecords={arrEntries.length}
 										pageLimit={this.state.pagingPageSize}
 										pageNeighbours={2}
+										currentPage={this.state.pagingCurrIdx}
 										onPageChanged={(event: any) =>
 											this.setState({ pagingCurrIdx: event.currentPage })
 										}
@@ -263,6 +273,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 										totalRecords={arrEntries.length}
 										pageLimit={this.state.pagingPageSize}
 										pageNeighbours={4}
+										currentPage={this.state.pagingCurrIdx}
 										onPageChanged={(event: any) =>
 											this.setState({ pagingCurrIdx: event.currentPage })
 										}

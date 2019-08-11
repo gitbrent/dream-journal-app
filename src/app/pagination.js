@@ -1,6 +1,8 @@
 /**
+ * Pagination component
  * @see: https://github.com/gladchinda/build-react-pagination-demo
  */
+
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 
@@ -26,23 +28,24 @@ const range = (from, to, step = 1) => {
 class Pagination extends Component {
 	constructor(props) {
 		super(props)
-		const { totalRecords = null, pageLimit = 30, pageNeighbours = 0 } = props
+		const { totalRecords = null, pageLimit = 30, pageNeighbours = 0, currentPage = 1 } = props
 
 		this.pageLimit = typeof pageLimit === 'number' ? pageLimit : 30
 		this.totalRecords = typeof totalRecords === 'number' ? totalRecords : 0
+		this.currentPage = typeof currentPage === 'number' ? currentPage : 1
 
 		// pageNeighbours can be: 0, 1 or 2 [ed:(bde) expanded!]
 		this.pageNeighbours = typeof pageNeighbours === 'number' ? Math.max(0, Math.min(pageNeighbours, 4)) : 0
 
 		this.state = {
-			currentPage: 1,
+			currentPage: this.currentPage,
 			pageLimit: this.pageLimit,
 			totalRecords: this.totalRecords,
 		}
 	}
 
 	componentDidMount() {
-		this.gotoPage(1)
+		this.gotoPage(this.state.currentPage)
 	}
 	componentWillReceiveProps(nextProps) {
 		if (nextProps.totalRecords && this.state.totalRecords !== nextProps.totalRecords) {
