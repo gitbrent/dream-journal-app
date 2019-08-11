@@ -75,7 +75,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 		this.props.doSaveSearchState(this.state)
 	}
 
-	handleHideAlert = _event => {
+	handleHideAlert = () => {
 		localStorage.setItem('show-alert-search', 'false')
 		this.setState({ showAlert: false })
 	}
@@ -85,7 +85,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 
 		let d1 = new Date(this.props.dataFile.entries[0].entryDate)
 		let d2 = new Date(this.props.dataFile.entries[this.props.dataFile.entries.length - 1].entryDate)
-		let months
+		let months: number
 		months = (d2.getFullYear() - d1.getFullYear()) * 12
 		months -= d1.getMonth() + 1
 		months += d2.getMonth()
@@ -94,15 +94,24 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 		return months <= 0 ? 0 : months
 	}
 
-	monthDiff = (d1, d2) => {
-		let months
+	monthDiff = (d1: Date, d2: Date) => {
+		let months: number
 		months = (d2.getFullYear() - d1.getFullYear()) * 12
 		months -= d1.getMonth() + 1
 		months += d2.getMonth()
 		return months <= 0 ? 0 : months
 	}
 
-	handleTypeChange = event => {
+	handleEntryEdit = (entryDate: string) => {
+		this.props.onShowModal({
+			show: true,
+			editEntry: this.props.dataFile.entries.filter(entry => {
+				return entry.entryDate == entryDate
+			})[0],
+		})
+	}
+
+	handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
 		let newState = { searchOptMatchType: null }
 
 		if (event.target.value == SearchMatchTypes.contains) newState.searchOptMatchType = SearchMatchTypes.contains
@@ -112,7 +121,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 
 		setTimeout(this.doKeywordSearch, 100) // TODO: no use, state change
 	}
-	handleScopeChange = event => {
+	handleScopeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
 		let newState = { searchOptScope: null }
 
 		if (event.target.value == SearchScopes.all) newState.searchOptScope = SearchScopes.all
@@ -188,7 +197,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 		})
 	}
 
-	doShowByType = type => {
+	doShowByType = (type: SearchScopes) => {
 		let arrFound = []
 
 		if (!this.props.dataFile || this.props.dataFile.entries.length <= 0) return
@@ -258,15 +267,6 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 		)
 	}
 
-	handleEntryEdit = e => {
-		this.props.onShowModal({
-			show: true,
-			editEntry: this.props.dataFile.entries.filter(entry => {
-				return entry.entryDate == e.target.getAttribute('data-entry-key')
-			})[0],
-		})
-	}
-
 	render() {
 		let totalDreams = 0
 		let totalLucids = 0
@@ -297,8 +297,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 											href='javascript:void(0)'
 											title='View Entry'
 											className={'card-link' + (entry.dream.isLucidDream ? ' text-success' : '')}
-											data-entry-key={entry.entryDate}
-											onClick={this.handleEntryEdit}>
+											onClick={() => this.handleEntryEdit(entry.entryDate)}>
 											{entry.dream.title}
 										</a>
 									</h5>
