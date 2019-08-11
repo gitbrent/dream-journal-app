@@ -57,7 +57,7 @@ import LogoBase64 from '../img/logo_base64'
 import TabHome from '../app/app-home'
 import TabView, { IAppViewState } from '../app/app-view'
 import TabImport from '../app/app-import'
-import TabSearch from '../app/app-search'
+import TabSearch, { IAppSearchState } from '../app/app-search'
 import EntryModal from '../app/app-entry-modal'
 
 export interface IAuthState {
@@ -69,7 +69,7 @@ export interface IDriveFile {
 	_isLoading: boolean
 	_isSaving: boolean
 	id: string
-	entries: Array<IJournalEntry>
+	entries: IJournalEntry[]
 	modifiedTime: string
 	name: string
 	size: string
@@ -96,10 +96,11 @@ export interface IJournalEntry {
 	starred?: boolean
 	dreams?: Array<IJournalDream>
 }
-
+/*
 // TODO: FIXME: https://stackoverflow.com/questions/48699820/how-do-i-hide-api-key-in-create-react-app
 console.log(process.env.REACT_APP_GDRIVE_CLIENT_ID)
 console.log(`${process.env.REACT_APP_GDRIVE_CLIENT_ID}`)
+*/
 /*
 const API_KEY = `${process.env.REACT_APP_GDRIVE_API_KEY}`;
 console.log(API_KEY)
@@ -114,73 +115,21 @@ const JOURNAL_HEADER = {
 	mimeType: 'application/json',
 }
 
-/**
- * @see: https://developers.google.com/identity/protocols/OAuth2UserAgent#example
- */
-function oauth2SignIn() {
-	// @see: https://developers.google.com/identity/protocols/OAuth2UserAgent
-
-	// Google's OAuth 2.0 endpoint for requesting an access token
-	var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth'
-
-	// Create <form> element to submit parameters to OAuth 2.0 endpoint.
-	var form = document.createElement('form')
-	form.setAttribute('method', 'GET') // Send as a GET request.
-	form.setAttribute('action', oauth2Endpoint)
-
-	// Parameters to pass to OAuth 2.0 endpoint.
-	var params = {
-		client_id: GITBRENT_CLIENT_ID,
-		scope: GDRIVE_SCOPE,
-		redirect_uri: location.href.indexOf('8080') > -1 ? LOCALHOST_URL : FIREBASE_URL,
-		response_type: 'token',
-		include_granted_scopes: 'true',
-		state: 'pass-through value',
-	}
-
-	// Add form parameters as hidden input values.
-	for (var p in params) {
-		var input = document.createElement('input')
-		input.setAttribute('type', 'hidden')
-		input.setAttribute('name', p)
-		input.setAttribute('value', params[p])
-		form.appendChild(input)
-	}
-
-	// Add form to page and submit it to open the OAuth 2.0 endpoint.
-	document.body.appendChild(form)
-	form.submit()
-}
-
-function parseStoreAccessKey() {
-	var fragmentString = location.hash.substring(1)
-
-	// Parse query string to see if page request is coming from OAuth 2.0 server.
-	var params = {}
-	var regex = /([^&=]+)=([^&]*)/g,
-		m
-	while ((m = regex.exec(fragmentString))) {
-		params[decodeURIComponent(m[1])] = decodeURIComponent(m[2])
-	}
-	if (Object.keys(params).length > 0) {
-		localStorage.setItem('oauth2-params', JSON.stringify(params))
-	}
-}
-
 // App Logic
-class App extends React.Component<
-	{},
-	{
-		auth: IAuthState
-		childImportState: object
-		childSearchState: object
-		childViewState: IAppViewState
-		dataFile: IDriveFile
-		editEntry: IJournalEntry
-		showModal: boolean
-	}
-> {
-	constructor(props: Readonly<{ showModal: boolean }>) {
+interface IAppProps {
+	showModal?: boolean
+}
+interface IAppState {
+	auth: IAuthState
+	childImportState: object
+	childSearchState: IAppSearchState
+	childViewState: IAppViewState
+	dataFile: IDriveFile
+	editEntry: IJournalEntry
+	showModal: boolean
+}
+class App extends React.Component<IAppProps, IAppState> {
+	constructor(props: Readonly<IAppProps>) {
 		super(props)
 
 		this.state = {
@@ -212,7 +161,7 @@ class App extends React.Component<
 	/**
 	 * Retain state between tab changes
 	 */
-	doSaveSearchState = (newState: object) => {
+	doSaveSearchState = (newState: IAppSearchState) => {
 		this.setState({
 			childSearchState: newState,
 		})
@@ -302,7 +251,7 @@ class App extends React.Component<
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
 		})
-			.then(response => {
+			.then(_response => {
 				this.setState({
 					auth: {
 						status: AuthState.Unauthenticated,
@@ -402,7 +351,7 @@ class App extends React.Component<
 			.then(response => {
 				response
 					.json()
-					.then(json => {
+					.then(_json => {
 						this.driveGetFileList()
 					})
 					.catch(error => {
@@ -535,7 +484,7 @@ class App extends React.Component<
 				.then(response => {
 					response
 						.json()
-						.then(fileResource => {
+						.then(_fileResource => {
 							// A: update state
 							let newState = this.state.dataFile
 							newState._isSaving = false
@@ -831,3 +780,56 @@ const AppMain: React.SFC<{ compiler: string; framework: string }> = _props => {
 }
 
 ReactDOM.render(<AppMain compiler='TypeScript' framework='React' />, document.getElementById('root'))
+
+/**
+ * @see: https://developers.google.com/identity/protocols/OAuth2UserAgent#example
+ */
+function oauth2SignIn() {
+	// @see: https://developers.google.com/identity/protocols/OAuth2UserAgent
+
+	// Google's OAuth 2.0 endpoint for requesting an access token
+	var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth'
+
+	// Create <form> element to submit parameters to OAuth 2.0 endpoint.
+	var form = document.createElement('form')
+	form.setAttribute('method', 'GET') // Send as a GET request.
+	form.setAttribute('action', oauth2Endpoint)
+
+	// Parameters to pass to OAuth 2.0 endpoint.
+	var params = {
+		client_id: GITBRENT_CLIENT_ID,
+		scope: GDRIVE_SCOPE,
+		redirect_uri: location.href.indexOf('8080') > -1 ? LOCALHOST_URL : FIREBASE_URL,
+		response_type: 'token',
+		include_granted_scopes: 'true',
+		state: 'pass-through value',
+	}
+
+	// Add form parameters as hidden input values.
+	for (var p in params) {
+		var input = document.createElement('input')
+		input.setAttribute('type', 'hidden')
+		input.setAttribute('name', p)
+		input.setAttribute('value', params[p])
+		form.appendChild(input)
+	}
+
+	// Add form to page and submit it to open the OAuth 2.0 endpoint.
+	document.body.appendChild(form)
+	form.submit()
+}
+
+function parseStoreAccessKey() {
+	var fragmentString = location.hash.substring(1)
+
+	// Parse query string to see if page request is coming from OAuth 2.0 server.
+	var params = {}
+	var regex = /([^&=]+)=([^&]*)/g,
+		m
+	while ((m = regex.exec(fragmentString))) {
+		params[decodeURIComponent(m[1])] = decodeURIComponent(m[2])
+	}
+	if (Object.keys(params).length > 0) {
+		localStorage.setItem('oauth2-params', JSON.stringify(params))
+	}
+}
