@@ -146,7 +146,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 		newState[name] = value
 
 		// A: allow edit of Entry Date, but check for dupe date so PK isnt corrupted
-		if (this.props.editEntry && name == 'entryDate' && value != this.state.origEntryDate) {
+		if (this.props.editEntry && name === 'entryDate' && value !== this.state.origEntryDate) {
 			this.setState({ isDateDupe: this.props.isExistingEntryDate(value) })
 		}
 
@@ -164,7 +164,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 		newState[name] = value
 
 		// A: allow edit of Entry Date, but check for dupe date so PK isnt corrupted
-		if (this.props.editEntry && name == 'entryDate' && value != this.state.origEntryDate) {
+		if (this.props.editEntry && name === 'entryDate' && value !== this.state.origEntryDate) {
 			this.setState({ isDateDupe: this.props.isExistingEntryDate(value) })
 		}
 
@@ -180,7 +180,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 
 		let newState = this.state.dailyEntry
 
-		if (name == 'dreamSigns') {
+		if (name === 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
 			newState.dreams[event.target.getAttribute('data-dream-idx')].dreamSigns = value
 				? value.toString().split(',')
@@ -198,7 +198,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 
 		let newState = this.state.dailyEntry
 
-		if (name == 'dreamSigns') {
+		if (name === 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
 			newState.dreams[event.target.getAttribute('data-dream-idx')].dreamSigns = value
 				? value.toString().split(',')
@@ -216,7 +216,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 
 		let newState = this.state.dailyEntry
 
-		if (name == 'dreamSigns') {
+		if (name === 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
 			newState.dreams[event.target.getAttribute('data-dream-idx')].dreamSigns = value
 				? value.toString().split(',')
@@ -246,7 +246,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 					alert('Unable to delete!\n' + err)
 				})
 				.then((res: Boolean) => {
-					if (res == true) this.modalClose()
+					if (res === true) this.modalClose()
 				})
 		}
 
@@ -270,7 +270,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 			})
 			.then(arrArrays => {
 				let result = arrArrays && arrArrays[0] ? arrArrays[0] : 'NO RESULTS'
-				if (typeof result === 'boolean' && result == true) this.modalClose()
+				if (typeof result === 'boolean' && result === true) this.modalClose()
 				else throw result
 			})
 			.catch(ex => {
@@ -292,7 +292,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 	renderDreamTab = (dream: IJournalDream, dreamIdx: number) => {
 		return (
 			<div
-				className={'tab-pane pt-3' + (dreamIdx == this.state.selectedTab ? ' active' : '')}
+				className={'tab-pane pt-3' + (dreamIdx === this.state.selectedTab ? ' active' : '')}
 				id={'drmtab' + dreamIdx}
 				role='tabpanel'
 				aria-labelledby={'drmtab' + dreamIdx + '-tab'}
@@ -463,7 +463,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 											<li className='nav-item' key={'dreamtab' + idx}>
 												<a
 													className={
-														'nav-link' + (idx == this.state.selectedTab ? ' active' : '')
+														'nav-link' + (idx === this.state.selectedTab ? ' active' : '')
 													}
 													id={'drmtab' + idx + '-tab'}
 													data-toggle='tab'
