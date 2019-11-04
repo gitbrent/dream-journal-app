@@ -32,14 +32,14 @@ import { AuthState, IAuthState, IDriveFile } from './app'
 import LogoBase64 from '../img/logo_base64'
 
 function getReadableFileSizeString(fileSizeInBytes: number) {
-	var i = -1
-	var byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB']
+	let idx = -1
+	let byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB']
 	do {
 		fileSizeInBytes = fileSizeInBytes / 1024
-		i++
+		idx++
 	} while (fileSizeInBytes > 1024)
 
-	return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i]
+	return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[idx]
 }
 
 export interface IHomeProps {
@@ -96,7 +96,7 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 	 */
 	render() {
 		let cardAuthUser: JSX.Element
-		if (this.props.authState.status == AuthState.Authenticated) {
+		if (this.props.authState.status === AuthState.Authenticated) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>
@@ -117,7 +117,7 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 					</div>
 				</div>
 			)
-		} else if (this.props.authState.status == AuthState.Expired) {
+		} else if (this.props.authState.status === AuthState.Expired) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Your session has expired. Please re-authenticate to continue.</p>
@@ -220,7 +220,7 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 								<div
 									className={
 										'card-header' +
-										(this.props.authState.status == AuthState.Authenticated
+										(this.props.authState.status === AuthState.Authenticated
 											? ' bg-success'
 											: ' bg-warning')
 									}>
