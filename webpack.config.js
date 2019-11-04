@@ -1,4 +1,4 @@
-const CleanWebpackPlugin = require("clean-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
@@ -7,7 +7,7 @@ module.exports = {
   //mode: "production", // these 2 made no diff in file size
   //devtool: false,
   plugins: [
-    new CleanWebpackPlugin(["public/build"]),
+    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: "src/templates/index.html"
     })
