@@ -28,12 +28,20 @@
 \*/
 
 import * as React from 'react'
-import { IJournalDream, IJournalEntry, InductionTypes } from './app'
+import { IJournalDream, IJournalEntry, InductionTypes, IDreamSignTag } from './app'
 import BootstrapSwitchButton from 'bootstrap-switch-button-react' // '../../../bootstrap-switch-button-react'
+import ReactTags from 'react-tag-autocomplete'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 // FUTURE: `react-bootstrap` added hooks in 1.0.0-beta.6 which break the whole app (even with react-16.8)
 // FUTURE: swtich to: https://reactstrap.github.io/components/modals/#app
+
+const KeyCodes = {
+	comma: 188,
+	enter: 13,
+}
+
+const delimiters = [KeyCodes.comma, KeyCodes.enter]
 
 const EMPTY_DREAM = {
 	title: '',
@@ -55,6 +63,7 @@ const NEW_ENTRY = Object.freeze({
 })
 
 export interface IAppModalProps {
+	dreamSignTags: IDreamSignTag[]
 	doCreateEntry: Function
 	doDeleteEntry: Function
 	doUpdateEntry: Function
@@ -228,7 +237,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 		this.setState({ dailyEntry: newState })
 	}
 
-	handleDeleteDream = (dreamIdx: number, event: React.MouseEvent<HTMLDivElement>) => {
+	handleDeleteDream = (dreamIdx: number, event: React.MouseEvent<HTMLButtonElement>) => {
 		if (confirm('Delete Dream #' + (dreamIdx + 1) + '?')) {
 			let dailyEntryNew = this.state.dailyEntry
 			dailyEntryNew.dreams.splice(dreamIdx, 1)
@@ -289,7 +298,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 		this.setState({ show: false })
 		this.props.onShowModal({ show: false })
 	}
-	renderDreamTab = (dream: IJournalDream, dreamIdx: number) => {
+	renderDreamTab = (dream: IJournalDream, dreamIdx: number): JSX.Element => {
 		return (
 			<div
 				className={'tab-pane pt-3' + (dreamIdx === this.state.selectedTab ? ' active' : '')}
@@ -298,7 +307,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 				aria-labelledby={'drmtab' + dreamIdx + '-tab'}
 				key={'dreamrow' + dreamIdx}>
 				<div className='row align-items-center mb-3'>
-					<div className='col'>
+					<div className='col-12 col-lg'>
 						<label className='text-muted text-uppercase text-sm'>Title</label>
 						<input
 							name='title'
@@ -309,29 +318,8 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 							data-dream-idx={dreamIdx}
 						/>
 					</div>
-					<div className='col-auto'>
-						<label className='text-muted text-uppercase text-sm d-block'>&nbsp;</label>
-						<div
-							className='iconSvg size24 small circle no cursor-pointer'
-							title='Delete Dream'
-							onClick={event => this.handleDeleteDream(dreamIdx, event)}
-						/>
-					</div>
-				</div>
-				<div className='row mb-3'>
-					<div className='col-12 col-lg-6 mb-3 mb-lg-0'>
-						<label className='text-muted text-uppercase text-sm d-block'>Dream Signs</label>
-						<input
-							name='dreamSigns'
-							type='text'
-							className='form-control'
-							value={dream.dreamSigns}
-							onChange={this.handleInputDreamChange}
-							data-dream-idx={dreamIdx}
-						/>
-					</div>
-					<div className='col-6 col-lg-3'>
-						<label className='text-muted text-uppercase text-sm d-block'>Lucid Dream?</label>
+					<div className='col-5 col-lg-auto'>
+						<label className='text-muted text-uppercase text-sm d-block'>Lucid?</label>
 						<BootstrapSwitchButton
 							onChange={(checked: boolean) => {
 								let newState = this.state.dailyEntry
@@ -339,15 +327,15 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 								this.setState({ dailyEntry: newState })
 							}}
 							checked={dream.isLucidDream}
-							onlabel='Yes'
+							onlabel='Y'
 							onstyle='outline-success'
-							offlabel='No'
+							offlabel='N'
 							offstyle='outline-dark'
 							style='w-100'
 						/>
 					</div>
-					<div className='col-6 col-lg-3'>
-						<label className='text-muted text-uppercase text-sm d-block'>Lucid Method</label>
+					<div className='col-5 col-lg-auto'>
+						<label className='text-muted text-uppercase text-sm d-block'>Method</label>
 						<select
 							name='lucidMethod'
 							value={dream.lucidMethod || InductionTypes.none}
@@ -363,6 +351,46 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 								)
 							})}
 						</select>
+					</div>
+					<div className='col-2 col-lg-auto'>
+						<label className='text-muted text-uppercase text-sm d-block'>Delete</label>
+						<button
+							type='button'
+							title='Delete Dream'
+							className='btn btn-outline-danger'
+							onClick={event => this.handleDeleteDream(dreamIdx, event)}>
+							<div className='iconSvg size16 small circle no cursor-pointer' />
+						</button>
+					</div>
+				</div>
+				<div className='row mb-3'>
+					<div className='col-12 col-lg mb-3 mb-lg-0'>
+						<label className='text-muted text-uppercase text-sm d-block'>DreamSign Tags</label>
+						<input
+							name='dreamSigns'
+							type='text'
+							className='form-control'
+							value={dream.dreamSigns}
+							onChange={this.handleInputDreamChange}
+							data-dream-idx={dreamIdx}
+						/>
+						<ReactTags
+							allowNew={true}
+							allowBackspace={false}
+							minQueryLength={1}
+							tags={dream.dreamSigns.map((sign, idx) => {
+								return { id: idx, name: sign.toLowerCase() }
+							})}
+							suggestions={this.props.dreamSignTags}
+							handleDelete={(idx: number) => {
+								console.log(`delete idx=${idx}`)
+							}}
+							handleAddition={tag => {
+								console.log(tag)
+							}}
+							delimiters={delimiters}
+							className='form-control'
+						/>
 					</div>
 				</div>
 				<div className='row'>
@@ -479,7 +507,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 								<div className='col-auto'>
 									<button
 										type='button'
-										className='btn btn-sm btn-outline-info'
+										className='btn btn-sm btn-outline-success'
 										onClick={this.handleAddDream}>
 										New Dream
 									</button>

@@ -53,6 +53,7 @@ import * as ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom'
 import '../css/bootstrap.yeticyborg.css'
 import '../css/svg-images.css'
+import '../css/react-tags.css'
 import LogoBase64 from '../img/logo_base64'
 import TabHome from '../app/app-home'
 import TabView, { IAppViewState } from '../app/app-view'
@@ -96,6 +97,11 @@ export interface IJournalEntry {
 	starred?: boolean
 	dreams?: Array<IJournalDream>
 }
+export interface IDreamSignTag {
+	id: number
+	name: string
+}
+
 /*
 // TODO: FIXME: https://stackoverflow.com/questions/48699820/how-do-i-hide-api-key-in-create-react-app
 console.log(process.env.REACT_APP_GDRIVE_CLIENT_ID)
@@ -215,7 +221,7 @@ class App extends React.Component<IAppProps, IAppState> {
 						}
 					})
 					.catch(error => {
-						if (error.code == '401') {
+						if (error.code === '401') {
 							let newState: IAuthState = this.state.auth
 							newState.status = AuthState.Expired
 							this.setState({ auth: newState })
@@ -297,7 +303,7 @@ class App extends React.Component<IAppProps, IAppState> {
 						// B: Capture datafile
 						let driveDataFile =
 							data.files.filter(file => {
-								return file.name == JOURNAL_HEADER.name
+								return file.name === JOURNAL_HEADER.name
 							})[0] || null
 						this.setState({
 							dataFile: driveDataFile,
@@ -307,7 +313,7 @@ class App extends React.Component<IAppProps, IAppState> {
 						driveDataFile ? this.doSelectFile() : this.doCreateFile()
 					})
 					.catch(error => {
-						if (error.code == '401') {
+						if (error.code === '401') {
 							oauth2SignIn()
 						} else {
 							console.error ? console.error(error) : console.log(error)
@@ -315,7 +321,7 @@ class App extends React.Component<IAppProps, IAppState> {
 					})
 			})
 			.catch(error => {
-				if (error.code == '401') {
+				if (error.code === '401') {
 					oauth2SignIn()
 				} else {
 					console.error ? console.error(error) : console.log(error)
@@ -359,7 +365,7 @@ class App extends React.Component<IAppProps, IAppState> {
 					})
 			})
 			.catch(error => {
-				if (error.code == '401') {
+				if (error.code === '401') {
 					oauth2SignIn()
 				} else {
 					console.error ? console.error(error) : console.log(error)
@@ -420,9 +426,9 @@ class App extends React.Component<IAppProps, IAppState> {
 					})
 			})
 			.catch(error => {
-				if (error.code == '401') {
+				if (error.code === '401') {
 					oauth2SignIn()
-				} else if (error.code == '503') {
+				} else if (error.code === '503') {
 					let newState = this.state.dataFile
 					newState._isLoading = false
 					// TODO: new field like `hasError` to hold "Service Unavailable" etc
@@ -440,23 +446,34 @@ class App extends React.Component<IAppProps, IAppState> {
 		return new Promise((resolve, reject) => {
 			let params = JSON.parse(localStorage.getItem('oauth2-params'))
 
-			// A
+			// A: Set state
 			let newState = this.state.dataFile
 			newState._isSaving = true
 			this.setState({
 				dataFile: newState,
 			})
 
+			// TEMP: (20191101): vvv TODO: (several entries were loaded before code was solid and created non-array dreamsigns)
+			/*
+			newState.entries.forEach(entry => {
+				entry.dreams.forEach(dream => {
+					// WORKED! if (typeof dream.dreamSigns === 'string') dream.dreamSigns = (dream.dreamSigns as string).split(',')
+					// WORKED! dream.dreamSigns = dream.dreamSigns.map(sign=>{ return sign.trim() })
+				})
+			})
+			// TEMP: ^^^
+			*/
+
 			// B: Sort by `entryDate`
 			let jsonBody: object = {
-				entries: this.state.dataFile.entries.sort((a, b) => {
+				entries: newState.entries.sort((a, b) => {
 					if (a.entryDate > b.entryDate) return 1
 					if (a.entryDate < b.entryDate) return -1
 					return 0
 				}),
 			}
 
-			// C
+			// C: Write file
 			let reqBody: string =
 				'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
 				JSON.stringify(JOURNAL_HEADER) +
@@ -495,10 +512,11 @@ class App extends React.Component<IAppProps, IAppState> {
 							// B: refresh file list (to update "size", "modified")
 							this.driveGetFileList()
 
+							// Done
 							resolve(true)
 						})
 						.catch(error => {
-							if (error.code == '401') {
+							if (error.code === '401') {
 								oauth2SignIn()
 							} else {
 								// TODO: Show message onscreen
@@ -507,7 +525,7 @@ class App extends React.Component<IAppProps, IAppState> {
 						})
 				})
 				.catch(error => {
-					if (error.code == '401') {
+					if (error.code === '401') {
 						oauth2SignIn()
 					} else {
 						reject(error)
@@ -518,7 +536,7 @@ class App extends React.Component<IAppProps, IAppState> {
 
 	isExistingEntryDate = (checkDate: string) => {
 		return this.state.dataFile.entries.filter(ent => {
-			return ent.entryDate == checkDate
+			return ent.entryDate === checkDate
 		}).length > 0
 			? true
 			: false
@@ -542,13 +560,31 @@ class App extends React.Component<IAppProps, IAppState> {
 						throw err
 					})
 					.then(res => {
-						if (res != true) throw res
+						if (res !== true) throw res
 						resolve(true)
 					})
 					.catch(err => {
 						reject(err)
 					})
 			}
+		})
+	}
+
+	getDreamSignTags = (): IDreamSignTag[] => {
+		let allTags: string[] = []
+
+		if (!this.state.dataFile || !this.state.dataFile.entries) return []
+
+		this.state.dataFile.entries.forEach(entry => {
+			entry.dreams.forEach(dream => {
+				dream.dreamSigns.forEach(sign => {
+					if (sign && allTags.indexOf(sign.toLowerCase()) === -1) allTags.push(sign.toLowerCase())
+				})
+			})
+		})
+
+		return allTags.sort().map((sign, idx) => {
+			return { id: idx, name: sign }
 		})
 	}
 
@@ -572,7 +608,7 @@ class App extends React.Component<IAppProps, IAppState> {
 						throw err
 					})
 					.then(res => {
-						if (res != true) throw res
+						if (res !== true) throw res
 						resolve(true)
 					})
 					.catch(err => {
@@ -592,7 +628,7 @@ class App extends React.Component<IAppProps, IAppState> {
 				reject('No data file currently selected')
 			} else {
 				let editEntry = newState.entries.filter(ent => {
-					return ent.entryDate == (origEntryDate != entry.entryDate ? origEntryDate : entry.entryDate)
+					return ent.entryDate === (origEntryDate !== entry.entryDate ? origEntryDate : entry.entryDate)
 				})[0]
 
 				if (!editEntry) {
@@ -611,7 +647,7 @@ class App extends React.Component<IAppProps, IAppState> {
 							throw err
 						})
 						.then(res => {
-							if (res != true) throw res
+							if (res !== true) throw res
 							resolve(true)
 						})
 						.catch(err => {
@@ -632,11 +668,11 @@ class App extends React.Component<IAppProps, IAppState> {
 			} else {
 				// A:
 				let delIdx = newState.entries.findIndex(ent => {
-					return ent.entryDate == entryDate
+					return ent.entryDate === entryDate
 				})
 
 				// B:
-				if (delIdx == -1) reject('Unable to find `entryDate` ' + entryDate)
+				if (delIdx === -1) reject('Unable to find `entryDate` ' + entryDate)
 
 				// C:
 				newState.entries.splice(delIdx, 1)
@@ -652,7 +688,7 @@ class App extends React.Component<IAppProps, IAppState> {
 						throw err
 					})
 					.then(res => {
-						if (res != true) throw res
+						if (res !== true) throw res
 						resolve(true)
 					})
 					.catch(err => {
@@ -679,6 +715,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		return (
 			<TabView
 				dataFile={this.state.dataFile || null}
+				dreamSignTags={this.getDreamSignTags()}
 				onShowModal={this.chgShowModal}
 				doSaveViewState={this.doSaveViewState}
 				viewState={this.state.childViewState}
@@ -761,6 +798,7 @@ class App extends React.Component<IAppProps, IAppState> {
 				<Route path='/import' render={this.Import} />
 
 				<EntryModal
+					dreamSignTags={this.getDreamSignTags()}
 					doCreateEntry={this.doCreateEntry}
 					doDeleteEntry={this.doDeleteEntry}
 					doUpdateEntry={this.doUpdateEntry}
@@ -788,15 +826,15 @@ function oauth2SignIn() {
 	// @see: https://developers.google.com/identity/protocols/OAuth2UserAgent
 
 	// Google's OAuth 2.0 endpoint for requesting an access token
-	var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth'
+	let oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth'
 
 	// Create <form> element to submit parameters to OAuth 2.0 endpoint.
-	var form = document.createElement('form')
+	let form = document.createElement('form')
 	form.setAttribute('method', 'GET') // Send as a GET request.
 	form.setAttribute('action', oauth2Endpoint)
 
 	// Parameters to pass to OAuth 2.0 endpoint.
-	var params = {
+	let params = {
 		client_id: GITBRENT_CLIENT_ID,
 		scope: GDRIVE_SCOPE,
 		redirect_uri: location.href.indexOf('8080') > -1 ? LOCALHOST_URL : FIREBASE_URL,
@@ -806,8 +844,8 @@ function oauth2SignIn() {
 	}
 
 	// Add form parameters as hidden input values.
-	for (var p in params) {
-		var input = document.createElement('input')
+	for (let p in params) {
+		let input = document.createElement('input')
 		input.setAttribute('type', 'hidden')
 		input.setAttribute('name', p)
 		input.setAttribute('value', params[p])
@@ -820,11 +858,11 @@ function oauth2SignIn() {
 }
 
 function parseStoreAccessKey() {
-	var fragmentString = location.hash.substring(1)
+	let fragmentString = location.hash.substring(1)
 
 	// Parse query string to see if page request is coming from OAuth 2.0 server.
-	var params = {}
-	var regex = /([^&=]+)=([^&]*)/g,
+	let params = {}
+	let regex = /([^&=]+)=([^&]*)/g,
 		m
 	while ((m = regex.exec(fragmentString))) {
 		params[decodeURIComponent(m[1])] = decodeURIComponent(m[2])

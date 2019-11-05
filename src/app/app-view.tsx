@@ -30,10 +30,11 @@
 import * as React from 'react'
 import DateRangePicker from '../app/date-range-picker'
 import Pagination from '../app/pagination'
-import { IJournalEntry, IDriveFile } from './app'
+import { IJournalEntry, IDriveFile, IDreamSignTag } from './app'
 
 export interface IAppViewProps {
 	dataFile: IDriveFile
+	dreamSignTags: IDreamSignTag[]
 	onShowModal: Function
 	doSaveViewState: Function
 	viewState: IAppViewState
@@ -67,14 +68,16 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 	handleNewModal = (_event: React.MouseEvent<HTMLInputElement>) => {
 		this.props.onShowModal({
 			show: true,
+			tags: this.props.dreamSignTags
 		})
 	}
 
 	handleEntryEdit = (_event: React.MouseEvent<HTMLButtonElement>, editEntryDate: IJournalEntry['entryDate']) => {
 		this.props.onShowModal({
 			show: true,
+			tags: this.props.dreamSignTags,
 			editEntry: this.props.dataFile.entries.filter(entry => {
-				return entry.entryDate == editEntryDate
+				return entry.entryDate === editEntryDate
 			})[0],
 		})
 	}
@@ -101,7 +104,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 					dateEntry <= this.state.dateRangeTo
 				)
 					return true
-				else if (this.state.dateRangeFrom && !this.state.dateRangeTo && dateEntry == this.state.dateRangeFrom)
+				else if (this.state.dateRangeFrom && !this.state.dateRangeTo && dateEntry === this.state.dateRangeFrom)
 					return true
 				else if (!this.state.dateRangeFrom && !this.state.dateRangeTo) return true
 				else return false
@@ -174,7 +177,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 										</td>
 										<td className='text-center'>
 											{entry.dreams.filter(dream => {
-												return dream.isLucidDream == true
+												return dream.isLucidDream === true
 											}).length > 0 ? (
 												<div
 													className='iconSvg size24 circle check'
@@ -196,7 +199,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 							})}
 					</tbody>
 					<tfoot>
-						{this.props.dataFile && this.props.dataFile.entries && this.props.dataFile.entries.length == 0 && (
+						{this.props.dataFile && this.props.dataFile.entries && this.props.dataFile.entries.length === 0 && (
 							<tr>
 								<td colSpan={6} className='text-center p-3 text-muted'>
 									(No Dream Journal entries found - select "Add Journal Entry" above to create a new
