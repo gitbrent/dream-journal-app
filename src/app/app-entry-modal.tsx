@@ -366,27 +366,25 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 				<div className='row mb-3'>
 					<div className='col-12 col-lg mb-3 mb-lg-0'>
 						<label className='text-muted text-uppercase text-sm d-block'>DreamSign Tags</label>
-						<input
-							name='dreamSigns'
-							type='text'
-							className='form-control'
-							value={dream.dreamSigns}
-							onChange={this.handleInputDreamChange}
-							data-dream-idx={dreamIdx}
-						/>
 						<ReactTags
 							allowNew={true}
 							allowBackspace={false}
 							minQueryLength={1}
-							tags={dream.dreamSigns.map((sign, idx) => {
+							tags={dream.dreamSigns.sort().map((sign, idx) => {
 								return { id: idx, name: sign.toLowerCase() }
 							})}
 							suggestions={this.props.dreamSignTags}
 							handleDelete={(idx: number) => {
-								console.log(`delete idx=${idx}`)
+								let newState = this.state.dailyEntry
+								newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
+								this.setState({ dailyEntry: newState })
 							}}
-							handleAddition={tag => {
-								console.log(tag)
+							handleAddition={(tag: IDreamSignTag) => {
+								let newState = this.state.dailyEntry
+								// Dont allow dupes
+								if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1)
+									newState.dreams[dreamIdx].dreamSigns.push(tag.name.trim())
+								this.setState({ dailyEntry: newState })
 							}}
 							delimiters={delimiters}
 							className='form-control'
