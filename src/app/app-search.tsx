@@ -81,7 +81,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 	}
 
 	getTotalMonths = () => {
-		if (!this.props.dataFile || (this.props.dataFile.entries || []).length == 0) return 0
+		if (!this.props.dataFile || (this.props.dataFile.entries || []).length === 0) return 0
 
 		let d1 = new Date(this.props.dataFile.entries[0].entryDate)
 		let d2 = new Date(this.props.dataFile.entries[this.props.dataFile.entries.length - 1].entryDate)
@@ -106,7 +106,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 		this.props.onShowModal({
 			show: true,
 			editEntry: this.props.dataFile.entries.filter(entry => {
-				return entry.entryDate == entryDate
+				return entry.entryDate === entryDate
 			})[0],
 		})
 	}
@@ -114,9 +114,9 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 	handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
 		let newState = { searchOptMatchType: null }
 
-		if (event.target.value == SearchMatchTypes.contains) newState.searchOptMatchType = SearchMatchTypes.contains
-		else if (event.target.value == SearchMatchTypes.starts) newState.searchOptMatchType = SearchMatchTypes.starts
-		else if (event.target.value == SearchMatchTypes.whole) newState.searchOptMatchType = SearchMatchTypes.whole
+		if (event.target.value === SearchMatchTypes.contains) newState.searchOptMatchType = SearchMatchTypes.contains
+		else if (event.target.value === SearchMatchTypes.starts) newState.searchOptMatchType = SearchMatchTypes.starts
+		else if (event.target.value === SearchMatchTypes.whole) newState.searchOptMatchType = SearchMatchTypes.whole
 		this.setState(newState)
 
 		setTimeout(this.doKeywordSearch, 100) // TODO: no use, state change
@@ -124,10 +124,10 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 	handleScopeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
 		let newState = { searchOptScope: null }
 
-		if (event.target.value == SearchScopes.all) newState.searchOptScope = SearchScopes.all
-		else if (event.target.value == SearchScopes.notes) newState.searchOptScope = SearchScopes.notes
-		else if (event.target.value == SearchScopes.signs) newState.searchOptScope = SearchScopes.signs
-		else if (event.target.value == SearchScopes.title) newState.searchOptScope = SearchScopes.title
+		if (event.target.value === SearchScopes.all) newState.searchOptScope = SearchScopes.all
+		else if (event.target.value === SearchScopes.notes) newState.searchOptScope = SearchScopes.notes
+		else if (event.target.value === SearchScopes.signs) newState.searchOptScope = SearchScopes.signs
+		else if (event.target.value === SearchScopes.title) newState.searchOptScope = SearchScopes.title
 		this.setState(newState)
 
 		setTimeout(this.doKeywordSearch, 100) // TODO: no use, state change
@@ -136,15 +136,15 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 	doKeywordSearch = () => {
 		let arrFound = []
 		let regex = new RegExp(this.state.searchTerm, 'gi') // SearchMatchTypes.contains
-		if (this.state.searchOptMatchType == SearchMatchTypes.whole)
+		if (this.state.searchOptMatchType === SearchMatchTypes.whole)
 			regex = new RegExp('\\b' + this.state.searchTerm + '\\b', 'gi')
-		else if (this.state.searchOptMatchType == SearchMatchTypes.starts)
+		else if (this.state.searchOptMatchType === SearchMatchTypes.starts)
 			regex = new RegExp('\\b' + this.state.searchTerm, 'gi')
 		if (!this.props.dataFile || this.props.dataFile.entries.length <= 0) return
 
 		this.props.dataFile.entries.forEach(entry => {
 			;(entry.dreams || []).forEach(dream => {
-				if (this.state.searchOptScope == SearchScopes.all) {
+				if (this.state.searchOptScope === SearchScopes.all) {
 					if (
 						(dream.notes || '').match(regex) ||
 						(dream.title || '').match(regex) ||
@@ -159,7 +159,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 							dream: dream,
 						})
 					}
-				} else if (this.state.searchOptScope == SearchScopes.notes) {
+				} else if (this.state.searchOptScope === SearchScopes.notes) {
 					if ((dream.notes || '').match(regex)) {
 						arrFound.push({
 							entryDate: entry.entryDate,
@@ -167,7 +167,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 							dream: dream,
 						})
 					}
-				} else if (this.state.searchOptScope == SearchScopes.signs) {
+				} else if (this.state.searchOptScope === SearchScopes.signs) {
 					if (
 						Array.isArray(dream.dreamSigns) &&
 						dream.dreamSigns.filter(sign => {
@@ -180,7 +180,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 							dream: dream,
 						})
 					}
-				} else if (this.state.searchOptScope == SearchScopes.title) {
+				} else if (this.state.searchOptScope === SearchScopes.title) {
 					if ((dream.title || '').match(regex)) {
 						arrFound.push({
 							entryDate: entry.entryDate,
@@ -202,7 +202,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 
 		if (!this.props.dataFile || this.props.dataFile.entries.length <= 0) return
 
-		if (type == SearchScopes._starred) {
+		if (type === SearchScopes._starred) {
 			this.props.dataFile.entries
 				.filter(entry => {
 					return entry.starred
@@ -243,11 +243,11 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 		//let parts = text.split(new RegExp(`(${highlight})`, 'gi'));
 		let parts = []
 		try {
-			if (this.state.searchOptMatchType == SearchMatchTypes.contains)
+			if (this.state.searchOptMatchType === SearchMatchTypes.contains)
 				parts = text.split(new RegExp('(' + highlight + ')', 'gi'))
-			else if (this.state.searchOptMatchType == SearchMatchTypes.whole)
+			else if (this.state.searchOptMatchType === SearchMatchTypes.whole)
 				parts = text.split(new RegExp('\\b(' + highlight + ')\\b', 'gi'))
-			else if (this.state.searchOptMatchType == SearchMatchTypes.starts)
+			else if (this.state.searchOptMatchType === SearchMatchTypes.starts)
 				parts = text.split(new RegExp('\\b(' + highlight + ')', 'gi'))
 		} catch (ex) {
 			//this.setState({ searchTermInvalidMsg: ex }) // TODO: FIXME: cannot set state bc were called inside `render()` !!
@@ -311,8 +311,8 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 									)}
 								</div>
 							</div>
-							{this.state.searchOptScope == SearchScopes.all ||
-							this.state.searchOptScope == SearchScopes.notes ? (
+							{this.state.searchOptScope === SearchScopes.all ||
+							this.state.searchOptScope === SearchScopes.notes ? (
 								<div className='card-body'>
 									<p className='card-text' style={{ whiteSpace: 'pre-line' }}>
 										{this.getHighlightedText(entry.dream.notes, this.state.searchTerm)}
@@ -322,8 +322,8 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 								''
 							)}
 							<div className='card-footer text-info'>
-								{this.state.searchOptScope == SearchScopes.all ||
-								this.state.searchOptScope == SearchScopes.signs ? (
+								{this.state.searchOptScope === SearchScopes.all ||
+								this.state.searchOptScope === SearchScopes.signs ? (
 									<div>
 										{entry.dream.dreamSigns && Array.isArray(entry.dream.dreamSigns)
 											? entry.dream.dreamSigns.map((sign, idx) => {
@@ -464,7 +464,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 												value={this.state.searchTerm}
 												className='form-control'
 												onKeyPress={event => {
-													if (event.key == 'Enter') this.doKeywordSearch()
+													if (event.key === 'Enter') this.doKeywordSearch()
 												}}
 												onChange={event => {
 													this.setState({ searchTerm: event.target.value })
@@ -510,7 +510,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 												onChange={this.handleScopeChange}>
 												{Object.keys(SearchScopes)
 													.filter(key => {
-														return key.indexOf('_') == -1
+														return key.indexOf('_') === -1
 													})
 													.map(val => {
 														return (
