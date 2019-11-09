@@ -8,9 +8,9 @@
 * Import wizard to convert your existing dreams into clean, searchable format
 
 
-# Online Dream Journal
+# Cloud-based Dream Journal
 
-Hosted on Google Firebase: [Brain Cloud Dream Journal](https://brain-cloud-dream-journal.firebaseapp.com/)
+[Brain Cloud Dream Journal](https://brain-cloud-dream-journal.firebaseapp.com/) securely hosted on Google Firebase.
 
 
 # Application Screens
@@ -24,8 +24,8 @@ Hosted on Google Firebase: [Brain Cloud Dream Journal](https://brain-cloud-dream
 
 # Credits
 
-Based on [react-typescript](https://github.com/basarat/react-typescript)
-App Icon made by [Nhor Phai](https://www.flaticon.com/authors/nhor-phai) from [Flaticon](https://www.flaticon.com/) [Creative Commons BY 3.0](http://creativecommons.org/licenses/by/3.0/")
+* Based on [react-typescript](https://github.com/basarat/react-typescript)
+* App icon made by [Nhor Phai](https://www.flaticon.com/authors/nhor-phai) from [Flaticon](https://www.flaticon.com/) [Creative Commons BY 3.0](http://creativecommons.org/licenses/by/3.0/")
 
 
 # License
