@@ -267,25 +267,9 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 		)
 	}
 
-	render() {
-		let totalDreams = 0
-		let totalLucids = 0
-		let totalStarred = 0
-
-		if (this.props.dataFile && this.props.dataFile.entries) {
-			this.props.dataFile.entries.forEach(entry => {
-				totalDreams += entry.dreams.length
-
-				if (entry.starred) totalStarred++
-
-				totalLucids += entry.dreams.filter(dream => {
-					return dream.isLucidDream
-				}).length
-			})
-		}
-
+	searchMatches = (): JSX.Element => {
 		// TODO: Show Lucid/Succes check icon and star icon when found
-		let searchMatches: JSX.Element = (
+		return (
 			<div>
 				{this.state.searchMatches.map((entry, idx) => {
 					return (
@@ -352,6 +336,24 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 				})}
 			</div>
 		)
+	}
+
+	render() {
+		let totalDreams = 0
+		let totalLucids = 0
+		let totalStarred = 0
+
+		if (this.props.dataFile && this.props.dataFile.entries) {
+			this.props.dataFile.entries.forEach(entry => {
+				totalDreams += entry.dreams.length
+
+				if (entry.starred) totalStarred++
+
+				totalLucids += entry.dreams.filter(dream => {
+					return dream.isLucidDream
+				}).length
+			})
+		}
 
 		return (
 			<div>
@@ -544,17 +546,15 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 				</section>
 
 				<main className='container my-5'>
-					{this.state.searchTerm && this.state.searchMatches.length > 0 ? (
+					{this.state.searchTerm && this.state.searchMatches.length > 0 && (
 						<h3 className='text-center text-primary pt-0 pb-3 mb-3'>
 							Search Results: {this.state.searchMatches.length} Dreams (
 							{Math.round((this.state.searchMatches.length / totalDreams) * 100)}
 							%)
 						</h3>
-					) : (
-						''
 					)}
 					{this.state.searchTerm ? (
-						<div className='card-columns'>{searchMatches}</div>
+						<div className='card-columns'>{this.searchMatches()}</div>
 					) : (
 						<h4 className='bg-light text-center text-muted mb-0 py-5'>(enter a keyword above to search)</h4>
 					)}
