@@ -1,7 +1,6 @@
 import React from 'react'
+import { IDriveFile, IJournalDream, IJournalEntry } from './types'
 import Alert from 'react-bootstrap/Alert'
-//import BootstrapSwitchButton from 'bootstrap-switch-button-react'
-import { IDriveFile, IJournalDream, IJournalEntry } from './app'
 
 enum SearchMatchTypes {
 	contains = 'Contains',
@@ -268,7 +267,6 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 	}
 
 	searchMatches = (): JSX.Element => {
-		// TODO: Show Lucid/Succes check icon and star icon when found
 		return (
 			<div>
 				{this.state.searchMatches.map((entry, idx) => {
@@ -419,7 +417,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 											: '-'}
 									</small>
 								</div>
-								<div className='w-100 d-md-none' />
+								<div className='w-100 mb-3 d-md-none mb-md-0' />
 								<div
 									className='col text-center'
 									onClick={() => this.doShowByType(SearchScopes._starred)}>

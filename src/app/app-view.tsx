@@ -30,7 +30,7 @@
 import * as React from 'react'
 import DateRangePicker from '../app/date-range-picker'
 import Pagination from '../app/pagination'
-import { IJournalEntry, IDriveFile, IDreamSignTag } from './app'
+import { IJournalEntry, IDriveFile, IDreamSignTag } from './types'
 
 export interface IAppViewProps {
 	dataFile: IDriveFile

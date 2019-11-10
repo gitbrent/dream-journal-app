@@ -30,24 +30,6 @@
 // TODO: [Auth redirect](https://reacttraining.com/react-router/web/example/auth-workflow)
 // FUTURE: https://github.com/FortAwesome/react-fontawesome
 
-export enum AuthState {
-	Authenticated = 'Authenticated',
-	Unauthenticated = 'Unauthenticated',
-	Expired = 'Expired',
-}
-export enum ImportTypes {
-	'docx' = 'Document',
-	'xlsx' = 'Spreadsheet',
-}
-export enum InductionTypes {
-	'none' = '(n/a)',
-	'dild' = 'DILD',
-	'mild' = 'MILD',
-	'wbtb' = 'WBTB',
-	'wild' = 'WILD',
-	'other' = 'Other',
-}
-
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom'
@@ -60,47 +42,7 @@ import TabView, { IAppViewState } from '../app/app-view'
 import TabImport from '../app/app-import'
 import TabSearch, { IAppSearchState } from '../app/app-search'
 import EntryModal from '../app/app-entry-modal'
-
-export interface IAuthState {
-	status: AuthState
-	userName: ''
-	userPhoto: ''
-}
-export interface IDriveFile {
-	_isLoading: boolean
-	_isSaving: boolean
-	id: string
-	entries: IJournalEntry[]
-	modifiedTime: string
-	name: string
-	size: string
-}
-/**
- * A single dream entry - there are 1+ of these in every IJournalEntry
- */
-export interface IJournalDream {
-	title: string
-	notes?: string
-	dreamSigns?: Array<string>
-	dreamImages?: Array<string>
-	isLucidDream: boolean
-	lucidMethod: InductionTypes
-}
-/**
- * A daily journal entry containing 1+ dreams
- */
-export interface IJournalEntry {
-	entryDate: string
-	bedTime?: string
-	notesPrep?: string
-	notesWake?: string
-	starred?: boolean
-	dreams?: Array<IJournalDream>
-}
-export interface IDreamSignTag {
-	id: number
-	name: string
-}
+import { IAuthState, IDriveFile, IJournalEntry, AuthState, IDreamSignTag } from './types'
 
 /*
 // TODO: FIXME: https://stackoverflow.com/questions/48699820/how-do-i-hide-api-key-in-create-react-app
@@ -779,13 +721,18 @@ class App extends React.Component<IAppProps, IAppState> {
 								</NavLink>
 							</li>
 							<li className='nav-item'>
+								<NavLink to='/tags' className='nav-link' activeClassName='active'>
+									Dreamsign Tags
+								</NavLink>
+							</li>
+							<li className='nav-item'>
 								<NavLink
 									to='/import'
 									activeClassName='active'
 									className={
 										!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'
 									}>
-									Import Journal
+									Import Dreams
 								</NavLink>
 							</li>
 						</ul>

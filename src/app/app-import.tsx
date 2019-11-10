@@ -28,7 +28,7 @@
 \*/
 
 import React from 'react'
-import { IDriveFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './app'
+import { IDriveFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './types'
 import BootstrapSwitchButton from 'bootstrap-switch-button-react' // '../../../bootstrap-switch-button-react'
 import ContentEditable from 'react-contenteditable'
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'

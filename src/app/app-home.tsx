@@ -28,7 +28,7 @@
 \*/
 
 import * as React from 'react'
-import { AuthState, IAuthState, IDriveFile } from './app'
+import { AuthState, IAuthState, IDriveFile } from './types'
 import LogoBase64 from '../img/logo_base64'
 
 function getReadableFileSizeString(fileSizeInBytes: number) {
