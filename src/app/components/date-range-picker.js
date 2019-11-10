@@ -5,7 +5,7 @@
 import React from 'react'
 import Helmet from 'react-helmet'
 import DayPicker, { DateUtils } from 'react-day-picker'
-import '../css/daypicker.css'
+import '../../css/daypicker.css'
 
 export default class DateRangeSelector extends React.Component {
 	constructor(props) {

@@ -28,8 +28,8 @@
 \*/
 
 import * as React from 'react'
-import DateRangePicker from '../app/date-range-picker'
-import Pagination from '../app/pagination'
+import DateRangePicker from '../app/components/date-range-picker'
+import Pagination from '../app/components/pagination'
 import { IJournalEntry, IDriveFile, IDreamSignTag } from './types'
 
 export interface IAppViewProps {

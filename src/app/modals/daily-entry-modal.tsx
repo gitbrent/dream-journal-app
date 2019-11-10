@@ -28,7 +28,7 @@
 \*/
 
 import * as React from 'react'
-import { IJournalDream, IJournalEntry, InductionTypes, IDreamSignTag } from './types'
+import { IJournalDream, IJournalEntry, InductionTypes, IDreamSignTag } from '../types'
 import BootstrapSwitchButton from 'bootstrap-switch-button-react' // '../../../bootstrap-switch-button-react'
 import ReactTags from 'react-tag-autocomplete'
 import Button from 'react-bootstrap/Button'

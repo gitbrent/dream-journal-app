@@ -1,20 +1,7 @@
 import React from 'react'
-import { IDriveFile, IJournalDream, IJournalEntry } from './types'
+import { IDriveFile, ISearchMatch, SearchMatchTypes, SearchScopes } from './types'
 import Alert from 'react-bootstrap/Alert'
-
-enum SearchMatchTypes {
-	contains = 'Contains',
-	starts = 'Starts With',
-	whole = 'Whole Word',
-}
-enum SearchScopes {
-	all = 'All Fields',
-	signs = 'Dream Signs',
-	notes = 'Dream Notes',
-	title = 'Dream Title',
-	_starred = 'starred',
-	_isLucid = 'isLucidDream',
-}
+import SearchResults from './components/search-results'
 
 export interface IAppSearchProps {
 	dataFile: IDriveFile
@@ -29,11 +16,6 @@ export interface IAppSearchState {
 	searchTerm: string
 	searchTermInvalidMsg: string
 	showAlert: boolean
-}
-interface ISearchMatch {
-	entryDate: IJournalEntry['entryDate']
-	starred: IJournalEntry['starred']
-	dream: IJournalDream
 }
 
 export default class TabSearch extends React.Component<IAppSearchProps, IAppSearchState> {
@@ -90,14 +72,6 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 		months += d2.getMonth()
 		months += 2 // include both first and last months
 
-		return months <= 0 ? 0 : months
-	}
-
-	monthDiff = (d1: Date, d2: Date) => {
-		let months: number
-		months = (d2.getFullYear() - d1.getFullYear()) * 12
-		months -= d1.getMonth() + 1
-		months += d2.getMonth()
 		return months <= 0 ? 0 : months
 	}
 
@@ -232,108 +206,6 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 		this.setState({
 			searchMatches: arrFound,
 		})
-	}
-
-	/**
-	 * @see: https://stackoverflow.com/questions/29652862/highlight-text-using-reactjs
-	 */
-	getHighlightedText(text: string, highlight: string) {
-		// Split on highlight term and include term into parts, ignore case
-		//let parts = text.split(new RegExp(`(${highlight})`, 'gi'));
-		let parts = []
-		try {
-			if (this.state.searchOptMatchType === SearchMatchTypes.contains)
-				parts = text.split(new RegExp('(' + highlight + ')', 'gi'))
-			else if (this.state.searchOptMatchType === SearchMatchTypes.whole)
-				parts = text.split(new RegExp('\\b(' + highlight + ')\\b', 'gi'))
-			else if (this.state.searchOptMatchType === SearchMatchTypes.starts)
-				parts = text.split(new RegExp('\\b(' + highlight + ')', 'gi'))
-		} catch (ex) {
-			//this.setState({ searchTermInvalidMsg: ex }) // TODO: FIXME: cannot set state bc were called inside `render()` !!
-			console.warn(ex)
-		}
-		return (
-			<span>
-				{' '}
-				{parts.map((part, i) => (
-					<span
-						key={i}
-						className={part.toLowerCase() === highlight.toLowerCase() ? 'badge badge-warning' : ''}>
-						{part}
-					</span>
-				))}{' '}
-			</span>
-		)
-	}
-
-	searchMatches = (): JSX.Element => {
-		return (
-			<div>
-				{this.state.searchMatches.map((entry, idx) => {
-					return (
-						<div className='card' key={'searchResultCard' + idx}>
-							<div className='row'>
-								<div className='col'>
-									<h5 className='card-header'>
-										<a
-											href='javascript:void(0)'
-											title='View Entry'
-											className={'card-link' + (entry.dream.isLucidDream ? ' text-success' : '')}
-											onClick={() => this.handleEntryEdit(entry.entryDate)}>
-											{entry.dream.title}
-										</a>
-									</h5>
-								</div>
-								<div className='col-auto'>
-									{entry.starred ? <div className='iconSvg size16 star-on mt-2 mx-2' /> : ''}
-									{entry.dream.isLucidDream ? (
-										<div className='iconSvg size24 circle check mt-2 mx-2' />
-									) : (
-										''
-									)}
-								</div>
-							</div>
-							{this.state.searchOptScope === SearchScopes.all ||
-							this.state.searchOptScope === SearchScopes.notes ? (
-								<div className='card-body'>
-									<p className='card-text' style={{ whiteSpace: 'pre-line' }}>
-										{this.getHighlightedText(entry.dream.notes, this.state.searchTerm)}
-									</p>
-								</div>
-							) : (
-								''
-							)}
-							<div className='card-footer text-info'>
-								{this.state.searchOptScope === SearchScopes.all ||
-								this.state.searchOptScope === SearchScopes.signs ? (
-									<div>
-										{entry.dream.dreamSigns && Array.isArray(entry.dream.dreamSigns)
-											? entry.dream.dreamSigns.map((sign, idx) => {
-													return (
-														<div
-															className='badge badge-info text-lowercase p-2 mr-2 mb-2'
-															key={'sign' + idx}>
-															{sign}
-														</div>
-													)
-											  })
-											: ''}
-									</div>
-								) : (
-									''
-								)}
-								<small>
-									{new Date(entry.entryDate).toLocaleDateString()}
-									<span className='ml-2'>
-										({this.monthDiff(new Date(entry.entryDate), new Date())} months ago)
-									</span>
-								</small>
-							</div>
-						</div>
-					)
-				})}
-			</div>
-		)
 	}
 
 	render() {
@@ -552,7 +424,15 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 						</h3>
 					)}
 					{this.state.searchTerm ? (
-						<div className='card-columns'>{this.searchMatches()}</div>
+						<div className='card-columns'>
+							<SearchResults
+								handleEntryEdit={this.handleEntryEdit}
+								searchMatches={this.state.searchMatches}
+								searchOptScope={this.state.searchOptScope}
+								searchOptMatchType={this.state.searchOptMatchType}
+								searchTerm={this.state.searchTerm}
+							/>
+						</div>
 					) : (
 						<h4 className='bg-light text-center text-muted mb-0 py-5'>(enter a keyword above to search)</h4>
 					)}
