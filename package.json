@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "bootstrap-switch-button-react": "^1.1.0",
+    "moment": "^2.24.0",
     "react": "^16.11.0",
     "react-bootstrap": "^1.0.0-beta.14",
     "react-contenteditable": "^3.3.2",
