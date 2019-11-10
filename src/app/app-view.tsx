@@ -68,7 +68,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 	handleNewModal = (_event: React.MouseEvent<HTMLInputElement>) => {
 		this.props.onShowModal({
 			show: true,
-			tags: this.props.dreamSignTags
+			tags: this.props.dreamSignTags,
 		})
 	}
 
@@ -162,7 +162,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 										<td className='text-center d-none d-lg-table-cell'>{entry.bedTime}</td>
 										<td className='text-center'>{entry.dreams.length}</td>
 										<td className='text-left d-none d-md-table-cell'>
-											{dreamSignsUnq.map((sign, idy) => {
+											{dreamSignsUnq.sort().map((sign, idy) => {
 												return (
 													<div
 														className='badge badge-info text-lowercase p-2 mr-2 mb-1'
@@ -199,14 +199,16 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 							})}
 					</tbody>
 					<tfoot>
-						{this.props.dataFile && this.props.dataFile.entries && this.props.dataFile.entries.length === 0 && (
-							<tr>
-								<td colSpan={6} className='text-center p-3 text-muted'>
-									(No Dream Journal entries found - select "Add Journal Entry" above to create a new
-									one)
-								</td>
-							</tr>
-						)}
+						{this.props.dataFile &&
+							this.props.dataFile.entries &&
+							this.props.dataFile.entries.length === 0 && (
+								<tr>
+									<td colSpan={6} className='text-center p-3 text-muted'>
+										(No Dream Journal entries found - select "Add Journal Entry" above to create a
+										new one)
+									</td>
+								</tr>
+							)}
 						{!this.props.dataFile && (
 							<tr>
 								<td colSpan={6} className='text-center p-3'>
