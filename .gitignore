@@ -12,3 +12,5 @@ bower_components/
 
 # Data
 src/data/*.json
+
+.prettierrc.json
