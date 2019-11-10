@@ -16,7 +16,19 @@ export enum InductionTypes {
 	'wild' = 'WILD',
 	'other' = 'Other',
 }
-
+export enum SearchMatchTypes {
+	contains = 'Contains',
+	starts = 'Starts With',
+	whole = 'Whole Word',
+}
+export enum SearchScopes {
+	all = 'All Fields',
+	signs = 'Dream Signs',
+	notes = 'Dream Notes',
+	title = 'Dream Title',
+	_starred = 'starred',
+	_isLucid = 'isLucidDream',
+}
 
 export interface IAuthState {
 	status: AuthState
@@ -60,4 +72,10 @@ export interface IJournalEntry {
 export interface IDreamSignTag {
 	id: number
 	name: string
+}
+
+export interface ISearchMatch {
+	entryDate: IJournalEntry['entryDate']
+	starred: IJournalEntry['starred']
+	dream: IJournalDream
 }

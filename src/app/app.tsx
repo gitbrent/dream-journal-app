@@ -41,7 +41,8 @@ import TabHome from '../app/app-home'
 import TabView, { IAppViewState } from '../app/app-view'
 import TabImport from '../app/app-import'
 import TabSearch, { IAppSearchState } from '../app/app-search'
-import EntryModal from '../app/app-entry-modal'
+import TabTags, { IAppTagsState } from '../app/app-tags'
+import EntryModal from '../app/modals/daily-entry-modal'
 import { IAuthState, IDriveFile, IJournalEntry, AuthState, IDreamSignTag } from './types'
 
 /*
@@ -71,6 +72,7 @@ interface IAppState {
 	auth: IAuthState
 	childImportState: object
 	childSearchState: IAppSearchState
+	childTagsState: IAppTagsState
 	childViewState: IAppViewState
 	dataFile: IDriveFile
 	editEntry: IJournalEntry
@@ -88,6 +90,7 @@ class App extends React.Component<IAppProps, IAppState> {
 			},
 			childImportState: null,
 			childSearchState: null,
+			childTagsState: null,
 			childViewState: null,
 			dataFile: null,
 			editEntry: null,
@@ -112,6 +115,14 @@ class App extends React.Component<IAppProps, IAppState> {
 	doSaveSearchState = (newState: IAppSearchState) => {
 		this.setState({
 			childSearchState: newState,
+		})
+	}
+	/**
+	 * Retain state between tab changes
+	 */
+	doSaveTagsState = (newState: IAppTagsState) => {
+		this.setState({
+			childTagsState: newState,
 		})
 	}
 	/**
@@ -674,6 +685,16 @@ class App extends React.Component<IAppProps, IAppState> {
 			/>
 		)
 	}
+	Tags = () => {
+		return (
+			<TabTags
+				dataFile={this.state.dataFile || null}
+				onShowModal={this.chgShowModal}
+				doSaveTagsState={this.doSaveTagsState}
+				tagsState={this.state.childTagsState}
+			/>
+		)
+	}
 	Import = () => {
 		return (
 			<TabImport
@@ -742,6 +763,7 @@ class App extends React.Component<IAppProps, IAppState> {
 				<Route path='/' exact render={this.Home} />
 				<Route path='/journal' render={this.Journal} />
 				<Route path='/search' render={this.Search} />
+				<Route path='/tags' render={this.Tags} />
 				<Route path='/import' render={this.Import} />
 
 				<EntryModal
