@@ -163,7 +163,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 		// A: "Entry Date"
 		this.setState({ _entryDateInvalidMsg: '' })
-		if (this.state._selEntryType == 'first') {
+		if (this.state._selEntryType === 'first') {
 			if ((demoData.split('\n') || []).length > 0) {
 				try {
 					let textParse = demoData.split('\n')[0].replace(/[^0-9$\/]/g, '')
@@ -179,7 +179,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					})
 				}
 			}
-		} else if (this.state._selEntryType == 'match' && this.state._entryDate) {
+		} else if (this.state._selEntryType === 'match' && this.state._entryDate) {
 			;(demoData.split('\n') || []).forEach(line => {
 				try {
 					if (line.trim().match(new RegExp(this.state._entryDate, 'g'))) {
@@ -217,7 +217,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		}
 
 		// C: "Prep Notes" (multi-line)
-		if (this.state._selNotePrepType == 'multi' && this.state._notesPrepEnd) {
+		if (this.state._selNotePrepType === 'multi' && this.state._notesPrepEnd) {
 			let isCapturing = false
 			let strNotesPrep = ''
 			;(demoData.split('\n') || []).forEach(line => {
@@ -238,7 +238,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		}
 
 		// D: "Wake Notes" (multi-line)
-		if (this.state._selNoteWakeType == 'multi' && this.state._notesWakeEnd) {
+		if (this.state._selNoteWakeType === 'multi' && this.state._notesWakeEnd) {
 			let isCapturing = false
 			let strNotesWake = ''
 			;(demoData.split('\n') || []).forEach(line => {
@@ -265,7 +265,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					let keyVal = line.trim().split(new RegExp(this.state[name], 'g'))
 					if (keyVal[1]) {
 						let newState = {}
-						newState[name.replace('_', '')] = name == '_isLucidDream' ? true : keyVal[1]
+						newState[name.replace('_', '')] = name === '_isLucidDream' ? true : keyVal[1]
 						this.setState(newState)
 					}
 				}
@@ -273,7 +273,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		})
 
 		// F: Update "Dream Notes"
-		if (this.state._selDreamNotes == 'after') {
+		if (this.state._selDreamNotes === 'after') {
 			if (!this.state._dreamBreak) {
 				this.setState({ notes: ['(add text to Dream Section)'] })
 			} else {
@@ -293,7 +293,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
 		// A: Capture regex field value
 		let newState = {}
-		if (event.target.name == 'dreamSigns') {
+		if (event.target.name === 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
 			newState['dreamSigns'] = event.target.value
 				? event.target.value.split(this.state._dreamSignsDelim || ',')
@@ -304,15 +304,15 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		this.setState(newState)
 
 		// B:
-		if (name == '_selEntryType') {
+		if (name === '_selEntryType') {
 			this.setState({
 				entryDate: '',
 			})
-		} else if (name == '_selNotePrepType') {
+		} else if (name === '_selNotePrepType') {
 			this.setState({
 				notesPrep: '',
 			})
-		} else if (name == '_selNoteWakeType') {
+		} else if (name === '_selNoteWakeType') {
 			this.setState({
 				notesWake: '',
 			})
@@ -329,7 +329,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 		// A: Capture regex field value
 		let newState = {}
-		if (name == 'dreamSigns') {
+		if (name === 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
 			newState['dreamSigns'] =
 				value && typeof value === 'string' ? value.split(this.state._dreamSignsDelim || ',') : []
@@ -339,15 +339,15 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		this.setState(newState)
 
 		// B:
-		if (name == '_selEntryType') {
+		if (name === '_selEntryType') {
 			this.setState({
 				entryDate: '',
 			})
-		} else if (name == '_selNotePrepType') {
+		} else if (name === '_selNotePrepType') {
 			this.setState({
 				notesPrep: '',
 			})
-		} else if (name == '_selNoteWakeType') {
+		} else if (name === '_selNoteWakeType') {
 			this.setState({
 				notesWake: '',
 			})
@@ -372,7 +372,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		let newState = this.state._parsedSections
 		if (typeof idy === 'number')
 			newState[idx].dreams[idy][name] =
-				name == 'dreamSigns' && typeof value === 'string'
+				name === 'dreamSigns' && typeof value === 'string'
 					? value.split(this.state._dreamSignsDelim || ',')
 					: value
 		else newState[idx][name] = value
@@ -403,8 +403,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		let arrEntries: Array<IJournalEntry> = []
 		let strSecBreak = new RegExp('\n\n')
 		let strImportText = this.state._importText
-		if (this.state._selBreakType == 'blankLine') strSecBreak = new RegExp('\n\n')
-		if (this.state._selBreakType == 'entryDate') strSecBreak = new RegExp(ENTRY_DATE_BREAK)
+		if (this.state._selBreakType === 'blankLine') strSecBreak = new RegExp('\n\n')
+		if (this.state._selBreakType === 'entryDate') strSecBreak = new RegExp(ENTRY_DATE_BREAK)
 
 		// A: reality check
 		if (!this.state._importText) {
@@ -416,7 +416,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		// B: handle "Entry Date" as section break
 		// Merely using `split(new RegExp(this.state._entryDate))` will cause the loss of the date itself
 		// SOLN: Add custom break and split using that string instead so only its lost
-		if (this.state._selBreakType == 'entryDate') {
+		if (this.state._selBreakType === 'entryDate') {
 			strImportText = strImportText.replace(new RegExp(this.state._entryDate, 'gi'), ENTRY_DATE_BREAK + '$&')
 		}
 
@@ -473,9 +473,9 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					}
 
 					// parse entry tokens/dream(s) tokens
-					if (objEntry.dreams.length == 0) {
+					if (objEntry.dreams.length === 0) {
 						// NOTE: As each of the Entry props have diff reqs, handle each one sep
-						if (idx == 0 && this.state._selEntryType == 'first') {
+						if (idx === 0 && this.state._selEntryType === 'first') {
 							try {
 								let textParse = line.split('\n')[0].replace(/[^0-9$\/]/g, '')
 								let dateParse = new Date(textParse)
@@ -489,7 +489,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 								objEntry.entryDate = ex
 							}
 						} else if (
-							this.state._selEntryType == 'match' &&
+							this.state._selEntryType === 'match' &&
 							this.state._entryDate &&
 							line.trim().match(new RegExp(this.state._entryDate, 'g'))
 						) {
@@ -533,7 +533,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 								objEntry.bedTime = time
 							}
 						} else if (line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
-							if (this.state._selNotePrepType == 'single') {
+							if (this.state._selNotePrepType === 'single') {
 								let keyVal = line.trim().split(new RegExp(this.state._notesPrep, 'g'))
 								if (keyVal[1].trim()) objEntry.notesPrep = keyVal[1].trim()
 							}
@@ -554,10 +554,10 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						if (line.trim().match(new RegExp(this.state._title, 'g'))) {
 							let keyVal = line.trim().split(new RegExp(this.state._title, 'g'))
 							if (keyVal[1]) objDream.title = keyVal[1].trim()
-						} else if (objDream.title && this.state._selDreamNotes == 'after' && line) {
+						} else if (objDream.title && this.state._selDreamNotes === 'after' && line) {
 							objDream.notes += (line + '\n').replace(/\n\s*\n/g, '\n')
 							//if (VERBOSE) console.log('dream.notes:\n' + objDream.notes)
-						} else if (this.state._selDreamNotes != 'after') {
+						} else if (this.state._selDreamNotes !== 'after') {
 							// TODO: look for regex
 						}
 
@@ -584,7 +584,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				})
 
 				// 3: Handle fields that can be multi-line
-				if (this.state._selNotePrepType == 'multi' && this.state._notesPrepEnd) {
+				if (this.state._selNotePrepType === 'multi' && this.state._notesPrepEnd) {
 					let isCapturing = false
 					;(sect.split('\n') || []).forEach(line => {
 						if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
@@ -597,7 +597,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						}
 					})
 				}
-				if (this.state._selNoteWakeType == 'multi' && this.state._notesWakeEnd) {
+				if (this.state._selNoteWakeType === 'multi' && this.state._notesWakeEnd) {
 					let isCapturing = false
 					;(sect.split('\n') || []).forEach(line => {
 						console.log(`line = ${line}`)
@@ -610,7 +610,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							// NOTE: Using multiline setting when only a single line exists, will duplicate data
 							// EX: "WAKES: none" => "nonenone" b/c `objEntry.notesWake` is already "none" before this block ran
 							// Therefore, check for this condition
-							if (objEntry.notesWake != line.replace(this.state._notesWake, '').trim())
+							if (objEntry.notesWake !== line.replace(this.state._notesWake, '').trim())
 								objEntry.notesWake += line.replace(this.state._notesWake, '').trim() + '\n'
 						}
 					})
@@ -662,7 +662,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		this.state._parsedSections.forEach(sect => {
 			if (
 				this.props.dataFile.entries.filter(entry => {
-					return entry.entryDate == sect.entryDate
+					return entry.entryDate === sect.entryDate
 				}).length > 0
 			) {
 				arrInvalidSects.push(sect)
@@ -798,7 +798,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 											<option value='first'>First line is the Entry Date</option>
 										</select>
 									</div>
-									<div className={this.state._selEntryType == 'first' ? 'd-none' : 'col-7 pl-1'}>
+									<div className={this.state._selEntryType === 'first' ? 'd-none' : 'col-7 pl-1'}>
 										<input
 											name='_entryDate'
 											value={this.state._entryDate}
@@ -867,7 +867,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 								</div>
 								<div
 									className={
-										this.state._selNotePrepType == 'multi' ? 'row no-gutters mt-1' : 'd-none'
+										this.state._selNotePrepType === 'multi' ? 'row no-gutters mt-1' : 'd-none'
 									}>
 									<input
 										name='_notesPrepEnd'
@@ -912,7 +912,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 								</div>
 								<div
 									className={
-										this.state._selNoteWakeType == 'multi' ? 'row no-gutters mt-1' : 'd-none'
+										this.state._selNoteWakeType === 'multi' ? 'row no-gutters mt-1' : 'd-none'
 									}>
 									<input
 										name='_notesWakeEnd'
@@ -1036,7 +1036,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 											<option value='after'>All text after Dream Title</option>
 										</select>
 									</div>
-									<div className={this.state._selDreamNotes == 'after' ? 'd-none' : 'col-7 pl-2'}>
+									<div className={this.state._selDreamNotes === 'after' ? 'd-none' : 'col-7 pl-2'}>
 										<input
 											name='_notes'
 											value={this.state._notes}
@@ -1173,7 +1173,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<button
 							className='btn btn-success'
 							onClick={this.handleParse}
-							disabled={(this.state._importText || '').length == 0}>
+							disabled={(this.state._importText || '').length === 0}>
 							Parse Journal Entries
 						</button>
 					</div>
@@ -1209,7 +1209,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							type='button'
 							className='btn btn-success'
 							onClick={this.handleImport}
-							disabled={this.state._parsedSections.length == 0}>
+							disabled={this.state._parsedSections.length === 0}>
 							Import Journal Entries
 						</button>
 					</div>
