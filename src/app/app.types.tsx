@@ -29,6 +29,11 @@ export enum SearchScopes {
 	_starred = 'starred',
 	_isLucid = 'isLucidDream',
 }
+export enum TagDisplayOptions {
+	all = 'All',
+	top30 = 'Top 30',
+	singles = 'Singles',
+}
 
 export interface IAuthState {
 	status: AuthState
@@ -66,7 +71,7 @@ export interface IJournalEntry {
 	notesPrep?: string
 	notesWake?: string
 	starred?: boolean
-	dreams?: Array<IJournalDream>
+	dreams?: IJournalDream[]
 }
 
 export interface IDreamSignTag {

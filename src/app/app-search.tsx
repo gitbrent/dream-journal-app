@@ -1,5 +1,5 @@
 import React from 'react'
-import { IDriveFile, ISearchMatch, SearchMatchTypes, SearchScopes } from './types'
+import { IDriveFile, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
 import Alert from 'react-bootstrap/Alert'
 import SearchResults from './components/search-results'
 
@@ -415,28 +415,20 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 					</div>
 				</section>
 
-				<main className='container my-5'>
-					{this.state.searchTerm && this.state.searchMatches.length > 0 && (
-						<h3 className='text-center text-primary pt-0 pb-3 mb-3'>
-							Search Results: {this.state.searchMatches.length} Dreams (
-							{Math.round((this.state.searchMatches.length / totalDreams) * 100)}
-							%)
-						</h3>
-					)}
-					{this.state.searchTerm ? (
-						<div className='card-columns'>
-							<SearchResults
-								handleEntryEdit={this.handleEntryEdit}
-								searchMatches={this.state.searchMatches}
-								searchOptScope={this.state.searchOptScope}
-								searchOptMatchType={this.state.searchOptMatchType}
-								searchTerm={this.state.searchTerm}
-							/>
-						</div>
-					) : (
+				{this.state.searchTerm ? (
+					<SearchResults
+						handleEntryEdit={this.handleEntryEdit}
+						searchMatches={this.state.searchMatches}
+						searchOptScope={this.state.searchOptScope}
+						searchOptMatchType={this.state.searchOptMatchType}
+						searchTerm={this.state.searchTerm}
+						totalDreams={totalDreams}
+					/>
+				) : (
+					<div className='container'>
 						<h4 className='bg-light text-center text-muted mb-0 py-5'>(enter a keyword above to search)</h4>
-					)}
-				</main>
+					</div>
+				)}
 			</div>
 		)
 	}
