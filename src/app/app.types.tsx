@@ -40,6 +40,9 @@ export interface IAuthState {
 	userName: ''
 	userPhoto: ''
 }
+/**
+ * Google Drive file in JSON format
+ */
 export interface IDriveFile {
 	_isLoading: boolean
 	_isSaving: boolean
@@ -79,6 +82,9 @@ export interface IDreamSignTag {
 	name: string
 }
 
+/**
+* An IJournalDream dream with parent entry's date and starred status
+*/
 export interface ISearchMatch {
 	entryDate: IJournalEntry['entryDate']
 	starred: IJournalEntry['starred']
