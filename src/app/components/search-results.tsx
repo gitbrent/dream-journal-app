@@ -1,5 +1,5 @@
 import React from 'react'
-import { ISearchMatch, SearchScopes, SearchMatchTypes } from '../app.types'
+import { ISearchMatch, SearchScopes, SearchMatchTypes, MONTHS } from '../app.types'
 import moment from 'moment'
 
 export interface ISearchResultsProps {
@@ -59,31 +59,56 @@ export default class SearchResults extends React.Component<ISearchResultsProps, 
 				<div className='card-columns'>
 					{this.props.searchMatches.map((entry, idx) => {
 						return (
-							<div className='card' key={'searchResultCard' + idx}>
-								<div className='row'>
-									<div className='col'>
-										<h5 className='card-header'>
-											<a
-												href='#!'
-												title='View Entry'
-												className={
-													'card-link' + (entry.dream.isLucidDream ? ' text-success' : '')
-												}
-												onClick={() => this.props.handleEntryEdit(entry.entryDate)}>
-												{entry.dream.title}
-											</a>
-										</h5>
-									</div>
-									<div className='col-auto'>
-										{entry.starred && <div className='iconSvg size16 star-on mt-2 mx-2' />}
-										{entry.dream.isLucidDream && (
-											<div className='iconSvg size24 circle check mt-2 mx-2' />
-										)}
+							<div className='card mb-4' key={'searchResultCard' + idx}>
+								<div
+									className={
+										entry.dream.isLucidDream ? 'card-header bg-success' : 'card-header bg-light'
+									}>
+									<div className='row no-gutters'>
+										<div className='col-auto'>
+											<div
+												className='text-center'
+												style={{ cursor: 'help', userSelect: 'none' }}
+												title={
+													Math.abs(
+														Math.round(
+															moment(entry.entryDate).diff(
+																moment(new Date()),
+																'months',
+																true
+															)
+														)
+													) + ' months ago'
+												}>
+												<div className='bg-danger px-2 pb-1 text-white rounded-top'>
+													{new Date(entry.entryDate).getFullYear()}
+												</div>
+												<div className='bg-white px-2 py-1 rounded-bottom'>
+													<h5 className='mb-0'>{MONTHS[new Date(entry.entryDate).getMonth()]}</h5>
+												</div>
+											</div>
+										</div>
+										<div className='col mx-3'>
+											<h5 className='mb-0'>
+												<a
+													href='#!'
+													title='View Entry'
+													className={
+														entry.dream.isLucidDream ? 'card-link text-white' : 'card-link'
+													}
+													onClick={() => this.props.handleEntryEdit(entry.entryDate)}>
+													{entry.dream.title}
+												</a>
+											</h5>
+										</div>
+										<div className='col-auto'>
+											{entry.starred && <div className='iconSvg size24 star-on' />}
+										</div>
 									</div>
 								</div>
 								{(this.props.searchOptScope === SearchScopes.all ||
 									this.props.searchOptScope === SearchScopes.notes) && (
-									<div className='card-body'>
+									<div className='card-body bg-black'>
 										<p className='card-text' style={{ whiteSpace: 'pre-line' }}>
 											{this.props.searchTerm
 												? this.getHighlightedText(entry.dream.notes, this.props.searchTerm)
@@ -91,7 +116,7 @@ export default class SearchResults extends React.Component<ISearchResultsProps, 
 										</p>
 									</div>
 								)}
-								<div className='card-footer text-info'>
+								<div className='card-footer bg-black'>
 									{(this.props.searchOptScope === SearchScopes.all ||
 										this.props.searchOptScope === SearchScopes.signs) && (
 										<div>
@@ -108,18 +133,6 @@ export default class SearchResults extends React.Component<ISearchResultsProps, 
 												: ''}
 										</div>
 									)}
-									<small>
-										{new Date(entry.entryDate).toLocaleDateString()}
-										<span className='ml-2'>
-											(
-											{Math.abs(
-												Math.round(
-													moment(entry.entryDate).diff(moment(new Date()), 'months', true)
-												)
-											)}{' '}
-											months ago)
-										</span>
-									</small>
 								</div>
 							</div>
 						)

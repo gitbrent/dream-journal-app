@@ -34,6 +34,7 @@ export enum TagDisplayOptions {
 	top30 = 'Top 30',
 	singles = 'Singles',
 }
+export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 export interface IAuthState {
 	status: AuthState
@@ -83,8 +84,8 @@ export interface IDreamSignTag {
 }
 
 /**
-* An IJournalDream dream with parent entry's date and starred status
-*/
+ * An IJournalDream dream with parent entry's date and starred status
+ */
 export interface ISearchMatch {
 	entryDate: IJournalEntry['entryDate']
 	starred: IJournalEntry['starred']

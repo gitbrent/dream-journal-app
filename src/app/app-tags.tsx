@@ -1,5 +1,5 @@
 import React from 'react'
-import { IDriveFile, ISearchMatch, TagDisplayOptions, SearchScopes } from './app.types'
+import { IDriveFile, ISearchMatch, SearchScopes, TagDisplayOptions } from './app.types'
 import Alert from 'react-bootstrap/Alert'
 import SearchResults from './components/search-results'
 //import SearchResults from './components/search-results'
@@ -11,7 +11,7 @@ export interface IAppTagsProps {
 	tagsState: IAppTagsState
 }
 export interface IAppTagsState {
-	isDataLoaded: boolean
+	dataFileModDate: string
 	searchMatches: ISearchMatch[]
 	showAlert: boolean
 	tagsAllUnique: ITag[]
@@ -32,7 +32,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 		let localShowAlert = JSON.parse(localStorage.getItem('show-alert-search'))
 
 		this.state = {
-			isDataLoaded: false,
+			dataFileModDate: '',
 			searchMatches:
 				this.props.tagsState && this.props.tagsState['searchMatches']
 					? this.props.tagsState['searchMatches']
@@ -53,58 +53,18 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 	}
 
 	/**
-	 * Detect prop (data) changes, then re-render file list
+	 * Detect prop (data) changes, to trigger re-render
 	 */
 	componentDidUpdate(prevProps: any) {
-		if (this.props.dataFile && this.props.dataFile.entries && !this.state.isDataLoaded) {
-			this.compileTags(this.props.dataFile)
-		} else if (
+		if (
 			this.props.dataFile &&
 			prevProps.dataFile &&
 			this.props.dataFile.modifiedTime !== prevProps.dataFile.modifiedTime
 		) {
-			// TODO: this doesnt catch when data file is updated!
-			console.log('REFRESH!')
-			this.compileTags(this.props.dataFile)
-		}
-	}
-
-	/* ======================================================================== */
-
-	// TODO: convert this to a render func - its not refreshing correctly!
-	private compileTags(dataFile: IDriveFile) {
-		let tagsAllUnique: ITag[] = []
-		;(dataFile.entries || []).forEach(entry => {
-			entry.dreams.forEach(dream => {
-				dream.dreamSigns.forEach(sign => {
-					let thisTag = tagsAllUnique.filter(tag => {
-						return tag.title.toLowerCase() === sign.toLowerCase()
-					})[0]
-
-					let searchDream = {
-						entryDate: entry.entryDate,
-						starred: entry.starred,
-						dream: dream,
-					}
-
-					if (thisTag) thisTag.dreams.push(searchDream)
-					else tagsAllUnique.push({ title: sign, dreams: [searchDream] })
-				})
-			})
-		})
-
-		let totalDreams = 0
-		if (this.props.dataFile && this.props.dataFile.entries) {
-			this.props.dataFile.entries.forEach(entry => {
-				totalDreams += entry.dreams.length
+			this.setState({
+				dataFileModDate: this.props.dataFile.modifiedTime,
 			})
 		}
-
-		this.setState({
-			isDataLoaded: true,
-			tagsAllUnique: tagsAllUnique,
-			totalDreams: totalDreams,
-		})
 	}
 
 	/* ======================================================================== */
@@ -126,9 +86,29 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 	/* ======================================================================== */
 
 	renderTags = (): JSX.Element => {
+		let tagsAllUnique: ITag[] = []
+		;(this.props.dataFile && this.props.dataFile.entries ? this.props.dataFile.entries : []).forEach(entry => {
+			entry.dreams.forEach(dream => {
+				dream.dreamSigns.forEach(sign => {
+					let thisTag = tagsAllUnique.filter(tag => {
+						return tag.title.toLowerCase() === sign.toLowerCase()
+					})[0]
+
+					let searchDream = {
+						entryDate: entry.entryDate,
+						starred: entry.starred,
+						dream: dream,
+					}
+
+					if (thisTag) thisTag.dreams.push(searchDream)
+					else tagsAllUnique.push({ title: sign, dreams: [searchDream] })
+				})
+			})
+		})
+
 		return (
 			<section>
-				{this.state.tagsAllUnique
+				{tagsAllUnique
 					.sort((a, b) => {
 						return a.dreams.length < b.dreams.length
 							? 1
@@ -137,7 +117,6 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 							: a.title > b.title
 							? 1
 							: -1
-						//return a.dreams.length > b.dreams.length ? 1 : -1 || a.title > b.title ? 1 : -1
 					})
 					.filter((tag, idx) => {
 						if (this.state.optionScope === TagDisplayOptions.all) return true
@@ -168,6 +147,15 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 	}
 
 	render() {
+		let totalDreams = 0
+		let totalDays = 0
+		if (this.props.dataFile && this.props.dataFile.entries) {
+			this.props.dataFile.entries.forEach(entry => {
+				totalDreams += entry.dreams.length
+			})
+			totalDays = this.props.dataFile.entries.length
+		}
+
 		return (
 			<div>
 				{this.state.showAlert && (
@@ -197,25 +185,21 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 						<div className='col-12 col-lg-8'>
 							<div className='card'>
 								<div className='card-header bg-primary'>
-									<h5 className='card-title text-white mb-0'>Dream Journal Tags</h5>
+									<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
 								</div>
 								<div className='card-body bg-light'>
 									<div className='row align-items-center'>
 										<div className='col text-center'>
-											<label className='text-primary text-uppercase'>Days</label>
-											<h1 className='text-primary mb-1'>
-												{this.props.dataFile && this.props.dataFile.entries
-													? this.props.dataFile.entries.length
-													: '-'}
-											</h1>
+											<label className='text-primary text-uppercase'>Dreams</label>
+											<h1 className='text-primary mb-1'>{totalDreams}</h1>
 										</div>
 										<div className='col text-center'>
-											<label className='text-primary text-uppercase'>Dreams</label>
-											<h1 className='text-primary mb-1'>{this.state.totalDreams || '-'}</h1>
+											<label className='text-primary text-uppercase'>Days</label>
+											<h1 className='text-primary mb-1'>{totalDays}</h1>
 										</div>
 										<div className='col text-center'>
 											<label className='text-info text-uppercase'>DreamSigns</label>
-											<h1 className='text-info mb-0'>{this.state.tagsAllUnique.length || '-'}</h1>
+											<h1 className='text-info mb-0'>{this.state.tagsAllUnique.length || '0'}</h1>
 										</div>
 									</div>
 								</div>
@@ -228,7 +212,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 								</div>
 								<div className='card-body bg-light'>
 									<div className='row align-items-center'>
-										<div className='col-12 col-md-6'>
+										<div className='col-12 col-md-5'>
 											<label className='text-uppercase text-muted'>Scope</label>
 											<select
 												className='form-control mt-2'
@@ -250,7 +234,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 												<option value='singles'>Singles</option>
 											</select>
 										</div>
-										<div className='col-12 col-md-6'>
+										<div className='col-12 col-md-7'>
 											<label className='text-uppercase text-muted'>Display</label>
 											<select
 												className='form-control mt-2'
@@ -287,15 +271,6 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 									<h5 className='text-secondary'>(no Dream Journal is currently selected)</h5>
 								</div>
 							)}
-
-							{this.props.dataFile && !this.state.isDataLoaded && (
-								<div className='align-middle text-center text-warning mb-4'>
-									<div className='spinner-border spinner-border-sm mr-2' role='status'>
-										<span className='sr-only' />
-									</div>
-									Saving/Loading...
-								</div>
-							)}
 						</div>
 					</div>
 				</section>
@@ -305,7 +280,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 						handleEntryEdit={this.handleEntryEdit}
 						searchMatches={this.state.searchMatches}
 						searchOptScope={this.state.optionDisplay}
-						totalDreams={this.state.totalDreams}
+						totalDreams={totalDreams}
 					/>
 				)}
 			</div>
