@@ -37,14 +37,13 @@ export default class SearchResults extends React.Component<ISearchResultsProps, 
 		}
 		return (
 			<span>
-				{' '}
 				{parts.map((part, i) => (
 					<span
 						key={i}
 						className={part.toLowerCase() === highlight.toLowerCase() ? 'badge badge-warning' : ''}>
 						{part}
 					</span>
-				))}{' '}
+				))}
 			</span>
 		)
 	}
@@ -65,7 +64,7 @@ export default class SearchResults extends React.Component<ISearchResultsProps, 
 									<div className='col'>
 										<h5 className='card-header'>
 											<a
-												href='javascript:void(0)'
+												href='#!'
 												title='View Entry'
 												className={
 													'card-link' + (entry.dream.isLucidDream ? ' text-success' : '')
@@ -86,7 +85,9 @@ export default class SearchResults extends React.Component<ISearchResultsProps, 
 									this.props.searchOptScope === SearchScopes.notes) && (
 									<div className='card-body'>
 										<p className='card-text' style={{ whiteSpace: 'pre-line' }}>
-											{this.getHighlightedText(entry.dream.notes, this.props.searchTerm)}
+											{this.props.searchTerm
+												? this.getHighlightedText(entry.dream.notes, this.props.searchTerm)
+												: entry.dream.notes}
 										</p>
 									</div>
 								)}
