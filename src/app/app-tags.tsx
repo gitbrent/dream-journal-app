@@ -1,8 +1,36 @@
+/*\
+|*|  :: Brain Cloud Dream Journal ::
+|*|
+|*|  Dream Journal App - Record and Search Daily Dream Entries
+|*|  https://github.com/gitbrent/dream-journal-app
+|*|
+|*|  This library is released under the MIT Public License (MIT)
+|*|
+|*|  Dream Journal App (C) 2019-present Brent Ely (https://github.com/gitbrent)
+|*|
+|*|  Permission is hereby granted, free of charge, to any person obtaining a copy
+|*|  of this software and associated documentation files (the "Software"), to deal
+|*|  in the Software without restriction, including without limitation the rights
+|*|  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+|*|  copies of the Software, and to permit persons to whom the Software is
+|*|  furnished to do so, subject to the following conditions:
+|*|
+|*|  The above copyright notice and this permission notice shall be included in all
+|*|  copies or substantial portions of the Software.
+|*|
+|*|  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+|*|  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+|*|  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+|*|  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+|*|  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+|*|  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+|*|  SOFTWARE.
+\*/
+
 import React from 'react'
 import { IDriveFile, ISearchMatch, SearchScopes, TagDisplayOptions } from './app.types'
 import Alert from 'react-bootstrap/Alert'
 import SearchResults from './components/search-results'
-//import SearchResults from './components/search-results'
 
 export interface IAppTagsProps {
 	dataFile: IDriveFile
@@ -13,6 +41,7 @@ export interface IAppTagsProps {
 export interface IAppTagsState {
 	dataFileModDate: string
 	searchMatches: ISearchMatch[]
+	selectedTagTitle: string
 	showAlert: boolean
 	tagsAllUnique: ITag[]
 	totalDreams: number
@@ -32,16 +61,24 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 		let localShowAlert = JSON.parse(localStorage.getItem('show-alert-search'))
 
 		this.state = {
-			dataFileModDate: '',
-			searchMatches:
-				this.props.tagsState && this.props.tagsState['searchMatches']
-					? this.props.tagsState['searchMatches']
-					: [],
+			dataFileModDate:
+				this.props.dataFile && this.props.dataFile.modifiedTime ? this.props.dataFile.modifiedTime : '',
+			searchMatches: [],
+			selectedTagTitle:
+				this.props.tagsState && this.props.tagsState.selectedTagTitle
+					? this.props.tagsState.selectedTagTitle
+					: '',
 			showAlert: typeof localShowAlert === 'boolean' ? localShowAlert : true,
 			tagsAllUnique: [],
 			totalDreams: 0,
-			optionDisplay: SearchScopes.all,
-			optionScope: TagDisplayOptions.all,
+			optionDisplay:
+				this.props.tagsState && this.props.tagsState.optionDisplay
+					? this.props.tagsState.optionDisplay
+					: SearchScopes.all,
+			optionScope:
+				this.props.tagsState && this.props.tagsState.optionScope
+					? this.props.tagsState.optionScope
+					: TagDisplayOptions.all,
 		}
 	}
 
@@ -85,7 +122,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 
 	/* ======================================================================== */
 
-	renderTags = (): JSX.Element => {
+	compileTagPiles = () => {
 		let tagsAllUnique: ITag[] = []
 		;(this.props.dataFile && this.props.dataFile.entries ? this.props.dataFile.entries : []).forEach(entry => {
 			entry.dreams.forEach(dream => {
@@ -105,6 +142,21 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 				})
 			})
 		})
+
+		// Handle tag deselect/reselect (we save term but not matches) (b/c when dreams are editted, we dont want to show old data on screen)
+		if (this.state.selectedTagTitle && this.state.searchMatches.length === 0) {
+			this.setState({
+				searchMatches: tagsAllUnique.filter(tag => {
+					return tag.title === this.state.selectedTagTitle
+				})[0].dreams,
+			})
+		}
+
+		return tagsAllUnique
+	}
+
+	renderTags = (): JSX.Element => {
+		let tagsAllUnique = this.compileTagPiles()
 
 		return (
 			<section>
@@ -130,7 +182,10 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 								key={idx + tag.title}
 								className='d-inline-block mr-3 mb-3'
 								onClick={() => {
-									this.setState({ searchMatches: tag.dreams })
+									this.setState({
+										searchMatches: tag.dreams,
+										selectedTagTitle: tag.title,
+									})
 								}}
 								style={{ cursor: 'pointer', userSelect: 'none' }}>
 								<div className='d-inline-block bg-dark px-2 py-1 text-light text-lowercase rounded-left'>
@@ -216,39 +271,40 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 											<label className='text-uppercase text-muted'>Scope</label>
 											<select
 												className='form-control mt-2'
-												defaultValue={TagDisplayOptions.all}
+												value={this.state.optionScope}
 												onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
 													this.setState({
 														optionScope:
-															event.currentTarget.value === 'all'
+															event.currentTarget.value === TagDisplayOptions.all
 																? TagDisplayOptions.all
-																: event.currentTarget.value === 'top30'
+																: event.currentTarget.value === TagDisplayOptions.top30
 																? TagDisplayOptions.top30
-																: event.currentTarget.value === 'singles'
+																: event.currentTarget.value ===
+																  TagDisplayOptions.singles
 																? TagDisplayOptions.singles
 																: TagDisplayOptions.all,
 													})
 												}}>
-												<option value='all'>All</option>
-												<option value='top30'>Top 30</option>
-												<option value='singles'>Singles</option>
+												<option value='All'>All</option>
+												<option value='Top 30'>Top 30</option>
+												<option value='Singles'>Singles</option>
 											</select>
 										</div>
 										<div className='col-12 col-md-7'>
 											<label className='text-uppercase text-muted'>Display</label>
 											<select
 												className='form-control mt-2'
-												defaultValue={SearchScopes.all}
+												defaultValue={this.state.optionDisplay}
 												onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
 													this.setState({
 														optionDisplay:
-															event.currentTarget.value === 'all'
+															event.currentTarget.value === SearchScopes.all
 																? SearchScopes.all
 																: SearchScopes.signs,
 													})
 												}}>
-												<option value='all'>Complete Dream</option>
-												<option value='signs'>No Dream Notes</option>
+												<option value='All Fields'>Complete Dream</option>
+												<option value='Dream Signs'>No Dream Notes</option>
 											</select>
 										</div>
 									</div>
