@@ -99,7 +99,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 	 * Handle show/no-show and clearing of form data
 	 * React-Design: Allow `props` changes from other Components to change state/render
 	 */
-	componentWillReceiveProps(nextProps: any) {
+	componentDidUpdate(nextProps: any) {
 		// A: Update `show` when needed
 		if (
 			typeof nextProps.show !== 'undefined' &&

@@ -47,7 +47,7 @@ class Pagination extends Component {
 	componentDidMount() {
 		this.gotoPage(this.state.currentPage)
 	}
-	componentWillReceiveProps(nextProps) {
+	componentDidUpdate(nextProps) {
 		if (nextProps.totalRecords && this.state.totalRecords !== nextProps.totalRecords) {
 			this.setState({ totalRecords: nextProps.totalRecords })
 		}
