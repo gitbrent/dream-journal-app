@@ -99,32 +99,36 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 	 * Handle show/no-show and clearing of form data
 	 * React-Design: Allow `props` changes from other Components to change state/render
 	 */
-	componentDidUpdate(nextProps: any) {
-		// A: Update `show` when needed
-		if (
-			typeof nextProps.show !== 'undefined' &&
-			typeof nextProps.show === 'boolean' &&
-			this.state.show !== nextProps.show
-		) {
-			this.setState({ show: nextProps.show })
-		}
+	componentDidUpdate(prevProps: any) {
+		if (prevProps.show !== this.props.show) {
+			// A: Update `show` when needed
+			if (
+				typeof this.props.show !== 'undefined' &&
+				typeof this.props.show === 'boolean' &&
+				this.state.show !== this.props.show
+			) {
+				this.setState({ show: this.props.show })
+			}
 
-		// B: Clear form when "Create" is used to open modal
-		if (nextProps.show && !nextProps.editEntry) {
-			this.setState({
-				dailyEntry: JSON.parse(JSON.stringify(NEW_ENTRY)),
-			})
+			// B: Clear form when "Create" is used to open modal
+			if (this.props.show && !this.props.editEntry) {
+				this.setState({
+					dailyEntry: JSON.parse(JSON.stringify(NEW_ENTRY)),
+				})
+			}
 		}
 
 		// C: Load corresponding day for Edits
-		if (nextProps.editEntry && this.state.dailyEntry !== nextProps.editEntry) {
-			// NOTE: React Feb-2019 wont do: `dailyEntry: nextProps.editEntry`
-			// SOLN: create a copy use json+json as `dreams` requires deep copy
-			this.setState({
-				dailyEntry: JSON.parse(JSON.stringify(nextProps.editEntry)),
-				origEntryDate: nextProps.editEntry.entryDate,
-				selectedTab: 0,
-			})
+		if (prevProps.editEntry !== this.props.editEntry) {
+			if (this.props.editEntry && this.state.dailyEntry !== this.props.editEntry) {
+				// NOTE: React Feb-2019 wont do: `dailyEntry: this.props.editEntry`
+				// SOLN: create a copy use json+json as `dreams` requires deep copy
+				this.setState({
+					dailyEntry: JSON.parse(JSON.stringify(this.props.editEntry)),
+					origEntryDate: this.props.editEntry.entryDate,
+					selectedTab: 0,
+				})
+			}
 		}
 	}
 
