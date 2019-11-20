@@ -144,7 +144,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 		})
 
 		// Handle tag deselect/reselect (we save term but not matches) (b/c when dreams are editted, we dont want to show old data on screen)
-		if (this.state.selectedTagTitle && this.state.searchMatches.length === 0) {
+		if (this.state.selectedTagTitle && this.state.searchMatches.length === 0 && tagsAllUnique) {
 			this.setState({
 				searchMatches: tagsAllUnique.filter(tag => {
 					return tag.title === this.state.selectedTagTitle
