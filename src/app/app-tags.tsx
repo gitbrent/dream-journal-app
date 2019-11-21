@@ -40,6 +40,7 @@ export interface IAppTagsProps {
 }
 export interface IAppTagsState {
 	dataFileModDate: string
+	searchDone: boolean
 	searchMatches: ISearchMatch[]
 	selectedTagTitle: string
 	showAlert: boolean
@@ -63,6 +64,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 		this.state = {
 			dataFileModDate:
 				this.props.dataFile && this.props.dataFile.modifiedTime ? this.props.dataFile.modifiedTime : '',
+			searchDone: false,
 			searchMatches: [],
 			selectedTagTitle:
 				this.props.tagsState && this.props.tagsState.selectedTagTitle
@@ -144,11 +146,20 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 		})
 
 		// Handle tag deselect/reselect (we save term but not matches) (b/c when dreams are editted, we dont want to show old data on screen)
-		if (this.state.selectedTagTitle && this.state.searchMatches.length === 0 && tagsAllUnique) {
+		if (
+			this.state.selectedTagTitle &&
+			this.state.searchMatches.length === 0 &&
+			tagsAllUnique &&
+			tagsAllUnique.length > 0 &&
+			!this.state.searchDone
+		) {
+			let tagDreams = tagsAllUnique.filter(tag => {
+				return tag.title === this.state.selectedTagTitle
+			})
+
 			this.setState({
-				searchMatches: tagsAllUnique.filter(tag => {
-					return tag.title === this.state.selectedTagTitle
-				})[0].dreams,
+				searchDone: true,
+				searchMatches: tagDreams && tagDreams.length > 0 ? tagDreams[0].dreams : [],
 			})
 		}
 
