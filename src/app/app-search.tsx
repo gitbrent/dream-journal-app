@@ -274,7 +274,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 										this.props.dataFile &&
 										this.props.dataFile.entries
 											? (this.props.dataFile.entries.length / this.getTotalMonths()).toFixed(2) +
-											  ' / month'
+											  ' / mon'
 											: '-'}
 									</small>
 								</div>
@@ -297,7 +297,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 									<h1 className='text-warning mb-1'>{totalStarred || '-'}</h1>
 									<small className='text-50-white text-uppercase d-none d-md-block'>
 										{totalDreams && totalStarred
-											? ((totalStarred / totalDreams) * 100).toFixed(2) + '% Starred'
+											? ((totalStarred / totalDreams) * 100).toFixed(2) + '%'
 											: '-'}
 									</small>
 								</div>
@@ -308,7 +308,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 									<h1 className='text-success mb-1'>{totalLucids || '-'}</h1>
 									<small className='text-50-white text-uppercase d-none d-md-block'>
 										{totalDreams && totalLucids
-											? ((totalLucids / totalDreams) * 100).toFixed(2) + '% Success'
+											? ((totalLucids / totalDreams) * 100).toFixed(2) + '%'
 											: '-'}
 									</small>
 								</div>
