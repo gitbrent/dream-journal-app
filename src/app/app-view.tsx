@@ -123,7 +123,9 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 				<table className='table'>
 					<thead className='thead'>
 						<tr>
-							<th>Date</th>
+							<th>
+								Date<span className='float-right'>▲</span>
+							</th>
 							<th className='text-center d-none d-lg-table-cell'>Bed</th>
 							<th className='text-center'>Dreams</th>
 							<th className='text-center d-none d-md-table-cell'>Dream Signs</th>
@@ -135,9 +137,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 					<tbody>
 						{arrEntries
 							.sort((a, b) => {
-								if (a.entryDate < b.entryDate) return -1
-								if (a.entryDate > b.entryDate) return 1
-								return 0
+								return a.entryDate < b.entryDate ? -1 : 1
 							})
 							.filter((_entry, idx) => {
 								return (
