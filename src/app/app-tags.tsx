@@ -145,6 +145,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 			})
 		})
 
+		// TODO: this is still hacky...
 		// Handle tag deselect/reselect (we save term but not matches) (b/c when dreams are editted, we dont want to show old data on screen)
 		if (
 			this.state.selectedTagTitle &&
@@ -191,7 +192,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 						return (
 							<div
 								key={idx + tag.title}
-								className='d-inline-block mr-3 mb-3'
+								className='d-inline-block text-nowrap mr-3 mb-3'
 								onClick={() => {
 									this.setState({
 										searchMatches: tag.dreams,
@@ -202,6 +203,17 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 								<div className='d-inline-block bg-dark px-2 py-1 text-light text-lowercase rounded-left'>
 									{tag.title}
 								</div>
+								{tag.dreams.filter(match => {
+									return match.dream.isLucidDream
+								}).length > 0 && (
+									<div className='d-inline-block bg-primary px-2 py-1 text-white'>
+										{
+											tag.dreams.filter(match => {
+												return match.dream.isLucidDream
+											}).length
+										}
+									</div>
+								)}
 								<div className='d-inline-block bg-info px-2 py-1 text-white rounded-right'>
 									{tag.dreams.length}
 								</div>
@@ -215,10 +227,18 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 	render() {
 		let totalDreams = 0
 		let totalDays = 0
+		let totalUntagged = 0
+
 		if (this.props.dataFile && this.props.dataFile.entries) {
 			this.props.dataFile.entries.forEach(entry => {
+				// 1
 				totalDreams += entry.dreams.length
+				// 2
+				entry.dreams.forEach(dream => {
+					if (dream.dreamSigns.length === 0) totalUntagged++
+				})
 			})
+			// 3
 			totalDays = this.props.dataFile.entries.length
 		}
 
@@ -266,6 +286,15 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 										<div className='col text-center'>
 											<label className='text-info text-uppercase'>DreamSigns</label>
 											<h1 className='text-info mb-0'>{this.state.tagsAllUnique.length || '0'}</h1>
+										</div>
+										<div className='col text-center'>
+											<label className='text-info text-uppercase'>Untagged</label>
+											<h1 className='text-info mb-0'>{totalUntagged || '0'}</h1>
+											<small className='text-50-white text-uppercase d-none d-md-block'>
+												{totalDreams
+													? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%'
+													: '0%'}
+											</small>
 										</div>
 									</div>
 								</div>
