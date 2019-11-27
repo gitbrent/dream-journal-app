@@ -124,7 +124,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 
 	/* ======================================================================== */
 
-	compileTagPiles = () => {
+	getUniqueTags = (): ITag[] => {
 		let tagsAllUnique: ITag[] = []
 		;(this.props.dataFile && this.props.dataFile.entries ? this.props.dataFile.entries : []).forEach(entry => {
 			entry.dreams.forEach(dream => {
@@ -168,7 +168,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 	}
 
 	renderTags = (): JSX.Element => {
-		let tagsAllUnique = this.compileTagPiles()
+		let tagsAllUnique = this.getUniqueTags()
 
 		return (
 			<section>
@@ -189,6 +189,11 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 							return true
 					})
 					.map((tag, idx) => {
+						let cntLucidTag = tag.dreams.filter(match => {
+							return match.dream.isLucidDream
+						}).length
+						let isLucidTag = cntLucidTag > 0
+
 						return (
 							<div
 								key={idx + tag.title}
@@ -200,18 +205,20 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 									})
 								}}
 								style={{ cursor: 'pointer', userSelect: 'none' }}>
-								<div className='d-inline-block bg-dark px-2 py-1 text-light text-lowercase rounded-left'>
+								<div
+									className={
+										'd-inline-block px-2 py-1 text-lowercase rounded-left' +
+										(isLucidTag ? ' bg-success text-white' : ' bg-dark text-light')
+									}>
 									{tag.title}
 								</div>
-								{tag.dreams.filter(match => {
-									return match.dream.isLucidDream
-								}).length > 0 && (
-									<div className='d-inline-block bg-primary px-2 py-1 text-white'>
-										{
-											tag.dreams.filter(match => {
-												return match.dream.isLucidDream
-											}).length
-										}
+								{isLucidTag && (
+									<div className='d-inline-block bg-success border-left px-2 py-1 text-white'>
+										{cntLucidTag +
+											' (' +
+											Math.round((cntLucidTag / tag.dreams.length) * 100) +
+											'%' +
+											')'}
 									</div>
 								)}
 								<div className='d-inline-block bg-info px-2 py-1 text-white rounded-right'>
@@ -226,7 +233,6 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 
 	render() {
 		let totalDreams = 0
-		let totalDays = 0
 		let totalUntagged = 0
 
 		if (this.props.dataFile && this.props.dataFile.entries) {
@@ -238,8 +244,6 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 					if (dream.dreamSigns.length === 0) totalUntagged++
 				})
 			})
-			// 3
-			totalDays = this.props.dataFile.entries.length
 		}
 
 		return (
@@ -274,29 +278,43 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 									<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
 								</div>
 								<div className='card-body bg-light'>
-									<div className='row align-items-start'>
-										<div className='col text-center'>
+									<div className='row align-items-start justify-content-around'>
+										<div className='col-auto text-center'>
 											<h1 className='text-primary mb-1 x3'>{totalDreams}</h1>
-											<label className='text-primary text-uppercase'>Dreams</label>
+											<label className='text-primary text-uppercase'>
+												Total
+												<br />
+												Dreams
+											</label>
 										</div>
-										<div className='col text-center'>
-											<h1 className='text-primary mb-1 x3'>{totalDays}</h1>
-											<label className='text-primary text-uppercase'>Days</label>
-										</div>
-										<div className='col text-center'>
-											<h1 className='text-info mb-1 x3'>
-												{this.state.tagsAllUnique.length || '0'}
+										<div className='col-auto text-center'>
+											<h1 className='text-primary mb-1 x3'>
+												{this.getUniqueTags().length || '0'}
 											</h1>
-											<label className='text-info text-uppercase'>DreamSigns</label>
+											<label className='text-primary text-uppercase d-block'>
+												Unique
+												<br />
+												DreamSigns
+											</label>
 										</div>
-										<div className='col text-center'>
-											<h1 className='text-warning mb-0 x3'>{totalUntagged || '0'}</h1>
-											<label className='text-warning text-uppercase'>Untagged</label>
-											<small className='text-50-white text-uppercase d-none d-md-block'>
+										<div className='col-auto text-center'>
+											<h1 className='text-info mb-1 x3'>{totalDreams - totalUntagged}</h1>
+											<label className='text-info text-uppercase d-block'>Tagged</label>
+											<div className='badge badge-pill badge-info w-100'>
+												{totalDreams
+													? (((totalDreams - totalUntagged) / totalDreams) * 100).toFixed(2) +
+													  '%'
+													: '0%'}
+											</div>
+										</div>
+										<div className='col-auto text-center'>
+											<h1 className='text-warning mb-1 x3'>{totalUntagged || '0'}</h1>
+											<label className='text-warning text-uppercase d-block'>Untagged</label>
+											<div className='badge badge-pill badge-warning w-100'>
 												{totalDreams
 													? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%'
 													: '0%'}
-											</small>
+											</div>
 										</div>
 									</div>
 								</div>
