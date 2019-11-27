@@ -256,19 +256,19 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 							<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
 						</div>
 						<div className='card-body bg-light'>
-							<div className='row align-items-center p-2'>
+							<div className='row align-items-start'>
 								<div className='col text-center d-none d-md-block'>
+									<h1 className='text-primary mb-0 x3'>{this.getTotalMonths() || '-'}</h1>
 									<label className='text-primary text-uppercase'>Months</label>
-									<h1 className='text-primary mb-0'>{this.getTotalMonths() || '-'}</h1>
 									<small className='text-50-white text-uppercase'>&nbsp;</small>
 								</div>
 								<div className='col text-center'>
-									<label className='text-primary text-uppercase'>Days</label>
-									<h1 className='text-primary mb-1'>
+									<h1 className='text-primary mb-1 x3'>
 										{this.props.dataFile && this.props.dataFile.entries
 											? this.props.dataFile.entries.length
 											: '-'}
 									</h1>
+									<label className='text-primary text-uppercase'>Days</label>
 									<small className='text-50-white text-uppercase d-none d-md-block'>
 										{this.getTotalMonths() * 30 > 0 &&
 										this.props.dataFile &&
@@ -279,8 +279,8 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 									</small>
 								</div>
 								<div className='col text-center'>
+									<h1 className='text-info mb-1 x3'>{totalDreams || '-'}</h1>
 									<label className='text-info text-uppercase'>Dreams</label>
-									<h1 className='text-info mb-1'>{totalDreams || '-'}</h1>
 									<small className='text-50-white text-uppercase d-none d-md-block'>
 										{this.getTotalMonths() * 30 > 0 &&
 										this.props.dataFile &&
@@ -293,8 +293,8 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 								<div
 									className='col text-center'
 									onClick={() => this.doShowByType(SearchScopes._starred)}>
+									<h1 className='text-warning mb-1 x3'>{totalStarred || '-'}</h1>
 									<label className='text-warning text-uppercase'>Starred</label>
-									<h1 className='text-warning mb-1'>{totalStarred || '-'}</h1>
 									<small className='text-50-white text-uppercase d-none d-md-block'>
 										{totalDreams && totalStarred
 											? ((totalStarred / totalDreams) * 100).toFixed(2) + '%'
@@ -304,8 +304,8 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 								<div
 									className='col text-center'
 									onClick={() => this.doShowByType(SearchScopes._isLucid)}>
+									<h1 className='text-success mb-1 x3'>{totalLucids || '-'}</h1>
 									<label className='text-success text-uppercase'>Lucids</label>
-									<h1 className='text-success mb-1'>{totalLucids || '-'}</h1>
 									<small className='text-50-white text-uppercase d-none d-md-block'>
 										{totalDreams && totalLucids
 											? ((totalLucids / totalDreams) * 100).toFixed(2) + '%'

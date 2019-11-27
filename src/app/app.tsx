@@ -34,8 +34,9 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom'
 import '../css/bootstrap.yeticyborg.css'
-import '../css/svg-images.css'
 import '../css/react-tags.css'
+import '../css/svg-images.css'
+import '../css/style.css'
 import LogoBase64 from '../img/logo_base64'
 import TabHome from '../app/app-home'
 import TabView, { IAppViewState } from '../app/app-view'
@@ -732,17 +733,32 @@ class App extends React.Component<IAppProps, IAppState> {
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/journal' className='nav-link' activeClassName='active'>
+								<NavLink
+									to='/journal'
+									activeClassName='active'
+									className={
+										!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'
+									}>
 									View Journal
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/search' className='nav-link' activeClassName='active'>
+								<NavLink
+									to='/search'
+									activeClassName='active'
+									className={
+										!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'
+									}>
 									Search Journal
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/tags' className='nav-link' activeClassName='active'>
+								<NavLink
+									to='/tags'
+									activeClassName='active'
+									className={
+										!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'
+									}>
 									Dreamsign Tags
 								</NavLink>
 							</li>

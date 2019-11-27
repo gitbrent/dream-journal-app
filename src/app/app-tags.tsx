@@ -269,27 +269,29 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 				<header className='container my-5'>
 					<div className='row'>
 						<div className='col-12 col-lg-8'>
-							<div className='card'>
+							<div className='card mb-4 mb-lg-0'>
 								<div className='card-header bg-primary'>
 									<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
 								</div>
 								<div className='card-body bg-light'>
-									<div className='row align-items-center'>
+									<div className='row align-items-start'>
 										<div className='col text-center'>
+											<h1 className='text-primary mb-1 x3'>{totalDreams}</h1>
 											<label className='text-primary text-uppercase'>Dreams</label>
-											<h1 className='text-primary mb-1'>{totalDreams}</h1>
 										</div>
 										<div className='col text-center'>
+											<h1 className='text-primary mb-1 x3'>{totalDays}</h1>
 											<label className='text-primary text-uppercase'>Days</label>
-											<h1 className='text-primary mb-1'>{totalDays}</h1>
 										</div>
 										<div className='col text-center'>
+											<h1 className='text-info mb-1 x3'>
+												{this.state.tagsAllUnique.length || '0'}
+											</h1>
 											<label className='text-info text-uppercase'>DreamSigns</label>
-											<h1 className='text-info mb-0'>{this.state.tagsAllUnique.length || '0'}</h1>
 										</div>
 										<div className='col text-center'>
-											<label className='text-info text-uppercase'>Untagged</label>
-											<h1 className='text-info mb-0'>{totalUntagged || '0'}</h1>
+											<h1 className='text-warning mb-0 x3'>{totalUntagged || '0'}</h1>
+											<label className='text-warning text-uppercase'>Untagged</label>
 											<small className='text-50-white text-uppercase d-none d-md-block'>
 												{totalDreams
 													? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%'
