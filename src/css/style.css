@@ -4,3 +4,7 @@
 .x4 {
   font-size: 4rem;
 }
+
+.bg-indigo {
+	background-color: var(--indigo) !important;
+}

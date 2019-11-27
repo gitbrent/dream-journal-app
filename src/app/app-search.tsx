@@ -256,61 +256,61 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 							<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
 						</div>
 						<div className='card-body bg-light'>
-							<div className='row align-items-start'>
-								<div className='col text-center d-none d-md-block'>
+							<div className='row align-items-start justify-content-around'>
+								<div className='col-auto text-center d-none d-md-block'>
 									<h1 className='text-primary mb-0 x3'>{this.getTotalMonths() || '-'}</h1>
 									<label className='text-primary text-uppercase'>Months</label>
 									<small className='text-50-white text-uppercase'>&nbsp;</small>
 								</div>
-								<div className='col text-center'>
+								<div className='col-auto text-center'>
 									<h1 className='text-primary mb-1 x3'>
 										{this.props.dataFile && this.props.dataFile.entries
 											? this.props.dataFile.entries.length
 											: '-'}
 									</h1>
 									<label className='text-primary text-uppercase'>Days</label>
-									<small className='text-50-white text-uppercase d-none d-md-block'>
+									<div className='badge badge-pill badge-primary w-100'>
 										{this.getTotalMonths() * 30 > 0 &&
 										this.props.dataFile &&
 										this.props.dataFile.entries
 											? (this.props.dataFile.entries.length / this.getTotalMonths()).toFixed(2) +
 											  ' / mon'
 											: '-'}
-									</small>
+									</div>
 								</div>
-								<div className='col text-center'>
+								<div className='col-auto text-center'>
 									<h1 className='text-info mb-1 x3'>{totalDreams || '-'}</h1>
-									<label className='text-info text-uppercase'>Dreams</label>
-									<small className='text-50-white text-uppercase d-none d-md-block'>
+									<label className='text-info text-uppercase d-block'>Dreams</label>
+									<div className='badge badge-pill badge-info w-100'>
 										{this.getTotalMonths() * 30 > 0 &&
 										this.props.dataFile &&
 										this.props.dataFile.entries
 											? (totalDreams / this.props.dataFile.entries.length).toFixed(2) + ' / day'
 											: '-'}
-									</small>
+									</div>
 								</div>
 								<div className='w-100 mb-3 d-md-none mb-md-0' />
 								<div
-									className='col text-center'
+									className='col-auto text-center'
 									onClick={() => this.doShowByType(SearchScopes._starred)}>
 									<h1 className='text-warning mb-1 x3'>{totalStarred || '-'}</h1>
-									<label className='text-warning text-uppercase'>Starred</label>
-									<small className='text-50-white text-uppercase d-none d-md-block'>
+									<label className='text-warning text-uppercase d-block'>Starred</label>
+									<div className='badge badge-pill badge-warning w-100'>
 										{totalDreams && totalStarred
 											? ((totalStarred / totalDreams) * 100).toFixed(2) + '%'
 											: '-'}
-									</small>
+									</div>
 								</div>
 								<div
-									className='col text-center'
+									className='col-auto text-center'
 									onClick={() => this.doShowByType(SearchScopes._isLucid)}>
 									<h1 className='text-success mb-1 x3'>{totalLucids || '-'}</h1>
-									<label className='text-success text-uppercase'>Lucids</label>
-									<small className='text-50-white text-uppercase d-none d-md-block'>
+									<label className='text-success text-uppercase d-block'>Lucids</label>
+									<div className='badge badge-pill badge-success w-100'>
 										{totalDreams && totalLucids
 											? ((totalLucids / totalDreams) * 100).toFixed(2) + '%'
 											: '-'}
-									</small>
+									</div>
 								</div>
 							</div>
 						</div>
