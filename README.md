@@ -30,6 +30,6 @@
 
 # License
 
-Copyright &copy; 2019 [Brent Ely](https://github.com/gitbrent/dream-journal-app)
+Copyright &copy; 2019-2020 [Brent Ely](https://github.com/gitbrent/dream-journal-app)
 
 [MIT](https://github.com/gitbrent/dream-journal-app/blob/master/LICENSE)
