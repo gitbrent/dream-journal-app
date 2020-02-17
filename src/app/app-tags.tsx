@@ -62,25 +62,15 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 		let localShowAlert = JSON.parse(localStorage.getItem('show-alert-search'))
 
 		this.state = {
-			dataFileModDate:
-				this.props.dataFile && this.props.dataFile.modifiedTime ? this.props.dataFile.modifiedTime : '',
+			dataFileModDate: this.props.dataFile && this.props.dataFile.modifiedTime ? this.props.dataFile.modifiedTime : '',
 			searchDone: false,
 			searchMatches: [],
-			selectedTagTitle:
-				this.props.tagsState && this.props.tagsState.selectedTagTitle
-					? this.props.tagsState.selectedTagTitle
-					: '',
+			selectedTagTitle: this.props.tagsState && this.props.tagsState.selectedTagTitle ? this.props.tagsState.selectedTagTitle : '',
 			showAlert: typeof localShowAlert === 'boolean' ? localShowAlert : true,
 			tagsAllUnique: [],
 			totalDreams: 0,
-			optionDisplay:
-				this.props.tagsState && this.props.tagsState.optionDisplay
-					? this.props.tagsState.optionDisplay
-					: SearchScopes.all,
-			optionScope:
-				this.props.tagsState && this.props.tagsState.optionScope
-					? this.props.tagsState.optionScope
-					: TagDisplayOptions.all,
+			optionDisplay: this.props.tagsState && this.props.tagsState.optionDisplay ? this.props.tagsState.optionDisplay : SearchScopes.all,
+			optionScope: this.props.tagsState && this.props.tagsState.optionScope ? this.props.tagsState.optionScope : TagDisplayOptions.all,
 		}
 	}
 
@@ -95,11 +85,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 	 * Detect prop (data) changes, to trigger re-render
 	 */
 	componentDidUpdate(prevProps: any) {
-		if (
-			this.props.dataFile &&
-			prevProps.dataFile &&
-			this.props.dataFile.modifiedTime !== prevProps.dataFile.modifiedTime
-		) {
+		if (this.props.dataFile && prevProps.dataFile && this.props.dataFile.modifiedTime !== prevProps.dataFile.modifiedTime) {
 			this.setState({
 				dataFileModDate: this.props.dataFile.modifiedTime,
 			})
@@ -116,9 +102,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 	handleEntryEdit = (entryDate: string) => {
 		this.props.onShowModal({
 			show: true,
-			editEntry: this.props.dataFile.entries.filter(entry => {
-				return entry.entryDate === entryDate
-			})[0],
+			editEntry: this.props.dataFile.entries.filter(entry => entry.entryDate === entryDate)[0],
 		})
 	}
 
@@ -129,9 +113,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 		;(this.props.dataFile && this.props.dataFile.entries ? this.props.dataFile.entries : []).forEach(entry => {
 			entry.dreams.forEach(dream => {
 				dream.dreamSigns.forEach(sign => {
-					let thisTag = tagsAllUnique.filter(tag => {
-						return tag.title.toLowerCase() === sign.toLowerCase()
-					})[0]
+					let thisTag = tagsAllUnique.filter(tag => tag.title.toLowerCase() === sign.toLowerCase())[0]
 
 					let searchDream = {
 						entryDate: entry.entryDate,
@@ -147,16 +129,8 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 
 		// TODO: this is still hacky...
 		// Handle tag deselect/reselect (we save term but not matches) (b/c when dreams are editted, we dont want to show old data on screen)
-		if (
-			this.state.selectedTagTitle &&
-			this.state.searchMatches.length === 0 &&
-			tagsAllUnique &&
-			tagsAllUnique.length > 0 &&
-			!this.state.searchDone
-		) {
-			let tagDreams = tagsAllUnique.filter(tag => {
-				return tag.title === this.state.selectedTagTitle
-			})
+		if (this.state.selectedTagTitle && this.state.searchMatches.length === 0 && tagsAllUnique && tagsAllUnique.length > 0 && !this.state.searchDone) {
+			let tagDreams = tagsAllUnique.filter(tag => tag.title === this.state.selectedTagTitle)
 
 			this.setState({
 				searchDone: true,
@@ -173,25 +147,14 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 		return (
 			<section>
 				{tagsAllUnique
-					.sort((a, b) => {
-						return a.dreams.length < b.dreams.length
-							? 1
-							: a.dreams.length > b.dreams.length
-							? -1
-							: a.title > b.title
-							? 1
-							: -1
-					})
+					.sort((a, b) => (a.dreams.length < b.dreams.length ? 1 : a.dreams.length > b.dreams.length ? -1 : a.title > b.title ? 1 : -1))
 					.filter((tag, idx) => {
 						if (this.state.optionScope === TagDisplayOptions.all) return true
 						else if (this.state.optionScope === TagDisplayOptions.top30 && idx < 30) return true
-						else if (this.state.optionScope === TagDisplayOptions.singles && tag.dreams.length === 1)
-							return true
+						else if (this.state.optionScope === TagDisplayOptions.singles && tag.dreams.length === 1) return true
 					})
 					.map((tag, idx) => {
-						let cntLucidTag = tag.dreams.filter(match => {
-							return match.dream.isLucidDream
-						}).length
+						let cntLucidTag = tag.dreams.filter(match => match.dream.isLucidDream).length
 						let isLucidTag = cntLucidTag > 0
 
 						return (
@@ -205,25 +168,15 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 									})
 								}}
 								style={{ cursor: 'pointer', userSelect: 'none' }}>
-								<div
-									className={
-										'd-inline-block px-2 py-1 text-lowercase rounded-left' +
-										(isLucidTag ? ' bg-success text-white' : ' bg-dark text-light')
-									}>
+								<div className={'d-inline-block px-2 py-1 text-lowercase rounded-left' + (isLucidTag ? ' bg-success text-white' : ' bg-dark text-light')}>
 									{tag.title}
 								</div>
 								{isLucidTag && (
 									<div className='d-inline-block bg-success border-left px-2 py-1 text-white'>
-										{cntLucidTag +
-											' (' +
-											Math.round((cntLucidTag / tag.dreams.length) * 100) +
-											'%' +
-											')'}
+										{cntLucidTag + ' (' + Math.round((cntLucidTag / tag.dreams.length) * 100) + '%' + ')'}
 									</div>
 								)}
-								<div className='d-inline-block bg-info px-2 py-1 text-white rounded-right'>
-									{tag.dreams.length}
-								</div>
+								<div className='d-inline-block bg-info px-2 py-1 text-white rounded-right'>{tag.dreams.length}</div>
 							</div>
 						)
 					})}
@@ -251,10 +204,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 				{this.state.showAlert && (
 					<Alert variant='secondary'>
 						<Alert.Heading>Make good use of your Dream Journal</Alert.Heading>
-						<p>
-							Analyze your journal to learn more about yourself, spot common themes/dreamsigns and improve
-							your lucid dreaming ability.
-						</p>
+						<p>Analyze your journal to learn more about yourself, spot common themes/dreamsigns and improve your lucid dreaming ability.</p>
 						<ul>
 							<li>How many lucid dreams have you had?</li>
 							<li>What are your common dream signs?</li>
@@ -288,9 +238,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 											</label>
 										</div>
 										<div className='col-auto text-center'>
-											<h1 className='text-primary mb-1 x3'>
-												{this.getUniqueTags().length || '0'}
-											</h1>
+											<h1 className='text-primary mb-1 x3'>{this.getUniqueTags().length || '0'}</h1>
 											<label className='text-primary text-uppercase d-block'>
 												Unique
 												<br />
@@ -301,19 +249,14 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 											<h1 className='text-info mb-1 x3'>{totalDreams - totalUntagged}</h1>
 											<label className='text-info text-uppercase d-block'>Tagged</label>
 											<div className='badge badge-pill badge-info w-100'>
-												{totalDreams
-													? (((totalDreams - totalUntagged) / totalDreams) * 100).toFixed(2) +
-													  '%'
-													: '0%'}
+												{totalDreams ? (((totalDreams - totalUntagged) / totalDreams) * 100).toFixed(2) + '%' : '0%'}
 											</div>
 										</div>
 										<div className='col-auto text-center'>
 											<h1 className='text-warning mb-1 x3'>{totalUntagged || '0'}</h1>
 											<label className='text-warning text-uppercase d-block'>Untagged</label>
 											<div className='badge badge-pill badge-warning w-100'>
-												{totalDreams
-													? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%'
-													: '0%'}
+												{totalDreams ? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%' : '0%'}
 											</div>
 										</div>
 									</div>
@@ -339,8 +282,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 																? TagDisplayOptions.all
 																: event.currentTarget.value === TagDisplayOptions.top30
 																? TagDisplayOptions.top30
-																: event.currentTarget.value ===
-																  TagDisplayOptions.singles
+																: event.currentTarget.value === TagDisplayOptions.singles
 																? TagDisplayOptions.singles
 																: TagDisplayOptions.all,
 													})
@@ -357,10 +299,7 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 												defaultValue={this.state.optionDisplay}
 												onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
 													this.setState({
-														optionDisplay:
-															event.currentTarget.value === SearchScopes.all
-																? SearchScopes.all
-																: SearchScopes.signs,
+														optionDisplay: event.currentTarget.value === SearchScopes.all ? SearchScopes.all : SearchScopes.signs,
 													})
 												}}>
 												<option value='All Fields'>Complete Dream</option>

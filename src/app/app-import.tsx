@@ -295,9 +295,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		let newState = {}
 		if (event.target.name === 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
-			newState['dreamSigns'] = event.target.value
-				? event.target.value.split(this.state._dreamSignsDelim || ',')
-				: []
+			newState['dreamSigns'] = event.target.value ? event.target.value.split(this.state._dreamSignsDelim || ',') : []
 		} else {
 			newState[event.target.name] = event.target.value
 		}
@@ -331,8 +329,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		let newState = {}
 		if (name === 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
-			newState['dreamSigns'] =
-				value && typeof value === 'string' ? value.split(this.state._dreamSignsDelim || ',') : []
+			newState['dreamSigns'] = value && typeof value === 'string' ? value.split(this.state._dreamSignsDelim || ',') : []
 		} else {
 			newState[name] = value
 		}
@@ -358,10 +355,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	}
 
 	handleResultChange = (
-		event:
-			| React.ChangeEvent<HTMLInputElement>
-			| React.ChangeEvent<HTMLSelectElement>
-			| React.ChangeEvent<HTMLTextAreaElement>,
+		event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement> | React.ChangeEvent<HTMLTextAreaElement>,
 		idx: number,
 		idy?: number
 	) => {
@@ -371,10 +365,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 		let newState = this.state._parsedSections
 		if (typeof idy === 'number')
-			newState[idx].dreams[idy][name] =
-				name === 'dreamSigns' && typeof value === 'string'
-					? value.split(this.state._dreamSignsDelim || ',')
-					: value
+			newState[idx].dreams[idy][name] = name === 'dreamSigns' && typeof value === 'string' ? value.split(this.state._dreamSignsDelim || ',') : value
 		else newState[idx][name] = value
 
 		this.setState({
@@ -434,9 +425,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		}
 		strImportText
 			.split(strSecBreak)
-			.filter(sect => {
-				return sect
-			})
+			.filter(sect => sect)
 			.forEach(sect => {
 				//if (VERBOSE) console.log('SECTION: ' + sect)
 
@@ -479,20 +468,13 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							try {
 								let textParse = line.split('\n')[0].replace(/[^0-9$\/]/g, '')
 								let dateParse = new Date(textParse)
-								if (
-									Object.prototype.toString.call(dateParse) === '[object Date]' &&
-									dateParse.getDay() > 0
-								) {
+								if (Object.prototype.toString.call(dateParse) === '[object Date]' && dateParse.getDay() > 0) {
 									objEntry.entryDate = dateParse.toISOString().substring(0, 10)
 								}
 							} catch (ex) {
 								objEntry.entryDate = ex
 							}
-						} else if (
-							this.state._selEntryType === 'match' &&
-							this.state._entryDate &&
-							line.trim().match(new RegExp(this.state._entryDate, 'g'))
-						) {
+						} else if (this.state._selEntryType === 'match' && this.state._entryDate && line.trim().match(new RegExp(this.state._entryDate, 'g'))) {
 							let textParse = line.trim().match(new RegExp(this.state._entryDate, 'gm'))[0]
 							if (textParse) {
 								textParse = textParse.replace(/:|;/gi, '') // For "11/29/2019:"
@@ -503,10 +485,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 									if (VERBOSE) console.log('FYI using `_defaultYear`: ' + this.state._defaultYear)
 									dateParse.setFullYear(this.state._defaultYear)
 								}
-								if (
-									Object.prototype.toString.call(dateParse) === '[object Date]' &&
-									dateParse.getDay() >= 0
-								) {
+								if (Object.prototype.toString.call(dateParse) === '[object Date]' && dateParse.getDay() >= 0) {
 									objEntry.entryDate = dateParse.toISOString().substring(0, 10)
 								} else {
 									if (VERBOSE) {
@@ -543,8 +522,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						} else if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
 							// DESIGN: Some people (*ahem*) choose to put DREAMSIGNS at the top-level (not as a Dream section field)
 							let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
-							if (keyVal[1].trim())
-								tmpDreamSigns = keyVal[1].trim().split(this.state._dreamSignsDelim || strDreamSignDelim)
+							if (keyVal[1].trim()) tmpDreamSigns = keyVal[1].trim().split(this.state._dreamSignsDelim || strDreamSignDelim)
 						}
 					} else if (line) {
 						// DESIGN: the last `else if` above created an item in `objEntry.dreams`
@@ -566,10 +544,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
 							// FIXME: TODO:
 							if (!keyVal[1]) console.log(line)
-							if (keyVal[1].trim())
-								objDream.dreamSigns =
-									tmpDreamSigns ||
-									keyVal[1].trim().split(this.state._dreamSignsDelim || strDreamSignDelim)
+							if (keyVal[1].trim()) objDream.dreamSigns = tmpDreamSigns || keyVal[1].trim().split(this.state._dreamSignsDelim || strDreamSignDelim)
 						} else if (line.trim().match(new RegExp(this.state._isLucidDream, 'g'))) {
 							let keyVal = line.trim().split(new RegExp(this.state._isLucidDream, 'g'))
 							if (keyVal[1].trim()) objDream.isLucidDream = keyVal[1].trim() ? true : false
@@ -617,8 +592,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				}
 
 				// 3: default [bed time] if needed
-				if (this.state._useDefaultTime && !objEntry.bedTime)
-					objEntry.bedTime = this.state._defaultBedTime || '00:00'
+				if (this.state._useDefaultTime && !objEntry.bedTime) objEntry.bedTime = this.state._defaultBedTime || '00:00'
 
 				// 4: add section
 				objEntry.notesPrep = objEntry.notesPrep.trim()
@@ -660,11 +634,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 		// C: flag entries with duplicate `entryDate` (already exists in selected journal)
 		this.state._parsedSections.forEach(sect => {
-			if (
-				this.props.dataFile.entries.filter(entry => {
-					return entry.entryDate === sect.entryDate
-				}).length > 0
-			) {
+			if (this.props.dataFile.entries.filter(entry => entry.entryDate === sect.entryDate).length > 0) {
 				arrInvalidSects.push(sect)
 			}
 		})
@@ -755,10 +725,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				<div className='row align-items-top mb-4'>
 					<div className='col-8'>
 						<h5 className='text-primary'>Field Mapping</h5>
-						<p>
-							Use the form below to map your dream journal fields to Brain Cloud's, then your data will be
-							automatically imported into your new dream journal.
-						</p>
+						<p>Use the form below to map your dream journal fields to Brain Cloud's, then your data will be automatically imported into your new dream journal.</p>
 					</div>
 					<div className='col-4'>
 						<h5 className='text-primary'>Current Journal Format</h5>
@@ -789,11 +756,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							<div className='col'>
 								<div className='row no-gutters'>
 									<div className='col'>
-										<select
-											name='_selEntryType'
-											className='form-control'
-											onChange={this.handleSelectChange}
-											value={this.state._selEntryType}>
+										<select name='_selEntryType' className='form-control' onChange={this.handleSelectChange} value={this.state._selEntryType}>
 											<option value='match'>Regex</option>
 											<option value='first'>First line is the Entry Date</option>
 										</select>
@@ -814,14 +777,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							</div>
 							<div className='col'>
 								<div className='form-output p-2'>{this.state.entryDate}</div>
-								<div
-									className={
-										this.state._entryDateInvalidMsg
-											? 'invalid-feedback d-block'
-											: 'invalid-feedback'
-									}>
-									{this.state._entryDateInvalidMsg}
-								</div>
+								<div className={this.state._entryDateInvalidMsg ? 'invalid-feedback d-block' : 'invalid-feedback'}>{this.state._entryDateInvalidMsg}</div>
 							</div>
 						</div>
 						<div className='row align-items-center mb-3'>
@@ -845,11 +801,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							<div className='col'>
 								<div className='row no-gutters'>
 									<div className='col-auto'>
-										<select
-											name='_selNotePrepType'
-											className='form-control'
-											onChange={this.handleSelectChange}
-											value={this.state._selNotePrepType}>
+										<select name='_selNotePrepType' className='form-control' onChange={this.handleSelectChange} value={this.state._selNotePrepType}>
 											<option value='single'>Single-line</option>
 											<option value='multi'>Multi-line</option>
 										</select>
@@ -865,10 +817,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										/>
 									</div>
 								</div>
-								<div
-									className={
-										this.state._selNotePrepType === 'multi' ? 'row no-gutters mt-1' : 'd-none'
-									}>
+								<div className={this.state._selNotePrepType === 'multi' ? 'row no-gutters mt-1' : 'd-none'}>
 									<input
 										name='_notesPrepEnd'
 										value={this.state._notesPrepEnd}
@@ -890,11 +839,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							<div className='col'>
 								<div className='row no-gutters'>
 									<div className='col-auto'>
-										<select
-											name='_selNoteWakeType'
-											className='form-control'
-											onChange={this.handleSelectChange}
-											value={this.state._selNoteWakeType}>
+										<select name='_selNoteWakeType' className='form-control' onChange={this.handleSelectChange} value={this.state._selNoteWakeType}>
 											<option value='single'>Single-line</option>
 											<option value='multi'>Multi-line</option>
 										</select>
@@ -910,10 +855,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										/>
 									</div>
 								</div>
-								<div
-									className={
-										this.state._selNoteWakeType === 'multi' ? 'row no-gutters mt-1' : 'd-none'
-									}>
+								<div className={this.state._selNoteWakeType === 'multi' ? 'row no-gutters mt-1' : 'd-none'}>
 									<input
 										name='_notesWakeEnd'
 										value={this.state._notesWakeEnd}
@@ -945,13 +887,11 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							</div>
 							<div className='col'>
 								<div className='form-output p-2'>
-									{(this.state.dreamBreak || []).map((dream, idx) => {
-										return (
-											<div key={'dreambreak' + idx}>
-												{idx + 1}:&nbsp;{dream}
-											</div>
-										)
-									})}
+									{(this.state.dreamBreak || []).map((dream, idx) => (
+										<div key={'dreambreak' + idx}>
+											{idx + 1}:&nbsp;{dream}
+										</div>
+									))}
 								</div>
 							</div>
 						</div>
@@ -968,11 +908,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 								/>
 							</div>
 							<div className='col'>
-								<div className='form-output p-2'>
-									{this.state.isLucidDream && (
-										<div className='badge badge-success font-weight-light p-2'>YES</div>
-									)}
-								</div>
+								<div className='form-output p-2'>{this.state.isLucidDream && <div className='badge badge-success font-weight-light p-2'>YES</div>}</div>
 							</div>
 						</div>
 						<div className='row align-items-center mb-3'>
@@ -990,11 +926,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										/>
 									</div>
 									<div className='col-2'>
-										<select
-											name='_dreamSignsDelim'
-											value={this.state._dreamSignsDelim}
-											className='form-control'
-											onChange={this.handleSelectChange}>
+										<select name='_dreamSignsDelim' value={this.state._dreamSignsDelim} className='form-control' onChange={this.handleSelectChange}>
 											<option value=','>,</option>
 											<option value=';'>;</option>
 											<option value=' '>(space)</option>
@@ -1027,11 +959,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							<div className='col'>
 								<div className='row no-gutters'>
 									<div className='col'>
-										<select
-											name='_selDreamNotes'
-											className='form-control'
-											onChange={this.handleSelectChange}
-											value={this.state._selDreamNotes}>
+										<select name='_selDreamNotes' className='form-control' onChange={this.handleSelectChange} value={this.state._selDreamNotes}>
 											<option value='match'>Regex</option>
 											<option value='after'>All text after Dream Title</option>
 										</select>
@@ -1050,9 +978,9 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							</div>
 							<div className='col'>
 								<div className='form-output p-2'>
-									{this.state.notes.map((note, idx) => {
-										return <div key={'note' + idx}>{note}</div>
-									})}
+									{this.state.notes.map((note, idx) => (
+										<div key={'note' + idx}>{note}</div>
+									))}
 								</div>
 							</div>
 						</div>
@@ -1067,11 +995,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					<div className='col'>
 						<h5 className='text-primary'>Section Break</h5>
 						<label>Type of break your journal uses between entries</label>
-						<select
-							name='_selBreakType'
-							className='form-control w-50'
-							onChange={this.handleSelectChange}
-							value={this.state._selBreakType}>
+						<select name='_selBreakType' className='form-control w-50' onChange={this.handleSelectChange} value={this.state._selBreakType}>
 							<option value='blankLine'>Empty Line (paragraph style)</option>
 							<option value='entryDate'>Entry Date</option>
 						</select>
@@ -1140,10 +1064,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 				<div className='row align-items-bottom'>
 					<div className='col-12 text-center'>
-						<p>
-							Once the options above are functioning correctly, go to the next tab to import your dream
-							journal.
-						</p>
+						<p>Once the options above are functioning correctly, go to the next tab to import your dream journal.</p>
 					</div>
 				</div>
 			</div>
@@ -1155,25 +1076,13 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					<div className='col'>
 						<h3 className='text-primary'>Instructions</h3>
 						<ul>
-							<li>
-								Copy one or more entries from your Dream Journal, then paste them below and click the
-								Parse button
-							</li>
-							<li>
-								The options in the Setup tab will be used to parse your existing entries into a new,
-								well-structured format
-							</li>
-							<li>
-								Review the results, make any changes, then click Import to add them to your Brain Cloud
-								journal
-							</li>
+							<li>Copy one or more entries from your Dream Journal, then paste them below and click the Parse button</li>
+							<li>The options in the Setup tab will be used to parse your existing entries into a new, well-structured format</li>
+							<li>Review the results, make any changes, then click Import to add them to your Brain Cloud journal</li>
 						</ul>
 					</div>
 					<div className='col-auto pt-2'>
-						<button
-							className='btn btn-success'
-							onClick={this.handleParse}
-							disabled={(this.state._importText || '').length === 0}>
+						<button className='btn btn-success' onClick={this.handleParse} disabled={(this.state._importText || '').length === 0}>
 							Parse Journal Entries
 						</button>
 					</div>
@@ -1200,193 +1109,143 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			<form>
 				<div className='row align-items-middle justify-content-between'>
 					<div className='col-auto'>
-						<h2 className='text-primary mb-3'>
-							{'Parse Results: ' + this.state._parsedSections.length + ' daily entries'}
-						</h2>
+						<h2 className='text-primary mb-3'>{'Parse Results: ' + this.state._parsedSections.length + ' daily entries'}</h2>
 					</div>
 					<div className='col-auto'>
-						<button
-							type='button'
-							className='btn btn-success'
-							onClick={this.handleImport}
-							disabled={this.state._parsedSections.length === 0}>
+						<button type='button' className='btn btn-success' onClick={this.handleImport} disabled={this.state._parsedSections.length === 0}>
 							Import Journal Entries
 						</button>
 					</div>
 				</div>
 				<p className='text-center'>
-					Review the results below and make changes as needed, then click Import Entries to add these new
-					entries to your current Dream Journal.
+					Review the results below and make changes as needed, then click Import Entries to add these new entries to your current Dream Journal.
 				</p>
 
 				<ul className='list-group mb-4'>
-					{this.state._parsedSections.map((sect, idx) => {
-						return (
-							<li className='list-group-item' key={'parsedsect' + idx}>
-								<div className='row no-gutters'>
-									<div className='col'>
-										<h4 className='text-primary'>Entry {idx + 1}</h4>
-									</div>
-									<div className='col-auto'>
-										<div
-											title='Delete Entry'
-											className='iconSvg size24 small circle no cursor-pointer'
-											onClick={() => this.handleDeleteEntry(idx)}
-										/>
-									</div>
+					{this.state._parsedSections.map((sect, idx) => (
+						<li className='list-group-item' key={'parsedsect' + idx}>
+							<div className='row no-gutters'>
+								<div className='col'>
+									<h4 className='text-primary'>Entry {idx + 1}</h4>
 								</div>
-								<div className='row mb-4'>
-									<div className='col-auto'>
-										<label className='text-uppercase text-muted d-block'>Entry Date</label>
-										<input
-											name='entryDate'
-											type='date'
-											className={
-												this.state._invalidSections.indexOf(sect) > -1
-													? 'form-control is-invalid'
-													: 'form-control'
-											}
-											value={sect.entryDate}
-											onChange={event => this.handleResultChange(event, idx)}
-											required
-										/>
-										<div className='invalid-feedback'>
-											A journal entry with this date already exists.
+								<div className='col-auto'>
+									<div title='Delete Entry' className='iconSvg size24 small circle no cursor-pointer' onClick={() => this.handleDeleteEntry(idx)} />
+								</div>
+							</div>
+							<div className='row mb-4'>
+								<div className='col-auto'>
+									<label className='text-uppercase text-muted d-block'>Entry Date</label>
+									<input
+										name='entryDate'
+										type='date'
+										className={this.state._invalidSections.indexOf(sect) > -1 ? 'form-control is-invalid' : 'form-control'}
+										value={sect.entryDate}
+										onChange={event => this.handleResultChange(event, idx)}
+										required
+									/>
+									<div className='invalid-feedback'>A journal entry with this date already exists.</div>
+								</div>
+								<div className='col-auto'>
+									<label className='text-uppercase text-muted d-block'>Bed Time</label>
+									<input name='bedTime' type='time' className='form-control' value={sect.bedTime} onChange={event => this.handleResultChange(event, idx)} />
+								</div>
+								<div className='col'>
+									<label className='text-uppercase text-muted d-block'>Prep Notes</label>
+									<textarea
+										name='notesPrep'
+										value={sect.notesPrep}
+										className='form-control'
+										onChange={event => this.handleResultChange(event, idx)}
+										rows={2}
+									/>
+								</div>
+								<div className='col'>
+									<label className='text-uppercase text-muted d-block'>Wake Notes</label>
+									<textarea
+										name='notesWake'
+										className='form-control'
+										value={sect.notesWake}
+										onChange={event => this.handleResultChange(event, idx)}
+										rows={2}
+									/>
+								</div>
+							</div>
+							{sect.dreams.map((dream, idy) => (
+								<div key={'parsedsectdream' + idx + idy}>
+									<div className='row mb-4'>
+										<div className='col-auto border-info border-right'>
+											<h2 className='text-info'>{idy + 1}</h2>
 										</div>
-									</div>
-									<div className='col-auto'>
-										<label className='text-uppercase text-muted d-block'>Bed Time</label>
-										<input
-											name='bedTime'
-											type='time'
-											className='form-control'
-											value={sect.bedTime}
-											onChange={event => this.handleResultChange(event, idx)}
-										/>
-									</div>
-									<div className='col'>
-										<label className='text-uppercase text-muted d-block'>Prep Notes</label>
-										<textarea
-											name='notesPrep'
-											value={sect.notesPrep}
-											className='form-control'
-											onChange={event => this.handleResultChange(event, idx)}
-											rows={2}
-										/>
-									</div>
-									<div className='col'>
-										<label className='text-uppercase text-muted d-block'>Wake Notes</label>
-										<textarea
-											name='notesWake'
-											className='form-control'
-											value={sect.notesWake}
-											onChange={event => this.handleResultChange(event, idx)}
-											rows={2}
-										/>
-									</div>
-								</div>
-								{sect.dreams.map((dream, idy) => {
-									return (
-										<div key={'parsedsectdream' + idx + idy}>
-											<div className='row mb-4'>
-												<div className='col-auto border-info border-right'>
-													<h2 className='text-info'>{idy + 1}</h2>
-												</div>
+										<div className='col'>
+											<div className='row mb-3'>
 												<div className='col'>
-													<div className='row mb-3'>
-														<div className='col'>
-															<label className='text-uppercase text-muted d-block'>
-																Title
-															</label>
-															<input
-																name='title'
-																type='text'
-																className='form-control'
-																value={dream.title}
-																onChange={event =>
-																	this.handleResultChange(event, idx, idy)
-																}
-															/>
-														</div>
-														<div className='col-auto'>
-															<label className='text-uppercase text-muted d-block'>
-																Dream Signs
-															</label>
-															<input
-																name='dreamSigns'
-																type='text'
-																className='form-control'
-																value={dream.dreamSigns}
-																onChange={event =>
-																	this.handleResultChange(event, idx, idy)
-																}
-															/>
-														</div>
-														<div className='col-auto'>
-															<label className='text-uppercase text-muted d-block'>
-																Lucid Dream?
-															</label>
-															<BootstrapSwitchButton
-																onChange={(checked: boolean) => {
-																	let newState = this.state._parsedSections
-																	if (idy)
-																		newState[idx].dreams[idy].isLucidDream = checked
-																	this.setState({ _parsedSections: newState })
-																}}
-																checked={dream.isLucidDream}
-																onlabel='Yes'
-																onstyle='outline-success'
-																offlabel='No'
-																offstyle='outline-dark'
-																style='w-100'
-															/>
-														</div>
-														<div className='col-auto'>
-															<label className='text-uppercase text-muted d-block'>
-																Lucid Method
-															</label>
-															<select
-																name='lucidMethod'
-																value={dream.lucidMethod || InductionTypes.none}
-																onChange={event =>
-																	this.handleResultChange(event, idx, idy)
-																}
-																className='form-control'>
-																{Object.keys(InductionTypes).map(type => {
-																	return (
-																		<option
-																			key={
-																				'lucid-' + type + '-' + idx + '-' + idy
-																			}
-																			value={type}>
-																			{InductionTypes[type]}
-																		</option>
-																	)
-																})}
-															</select>
-														</div>
-													</div>
-													<div className='row'>
-														<div className='col'>
-															<textarea
-																name='notes'
-																value={dream.notes}
-																onChange={event =>
-																	this.handleResultChange(event, idx, idy)
-																}
-																className='form-control w-100'
-																rows={5}
-															/>
-														</div>
-													</div>
+													<label className='text-uppercase text-muted d-block'>Title</label>
+													<input
+														name='title'
+														type='text'
+														className='form-control'
+														value={dream.title}
+														onChange={event => this.handleResultChange(event, idx, idy)}
+													/>
+												</div>
+												<div className='col-auto'>
+													<label className='text-uppercase text-muted d-block'>Dream Signs</label>
+													<input
+														name='dreamSigns'
+														type='text'
+														className='form-control'
+														value={dream.dreamSigns}
+														onChange={event => this.handleResultChange(event, idx, idy)}
+													/>
+												</div>
+												<div className='col-auto'>
+													<label className='text-uppercase text-muted d-block'>Lucid Dream?</label>
+													<BootstrapSwitchButton
+														onChange={(checked: boolean) => {
+															let newState = this.state._parsedSections
+															if (idy) newState[idx].dreams[idy].isLucidDream = checked
+															this.setState({ _parsedSections: newState })
+														}}
+														checked={dream.isLucidDream}
+														onlabel='Yes'
+														onstyle='outline-success'
+														offlabel='No'
+														offstyle='outline-dark'
+														style='w-100'
+													/>
+												</div>
+												<div className='col-auto'>
+													<label className='text-uppercase text-muted d-block'>Lucid Method</label>
+													<select
+														name='lucidMethod'
+														value={dream.lucidMethod || InductionTypes.none}
+														onChange={event => this.handleResultChange(event, idx, idy)}
+														className='form-control'>
+														{Object.keys(InductionTypes).map(type => (
+															<option key={'lucid-' + type + '-' + idx + '-' + idy} value={type}>
+																{InductionTypes[type]}
+															</option>
+														))}
+													</select>
+												</div>
+											</div>
+											<div className='row'>
+												<div className='col'>
+													<textarea
+														name='notes'
+														value={dream.notes}
+														onChange={event => this.handleResultChange(event, idx, idy)}
+														className='form-control w-100'
+														rows={5}
+													/>
 												</div>
 											</div>
 										</div>
-									)
-								})}
-							</li>
-						)
-					})}
+									</div>
+								</div>
+							))}
+						</li>
+					))}
 				</ul>
 			</form>
 		)
@@ -1404,14 +1263,12 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							</div>
 							<div className='col'>
 								<p className='card-text'>
-									It's likely that you're already keeping a dream journal in another format, such a
-									Document (Google Docs, Microsoft Word), spreadsheet (Google Sheets, Microsoft
-									Excel), or just plain text.
+									It's likely that you're already keeping a dream journal in another format, such a Document (Google Docs, Microsoft Word), spreadsheet
+									(Google Sheets, Microsoft Excel), or just plain text.
 								</p>
 								<p className='card-text'>
-									The importer interface allows you to import your free-form journal into the
-									well-formatted Brain Cloud JSON format which is a universal, plain text, flat-file
-									database readable by a myriad of apps (databases, text editors, etc.)
+									The importer interface allows you to import your free-form journal into the well-formatted Brain Cloud JSON format which is a universal,
+									plain text, flat-file database readable by a myriad of apps (databases, text editors, etc.)
 								</p>
 							</div>
 						</div>
@@ -1420,48 +1277,23 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 				<ul className='nav nav-tabs nav-fill' role='tablist'>
 					<li className='nav-item'>
-						<a
-							className='nav-link active'
-							id='setup-tab'
-							data-toggle='tab'
-							href='#setup'
-							role='tab'
-							aria-controls='setup'
-							aria-selected='true'>
+						<a className='nav-link active' id='setup-tab' data-toggle='tab' href='#setup' role='tab' aria-controls='setup' aria-selected='true'>
 							Set Import Options
 						</a>
 					</li>
 					<li className='nav-item'>
-						<a
-							className='nav-link'
-							id='parse-tab'
-							data-toggle='tab'
-							href='#parse'
-							role='tab'
-							aria-controls='parse'
-							aria-selected='false'>
+						<a className='nav-link' id='parse-tab' data-toggle='tab' href='#parse' role='tab' aria-controls='parse' aria-selected='false'>
 							Parse Journal Entries
 						</a>
 					</li>
 					<li className='nav-item'>
-						<a
-							className='nav-link'
-							id='results-tab'
-							data-toggle='tab'
-							href='#results'
-							role='tab'
-							aria-controls='results'
-							aria-selected='false'>
+						<a className='nav-link' id='results-tab' data-toggle='tab' href='#results' role='tab' aria-controls='results' aria-selected='false'>
 							Import Journal Entries
 						</a>
 					</li>
 				</ul>
 				<div className='tab-content mb-5'>
-					<div
-						className='tab-pane bg-light p-4 active'
-						id='setup'
-						role='tabpanel'
-						aria-labelledby='setup-tab'>
+					<div className='tab-pane bg-light p-4 active' id='setup' role='tabpanel' aria-labelledby='setup-tab'>
 						{importSetup}
 					</div>
 					<div className='tab-pane bg-light p-4' id='parse' role='tabpanel' aria-labelledby='parse-tab'>

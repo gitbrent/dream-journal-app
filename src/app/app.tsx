@@ -255,10 +255,7 @@ class App extends React.Component<IAppProps, IAppState> {
 						if (data && data.error && data.error.code) throw data.error
 
 						// B: Capture datafile
-						let driveDataFile =
-							data.files.filter(file => {
-								return file.name === JOURNAL_HEADER.name
-							})[0] || null
+						let driveDataFile = data.files.filter(file => file.name === JOURNAL_HEADER.name)[0] || null
 						this.setState({
 							dataFile: driveDataFile,
 						})
@@ -396,8 +393,8 @@ class App extends React.Component<IAppProps, IAppState> {
 	/**
 	 * @see: https://developers.google.com/drive/api/v3/reference/files/update
 	 */
-	doSaveFile = () => {
-		return new Promise((resolve, reject) => {
+	doSaveFile = () =>
+		new Promise((resolve, reject) => {
 			let params = JSON.parse(localStorage.getItem('oauth2-params'))
 
 			// A: Set state
@@ -444,14 +441,11 @@ class App extends React.Component<IAppProps, IAppState> {
 				'Content-Length': reqBody.length + reqEnd.length,
 			}
 
-			fetch(
-				'https://www.googleapis.com/upload/drive/v3/files/' + this.state.dataFile.id + '?uploadType=multipart',
-				{
-					method: 'PATCH',
-					headers: requestHeaders,
-					body: reqBody,
-				}
-			)
+			fetch('https://www.googleapis.com/upload/drive/v3/files/' + this.state.dataFile.id + '?uploadType=multipart', {
+				method: 'PATCH',
+				headers: requestHeaders,
+				body: reqBody,
+			})
 				.then(response => {
 					response
 						.json()
@@ -486,19 +480,12 @@ class App extends React.Component<IAppProps, IAppState> {
 					}
 				})
 		})
-	}
 
-	isExistingEntryDate = (checkDate: string) => {
-		return this.state.dataFile.entries.filter(ent => {
-			return ent.entryDate === checkDate
-		}).length > 0
-			? true
-			: false
-	}
-	doImportEntries = (entries: Array<IJournalEntry>) => {
-		let newState = this.state.dataFile
+	isExistingEntryDate = (checkDate: string) => (this.state.dataFile.entries.filter(ent => ent.entryDate === checkDate).length > 0 ? true : false)
 
-		return new Promise((resolve, reject) => {
+	doImportEntries = (entries: Array<IJournalEntry>) =>
+		new Promise((resolve, reject) => {
+			let newState = this.state.dataFile
 			if (!newState || !newState.id) {
 				reject('No data file currently selected')
 			} else {
@@ -522,7 +509,6 @@ class App extends React.Component<IAppProps, IAppState> {
 					})
 			}
 		})
-	}
 
 	getDreamSignTags = (): IDreamSignTag[] => {
 		let allTags: string[] = []
@@ -537,18 +523,15 @@ class App extends React.Component<IAppProps, IAppState> {
 			})
 		})
 
-		return allTags.sort().map((sign, idx) => {
-			return { id: idx, name: sign }
-		})
+		return allTags.sort().map((sign, idx) => new Object({ id: idx, name: sign }) as IDreamSignTag)
 	}
 
 	/**
 	 * Add new `IJournalEntry` into selected `IDriveFile`
 	 */
-	doCreateEntry = (entry: IJournalEntry) => {
-		let newState = this.state.dataFile
-
-		return new Promise((resolve, reject) => {
+	doCreateEntry = (entry: IJournalEntry) =>
+		new Promise((resolve, reject) => {
+			let newState = this.state.dataFile
 			if (!newState || !newState.id) {
 				reject('No data file currently selected')
 			} else {
@@ -570,7 +553,7 @@ class App extends React.Component<IAppProps, IAppState> {
 					})
 			}
 		})
-	}
+
 	/**
 	 * Add new `IJournalEntry` into selected `IDriveFile`
 	 */
@@ -581,9 +564,7 @@ class App extends React.Component<IAppProps, IAppState> {
 			if (!newState || !newState.id) {
 				reject('No data file currently selected')
 			} else {
-				let editEntry = newState.entries.filter(ent => {
-					return ent.entryDate === (origEntryDate !== entry.entryDate ? origEntryDate : entry.entryDate)
-				})[0]
+				let editEntry = newState.entries.filter(ent => ent.entryDate === (origEntryDate !== entry.entryDate ? origEntryDate : entry.entryDate))[0]
 
 				if (!editEntry) {
 					reject('ERROR: Unable to find this entry to update it')
@@ -621,9 +602,7 @@ class App extends React.Component<IAppProps, IAppState> {
 				reject('No data file currently selected')
 			} else {
 				// A:
-				let delIdx = newState.entries.findIndex(ent => {
-					return ent.entryDate === entryDate
-				})
+				let delIdx = newState.entries.findIndex(ent => ent.entryDate === entryDate)
 
 				// B:
 				if (delIdx === -1) reject('Unable to find `entryDate` ' + entryDate)
@@ -654,58 +633,47 @@ class App extends React.Component<IAppProps, IAppState> {
 
 	// App Pages
 
-	Home = () => {
-		return (
-			<TabHome
-				authState={this.state.auth}
-				dataFile={this.state.dataFile || null}
-				doAuthSignIn={this.doAuthSignIn}
-				doAuthSignOut={this.doAuthSignOut}
-				onShowModal={this.chgShowModal}
-			/>
-		)
-	}
-	Journal = () => {
-		return (
-			<TabView
-				dataFile={this.state.dataFile || null}
-				dreamSignTags={this.getDreamSignTags()}
-				onShowModal={this.chgShowModal}
-				doSaveViewState={this.doSaveViewState}
-				viewState={this.state.childViewState}
-			/>
-		)
-	}
-	Search = () => {
-		return (
-			<TabSearch
-				dataFile={this.state.dataFile || null}
-				onShowModal={this.chgShowModal}
-				doSaveSearchState={this.doSaveSearchState}
-				searchState={this.state.childSearchState}
-			/>
-		)
-	}
-	Tags = () => {
-		return (
-			<TabTags
-				dataFile={this.state.dataFile || null}
-				onShowModal={this.chgShowModal}
-				doSaveTagsState={this.doSaveTagsState}
-				tagsState={this.state.childTagsState}
-			/>
-		)
-	}
-	Import = () => {
-		return (
-			<TabImport
-				dataFile={this.state.dataFile || null}
-				doImportEntries={this.doImportEntries}
-				doSaveImportState={this.doSaveImportState}
-				importState={this.state.childImportState}
-			/>
-		)
-	}
+	Home = () => (
+		<TabHome
+			authState={this.state.auth}
+			dataFile={this.state.dataFile || null}
+			doAuthSignIn={this.doAuthSignIn}
+			doAuthSignOut={this.doAuthSignOut}
+			onShowModal={this.chgShowModal}
+		/>
+	)
+
+	Journal = () => (
+		<TabView
+			dataFile={this.state.dataFile || null}
+			dreamSignTags={this.getDreamSignTags()}
+			onShowModal={this.chgShowModal}
+			doSaveViewState={this.doSaveViewState}
+			viewState={this.state.childViewState}
+		/>
+	)
+
+	Search = () => (
+		<TabSearch
+			dataFile={this.state.dataFile || null}
+			onShowModal={this.chgShowModal}
+			doSaveSearchState={this.doSaveSearchState}
+			searchState={this.state.childSearchState}
+		/>
+	)
+
+	Tags = () => (
+		<TabTags dataFile={this.state.dataFile || null} onShowModal={this.chgShowModal} doSaveTagsState={this.doSaveTagsState} tagsState={this.state.childTagsState} />
+	)
+
+	Import = () => (
+		<TabImport
+			dataFile={this.state.dataFile || null}
+			doImportEntries={this.doImportEntries}
+			doSaveImportState={this.doSaveImportState}
+			importState={this.state.childImportState}
+		/>
+	)
 
 	render() {
 		return (
@@ -733,42 +701,22 @@ class App extends React.Component<IAppProps, IAppState> {
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink
-									to='/journal'
-									activeClassName='active'
-									className={
-										!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'
-									}>
+								<NavLink to='/journal' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'}>
 									View Journal
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink
-									to='/search'
-									activeClassName='active'
-									className={
-										!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'
-									}>
+								<NavLink to='/search' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'}>
 									Search Journal
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink
-									to='/tags'
-									activeClassName='active'
-									className={
-										!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'
-									}>
+								<NavLink to='/tags' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'}>
 									Dreamsign Tags
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink
-									to='/import'
-									activeClassName='active'
-									className={
-										!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'
-									}>
+								<NavLink to='/import' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'}>
 									Import Dreams
 								</NavLink>
 							</li>
@@ -798,9 +746,7 @@ class App extends React.Component<IAppProps, IAppState> {
 }
 
 // App Container
-const AppMain: React.SFC<{ compiler: string; framework: string }> = _props => {
-	return <App />
-}
+const AppMain: React.SFC<{ compiler: string; framework: string }> = _props => <App />
 
 ReactDOM.render(<AppMain compiler='TypeScript' framework='React' />, document.getElementById('root'))
 
@@ -847,8 +793,9 @@ function parseStoreAccessKey() {
 
 	// Parse query string to see if page request is coming from OAuth 2.0 server.
 	let params = {}
-	let regex = /([^&=]+)=([^&]*)/g,
-		m
+	let regex = /([^&=]+)=([^&]*)/g
+	let m: RegExpExecArray
+
 	while ((m = regex.exec(fragmentString))) {
 		params[decodeURIComponent(m[1])] = decodeURIComponent(m[2])
 	}

@@ -76,9 +76,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 		this.props.onShowModal({
 			show: true,
 			tags: this.props.dreamSignTags,
-			editEntry: this.props.dataFile.entries.filter(entry => {
-				return entry.entryDate === editEntryDate
-			})[0],
+			editEntry: this.props.dataFile.entries.filter(entry => entry.entryDate === editEntryDate)[0],
 		})
 	}
 
@@ -93,23 +91,14 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 	// @see: http://react-day-picker.js.org/examples/elements-cell
 	render() {
 		// A: filter entries
-		let arrEntries = (this.props.dataFile && this.props.dataFile.entries ? this.props.dataFile.entries : []).filter(
-			entry => {
-				let dateEntry = new Date(entry.entryDate + ' 00:00:00')
-				// FIXME: doesnt work if you select the day of an entry (eg: jan1 - jan3 works, nut select jan 2 and nothing)
-				if (
-					this.state.dateRangeFrom &&
-					this.state.dateRangeTo &&
-					dateEntry >= this.state.dateRangeFrom &&
-					dateEntry <= this.state.dateRangeTo
-				)
-					return true
-				else if (this.state.dateRangeFrom && !this.state.dateRangeTo && dateEntry === this.state.dateRangeFrom)
-					return true
-				else if (!this.state.dateRangeFrom && !this.state.dateRangeTo) return true
-				else return false
-			}
-		)
+		let arrEntries = (this.props.dataFile && this.props.dataFile.entries ? this.props.dataFile.entries : []).filter(entry => {
+			let dateEntry = new Date(entry.entryDate + ' 00:00:00')
+			// FIXME: doesnt work if you select the day of an entry (eg: jan1 - jan3 works, nut select jan 2 and nothing)
+			if (this.state.dateRangeFrom && this.state.dateRangeTo && dateEntry >= this.state.dateRangeFrom && dateEntry <= this.state.dateRangeTo) return true
+			else if (this.state.dateRangeFrom && !this.state.dateRangeTo && dateEntry === this.state.dateRangeFrom) return true
+			else if (!this.state.dateRangeFrom && !this.state.dateRangeTo) return true
+			else return false
+		})
 
 		let tableFileList: JSX.Element =
 			this.props.dataFile && this.props.dataFile._isLoading ? (
@@ -136,18 +125,14 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 					</thead>
 					<tbody>
 						{arrEntries
-							.sort((a, b) => {
-								return a.entryDate < b.entryDate ? -1 : 1
-							})
-							.filter((_entry, idx) => {
-								return (
-									idx >= this.state.pagingPageSize * (this.state.pagingCurrIdx - 1) &&
-									idx < this.state.pagingPageSize * this.state.pagingCurrIdx
-								)
-							})
+							.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
+							.filter(
+								(_entry, idx) =>
+									idx >= this.state.pagingPageSize * (this.state.pagingCurrIdx - 1) && idx < this.state.pagingPageSize * this.state.pagingCurrIdx
+							)
 							.map((entry: IJournalEntry, idx) => {
 								// This is a harsh thing to compile inline below, so do it here
-								let dreamSignsUnq: Array<string> = []
+								let dreamSignsUnq: string[] = []
 								entry.dreams.forEach(dream =>
 									Array.isArray(dream.dreamSigns)
 										? (dreamSignsUnq = [...new Set(dream.dreamSigns.concat(dreamSignsUnq))])
@@ -162,35 +147,20 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 										<td className='text-center d-none d-lg-table-cell'>{entry.bedTime}</td>
 										<td className='text-center'>{entry.dreams.length}</td>
 										<td className='text-left d-none d-md-table-cell'>
-											{dreamSignsUnq.sort().map((sign, idy) => {
-												return (
-													<div
-														className='badge badge-info text-lowercase p-2 mr-2 mb-1'
-														key={idx + '-' + idy}>
-														{sign}
-													</div>
-												)
-											})}
+											{dreamSignsUnq.sort().map((sign, idy) => (
+												<div className='badge badge-info text-lowercase p-2 mr-2 mb-1' key={idx + '-' + idy}>
+													{sign}
+												</div>
+											))}
 										</td>
-										<td className='text-center d-none d-md-table-cell'>
-											{entry.starred ? <div className='iconSvg star-on size16' /> : ''}
-										</td>
+										<td className='text-center d-none d-md-table-cell'>{entry.starred ? <div className='iconSvg star-on size16' /> : ''}</td>
 										<td className='text-center'>
-											{entry.dreams.filter(dream => {
-												return dream.isLucidDream === true
-											}).length > 0 ? (
-												<div
-													className='iconSvg size24 circle check'
-													title='Lucid Dream Success!'
-												/>
-											) : (
-												''
+											{entry.dreams.filter(dream => dream.isLucidDream === true).length > 0 && (
+												<div className='iconSvg size24 circle check' title='Lucid Dream Success!' />
 											)}
 										</td>
 										<td className='text-center'>
-											<button
-												className='btn btn-sm btn-outline-primary px-4'
-												onClick={event => this.handleEntryEdit(event, entry.entryDate)}>
+											<button className='btn btn-sm btn-outline-primary px-4' onClick={event => this.handleEntryEdit(event, entry.entryDate)}>
 												Edit
 											</button>
 										</td>
@@ -199,16 +169,13 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 							})}
 					</tbody>
 					<tfoot>
-						{this.props.dataFile &&
-							this.props.dataFile.entries &&
-							this.props.dataFile.entries.length === 0 && (
-								<tr>
-									<td colSpan={6} className='text-center p-3 text-muted'>
-										(No Dream Journal entries found - select "Add Journal Entry" above to create a
-										new one)
-									</td>
-								</tr>
-							)}
+						{this.props.dataFile && this.props.dataFile.entries && this.props.dataFile.entries.length === 0 && (
+							<tr>
+								<td colSpan={6} className='text-center p-3 text-muted'>
+									(No Dream Journal entries found - select "Add Journal Entry" above to create a new one)
+								</td>
+							</tr>
+						)}
 						{!this.props.dataFile && (
 							<tr>
 								<td colSpan={6} className='text-center p-3'>
@@ -235,10 +202,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 								<h5 className='card-title text-white mb-0'>View Dream Journal</h5>
 							</div>
 							<div className='card-body bg-light'>
-								<p className='lead'>
-									All of your journal entries are shown by default. Use the date range search to find
-									specific entries.
-								</p>
+								<p className='lead'>All of your journal entries are shown by default. Use the date range search to find specific entries.</p>
 								<div className='text-center d-block d-sm-none'>
 									<DateRangePicker
 										numberOfMonths={1}
@@ -298,9 +262,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 										pageLimit={this.state.pagingPageSize}
 										pageNeighbours={2}
 										currentPage={this.state.pagingCurrIdx}
-										onPageChanged={(event: any) =>
-											this.setState({ pagingCurrIdx: event.currentPage })
-										}
+										onPageChanged={(event: any) => this.setState({ pagingCurrIdx: event.currentPage })}
 									/>
 								</div>
 								<div className='text-center d-none d-sm-block'>
@@ -309,9 +271,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 										pageLimit={this.state.pagingPageSize}
 										pageNeighbours={4}
 										currentPage={this.state.pagingCurrIdx}
-										onPageChanged={(event: any) =>
-											this.setState({ pagingCurrIdx: event.currentPage })
-										}
+										onPageChanged={(event: any) => this.setState({ pagingCurrIdx: event.currentPage })}
 									/>
 								</div>
 							</div>

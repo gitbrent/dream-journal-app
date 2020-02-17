@@ -25,26 +25,11 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 		let localShowAlert = JSON.parse(localStorage.getItem('show-alert-search'))
 
 		this.state = {
-			searchOptMatchType:
-				this.props.searchState && this.props.searchState['searchOptMatchType']
-					? this.props.searchState['searchOptMatchType']
-					: SearchMatchTypes.whole,
-			searchOptScope:
-				this.props.searchState && this.props.searchState['searchOptScope']
-					? this.props.searchState['searchOptScope']
-					: SearchScopes.all,
-			searchMatches:
-				this.props.searchState && this.props.searchState['searchMatches']
-					? this.props.searchState['searchMatches']
-					: [],
-			searchTerm:
-				this.props.searchState && this.props.searchState['searchTerm']
-					? this.props.searchState['searchTerm']
-					: '',
-			searchTermInvalidMsg:
-				this.props.searchState && this.props.searchState['searchTermInvalidMsg']
-					? this.props.searchState['searchTermInvalidMsg']
-					: '',
+			searchOptMatchType: this.props.searchState && this.props.searchState['searchOptMatchType'] ? this.props.searchState['searchOptMatchType'] : SearchMatchTypes.whole,
+			searchOptScope: this.props.searchState && this.props.searchState['searchOptScope'] ? this.props.searchState['searchOptScope'] : SearchScopes.all,
+			searchMatches: this.props.searchState && this.props.searchState['searchMatches'] ? this.props.searchState['searchMatches'] : [],
+			searchTerm: this.props.searchState && this.props.searchState['searchTerm'] ? this.props.searchState['searchTerm'] : '',
+			searchTermInvalidMsg: this.props.searchState && this.props.searchState['searchTermInvalidMsg'] ? this.props.searchState['searchTermInvalidMsg'] : '',
 			showAlert: typeof localShowAlert === 'boolean' ? localShowAlert : true,
 		}
 	}
@@ -78,9 +63,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 	handleEntryEdit = (entryDate: string) => {
 		this.props.onShowModal({
 			show: true,
-			editEntry: this.props.dataFile.entries.filter(entry => {
-				return entry.entryDate === entryDate
-			})[0],
+			editEntry: this.props.dataFile.entries.filter(entry => entry.entryDate === entryDate)[0],
 		})
 	}
 
@@ -109,10 +92,8 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 	doKeywordSearch = () => {
 		let arrFound = []
 		let regex = new RegExp(this.state.searchTerm, 'gi') // SearchMatchTypes.contains
-		if (this.state.searchOptMatchType === SearchMatchTypes.whole)
-			regex = new RegExp('\\b' + this.state.searchTerm + '\\b', 'gi')
-		else if (this.state.searchOptMatchType === SearchMatchTypes.starts)
-			regex = new RegExp('\\b' + this.state.searchTerm, 'gi')
+		if (this.state.searchOptMatchType === SearchMatchTypes.whole) regex = new RegExp('\\b' + this.state.searchTerm + '\\b', 'gi')
+		else if (this.state.searchOptMatchType === SearchMatchTypes.starts) regex = new RegExp('\\b' + this.state.searchTerm, 'gi')
 		if (!this.props.dataFile || this.props.dataFile.entries.length <= 0) return
 
 		this.props.dataFile.entries.forEach(entry => {
@@ -121,10 +102,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 					if (
 						(dream.notes || '').match(regex) ||
 						(dream.title || '').match(regex) ||
-						(Array.isArray(dream.dreamSigns) &&
-							dream.dreamSigns.filter(sign => {
-								return sign.match(regex)
-							}).length > 0)
+						(Array.isArray(dream.dreamSigns) && dream.dreamSigns.filter(sign => sign.match(regex)).length > 0)
 					) {
 						arrFound.push({
 							entryDate: entry.entryDate,
@@ -141,12 +119,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 						})
 					}
 				} else if (this.state.searchOptScope === SearchScopes.signs) {
-					if (
-						Array.isArray(dream.dreamSigns) &&
-						dream.dreamSigns.filter(sign => {
-							return sign.match(regex)
-						}).length > 0
-					) {
+					if (Array.isArray(dream.dreamSigns) && dream.dreamSigns.filter(sign => sign.match(regex)).length > 0) {
 						arrFound.push({
 							entryDate: entry.entryDate,
 							starred: entry.starred,
@@ -177,9 +150,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 
 		if (type === SearchScopes._starred) {
 			this.props.dataFile.entries
-				.filter(entry => {
-					return entry.starred
-				})
+				.filter(entry => entry.starred)
 				.forEach(entry => {
 					;(entry.dreams || []).forEach(dream => {
 						arrFound.push({
@@ -219,9 +190,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 
 				if (entry.starred) totalStarred++
 
-				totalLucids += entry.dreams.filter(dream => {
-					return dream.isLucidDream
-				}).length
+				totalLucids += entry.dreams.filter(dream => dream.isLucidDream).length
 			})
 		}
 
@@ -231,10 +200,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 					{this.state.showAlert ? (
 						<Alert variant='secondary'>
 							<Alert.Heading>Make good use of your Dream Journal</Alert.Heading>
-							<p>
-								Analyze your journal to learn more about yourself, spot common themes/dreamsigns and
-								improve your lucid dreaming ability.
-							</p>
+							<p>Analyze your journal to learn more about yourself, spot common themes/dreamsigns and improve your lucid dreaming ability.</p>
 							<ul>
 								<li>How many lucid dreams have you had?</li>
 								<li>What are your common dream signs?</li>
@@ -263,18 +229,11 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 									<small className='text-50-white text-uppercase'>&nbsp;</small>
 								</div>
 								<div className='col-auto text-center'>
-									<h1 className='text-primary mb-1 x3'>
-										{this.props.dataFile && this.props.dataFile.entries
-											? this.props.dataFile.entries.length
-											: '-'}
-									</h1>
+									<h1 className='text-primary mb-1 x3'>{this.props.dataFile && this.props.dataFile.entries ? this.props.dataFile.entries.length : '-'}</h1>
 									<label className='text-primary text-uppercase'>Days</label>
 									<div className='badge badge-pill badge-primary w-100'>
-										{this.getTotalMonths() * 30 > 0 &&
-										this.props.dataFile &&
-										this.props.dataFile.entries
-											? (this.props.dataFile.entries.length / this.getTotalMonths()).toFixed(2) +
-											  ' / mon'
+										{this.getTotalMonths() * 30 > 0 && this.props.dataFile && this.props.dataFile.entries
+											? (this.props.dataFile.entries.length / this.getTotalMonths()).toFixed(2) + ' / mon'
 											: '-'}
 									</div>
 								</div>
@@ -282,34 +241,24 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 									<h1 className='text-info mb-1 x3'>{totalDreams || '-'}</h1>
 									<label className='text-info text-uppercase d-block'>Dreams</label>
 									<div className='badge badge-pill badge-info w-100'>
-										{this.getTotalMonths() * 30 > 0 &&
-										this.props.dataFile &&
-										this.props.dataFile.entries
+										{this.getTotalMonths() * 30 > 0 && this.props.dataFile && this.props.dataFile.entries
 											? (totalDreams / this.props.dataFile.entries.length).toFixed(2) + ' / day'
 											: '-'}
 									</div>
 								</div>
 								<div className='w-100 mb-3 d-md-none mb-md-0' />
-								<div
-									className='col-auto text-center'
-									onClick={() => this.doShowByType(SearchScopes._starred)}>
+								<div className='col-auto text-center' onClick={() => this.doShowByType(SearchScopes._starred)}>
 									<h1 className='text-warning mb-1 x3'>{totalStarred || '-'}</h1>
 									<label className='text-warning text-uppercase d-block'>Starred</label>
 									<div className='badge badge-pill badge-warning w-100'>
-										{totalDreams && totalStarred
-											? ((totalStarred / totalDreams) * 100).toFixed(2) + '%'
-											: '-'}
+										{totalDreams && totalStarred ? ((totalStarred / totalDreams) * 100).toFixed(2) + '%' : '-'}
 									</div>
 								</div>
-								<div
-									className='col-auto text-center'
-									onClick={() => this.doShowByType(SearchScopes._isLucid)}>
+								<div className='col-auto text-center' onClick={() => this.doShowByType(SearchScopes._isLucid)}>
 									<h1 className='text-success mb-1 x3'>{totalLucids || '-'}</h1>
 									<label className='text-success text-uppercase d-block'>Lucids</label>
 									<div className='badge badge-pill badge-success w-100'>
-										{totalDreams && totalLucids
-											? ((totalLucids / totalDreams) * 100).toFixed(2) + '%'
-											: '-'}
+										{totalDreams && totalLucids ? ((totalLucids / totalDreams) * 100).toFixed(2) + '%' : '-'}
 									</div>
 								</div>
 							</div>
@@ -344,12 +293,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 												}}
 												disabled={!this.props.dataFile ? true : false}
 											/>
-											<div
-												className={
-													this.state.searchTermInvalidMsg
-														? 'invalid-feedback d-block'
-														: 'invalid-feedback'
-												}>
+											<div className={this.state.searchTermInvalidMsg ? 'invalid-feedback d-block' : 'invalid-feedback'}>
 												{this.state.searchTermInvalidMsg}
 											</div>
 										</div>
@@ -376,36 +320,24 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 									<div className='row align-items-center'>
 										<div className='col-12 col-md-6'>
 											<label className='text-uppercase text-muted'>Fields</label>
-											<select
-												className='form-control'
-												defaultValue={this.state.searchOptScope}
-												onChange={this.handleScopeChange}>
+											<select className='form-control' defaultValue={this.state.searchOptScope} onChange={this.handleScopeChange}>
 												{Object.keys(SearchScopes)
-													.filter(key => {
-														return key.indexOf('_') === -1
-													})
-													.map(val => {
-														return (
-															<option value={SearchScopes[val]} key={'enum' + val}>
-																{SearchScopes[val]}
-															</option>
-														)
-													})}
+													.filter(key => key.indexOf('_') === -1)
+													.map(val => (
+														<option value={SearchScopes[val]} key={'enum' + val}>
+															{SearchScopes[val]}
+														</option>
+													))}
 											</select>
 										</div>
 										<div className='col-12 col-md-6'>
 											<label className='text-uppercase text-muted'>Type</label>
-											<select
-												className='form-control'
-												defaultValue={this.state.searchOptMatchType}
-												onChange={this.handleTypeChange}>
-												{Object.keys(SearchMatchTypes).map(val => {
-													return (
-														<option value={SearchMatchTypes[val]} key={'enum' + val}>
-															{SearchMatchTypes[val]}
-														</option>
-													)
-												})}
+											<select className='form-control' defaultValue={this.state.searchOptMatchType} onChange={this.handleTypeChange}>
+												{Object.keys(SearchMatchTypes).map(val => (
+													<option value={SearchMatchTypes[val]} key={'enum' + val}>
+														{SearchMatchTypes[val]}
+													</option>
+												))}
 											</select>
 										</div>
 									</div>

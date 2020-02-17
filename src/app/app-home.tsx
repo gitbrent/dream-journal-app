@@ -185,45 +185,28 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 								<img src={LogoBase64} width='75' height='75' className='mr-4' alt='Logo' />
 								Brain Cloud - Dream Journal
 							</h1>
-							<h1 className='text-primary mb-0 d-none d-md-block d-lg-none'>
-								Brain Cloud - Dream Journal
-							</h1>
+							<h1 className='text-primary mb-0 d-none d-md-block d-lg-none'>Brain Cloud - Dream Journal</h1>
 							<h1 className='text-primary mb-0 d-block d-md-none'>Brain Cloud</h1>
 						</div>
 						<div className='col-auto'>
-							<button
-								className='btn btn-primary px-4 text-uppercase'
-								type='button'
-								disabled={!this.props.dataFile}
-								onClick={this.handleNewModal}>
+							<button className='btn btn-primary px-4 text-uppercase' type='button' disabled={!this.props.dataFile} onClick={this.handleNewModal}>
 								Create
 								<br />
 								Entry
-								<div
-									className='d-none d-md-none d-xl-block'
-									style={{ fontSize: '4rem', lineHeight: '3rem' }}>
+								<div className='d-none d-md-none d-xl-block' style={{ fontSize: '4rem', lineHeight: '3rem' }}>
 									&#43;
 								</div>
 							</button>
 						</div>
 					</div>
 
-					<p className='lead mt-3'>
-						Record your daily dream journal entries into well-formatted JSON, enabling keyword searches,
-						metrics and more.
-					</p>
+					<p className='lead mt-3'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</p>
 					<hr className='my-4' />
 
 					<div className='row mb-5'>
 						<div className='col-12 col-md d-flex mb-5 mb-md-0'>
 							<div className='card flex-fill'>
-								<div
-									className={
-										'card-header' +
-										(this.props.authState.status === AuthState.Authenticated
-											? ' bg-success'
-											: ' bg-warning')
-									}>
+								<div className={'card-header' + (this.props.authState.status === AuthState.Authenticated ? ' bg-success' : ' bg-warning')}>
 									<h5 className='card-title text-white mb-0'>{this.props.authState.status}</h5>
 								</div>
 								<div className='card-body bg-light text-dark'>{cardAuthUser}</div>
@@ -247,12 +230,10 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 								</div>
 								<div className='card-body bg-light text-dark'>
 									<p className='card-text'>
-										This application uses your Google Drive to store dream journals so they are
-										safe, secure, and accessible on any of your devices.
+										This application uses your Google Drive to store dream journals so they are safe, secure, and accessible on any of your devices.
 									</p>
 									<p className='card-text'>
-										Click "Sign In", select the Google account to use with this app, view the
-										request permissions page asking to create and modify{' '}
+										Click "Sign In", select the Google account to use with this app, view the request permissions page asking to create and modify{' '}
 										<strong>
 											<u>only its own files</u>
 										</strong>{' '}
