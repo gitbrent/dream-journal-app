@@ -102,11 +102,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 	componentDidUpdate(prevProps: any) {
 		if (prevProps.show !== this.props.show) {
 			// A: Update `show` when needed
-			if (
-				typeof this.props.show !== 'undefined' &&
-				typeof this.props.show === 'boolean' &&
-				this.state.show !== this.props.show
-			) {
+			if (typeof this.props.show !== 'undefined' && typeof this.props.show === 'boolean' && this.state.show !== this.props.show) {
 				this.setState({ show: this.props.show })
 			}
 
@@ -195,9 +191,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 
 		if (name === 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
-			newState.dreams[event.target.getAttribute('data-dream-idx')].dreamSigns = value
-				? value.toString().split(',')
-				: []
+			newState.dreams[event.target.getAttribute('data-dream-idx')].dreamSigns = value ? value.toString().split(',') : []
 		} else {
 			newState.dreams[event.target.getAttribute('data-dream-idx')][name] = value
 		}
@@ -213,9 +207,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 
 		if (name === 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
-			newState.dreams[event.target.getAttribute('data-dream-idx')].dreamSigns = value
-				? value.toString().split(',')
-				: []
+			newState.dreams[event.target.getAttribute('data-dream-idx')].dreamSigns = value ? value.toString().split(',') : []
 		} else {
 			newState.dreams[event.target.getAttribute('data-dream-idx')][name] = value
 		}
@@ -231,9 +223,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 
 		if (name === 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
-			newState.dreams[event.target.getAttribute('data-dream-idx')].dreamSigns = value
-				? value.toString().split(',')
-				: []
+			newState.dreams[event.target.getAttribute('data-dream-idx')].dreamSigns = value ? value.toString().split(',') : []
 		} else {
 			newState.dreams[event.target.getAttribute('data-dream-idx')][name] = value
 		}
@@ -302,115 +292,90 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 		this.setState({ show: false })
 		this.props.onShowModal({ show: false })
 	}
-	renderDreamTab = (dream: IJournalDream, dreamIdx: number): JSX.Element => {
-		return (
-			<div
-				className={'tab-pane pt-3' + (dreamIdx === this.state.selectedTab ? ' active' : '')}
-				id={'drmtab' + dreamIdx}
-				role='tabpanel'
-				aria-labelledby={'drmtab' + dreamIdx + '-tab'}
-				key={'dreamrow' + dreamIdx}>
-				<div className='row align-items-center mb-3'>
-					<div className='col-12 col-lg'>
-						<label className='text-muted text-uppercase text-sm'>Title</label>
-						<input
-							name='title'
-							type='text'
-							className='form-control'
-							value={dream.title}
-							onChange={this.handleInputDreamChange}
-							data-dream-idx={dreamIdx}
-						/>
-					</div>
-					<div className='col-5 col-lg-auto'>
-						<label className='text-muted text-uppercase text-sm d-block'>Lucid?</label>
-						<BootstrapSwitchButton
-							onChange={(checked: boolean) => {
-								let newState = this.state.dailyEntry
-								newState.dreams[dreamIdx].isLucidDream = checked
-								this.setState({ dailyEntry: newState })
-							}}
-							checked={dream.isLucidDream}
-							onlabel='Y'
-							onstyle='outline-success'
-							offlabel='N'
-							offstyle='outline-dark'
-							style='w-100'
-						/>
-					</div>
-					<div className='col-5 col-lg-auto'>
-						<label className='text-muted text-uppercase text-sm d-block'>Method</label>
-						<select
-							name='lucidMethod'
-							value={dream.lucidMethod || InductionTypes.none}
-							disabled={!dream.isLucidDream}
-							data-dream-idx={dreamIdx}
-							onChange={this.handleSelectDreamChange}
-							className='form-control'>
-							{Object.keys(InductionTypes).map(type => {
-								return (
-									<option value={type} key={'lucid-' + type + '-' + dreamIdx}>
-										{InductionTypes[type]}
-									</option>
-								)
-							})}
-						</select>
-					</div>
-					<div className='col-2 col-lg-auto'>
-						<label className='text-muted text-uppercase text-sm d-block'>Delete</label>
-						<button
-							type='button'
-							title='Delete Dream'
-							className='btn btn-outline-danger'
-							onClick={event => this.handleDeleteDream(dreamIdx, event)}>
-							<div className='iconSvg size16 small circle no cursor-pointer' />
-						</button>
-					</div>
+	renderDreamTab = (dream: IJournalDream, dreamIdx: number): JSX.Element => (
+		<div
+			className={'tab-pane pt-3' + (dreamIdx === this.state.selectedTab ? ' active' : '')}
+			id={'drmtab' + dreamIdx}
+			role='tabpanel'
+			aria-labelledby={'drmtab' + dreamIdx + '-tab'}
+			key={'dreamrow' + dreamIdx}>
+			<div className='row align-items-center mb-3'>
+				<div className='col-12 col-lg'>
+					<label className='text-muted text-uppercase text-sm'>Title</label>
+					<input name='title' type='text' className='form-control' value={dream.title} onChange={this.handleInputDreamChange} data-dream-idx={dreamIdx} />
 				</div>
-				<div className='row mb-3'>
-					<div className='col-12 col-lg mb-3 mb-lg-0'>
-						<label className='text-muted text-uppercase text-sm d-block'>DreamSign Tags</label>
-						<ReactTags
-							allowNew={true}
-							allowBackspace={false}
-							minQueryLength={1}
-							tags={dream.dreamSigns.sort().map((sign, idx) => {
-								return { id: idx, name: sign.toLowerCase() }
-							})}
-							suggestions={this.props.dreamSignTags}
-							handleDelete={(idx: number) => {
-								let newState = this.state.dailyEntry
-								newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
-								this.setState({ dailyEntry: newState })
-							}}
-							handleAddition={(tag: IDreamSignTag) => {
-								let newState = this.state.dailyEntry
-								// Dont allow dupes
-								if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1)
-									newState.dreams[dreamIdx].dreamSigns.push(tag.name.trim())
-								this.setState({ dailyEntry: newState })
-							}}
-							delimiters={delimiters}
-							className='form-control'
-						/>
-					</div>
+				<div className='col-5 col-lg-auto'>
+					<label className='text-muted text-uppercase text-sm d-block'>Lucid?</label>
+					<BootstrapSwitchButton
+						onChange={(checked: boolean) => {
+							let newState = this.state.dailyEntry
+							newState.dreams[dreamIdx].isLucidDream = checked
+							this.setState({ dailyEntry: newState })
+						}}
+						checked={dream.isLucidDream}
+						onlabel='Y'
+						onstyle='outline-success'
+						offlabel='N'
+						offstyle='outline-dark'
+						style='w-100'
+					/>
 				</div>
-				<div className='row'>
-					<div className='col'>
-						<label className='text-muted text-uppercase text-sm'>Dream Details</label>
-						<textarea
-							name='notes'
-							className='form-control'
-							rows={8}
-							value={dream.notes}
-							onChange={this.handleTextAreaDreamChange}
-							data-dream-idx={dreamIdx}
-						/>
-					</div>
+				<div className='col-5 col-lg-auto'>
+					<label className='text-muted text-uppercase text-sm d-block'>Method</label>
+					<select
+						name='lucidMethod'
+						value={dream.lucidMethod || InductionTypes.none}
+						disabled={!dream.isLucidDream}
+						data-dream-idx={dreamIdx}
+						onChange={this.handleSelectDreamChange}
+						className='form-control'>
+						{Object.keys(InductionTypes).map(type => (
+							<option value={type} key={'lucid-' + type + '-' + dreamIdx}>
+								{InductionTypes[type]}
+							</option>
+						))}
+					</select>
+				</div>
+				<div className='col-2 col-lg-auto'>
+					<label className='text-muted text-uppercase text-sm d-block'>Delete</label>
+					<button type='button' title='Delete Dream' className='btn btn-outline-danger' onClick={event => this.handleDeleteDream(dreamIdx, event)}>
+						<div className='iconSvg size16 small circle no cursor-pointer' />
+					</button>
 				</div>
 			</div>
-		)
-	}
+			<div className='row mb-3'>
+				<div className='col-12 col-lg mb-3 mb-lg-0'>
+					<label className='text-muted text-uppercase text-sm d-block'>DreamSign Tags</label>
+					<ReactTags
+						allowNew={true}
+						allowBackspace={false}
+						minQueryLength={1}
+						tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign.toLowerCase() }))}
+						suggestions={this.props.dreamSignTags}
+						handleDelete={(idx: number) => {
+							let newState = this.state.dailyEntry
+							newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
+							this.setState({ dailyEntry: newState })
+						}}
+						handleAddition={(tag: IDreamSignTag) => {
+							let newState = this.state.dailyEntry
+							// Dont allow dupes
+							if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) newState.dreams[dreamIdx].dreamSigns.push(tag.name.trim())
+							this.setState({ dailyEntry: newState })
+						}}
+						delimiters={delimiters}
+						className='form-control'
+					/>
+				</div>
+			</div>
+			<div className='row'>
+				<div className='col'>
+					<label className='text-muted text-uppercase text-sm'>Dream Details</label>
+					<textarea name='notes' className='form-control' rows={8} value={dream.notes} onChange={this.handleTextAreaDreamChange} data-dream-idx={dreamIdx} />
+				</div>
+			</div>
+		</div>
+	)
 
 	render() {
 		return (
@@ -430,32 +395,19 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 										type='date'
 										value={this.state.dailyEntry.entryDate}
 										onChange={this.handleInputChange}
-										className={
-											this.state.isDateDupe
-												? 'is-invalid form-control w-100'
-												: 'form-control w-100'
-										}
+										className={this.state.isDateDupe ? 'is-invalid form-control w-100' : 'form-control w-100'}
 										required
 									/>
 									<div className='invalid-feedback'>Entry Date already exists in Dream Journal!</div>
 								</div>
 								<div className='col mb-2'>
 									<label className='text-muted text-uppercase text-sm'>Bed Time</label>
-									<input
-										name='bedTime'
-										type='time'
-										value={this.state.dailyEntry.bedTime}
-										onChange={this.handleInputChange}
-										className='form-control w-100'
-									/>
+									<input name='bedTime' type='time' value={this.state.dailyEntry.bedTime} onChange={this.handleInputChange} className='form-control w-100' />
 								</div>
 								<div className='col-auto px-0 mb-2'>
 									<label className='text-muted text-uppercase text-sm'>&nbsp;</label>
 									<div
-										className={
-											'd-block iconSvg size32 cursor-pointer ' +
-											(this.state.dailyEntry.starred ? 'star-on' : 'star-off')
-										}
+										className={'d-block iconSvg size32 cursor-pointer ' + (this.state.dailyEntry.starred ? 'star-on' : 'star-off')}
 										title={this.state.dailyEntry.starred ? 'Un-Star Entry' : 'Star Entry'}
 										onClick={() => {
 											let newState = this.state.dailyEntry
@@ -492,9 +444,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 										{this.state.dailyEntry.dreams.map((_dream, idx) => (
 											<li className='nav-item' key={'dreamtab' + idx}>
 												<a
-													className={
-														'nav-link' + (idx === this.state.selectedTab ? ' active' : '')
-													}
+													className={'nav-link' + (idx === this.state.selectedTab ? ' active' : '')}
 													id={'drmtab' + idx + '-tab'}
 													data-toggle='tab'
 													href={'#drmtab' + idx}
@@ -507,17 +457,12 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 									</ul>
 								</div>
 								<div className='col-auto'>
-									<button
-										type='button'
-										className='btn btn-sm btn-outline-success'
-										onClick={this.handleAddDream}>
+									<button type='button' className='btn btn-sm btn-outline-success' onClick={this.handleAddDream}>
 										New Dream
 									</button>
 								</div>
 							</div>
-							<div className='tab-content'>
-								{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamTab(dream, idx))}
-							</div>
+							<div className='tab-content'>{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamTab(dream, idx))}</div>
 						</div>
 					</Modal.Body>
 
@@ -535,18 +480,11 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 								</button>
 							</div>
 							<div className='d-none d-sm-block'>
-								<button
-									type='button'
-									className='btn btn-outline-danger mr-5'
-									onClick={this.handleDelete}>
+								<button type='button' className='btn btn-outline-danger mr-5' onClick={this.handleDelete}>
 									Delete Entry
 								</button>
 							</div>
-							<Button
-								type='button'
-								variant='outline-secondary'
-								className='px-4 mr-2'
-								onClick={this.modalClose}>
+							<Button type='button' variant='outline-secondary' className='px-4 mr-2' onClick={this.modalClose}>
 								Cancel
 							</Button>
 							<div className='d-block d-sm-none'>
