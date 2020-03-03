@@ -49,8 +49,9 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 	getTotalMonths = () => {
 		if (!this.props.dataFile || (this.props.dataFile.entries || []).length === 0) return 0
 
-		let d1 = new Date(this.props.dataFile.entries[0].entryDate)
-		let d2 = new Date(this.props.dataFile.entries[this.props.dataFile.entries.length - 1].entryDate)
+		let d1 = new Date(this.props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
+		let d2 = new Date(this.props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
+
 		let months: number
 		months = (d2.getFullYear() - d1.getFullYear()) * 12
 		months -= d1.getMonth() + 1
@@ -197,7 +198,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 		return (
 			<div>
 				<header className='container my-5'>
-					{this.state.showAlert ? (
+					{this.state.showAlert && (
 						<Alert variant='secondary'>
 							<Alert.Heading>Make good use of your Dream Journal</Alert.Heading>
 							<p>Analyze your journal to learn more about yourself, spot common themes/dreamsigns and improve your lucid dreaming ability.</p>
@@ -214,8 +215,6 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 								</button>
 							</div>
 						</Alert>
-					) : (
-						''
 					)}
 					<div className='card my-5'>
 						<div className='card-header bg-primary'>

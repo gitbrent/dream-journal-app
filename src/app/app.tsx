@@ -406,25 +406,24 @@ class App extends React.Component<IAppProps, IAppState> {
 
 			// TEMP: (20191101): vvv TODO: (several entries were loaded before code was solid and created non-array dreamsigns)
 			/*
-			newState.entries.forEach(entry => {
-				entry.dreams.forEach(dream => {
-					// WORKED! if (typeof dream.dreamSigns === 'string') dream.dreamSigns = (dream.dreamSigns as string).split(',')
-					// WORKED! dream.dreamSigns = dream.dreamSigns.map(sign=>{ return sign.trim() })
+				newState.entries.forEach(entry => {
+					entry.dreams.forEach(dream => {
+						// WORKED! if (typeof dream.dreamSigns === 'string') dream.dreamSigns = (dream.dreamSigns as string).split(',')
+						// WORKED! dream.dreamSigns = dream.dreamSigns.map(sign=>{ return sign.trim() })
+					})
 				})
-			})
-			// TEMP: ^^^
 			*/
 
-			// B: Sort by `entryDate`
+			// B: Fix missing dates that canbe created by import data/formatting, etc.
+			let entriesFix = newState.entries
+			entriesFix.forEach((entry, idx) => (entry.entryDate = entry.entryDate ? entry.entryDate : `1999-01-0${idx + 1}`))
+
+			// C: Sort by `entryDate`
 			let jsonBody: object = {
-				entries: newState.entries.sort((a, b) => {
-					if (a.entryDate > b.entryDate) return 1
-					if (a.entryDate < b.entryDate) return -1
-					return 0
-				}),
+				entries: entriesFix.sort((a, b) => (a.entryDate > b.entryDate ? 1 : -1)),
 			}
 
-			// C: Write file
+			// D: Write file
 			let reqBody: string =
 				'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
 				JSON.stringify(JOURNAL_HEADER) +
