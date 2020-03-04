@@ -46,7 +46,7 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 		this.setState({ showAlert: false })
 	}
 
-	getTotalMonths = () => {
+	getTotalMonths = (): number => {
 		if (!this.props.dataFile || (this.props.dataFile.entries || []).length === 0) return 0
 
 		let d1 = new Date(this.props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
@@ -59,6 +59,14 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 		months += 2 // include both first and last months
 
 		return months <= 0 ? 0 : months
+	}
+	getYearSpan = (): number => {
+		if (!this.props.dataFile || (this.props.dataFile.entries || []).length === 0) return 0
+
+		let d1 = new Date(this.props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
+		let d2 = new Date(this.props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
+
+		return d2.getFullYear() - d1.getFullYear() + 1
 	}
 
 	handleEntryEdit = (entryDate: string) => {
@@ -187,10 +195,8 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 
 		if (this.props.dataFile && this.props.dataFile.entries) {
 			this.props.dataFile.entries.forEach(entry => {
-				totalDreams += entry.dreams.length
-
 				if (entry.starred) totalStarred++
-
+				totalDreams += entry.dreams.length
 				totalLucids += entry.dreams.filter(dream => dream.isLucidDream).length
 			})
 		}
@@ -223,9 +229,9 @@ export default class TabSearch extends React.Component<IAppSearchProps, IAppSear
 						<div className='card-body bg-light'>
 							<div className='row align-items-start justify-content-around'>
 								<div className='col-auto text-center d-none d-md-block'>
-									<h1 className='text-primary mb-0 x3'>{this.getTotalMonths() || '-'}</h1>
+									<h1 className='text-primary mb-1 x3'>{this.getTotalMonths() || '-'}</h1>
 									<label className='text-primary text-uppercase'>Months</label>
-									<small className='text-50-white text-uppercase'>&nbsp;</small>
+									<div className='badge badge-pill badge-primary w-100'>{this.getYearSpan() + ' years'}</div>
 								</div>
 								<div className='col-auto text-center'>
 									<h1 className='text-primary mb-1 x3'>{this.props.dataFile && this.props.dataFile.entries ? this.props.dataFile.entries.length : '-'}</h1>
