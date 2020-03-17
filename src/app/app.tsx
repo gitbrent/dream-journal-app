@@ -695,27 +695,27 @@ class App extends React.Component<IAppProps, IAppState> {
 					<div className='collapse navbar-collapse' id='navbarNav'>
 						<ul className='navbar-nav'>
 							<li className='nav-item'>
-								<NavLink to='/' exact={true} className='nav-link' activeClassName='active'>
+								<NavLink to='/' exact={true} activeClassName='active' className='nav-link'>
 									Home
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/journal' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'}>
+								<NavLink to='/journal' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
 									View Journal
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/search' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'}>
+								<NavLink to='/search' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
 									Search Journal
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/tags' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'}>
+								<NavLink to='/tags' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
 									Dreamsign Tags
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/import' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link d-none d-lg-block'}>
+								<NavLink to='/import' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
 									Import Dreams
 								</NavLink>
 							</li>
