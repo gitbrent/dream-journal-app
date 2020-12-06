@@ -1,5 +1,6 @@
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const path = require("path");
 
 module.exports = {
 	entry: "./src/app/app.tsx",
@@ -85,6 +86,10 @@ module.exports = {
 		],
 	},
 	devServer: {
+		open: true,
 		historyApiFallback: true,
+		contentBase: path.join(__dirname, "public"),
+		compress: true,
+		port: 9000,
 	},
 };
