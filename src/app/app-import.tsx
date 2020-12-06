@@ -180,7 +180,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				}
 			}
 		} else if (this.state._selEntryType === 'match' && this.state._entryDate) {
-			;(demoData.split('\n') || []).forEach(line => {
+			;(demoData.split('\n') || []).forEach((line) => {
 				try {
 					if (line.trim().match(new RegExp(this.state._entryDate, 'g'))) {
 						let keyVal = line.trim().split(new RegExp(this.state._entryDate, 'g'))
@@ -207,7 +207,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		// B: "Dream Break"
 		if ((demoData || '').split('\n').length > 0) {
 			let arrMatch = []
-			demoData.split('\n').forEach(line => {
+			demoData.split('\n').forEach((line) => {
 				if (line.trim().match(new RegExp(this.state._dreamBreak, 'g'))) {
 					let keyVal = line.trim().split(new RegExp(this.state._dreamBreak, 'g'))
 					arrMatch.push(keyVal[1])
@@ -220,7 +220,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		if (this.state._selNotePrepType === 'multi' && this.state._notesPrepEnd) {
 			let isCapturing = false
 			let strNotesPrep = ''
-			;(demoData.split('\n') || []).forEach(line => {
+			;(demoData.split('\n') || []).forEach((line) => {
 				if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
 					isCapturing = false
 				} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
@@ -241,7 +241,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		if (this.state._selNoteWakeType === 'multi' && this.state._notesWakeEnd) {
 			let isCapturing = false
 			let strNotesWake = ''
-			;(demoData.split('\n') || []).forEach(line => {
+			;(demoData.split('\n') || []).forEach((line) => {
 				if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
 					isCapturing = false
 				} else if (line && line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
@@ -259,8 +259,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		}
 
 		// E: all other fields
-		;(demoData.split('\n') || []).forEach(line => {
-			arrOtherFields.forEach(name => {
+		;(demoData.split('\n') || []).forEach((line) => {
+			arrOtherFields.forEach((name) => {
 				if (line.trim().match(new RegExp(this.state[name], 'g'))) {
 					let keyVal = line.trim().split(new RegExp(this.state[name], 'g'))
 					if (keyVal[1]) {
@@ -280,7 +280,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				let arrNotes = [],
 					isNotes = false
 				// Locate "Dream Title", capture all lines after it - until next [Dream Section]/[Dream Title]
-				demoData.split('\n').forEach(line => {
+				demoData.split('\n').forEach((line) => {
 					if (isNotes) arrNotes.push(line)
 					// Flip capture flag once we hit a subsequnet [DreamTitle]
 					if (line.trim().match(new RegExp(this.state.title, 'g'))) isNotes = isNotes ? false : true
@@ -291,13 +291,17 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	}
 
 	handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+		const target = event.target
+		const value = target.value
+		const name = target.name
+
 		// A: Capture regex field value
 		let newState = {}
-		if (event.target.name === 'dreamSigns') {
+		if (name === 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
-			newState['dreamSigns'] = event.target.value ? event.target.value.split(this.state._dreamSignsDelim || ',') : []
+			newState['dreamSigns'] = value ? value.split(this.state._dreamSignsDelim || ',') : []
 		} else {
-			newState[event.target.name] = event.target.value
+			newState[name] = value
 		}
 		this.setState(newState)
 
@@ -425,8 +429,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		}
 		strImportText
 			.split(strSecBreak)
-			.filter(sect => sect)
-			.forEach(sect => {
+			.filter((sect) => sect)
+			.forEach((sect) => {
 				//if (VERBOSE) console.log('SECTION: ' + sect)
 
 				// 1: Divide text into dream sections
@@ -561,7 +565,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				// 3: Handle fields that can be multi-line
 				if (this.state._selNotePrepType === 'multi' && this.state._notesPrepEnd) {
 					let isCapturing = false
-					;(sect.split('\n') || []).forEach(line => {
+					;(sect.split('\n') || []).forEach((line) => {
 						if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
 							isCapturing = false
 						} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
@@ -574,7 +578,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				}
 				if (this.state._selNoteWakeType === 'multi' && this.state._notesWakeEnd) {
 					let isCapturing = false
-					;(sect.split('\n') || []).forEach(line => {
+					;(sect.split('\n') || []).forEach((line) => {
 						console.log(`line = ${line}`)
 						if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
 							isCapturing = false
@@ -633,8 +637,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		})
 
 		// C: flag entries with duplicate `entryDate` (already exists in selected journal)
-		this.state._parsedSections.forEach(sect => {
-			if (this.props.dataFile.entries.filter(entry => entry.entryDate === sect.entryDate).length > 0) {
+		this.state._parsedSections.forEach((sect) => {
+			if (this.props.dataFile.entries.filter((entry) => entry.entryDate === sect.entryDate).length > 0) {
 				arrInvalidSects.push(sect)
 			}
 		})
@@ -647,14 +651,14 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		} else {
 			this.props
 				.doImportEntries(this.state._parsedSections)
-				.catch(err => {
+				.catch((err) => {
 					// TODO: show onscreen
 					alert('ERROR: ' + err)
 					console.error(err)
 					// TODO: what to do about expired session?
 					// `save` can can oauthLogin, but file still needs ot be saved - show a save button?
 				})
-				.then(_result => {
+				.then((_result) => {
 					// 1: Clear import text and parsed results
 					this.setState({
 						_importHTML: '<br>',
@@ -1092,7 +1096,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					innerRef={this.refContentEditable}
 					html={this.state._importHTML} // innerHTML of the editable div
 					disabled={false} // use true to disable editing
-					onChange={event =>
+					onChange={(event) =>
 						this.setState({
 							_importText: event.currentTarget.innerText,
 							_importHTML: event.target.value,
@@ -1140,14 +1144,20 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										type='date'
 										className={this.state._invalidSections.indexOf(sect) > -1 ? 'form-control is-invalid' : 'form-control'}
 										value={sect.entryDate}
-										onChange={event => this.handleResultChange(event, idx)}
+										onChange={(event) => this.handleResultChange(event, idx)}
 										required
 									/>
 									<div className='invalid-feedback'>A journal entry with this date already exists.</div>
 								</div>
 								<div className='col-auto'>
 									<label className='text-uppercase text-muted d-block'>Bed Time</label>
-									<input name='bedTime' type='time' className='form-control' value={sect.bedTime} onChange={event => this.handleResultChange(event, idx)} />
+									<input
+										name='bedTime'
+										type='time'
+										className='form-control'
+										value={sect.bedTime}
+										onChange={(event) => this.handleResultChange(event, idx)}
+									/>
 								</div>
 								<div className='col'>
 									<label className='text-uppercase text-muted d-block'>Prep Notes</label>
@@ -1155,7 +1165,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										name='notesPrep'
 										value={sect.notesPrep}
 										className='form-control'
-										onChange={event => this.handleResultChange(event, idx)}
+										onChange={(event) => this.handleResultChange(event, idx)}
 										rows={2}
 									/>
 								</div>
@@ -1165,7 +1175,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										name='notesWake'
 										className='form-control'
 										value={sect.notesWake}
-										onChange={event => this.handleResultChange(event, idx)}
+										onChange={(event) => this.handleResultChange(event, idx)}
 										rows={2}
 									/>
 								</div>
@@ -1185,7 +1195,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 														type='text'
 														className='form-control'
 														value={dream.title}
-														onChange={event => this.handleResultChange(event, idx, idy)}
+														onChange={(event) => this.handleResultChange(event, idx, idy)}
 													/>
 												</div>
 												<div className='col-auto'>
@@ -1195,7 +1205,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 														type='text'
 														className='form-control'
 														value={dream.dreamSigns}
-														onChange={event => this.handleResultChange(event, idx, idy)}
+														onChange={(event) => this.handleResultChange(event, idx, idy)}
 													/>
 												</div>
 												<div className='col-auto'>
@@ -1219,9 +1229,9 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 													<select
 														name='lucidMethod'
 														value={dream.lucidMethod || InductionTypes.none}
-														onChange={event => this.handleResultChange(event, idx, idy)}
+														onChange={(event) => this.handleResultChange(event, idx, idy)}
 														className='form-control'>
-														{Object.keys(InductionTypes).map(type => (
+														{Object.keys(InductionTypes).map((type) => (
 															<option key={'lucid-' + type + '-' + idx + '-' + idy} value={type}>
 																{InductionTypes[type]}
 															</option>
@@ -1234,7 +1244,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 													<textarea
 														name='notes'
 														value={dream.notes}
-														onChange={event => this.handleResultChange(event, idx, idy)}
+														onChange={(event) => this.handleResultChange(event, idx, idy)}
 														className='form-control w-100'
 														rows={5}
 													/>
