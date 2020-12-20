@@ -1,6 +1,6 @@
 {
   "name": "dream-journal-app",
-  "version": "1.0.1-beta-20201205",
+  "version": "1.0.1",
   "author": {
     "name": "Brent Ely",
     "url": "https://github.com/gitbrent/"
@@ -14,6 +14,7 @@
   },
   "scripts": {
     "build": "webpack --config webpack.prod.js",
+    "deploy": "firebase deploy",
 	"start": "webpack serve --config webpack.dev.js"
   },
   "dependencies": {
