@@ -260,7 +260,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 									<Pagination
 										totalRecords={arrEntries.length}
 										pageLimit={this.state.pagingPageSize}
-										pageNeighbours={2}
+										pageNeighbours={1}
 										currentPage={this.state.pagingCurrIdx}
 										onPageChanged={(event: any) => this.setState({ pagingCurrIdx: event.currentPage })}
 									/>

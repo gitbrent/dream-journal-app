@@ -28,14 +28,15 @@ const range = (from, to, step = 1) => {
 class Pagination extends Component {
 	constructor(props) {
 		super(props)
-		const { totalRecords = null, pageLimit = 30, pageNeighbours = 0, currentPage = 1 } = props
+		const { totalRecords = null, pageLimit = 30, pageNeighbours = 3, currentPage = 1 } = props
 
-		this.pageLimit = typeof pageLimit === 'number' ? pageLimit : 30
 		this.totalRecords = typeof totalRecords === 'number' ? totalRecords : 0
+		this.pageLimit = typeof pageLimit === 'number' ? pageLimit : 30
+		this.pageNeighbours = typeof pageNeighbours === 'number' ? pageNeighbours : 3
 		this.currentPage = typeof currentPage === 'number' ? currentPage : 1
 
 		// pageNeighbours can be: 0, 1 or 2 [ed:(bde) expanded!]
-		this.pageNeighbours = typeof pageNeighbours === 'number' ? Math.max(0, Math.min(pageNeighbours, 4)) : 0
+		//this.pageNeighbours = typeof pageNeighbours === 'number' ? Math.max(0, Math.min(pageNeighbours, 3)) : 0
 
 		this.state = {
 			currentPage: this.currentPage,
