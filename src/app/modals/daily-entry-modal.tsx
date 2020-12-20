@@ -352,12 +352,12 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 						minQueryLength={1}
 						tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign.toLowerCase() }))}
 						suggestions={this.props.dreamSignTags}
-						handleDelete={(idx: number) => {
+						onDelete={(idx: number) => {
 							let newState = this.state.dailyEntry
 							newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
 							this.setState({ dailyEntry: newState })
 						}}
-						handleAddition={(tag: IDreamSignTag) => {
+						onAddition={(tag: IDreamSignTag) => {
 							let newState = this.state.dailyEntry
 							// Dont allow dupes
 							if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) newState.dreams[dreamIdx].dreamSigns.push(tag.name.trim())
