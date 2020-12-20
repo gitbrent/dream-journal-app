@@ -53,8 +53,8 @@ class Pagination extends Component {
 		}
 	}
 
-	gotoPage = page => {
-		const { onPageChanged = f => f } = this.props
+	gotoPage = (page) => {
+		const { onPageChanged = (f) => f } = this.props
 		const totalPages = Math.ceil(this.state.totalRecords / this.state.pageLimit)
 		const currentPage = Math.max(0, Math.min(page, totalPages)) || 1
 
@@ -67,17 +67,17 @@ class Pagination extends Component {
 		this.setState({ currentPage }, () => onPageChanged(paginationData))
 	}
 
-	handleClick = page => evt => {
+	handleClick = (page) => (evt) => {
 		evt.preventDefault()
 		this.gotoPage(page)
 	}
 
-	handleMoveLeft = evt => {
+	handleMoveLeft = (evt) => {
 		evt.preventDefault()
 		this.gotoPage(this.state.currentPage - this.pageNeighbours * 2 - 1)
 	}
 
-	handleMoveRight = evt => {
+	handleMoveRight = (evt) => {
 		evt.preventDefault()
 		this.gotoPage(this.state.currentPage + this.pageNeighbours * 2 + 1)
 	}
@@ -163,11 +163,7 @@ class Pagination extends Component {
 							if (page === LEFT_PAGE)
 								return (
 									<li key={index} className='page-item'>
-										<a
-											className='page-link'
-											href='#'
-											aria-label='Previous'
-											onClick={this.handleMoveLeft}>
+										<a className='page-link' href='#' aria-label='Previous' onClick={this.handleMoveLeft}>
 											<span aria-hidden='true'>&laquo;</span>
 											<span className='sr-only'>Previous</span>
 										</a>
@@ -177,11 +173,7 @@ class Pagination extends Component {
 							if (page === RIGHT_PAGE)
 								return (
 									<li key={index} className='page-item'>
-										<a
-											className='page-link'
-											href='#'
-											aria-label='Next'
-											onClick={this.handleMoveRight}>
+										<a className='page-link' href='#' aria-label='Next' onClick={this.handleMoveRight}>
 											<span aria-hidden='true'>&raquo;</span>
 											<span className='sr-only'>Next</span>
 										</a>
