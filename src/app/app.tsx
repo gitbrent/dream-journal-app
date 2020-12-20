@@ -44,7 +44,7 @@ import TabImport from '../app/app-import'
 import TabSearch, { IAppSearchState } from '../app/app-search'
 import TabTags, { IAppTagsState } from '../app/app-tags'
 import EntryModal from '../app/modals/daily-entry-modal'
-import { IAuthState, IDriveFile, IJournalEntry, AuthState, IDreamSignTag } from './app.types'
+import { IAuthState, IDriveFile, IJournalEntry, AuthState, IDreamSignTag, APP_VER } from './app.types'
 
 /*
 // TODO: FIXME: https://stackoverflow.com/questions/48699820/how-do-i-hide-api-key-in-create-react-app
@@ -99,6 +99,8 @@ class App extends React.Component<IAppProps, IAppState> {
 		}
 
 		this.updateAuthState()
+
+		console.log(APP_VER);
 	}
 
 	/**
