@@ -90,6 +90,6 @@ module.exports = {
 		historyApiFallback: true,
 		contentBase: path.join(__dirname, "public"),
 		compress: true,
-		port: 9000,
+		port: 8080,
 	},
 };
