@@ -42,6 +42,7 @@ import TabHome from '../app/app-home'
 import TabView, { IAppViewState } from '../app/app-view'
 import TabImport from '../app/app-import'
 import TabSearch, { IAppSearchState } from '../app/app-search'
+import TabAdmin, { IAppAdminState } from '../app/app-admin'
 import TabTags, { IAppTagsState } from '../app/app-tags'
 import EntryModal from '../app/modals/daily-entry-modal'
 import { IAuthState, IDriveFile, IJournalEntry, AuthState, IDreamSignTag, APP_VER } from './app.types'
@@ -75,6 +76,7 @@ interface IAppState {
 	childSearchState: IAppSearchState
 	childTagsState: IAppTagsState
 	childViewState: IAppViewState
+	childAdminState: IAppAdminState
 	dataFile: IDriveFile
 	editEntry: IJournalEntry
 	showModal: boolean
@@ -93,6 +95,7 @@ class App extends React.Component<IAppProps, IAppState> {
 			childSearchState: null,
 			childTagsState: null,
 			childViewState: null,
+			childAdminState: null,
 			dataFile: null,
 			editEntry: null,
 			showModal: typeof props.showModal === 'boolean' ? props.showModal : false,
@@ -134,6 +137,14 @@ class App extends React.Component<IAppProps, IAppState> {
 	doSaveViewState = (newState: IAppViewState) => {
 		this.setState({
 			childViewState: newState,
+		})
+	}
+	/**
+	 * Retain state between tab changes
+	 */
+	doSaveAdminState = (newState: IAppAdminState) => {
+		this.setState({
+			childAdminState: newState,
 		})
 	}
 
@@ -675,6 +686,8 @@ class App extends React.Component<IAppProps, IAppState> {
 			importState={this.state.childImportState}
 		/>
 	)
+
+	Admin = () => <TabAdmin dataFile={this.state.dataFile || null} doSaveAdminState={this.doSaveAdminState} adminState={this.state.childAdminState} />
 
 	render() {
 		return (

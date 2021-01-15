@@ -1,6 +1,6 @@
 // APP
-export const APP_BLD = '20201220'
-export const APP_VER = `1.0.1-${APP_BLD}`
+export const APP_BLD = '20210114'
+export const APP_VER = `1.1.0-${APP_BLD}`
 
 // ENUMS
 export enum AuthState {
