@@ -34,7 +34,6 @@ export default function TabSearch(props: IAppSearchProps) {
 
 	// Push state up whenever it changes
 	useEffect(() => {
-		console.log('SAVE')
 		props.doSaveSearchState({
 			searchMatches: searchMatches,
 			searchOptMatchType: searchOptMatchType,
