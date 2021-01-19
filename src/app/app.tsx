@@ -103,7 +103,7 @@ class App extends React.Component<IAppProps, IAppState> {
 
 		this.updateAuthState()
 
-		console.log(APP_VER);
+		console.log(APP_VER)
 	}
 
 	/**
@@ -168,10 +168,10 @@ class App extends React.Component<IAppProps, IAppState> {
 					Accept: 'application/json',
 					Authorization: 'Bearer ' + params['access_token'],
 				},
-			}).then(response => {
+			}).then((response) => {
 				response
 					.json()
-					.then(json => {
+					.then((json) => {
 						if (json && json.error && json.error.code) {
 							// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
 							throw json.error
@@ -187,7 +187,7 @@ class App extends React.Component<IAppProps, IAppState> {
 							this.driveGetFileList()
 						}
 					})
-					.catch(error => {
+					.catch((error) => {
 						if (error.code === '401') {
 							let newState: IAuthState = this.state.auth
 							newState.status = AuthState.Expired
@@ -224,7 +224,7 @@ class App extends React.Component<IAppProps, IAppState> {
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
 		})
-			.then(_response => {
+			.then((_response) => {
 				this.setState({
 					auth: {
 						status: AuthState.Unauthenticated,
@@ -235,7 +235,7 @@ class App extends React.Component<IAppProps, IAppState> {
 				})
 				localStorage.setItem('journal-selected-fileid', null)
 			})
-			.catch(error => {
+			.catch((error) => {
 				console.error ? console.error(error) : console.log(error)
 			})
 	}
@@ -257,10 +257,10 @@ class App extends React.Component<IAppProps, IAppState> {
 				Authorization: 'Bearer ' + params['access_token'],
 			},
 		})
-			.then(response => {
+			.then((response) => {
 				response
 					.json()
-					.then(json => {
+					.then((json) => {
 						let data = json
 
 						// A: Check for errors
@@ -268,7 +268,7 @@ class App extends React.Component<IAppProps, IAppState> {
 						if (data && data.error && data.error.code) throw data.error
 
 						// B: Capture datafile
-						let driveDataFile = data.files.filter(file => file.name === JOURNAL_HEADER.name)[0] || null
+						let driveDataFile = data.files.filter((file) => file.name === JOURNAL_HEADER.name)[0] || null
 						this.setState({
 							dataFile: driveDataFile,
 						})
@@ -276,7 +276,7 @@ class App extends React.Component<IAppProps, IAppState> {
 						// C: Load or Create data file
 						driveDataFile ? this.doSelectFile() : this.doCreateFile()
 					})
-					.catch(error => {
+					.catch((error) => {
 						if (error.code === '401') {
 							oauth2SignIn()
 						} else {
@@ -284,7 +284,7 @@ class App extends React.Component<IAppProps, IAppState> {
 						}
 					})
 			})
-			.catch(error => {
+			.catch((error) => {
 				if (error.code === '401') {
 					oauth2SignIn()
 				} else {
@@ -318,17 +318,17 @@ class App extends React.Component<IAppProps, IAppState> {
 			headers: requestHeaders,
 			body: reqBody,
 		})
-			.then(response => {
+			.then((response) => {
 				response
 					.json()
-					.then(_json => {
+					.then((_json) => {
 						this.driveGetFileList()
 					})
-					.catch(error => {
+					.catch((error) => {
 						throw error
 					})
 			})
-			.catch(error => {
+			.catch((error) => {
 				if (error.code === '401') {
 					oauth2SignIn()
 				} else {
@@ -357,10 +357,10 @@ class App extends React.Component<IAppProps, IAppState> {
 				Authorization: 'Bearer ' + params['access_token'],
 			},
 		})
-			.then(response => {
+			.then((response) => {
 				response
 					.arrayBuffer()
-					.then(buffer => {
+					.then((buffer) => {
 						let decoded: string = new TextDecoder('utf-8').decode(buffer)
 						let json: Object = {}
 						let entries: Array<IJournalEntry>
@@ -385,11 +385,11 @@ class App extends React.Component<IAppProps, IAppState> {
 							dataFile: newState,
 						})
 					})
-					.catch(error => {
+					.catch((error) => {
 						throw error
 					})
 			})
-			.catch(error => {
+			.catch((error) => {
 				if (error.code === '401') {
 					oauth2SignIn()
 				} else if (error.code === '503') {
@@ -458,10 +458,10 @@ class App extends React.Component<IAppProps, IAppState> {
 				headers: requestHeaders,
 				body: reqBody,
 			})
-				.then(response => {
+				.then((response) => {
 					response
 						.json()
-						.then(_fileResource => {
+						.then((_fileResource) => {
 							// A: update state
 							let newState = this.state.dataFile
 							newState._isSaving = false
@@ -475,7 +475,7 @@ class App extends React.Component<IAppProps, IAppState> {
 							// Done
 							resolve(true)
 						})
-						.catch(error => {
+						.catch((error) => {
 							if (error.code === '401') {
 								oauth2SignIn()
 							} else {
@@ -484,7 +484,7 @@ class App extends React.Component<IAppProps, IAppState> {
 							}
 						})
 				})
-				.catch(error => {
+				.catch((error) => {
 					if (error.code === '401') {
 						oauth2SignIn()
 					} else {
@@ -493,7 +493,7 @@ class App extends React.Component<IAppProps, IAppState> {
 				})
 		})
 
-	isExistingEntryDate = (checkDate: string) => (this.state.dataFile.entries.filter(ent => ent.entryDate === checkDate).length > 0 ? true : false)
+	isExistingEntryDate = (checkDate: string) => (this.state.dataFile.entries.filter((ent) => ent.entryDate === checkDate).length > 0 ? true : false)
 
 	doImportEntries = (entries: Array<IJournalEntry>) =>
 		new Promise((resolve, reject) => {
@@ -509,14 +509,14 @@ class App extends React.Component<IAppProps, IAppState> {
 				})
 
 				return this.doSaveFile()
-					.catch(err => {
+					.catch((err) => {
 						throw err
 					})
-					.then(res => {
+					.then((res) => {
 						if (res !== true) throw res
 						resolve(true)
 					})
-					.catch(err => {
+					.catch((err) => {
 						reject(err)
 					})
 			}
@@ -527,9 +527,9 @@ class App extends React.Component<IAppProps, IAppState> {
 
 		if (!this.state.dataFile || !this.state.dataFile.entries) return []
 
-		this.state.dataFile.entries.forEach(entry => {
-			entry.dreams.forEach(dream => {
-				dream.dreamSigns.forEach(sign => {
+		this.state.dataFile.entries.forEach((entry) => {
+			entry.dreams.forEach((dream) => {
+				dream.dreamSigns.forEach((sign) => {
 					if (sign && allTags.indexOf(sign.toLowerCase()) === -1) allTags.push(sign.toLowerCase())
 				})
 			})
@@ -553,14 +553,14 @@ class App extends React.Component<IAppProps, IAppState> {
 				})
 
 				return this.doSaveFile()
-					.catch(err => {
+					.catch((err) => {
 						throw err
 					})
-					.then(res => {
+					.then((res) => {
 						if (res !== true) throw res
 						resolve(true)
 					})
-					.catch(err => {
+					.catch((err) => {
 						reject(err)
 					})
 			}
@@ -576,12 +576,12 @@ class App extends React.Component<IAppProps, IAppState> {
 			if (!newState || !newState.id) {
 				reject('No data file currently selected')
 			} else {
-				let editEntry = newState.entries.filter(ent => ent.entryDate === (origEntryDate !== entry.entryDate ? origEntryDate : entry.entryDate))[0]
+				let editEntry = newState.entries.filter((ent) => ent.entryDate === (origEntryDate !== entry.entryDate ? origEntryDate : entry.entryDate))[0]
 
 				if (!editEntry) {
 					reject('ERROR: Unable to find this entry to update it')
 				} else {
-					Object.keys(entry).forEach(key => {
+					Object.keys(entry).forEach((key) => {
 						editEntry[key] = entry[key]
 					})
 
@@ -590,14 +590,14 @@ class App extends React.Component<IAppProps, IAppState> {
 					})
 
 					return this.doSaveFile()
-						.catch(err => {
+						.catch((err) => {
 							throw err
 						})
-						.then(res => {
+						.then((res) => {
 							if (res !== true) throw res
 							resolve(true)
 						})
-						.catch(err => {
+						.catch((err) => {
 							reject(err)
 						})
 				}
@@ -614,7 +614,7 @@ class App extends React.Component<IAppProps, IAppState> {
 				reject('No data file currently selected')
 			} else {
 				// A:
-				let delIdx = newState.entries.findIndex(ent => ent.entryDate === entryDate)
+				let delIdx = newState.entries.findIndex((ent) => ent.entryDate === entryDate)
 
 				// B:
 				if (delIdx === -1) reject('Unable to find `entryDate` ' + entryDate)
@@ -629,14 +629,14 @@ class App extends React.Component<IAppProps, IAppState> {
 
 				// E:
 				return this.doSaveFile()
-					.catch(err => {
+					.catch((err) => {
 						throw err
 					})
-					.then(res => {
+					.then((res) => {
 						if (res !== true) throw res
 						resolve(true)
 					})
-					.catch(err => {
+					.catch((err) => {
 						reject(err)
 					})
 			}
@@ -734,6 +734,11 @@ class App extends React.Component<IAppProps, IAppState> {
 									Import Dreams
 								</NavLink>
 							</li>
+							<li className='nav-item'>
+								<NavLink to='/admin' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+									Admin
+								</NavLink>
+							</li>
 						</ul>
 					</div>
 				</nav>
@@ -743,6 +748,7 @@ class App extends React.Component<IAppProps, IAppState> {
 				<Route path='/search' render={this.Search} />
 				<Route path='/tags' render={this.Tags} />
 				<Route path='/import' render={this.Import} />
+				<Route path='/admin' render={this.Admin} />
 
 				<EntryModal
 					dreamSignTags={this.getDreamSignTags()}
@@ -760,7 +766,7 @@ class App extends React.Component<IAppProps, IAppState> {
 }
 
 // App Container
-const AppMain: React.SFC<{ compiler: string; framework: string }> = _props => <App />
+const AppMain: React.SFC<{ compiler: string; framework: string }> = (_props) => <App />
 
 ReactDOM.render(<AppMain compiler='TypeScript' framework='React' />, document.getElementById('root'))
 
