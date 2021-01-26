@@ -268,15 +268,15 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 		}
 
 		Promise.all(arrPromises)
-			.catch(err => {
+			.catch((err) => {
 				throw err
 			})
-			.then(arrArrays => {
+			.then((arrArrays) => {
 				let result = arrArrays && arrArrays[0] ? arrArrays[0] : 'NO RESULTS'
 				if (typeof result === 'boolean' && result === true) this.modalClose()
 				else throw result
 			})
-			.catch(ex => {
+			.catch((ex) => {
 				// TODO: Show error message somewhere on dialog! (20190324)
 				alert(ex)
 			})
@@ -329,7 +329,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 						data-dream-idx={dreamIdx}
 						onChange={this.handleSelectDreamChange}
 						className='form-control'>
-						{Object.keys(InductionTypes).map(type => (
+						{Object.keys(InductionTypes).map((type) => (
 							<option value={type} key={'lucid-' + type + '-' + dreamIdx}>
 								{InductionTypes[type]}
 							</option>
@@ -338,7 +338,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 				</div>
 				<div className='col-2 col-lg-auto'>
 					<label className='text-muted text-uppercase text-sm d-block'>Delete</label>
-					<button type='button' title='Delete Dream' className='btn btn-outline-danger' onClick={event => this.handleDeleteDream(dreamIdx, event)}>
+					<button type='button' title='Delete Dream' className='btn btn-outline-danger' onClick={(event) => this.handleDeleteDream(dreamIdx, event)}>
 						<div className='iconSvg size16 small circle no cursor-pointer' />
 					</button>
 				</div>
@@ -363,6 +363,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 							if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) newState.dreams[dreamIdx].dreamSigns.push(tag.name.trim())
 							this.setState({ dailyEntry: newState })
 						}}
+						addOnBlur={true}
 						delimiters={delimiters}
 						className='form-control'
 					/>
