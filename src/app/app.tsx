@@ -413,21 +413,20 @@ class App extends React.Component<IAppProps, IAppState> {
 			// A: Set state
 			let newState = this.state.dataFile
 			newState._isSaving = true
-			this.setState({
-				dataFile: newState,
-			})
+			this.setState({ dataFile: newState })
 
-			// TEMP: (20191101): vvv TODO: (several entries were loaded before code was solid and created non-array dreamsigns)
+			// DATA FIXES: (20191101): vvv TODO: (several entries were loaded before code was solid and created non-array dreamsigns)
 			/*
 				newState.entries.forEach(entry => {
 					entry.dreams.forEach(dream => {
 						// WORKED! if (typeof dream.dreamSigns === 'string') dream.dreamSigns = (dream.dreamSigns as string).split(',')
 						// WORKED! dream.dreamSigns = dream.dreamSigns.map(sign=>{ return sign.trim() })
+						// WORKED (20210127) dream.dreamSigns = dream.dreamSigns.map((sign) => sign.toLowerCase().trim())
 					})
 				})
 			*/
 
-			// B: Fix missing dates that canbe created by import data/formatting, etc.
+			// B: Fix [null] dates that can be created by import data/formatting, etc.
 			let entriesFix = newState.entries
 			entriesFix.forEach((entry, idx) => (entry.entryDate = entry.entryDate ? entry.entryDate : `1999-01-0${idx + 1}`))
 
@@ -675,7 +674,12 @@ class App extends React.Component<IAppProps, IAppState> {
 	)
 
 	Tags = () => (
-		<TabTags dataFile={this.state.dataFile || null} onShowModal={this.chgShowModal} doSaveTagsState={this.doSaveTagsState} tagsState={this.state.childTagsState} />
+		<TabTags
+			dataFile={this.state.dataFile && this.state.dataFile.entries ? this.state.dataFile : null}
+			onShowModal={this.chgShowModal}
+			doSaveTagsState={this.doSaveTagsState}
+			tagsState={this.state.childTagsState}
+		/>
 	)
 
 	Import = () => (
@@ -687,7 +691,14 @@ class App extends React.Component<IAppProps, IAppState> {
 		/>
 	)
 
-	Admin = () => <TabAdmin dataFile={this.state.dataFile || null} doSaveAdminState={this.doSaveAdminState} adminState={this.state.childAdminState} />
+	Admin = () => (
+		<TabAdmin
+			dataFile={this.state.dataFile && this.state.dataFile.entries ? this.state.dataFile : null}
+			onShowModal={this.chgShowModal}
+			doSaveAdminState={this.doSaveAdminState}
+			adminState={this.state.childAdminState}
+		/>
+	)
 
 	render() {
 		return (
