@@ -1,6 +1,9 @@
 // APP
-export const APP_BLD = '20210125'
+export const APP_BLD = '20210126'
 export const APP_VER = `1.1.0-${APP_BLD}`
+
+// CONST
+export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 // ENUMS
 export enum AuthState {
@@ -38,8 +41,8 @@ export enum TagDisplayOptions {
 	top30 = 'Top 30',
 	singles = 'Singles',
 }
-export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+// INTERFACES
 export interface IAuthState {
 	status: AuthState
 	userName: ''
