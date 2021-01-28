@@ -348,5 +348,4 @@ export default function TabSearch(props: IAppSearchProps) {
 			)}
 		</div>
 	)
-	//}
 }
