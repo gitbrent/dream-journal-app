@@ -5,6 +5,10 @@
   font-size: 4rem;
 }
 
+.text-sm {
+	font-size: 0.75rem;
+}
+
 .bg-indigo {
 	background-color: var(--indigo) !important;
 }
