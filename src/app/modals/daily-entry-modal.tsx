@@ -26,7 +26,6 @@
 |*|  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 |*|  SOFTWARE.
 \*/
-
 import * as React from 'react'
 import { IJournalDream, IJournalEntry, InductionTypes, IDreamSignTag } from '../app.types'
 import BootstrapSwitchButton from 'bootstrap-switch-button-react' // '../../../bootstrap-switch-button-react'
@@ -360,7 +359,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 						onAddition={(tag: IDreamSignTag) => {
 							let newState = this.state.dailyEntry
 							// Dont allow dupes
-							if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) newState.dreams[dreamIdx].dreamSigns.push(tag.name.trim())
+							if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase().trim())
 							this.setState({ dailyEntry: newState })
 						}}
 						addOnBlur={true}
