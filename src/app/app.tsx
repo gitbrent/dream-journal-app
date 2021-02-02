@@ -48,13 +48,11 @@ import EntryModal from '../app/modals/daily-entry-modal'
 import { IAuthState, IDriveFile, IJournalEntry, AuthState, IDreamSignTag, APP_VER } from './app.types'
 
 /*
-// TODO: FIXME: https://stackoverflow.com/questions/48699820/how-do-i-hide-api-key-in-create-react-app
-console.log(process.env.REACT_APP_GDRIVE_CLIENT_ID)
-console.log(`${process.env.REACT_APP_GDRIVE_CLIENT_ID}`)
-*/
-/*
-const API_KEY = `${process.env.REACT_APP_GDRIVE_API_KEY}`;
-console.log(API_KEY)
+	TODO: FIXME: https://stackoverflow.com/questions/48699820/how-do-i-hide-api-key-in-create-react-app
+	console.log(process.env.REACT_APP_GDRIVE_CLIENT_ID)
+	console.log(`${process.env.REACT_APP_GDRIVE_CLIENT_ID}`)
+	const API_KEY = `${process.env.REACT_APP_GDRIVE_API_KEY}`;
+	console.log(API_KEY)
 */
 const GITBRENT_CLIENT_ID = '300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com'
 const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
