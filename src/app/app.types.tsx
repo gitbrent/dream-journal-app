@@ -1,5 +1,5 @@
 // APP
-export const APP_BLD = '20210130'
+export const APP_BLD = '20210201'
 export const APP_VER = `1.1.0-${APP_BLD}`
 
 // CONST
