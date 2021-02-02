@@ -17,7 +17,10 @@ export default function CardDreamSignGrp(props: IDreamSignTagProps) {
 	return !props || !props.tagGrp ? (
 		<div />
 	) : props.viewType === CardDreamSignGrpViewType.full || props.viewType === CardDreamSignGrpViewType.mini ? (
-		<div key={`cardTag${props.tagGrp.dreamSign}`} className='card mb-3' style={{ minWidth: props.viewType === CardDreamSignGrpViewType.full ? '200px' : '125px' }}>
+		<div
+			key={`cardTag${props.tagGrp.dreamSign}`}
+			className='card mb-3'
+			style={{ minWidth: props.viewType === CardDreamSignGrpViewType.full ? (!showEditBtns ? '200px' : '600px') : '125px' }}>
 			<div className={`card-head bg-info text-white p-2 ${props.viewType === CardDreamSignGrpViewType.mini ? 'h-100' : ''}`}>
 				<div className='row align-tiems-center'>
 					<div className='col'>
@@ -30,7 +33,7 @@ export default function CardDreamSignGrp(props: IDreamSignTagProps) {
 			</div>
 			{(props.viewType === CardDreamSignGrpViewType.full || showEditBtns) && (
 				<div className='card-body bg-white p-2'>
-					{(showEditBtns || props.tagGrp.totalOccurs <= 10) &&
+					{showEditBtns &&
 						props.tagGrp.dailyEntries.map((entry, idy) => (
 							<div
 								key={`cardTagDate${props.tagGrp.dreamSign}${idy}`}
@@ -49,11 +52,8 @@ export default function CardDreamSignGrp(props: IDreamSignTagProps) {
 				</div>
 			)}
 			<div className='card-footer text-center'>
-				<button
-					disabled={props.tagGrp.totalOccurs <= 10 && props.viewType === CardDreamSignGrpViewType.full}
-					onClick={() => setShowEditBtns(!showEditBtns)}
-					className='btn btn-sm btn-dark mr-2'>
-					{showEditBtns ? 'Hide >10' : 'Show All'}
+				<button onClick={() => setShowEditBtns(!showEditBtns)} className='btn btn-sm btn-dark mr-2'>
+					{showEditBtns ? 'Hide Dreams' : 'Show Dreams'}
 				</button>
 			</div>
 		</div>

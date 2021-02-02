@@ -21,6 +21,12 @@ export interface IAppAdminState {
 	*/
 }
 
+enum FilterSortOrder {
+	title = 'Title',
+	highlow = 'High → Low',
+	lowhigh = 'Low → High',
+}
+
 export default function TabAdmin(props: IAppAdminProps) {
 	const [totalMonths, setTotalMonths] = useState(0)
 	const [totalYears, setTotalYears] = useState(0)
@@ -34,6 +40,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 	const [dupeDreamSigns, setDupeDreamSigns] = useState<IJournalEntry[]>([])
 	const [searchTerm, setSearchTerm] = useState('')
 	const [filterViewType, setFilterViewType] = useState<CardDreamSignGrpViewType>(CardDreamSignGrpViewType.full)
+	const [filterSortOrder, setFilterSortOrder] = useState<FilterSortOrder>(FilterSortOrder.title)
 
 	useEffect(() => {
 		if (!props.dataFile || !props.dataFile.entries) return
@@ -199,23 +206,24 @@ export default function TabAdmin(props: IAppAdminProps) {
 											onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
 											className='form-control'>
 											{Object.keys(CardDreamSignGrpViewType).map((val) => (
-												<option value={CardDreamSignGrpViewType[val]} key={'enum' + val}>
+												<option value={CardDreamSignGrpViewType[val]} key={'viewType' + val}>
 													{CardDreamSignGrpViewType[val]}
 												</option>
 											))}
 										</select>
 									</div>
 									<div className='col-12 col-md-6'>
-										<label className='text-uppercase text-muted'>Type</label>
-										{/*
-										<select className='form-control' defaultValue={searchOptMatchType} onChange={handleTypeChange}>
-											{Object.keys(SearchMatchTypes).map((val) => (
-												<option value={SearchMatchTypes[val]} key={'enum' + val}>
-													{SearchMatchTypes[val]}
+										<label className='text-uppercase text-muted'>Sort Order</label>
+										<select
+											defaultValue={filterSortOrder}
+											onChange={(ev) => setFilterSortOrder(ev.currentTarget.value as FilterSortOrder)}
+											className='form-control'>
+											{Object.keys(FilterSortOrder).map((val) => (
+												<option value={FilterSortOrder[val]} key={'sortOrder' + val}>
+													{FilterSortOrder[val]}
 												</option>
 											))}
 										</select>
-										*/}
 									</div>
 								</div>
 							</div>
@@ -243,7 +251,25 @@ export default function TabAdmin(props: IAppAdminProps) {
 					<div className='card-deck'>
 						{dreamTagGroups
 							.filter((tagGrp) => !searchTerm || tagGrp.dreamSign.indexOf(searchTerm) > -1 || searchTerm.indexOf(tagGrp.dreamSign) > -1)
-							.sort((a, b) => (a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1))
+							.sort((a, b) => {
+								if (filterSortOrder === FilterSortOrder.title) return a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
+								else if (filterSortOrder === FilterSortOrder.highlow)
+									return a.totalOccurs > b.totalOccurs
+										? -1
+										: a.totalOccurs < b.totalOccurs
+										? 1
+										: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
+										? -1
+										: 1
+								else if (filterSortOrder === FilterSortOrder.lowhigh)
+									return a.totalOccurs < b.totalOccurs
+										? -1
+										: a.totalOccurs > b.totalOccurs
+										? 1
+										: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
+										? -1
+										: 1
+							})
 							.map((tagGrp) => (
 								<CardDreamSignGrp tagGrp={tagGrp} onShowModal={props.onShowModal} viewType={filterViewType} />
 							))}
