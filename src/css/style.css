@@ -1,8 +1,8 @@
 .x3 {
-  font-size: 3rem;
+	font-size: 3rem;
 }
 .x4 {
-  font-size: 4rem;
+	font-size: 4rem;
 }
 
 .text-sm {
@@ -11,4 +11,15 @@
 
 .bg-indigo {
 	background-color: var(--indigo) !important;
+}
+
+.cursor-help {
+	cursor: help;
+}
+.cursor-link {
+	cursor: pointer;
+}
+
+.bg-trans-25 {
+	background-color: rgba(0, 0, 0, 0.25);
 }
