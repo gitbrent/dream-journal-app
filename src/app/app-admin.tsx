@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { IDriveFile, IJournalEntry } from './app.types'
+import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDriveFile, IJournalEntry } from './app.types'
 import { Search } from 'react-bootstrap-icons'
-import EntryModal from './modals/daily-entry-modal'
+import CardDreamSignGrp from './components/card-DreamSign'
 
 export interface IAppAdminProps {
 	dataFile: IDriveFile
@@ -21,14 +21,6 @@ export interface IAppAdminState {
 	*/
 }
 
-export interface IDreamSignTagGroup {
-	dreamSign: string
-	/** every journal entry this dreamSign appears in */
-	dailyEntries: IJournalEntry[]
-	/** sums the dreams under `entries` (save us time!) */
-	totalOccurs: number
-}
-
 export default function TabAdmin(props: IAppAdminProps) {
 	const [totalMonths, setTotalMonths] = useState(0)
 	const [totalYears, setTotalYears] = useState(0)
@@ -40,8 +32,8 @@ export default function TabAdmin(props: IAppAdminProps) {
 	const [totalDreamSigns, setTotalDreamSigns] = useState(0)
 	const [dreamTagGroups, setDreamTagGroups] = useState<IDreamSignTagGroup[]>([])
 	const [dupeDreamSigns, setDupeDreamSigns] = useState<IJournalEntry[]>([])
-
 	const [searchTerm, setSearchTerm] = useState('')
+	const [filterViewType, setFilterViewType] = useState<CardDreamSignGrpViewType>(CardDreamSignGrpViewType.full)
 
 	useEffect(() => {
 		if (!props.dataFile || !props.dataFile.entries) return
@@ -201,18 +193,17 @@ export default function TabAdmin(props: IAppAdminProps) {
 							<div className='card-body bg-light p-4'>
 								<div className='row align-items-center'>
 									<div className='col-12 col-md-6'>
-										<label className='text-uppercase text-muted text-sm'>Fields</label>
-										{/*
-										<select className='form-control' defaultValue={searchOptScope} onChange={handleScopeChange}>
-											{Object.keys(SearchScopes)
-												.filter((key) => key.indexOf('_') === -1)
-												.map((val) => (
-													<option value={SearchScopes[val]} key={'enum' + val}>
-														{SearchScopes[val]}
-													</option>
-												))}
+										<label className='text-uppercase text-muted text-sm'>View Type</label>
+										<select
+											defaultValue={filterViewType}
+											onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
+											className='form-control'>
+											{Object.keys(CardDreamSignGrpViewType).map((val) => (
+												<option value={CardDreamSignGrpViewType[val]} key={'enum' + val}>
+													{CardDreamSignGrpViewType[val]}
+												</option>
+											))}
 										</select>
-										*/}
 									</div>
 									<div className='col-12 col-md-6'>
 										<label className='text-uppercase text-muted'>Type</label>
@@ -238,7 +229,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 	function renderDreamSignTags(): JSX.Element {
 		return (
 			<div className='card my-5'>
-				<div className='card-header bg-info text-white'>
+				<div className='card-header bg-primary text-white'>
 					<div className='row'>
 						<div className='col'>
 							<h5 className='mb-0'>Dream Signs/Tags</h5>
@@ -249,54 +240,14 @@ export default function TabAdmin(props: IAppAdminProps) {
 					</div>
 				</div>
 				<div className='card-body bg-light'>
-					<table className='table table-sm'>
-						<thead>
-							<tr>
-								<th>DreamSign/Tag</th>
-								<th>Entries</th>
-								<th className='text-nowrap' style={{ width: '5%' }}>
-									Total Dreams
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							{dreamTagGroups
-								.filter((tagGrp) => !searchTerm || tagGrp.dreamSign.indexOf(searchTerm) > -1 || searchTerm.indexOf(tagGrp.dreamSign) > -1)
-								.sort((a, b) => (a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1))
-								.map((tagGrp, idx) => (
-									<tr key={`trTag${idx}`}>
-										<td className='align-middle'>{tagGrp.dreamSign}</td>
-										<td>
-											{tagGrp.totalOccurs < 10 ? (
-												tagGrp.dailyEntries.map((entry, idy) => (
-													<button
-														key={`tagLink${idy}`}
-														onClick={() => props.onShowModal({ show: true, editEntry: entry })}
-														className='btn btn-sm btn-dark mr-2'>
-														{entry.entryDate}
-													</button>
-												))
-											) : (
-												<div>
-													{tagGrp.dailyEntries
-														.filter((_entry, idz) => idz < 5)
-														.map((entry, idy) => (
-															<button
-																key={`tagLink${idy}`}
-																onClick={() => props.onShowModal({ show: true, editEntry: entry })}
-																className='btn btn-sm btn-dark mr-2'>
-																{entry.entryDate}
-															</button>
-														))}
-													<span className='ml-2'>(only first 5 shown)</span>
-												</div>
-											)}
-										</td>
-										<td className='text-right'>{tagGrp.totalOccurs}</td>
-									</tr>
-								))}
-						</tbody>
-					</table>
+					<div className='card-deck'>
+						{dreamTagGroups
+							.filter((tagGrp) => !searchTerm || tagGrp.dreamSign.indexOf(searchTerm) > -1 || searchTerm.indexOf(tagGrp.dreamSign) > -1)
+							.sort((a, b) => (a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1))
+							.map((tagGrp) => (
+								<CardDreamSignGrp tagGrp={tagGrp} onShowModal={props.onShowModal} viewType={filterViewType} />
+							))}
+					</div>
 				</div>
 			</div>
 		)
