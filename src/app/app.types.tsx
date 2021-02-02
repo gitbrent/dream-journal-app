@@ -1,5 +1,5 @@
 // APP
-export const APP_BLD = '20210126'
+export const APP_BLD = '20210130'
 export const APP_VER = `1.1.0-${APP_BLD}`
 
 // CONST
@@ -40,6 +40,11 @@ export enum TagDisplayOptions {
 	all = 'All',
 	top30 = 'Top 30',
 	singles = 'Singles',
+}
+export enum CardDreamSignGrpViewType {
+	full = 'Full Card',
+	mini = 'Mini Card',
+	badg = 'Badge',
 }
 
 // INTERFACES
@@ -97,4 +102,12 @@ export interface ISearchMatch {
 	entryDate: IJournalEntry['entryDate']
 	starred: IJournalEntry['starred']
 	dream: IJournalDream
+}
+
+export interface IDreamSignTagGroup {
+	dreamSign: string
+	/** every journal entry this dreamSign appears in */
+	dailyEntries: IJournalEntry[]
+	/** sums `dream` array under `dailyEntries` (save us time!) */
+	totalOccurs: number
 }
