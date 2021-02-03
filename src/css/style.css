@@ -1,3 +1,5 @@
+/* Brent BS addons */
+
 .x3 {
 	font-size: 3rem;
 }
@@ -12,6 +14,9 @@
 .bg-indigo {
 	background-color: var(--indigo) !important;
 }
+.bg-info-800 {
+	background-color: #6A1B9A !important;
+}
 
 .cursor-help {
 	cursor: help;
@@ -23,3 +28,15 @@
 .bg-trans-25 {
 	background-color: rgba(0, 0, 0, 0.25);
 }
+.text-breakword {
+	word-break: break-word;
+}
+
+/* Need for Bootstrap 5
+.jumbotron {
+  padding: 2rem 1rem;
+  margin-bottom: 2rem;
+  background-color: #e9ecef;
+  border-radius: .3rem;
+}
+*/
