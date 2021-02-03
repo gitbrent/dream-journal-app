@@ -39,7 +39,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 	const [dreamTagGroups, setDreamTagGroups] = useState<IDreamSignTagGroup[]>([])
 	const [dupeDreamSigns, setDupeDreamSigns] = useState<IJournalEntry[]>([])
 	const [searchTerm, setSearchTerm] = useState('')
-	const [filterViewType, setFilterViewType] = useState<CardDreamSignGrpViewType>(CardDreamSignGrpViewType.full)
+	const [filterViewType, setFilterViewType] = useState<CardDreamSignGrpViewType>(CardDreamSignGrpViewType.md)
 	const [filterSortOrder, setFilterSortOrder] = useState<FilterSortOrder>(FilterSortOrder.title)
 
 	useEffect(() => {
@@ -71,30 +71,32 @@ export default function TabAdmin(props: IAppAdminProps) {
 		// tags grouped
 		let tagGroups: IDreamSignTagGroup[] = []
 		let dupeSigns: IJournalEntry[] = []
-		props.dataFile.entries.forEach((entry) => {
-			entry.dreams.forEach((dream) =>
-				dream.dreamSigns.forEach((sign) => {
-					let tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
-					if (tag) {
-						let existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
-						if (!existingEntry) tag.dailyEntries.push(entry)
-						tag.totalOccurs++
-					} else {
-						tagGroups.push({ dreamSign: sign, dailyEntries: [entry], totalOccurs: 1 })
-					}
-				})
-			)
+		props.dataFile.entries
+			.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
+			.forEach((entry) => {
+				entry.dreams.forEach((dream) =>
+					dream.dreamSigns.forEach((sign) => {
+						let tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
+						if (tag) {
+							let existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
+							if (!existingEntry) tag.dailyEntries.push(entry)
+							tag.totalOccurs++
+						} else {
+							tagGroups.push({ dreamSign: sign, dailyEntries: [entry], totalOccurs: 1 })
+						}
+					})
+				)
 
-			// Find dupes
-			if (
-				entry.dreams &&
-				entry.dreams[0] &&
-				entry.dreams[0].dreamSigns.length > 0 &&
-				entry.dreams[1] &&
-				entry.dreams[0].dreamSigns.toString() == entry.dreams[1].dreamSigns.toString()
-			)
-				dupeSigns.push(entry)
-		})
+				// Find dupes
+				if (
+					entry.dreams &&
+					entry.dreams[0] &&
+					entry.dreams[0].dreamSigns.length > 0 &&
+					entry.dreams[1] &&
+					entry.dreams[0].dreamSigns.toString() == entry.dreams[1].dreamSigns.toString()
+				)
+					dupeSigns.push(entry)
+			})
 		setDreamTagGroups(tagGroups)
 		setTotalDreamSigns(tagGroups.length)
 		setDupeDreamSigns(dupeSigns)
@@ -165,72 +167,51 @@ export default function TabAdmin(props: IAppAdminProps) {
 
 	function renderFilters(): JSX.Element {
 		return (
-			<section className='my-5'>
-				<div className='row'>
-					<div className='col-12 col-lg-8'>
-						<div className='card mb-5 mb-lg-0'>
-							<div className='card-header bg-secondary'>
-								<h5 className='card-title text-white mb-0'>Keyword Search</h5>
-							</div>
-							<div className='card-body bg-light p-4'>
-								<div className='row align-items-center'>
-									<div className='col-auto d-none d-md-block'>
-										<Search size={48} className='text-secondary' />
-									</div>
-									<div className='col'>
-										<label className='text-uppercase text-muted'>Dream Sign</label>
-										<input
-											type='text'
-											value={searchTerm}
-											className='form-control'
-											onChange={(event) => setSearchTerm(event.target.value)}
-											disabled={!props.dataFile ? true : false}
-										/>
-									</div>
-									<div className='w-100 mb-3 d-md-none' />
-								</div>
-							</div>
+			<div className='card my-5'>
+				<div className='card-header bg-secondary'>
+					<h5 className='card-title text-white mb-0'>Search Options</h5>
+				</div>
+				<div className='card-body bg-light p-4'>
+					<div className='row align-items-center'>
+						<div className='col-auto d-none d-md-block'>
+							<Search size={48} className='text-secondary' />
 						</div>
-					</div>
-					<div className='col-12 col-lg-4'>
-						<div className='card'>
-							<div className='card-header bg-secondary'>
-								<h5 className='card-title text-white mb-0'>Search Options</h5>
-							</div>
-							<div className='card-body bg-light p-4'>
-								<div className='row align-items-center'>
-									<div className='col-12 col-md-6'>
-										<label className='text-uppercase text-muted text-sm'>View Type</label>
-										<select
-											defaultValue={filterViewType}
-											onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
-											className='form-control'>
-											{Object.keys(CardDreamSignGrpViewType).map((val) => (
-												<option value={CardDreamSignGrpViewType[val]} key={'viewType' + val}>
-													{CardDreamSignGrpViewType[val]}
-												</option>
-											))}
-										</select>
-									</div>
-									<div className='col-12 col-md-6'>
-										<label className='text-uppercase text-muted'>Sort Order</label>
-										<select
-											defaultValue={filterSortOrder}
-											onChange={(ev) => setFilterSortOrder(ev.currentTarget.value as FilterSortOrder)}
-											className='form-control'>
-											{Object.keys(FilterSortOrder).map((val) => (
-												<option value={FilterSortOrder[val]} key={'sortOrder' + val}>
-													{FilterSortOrder[val]}
-												</option>
-											))}
-										</select>
-									</div>
-								</div>
-							</div>
+						<div className='col-12 col-md mb-3 mb-md-0'>
+							<label className='text-uppercase text-muted'>DreamSign/Tag</label>
+							<input
+								type='text'
+								value={searchTerm}
+								className='form-control'
+								onChange={(event) => setSearchTerm(event.target.value)}
+								disabled={!props.dataFile ? true : false}
+							/>
+						</div>
+						<div className='col-auto'>
+							<label className='text-uppercase text-muted'>Tag Size</label>
+							<select
+								defaultValue={filterViewType}
+								onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
+								className='form-control'>
+								{Object.keys(CardDreamSignGrpViewType).map((val) => (
+									<option value={CardDreamSignGrpViewType[val]} key={'viewType' + val}>
+										{CardDreamSignGrpViewType[val]}
+									</option>
+								))}
+							</select>
+						</div>
+						<div className='col-auto'>
+							<label className='text-uppercase text-muted'>Sort Order</label>
+							<select defaultValue={filterSortOrder} onChange={(ev) => setFilterSortOrder(ev.currentTarget.value as FilterSortOrder)} className='form-control'>
+								{Object.keys(FilterSortOrder).map((val) => (
+									<option value={FilterSortOrder[val]} key={'sortOrder' + val}>
+										{FilterSortOrder[val]}
+									</option>
+								))}
+							</select>
 						</div>
 					</div>
 				</div>
-			</section>
+			</div>
 		)
 	}
 
