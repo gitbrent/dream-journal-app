@@ -1,6 +1,6 @@
 // APP
-export const APP_BLD = '20210202'
-export const APP_VER = `1.1.0-${APP_BLD}`
+export const APP_BLD = '20210203'
+export const APP_VER = `1.1.0-WIP-${APP_BLD}`
 
 // CONST
 export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']

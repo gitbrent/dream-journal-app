@@ -30,7 +30,7 @@
 import React from 'react'
 import { IDriveFile, ISearchMatch, SearchScopes, TagDisplayOptions } from './app.types'
 import Alert from 'react-bootstrap/Alert'
-import SearchResults from './components/search-results'
+import SearchResults from './comp-app/search-results'
 
 export interface IAppTagsProps {
 	dataFile: IDriveFile

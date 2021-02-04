@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { IDriveFile, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
 import Alert from 'react-bootstrap/Alert'
-import SearchResults from './components/search-results'
+import SearchResults from './comp-app/search-results'
 
 export interface IAppSearchProps {
 	dataFile: IDriveFile

@@ -11,7 +11,7 @@ export interface IDreamSignTagState {
 	showEditBtns: boolean
 }
 
-export default function CardDreamSignGrp(props: IDreamSignTagProps) {
+export default function DreamSignTag(props: IDreamSignTagProps) {
 	const [showEditBtns, setShowEditBtns] = useState(false)
 
 	return !props || !props.tagGrp ? (
@@ -46,14 +46,14 @@ export default function CardDreamSignGrp(props: IDreamSignTagProps) {
 							</div>
 						))}
 				</div>
-				<div className='row align-items-center no-gutters'>
-					<div className='col-auto'>
-						<button onClick={() => setShowEditBtns(!showEditBtns)} className='btn btn-sm btn-outline-info w-100'>
+				<div className='row align-items-center no-gutters flex-nowrap'>
+					<div className='col pr-1'>
+						<button className='btn btn-sm btn-outline-info w-100' onClick={() => setShowEditBtns(!showEditBtns)}>
 							{showEditBtns ? 'Hide' : 'Show'}
 						</button>
 					</div>
-					<div className='col pl-2'>
-						<button onClick={() => console.log('TODO:')} className='btn btn-sm btn-outline-warning w-100'>
+					<div className='col pl-1'>
+						<button className='btn btn-sm btn-outline-dark w-100' onClick={() => console.log('TODO:')}>
 							Rename
 						</button>
 					</div>

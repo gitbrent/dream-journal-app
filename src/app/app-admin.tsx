@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDriveFile, IJournalEntry } from './app.types'
 import { Search } from 'react-bootstrap-icons'
-import CardDreamSignGrp from './components/card-DreamSign'
+import DreamSignTag from './comp-app/dreamsign-tag'
 
 export interface IAppAdminProps {
 	dataFile: IDriveFile
@@ -231,7 +231,9 @@ export default function TabAdmin(props: IAppAdminProps) {
 				<div className='card-body bg-light'>
 					<div className='card-deck'>
 						{dreamTagGroups
-							.filter((tagGrp) => !searchTerm || tagGrp.dreamSign.indexOf(searchTerm) > -1 || searchTerm.indexOf(tagGrp.dreamSign) > -1)
+							.filter(
+								(tagGrp) => !searchTerm || tagGrp.dreamSign.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || searchTerm.indexOf(tagGrp.dreamSign) > -1
+							)
 							.sort((a, b) => {
 								if (filterSortOrder === FilterSortOrder.title) return a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
 								else if (filterSortOrder === FilterSortOrder.highlow)
@@ -252,7 +254,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 										: 1
 							})
 							.map((tagGrp) => (
-								<CardDreamSignGrp tagGrp={tagGrp} onShowModal={props.onShowModal} viewType={filterViewType} />
+								<DreamSignTag tagGrp={tagGrp} onShowModal={props.onShowModal} viewType={filterViewType} />
 							))}
 					</div>
 				</div>
