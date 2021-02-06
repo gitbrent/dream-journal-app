@@ -222,7 +222,7 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 						</div>
 					</div>
 
-					<div className='row mb-5'>
+					<div className='row mb-0'>
 						<div className='col-12 col-md d-flex'>
 							<div className='card'>
 								<div className='card-header bg-secondary'>
