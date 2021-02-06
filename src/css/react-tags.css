@@ -23,6 +23,12 @@
  *   </div>
  */
 
+/* 20210206: updated to work with bootsrap-cyborg-4.x */
+:root {
+  --formbgd: #555;
+  --formclr: #fff;
+}
+
 .react-tags {
   /* form-control */
   display: block;
@@ -82,7 +88,7 @@
   border: 1px solid #d1d1d1;
   border-radius: 2px;
   */
-  background: var(--purple);
+  background: var(--formbgd);
   color: white;
   /* match the font styles */
   font-size: inherit;
