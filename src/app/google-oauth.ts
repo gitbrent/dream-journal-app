@@ -16,10 +16,19 @@ const JOURNAL_HEADER = {
 
 let gAuthState: IAuthState = null
 let gDataFile: IDriveFile = null
+let gAuthCallback: Function = null
+let gDataCallback: Function = null
 
 // PUBLIC METHODS ------------------------------------------------------------
 
-export function updateAuthState() {
+export function authStateCallback(callback: Function) {
+	gAuthCallback = callback
+}
+export function dataFileCallback(callback: Function) {
+	gDataCallback = callback
+}
+
+export function doAuthUpdate() {
 	// A: Get *current* value for `access_token` from location.href
 	parseStoreAccessKey()
 
@@ -45,7 +54,7 @@ export function updateAuthState() {
 				.then((json) => {
 					if (json && json.error && json.error.code) {
 						// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
-						throw json.error
+						throw new Error(json.error)
 					} else if (json && json.user) {
 						// A: Set user states
 						gAuthState = {
@@ -54,7 +63,10 @@ export function updateAuthState() {
 							userPhoto: json.user.photoLink || null,
 						}
 
-						// B: Get files (so Route pages have data)
+						// B: Notify listeners
+						gAuthCallback(gAuthState)
+
+						// C: Go ahead and load data file since we need it
 						driveGetFileList()
 					}
 				})
@@ -62,13 +74,14 @@ export function updateAuthState() {
 					if (error.code === '401') {
 						gAuthState.status = AuthState.Expired
 					} else {
+						gAuthState.status = AuthState.Unauthenticated
 						console.error ? console.error(error) : console.log(error)
 					}
+					gAuthCallback(gAuthState)
 				})
 		})
 	}
 }
-
 /**
  * @see https://developers.google.com/identity/protocols/OAuth2UserAgent
  * @see https://developers.google.com/identity/protocols/OAuth2UserAgent#example
@@ -105,14 +118,13 @@ export function doAuthSignIn() {
 	document.body.appendChild(form)
 	form.submit()
 }
-
 /**
  * @see: https://developers.google.com/identity/protocols/OAuth2UserAgent#tokenrevoke
  */
 export function doAuthSignOut() {
 	let params = JSON.parse(localStorage.getItem('oauth2-params'))
 
-	// TODO: Prompt for Save!!!
+	// FUTURE: Prompt for Save!!!
 
 	fetch('https://accounts.google.com/o/oauth2/revoke?token=' + params['access_token'], {
 		method: 'GET',
@@ -124,13 +136,52 @@ export function doAuthSignOut() {
 				userName: '',
 				userPhoto: '',
 			}
+			gAuthCallback(gAuthState)
 			gDataFile = null
+			gDataCallback(gDataFile)
 
 			localStorage.setItem('journal-selected-fileid', null)
 		})
 		.catch((error) => {
 			console.error ? console.error(error) : console.log(error)
 		})
+}
+
+/** Does this entry date already exist in the datafile */
+export function checkEntryDate(checkDate: string): boolean {
+	return gDataFile.entries.filter((item) => item.entryDate === checkDate).length > 0 ? true : false
+}
+
+/**
+ * Add new `IJournalEntry` into selected `IDriveFile`
+ */
+export function doEntryAdd(entry: IJournalEntry) {
+	if (!gDataFile || !gDataFile.entries) throw new Error('No datafile!')
+	gDataFile.entries.push(entry)
+}
+/**
+ * Edit existing `IJournalEntry` from selected `IDriveFile`
+ */
+export function doEntryEdit(entry: IJournalEntry, origEntryDate: IJournalEntry['entryDate']) {
+	if (!gDataFile || !gDataFile.entries) throw new Error('No datafile!')
+
+	let editEntry = gDataFile.entries.filter((item) => item.entryDate === (origEntryDate !== entry.entryDate ? origEntryDate : entry.entryDate))[0]
+	if (!editEntry) throw new Error('Unable to find entry!')
+
+	Object.keys(entry).forEach((key) => {
+		editEntry[key] = entry[key]
+	})
+}
+/**
+ * Edit existing `IJournalEntry` from selected `IDriveFile`
+ */
+export function doEntryDelete(entryDate: IJournalEntry['entryDate']) {
+	if (!gDataFile || !gDataFile.entries) throw new Error('No datafile!')
+
+	let delIdx = gDataFile.entries.findIndex((item) => item.entryDate === entryDate)
+	if (delIdx === -1) throw new Error('Unable to find entry!')
+
+	gDataFile.entries.splice(delIdx, 1)
 }
 
 /**
@@ -177,7 +228,7 @@ export function doSaveFile(): Promise<any> {
 			'Content-Length': reqBody.length + reqEnd.length,
 		}
 
-		fetch('https://www.googleapis.com/upload/drive/v3/files/' + gDataFile.id + '?uploadType=multipart', {
+		fetch(`https://www.googleapis.com/upload/drive/v3/files/${gDataFile.id}?uploadType=multipart`, {
 			method: 'PATCH',
 			headers: requestHeaders,
 			body: reqBody,
@@ -242,10 +293,10 @@ function driveGetFileList() {
 					// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
 					if (data && data.error && data.error.code) throw data.error
 
-					// B: Capture datafile
+					// B: Grab datafile (id, name, size, etc) (not the contents!)
 					gDataFile = data.files.filter((file) => file.name === JOURNAL_HEADER.name)[0] || null
 
-					// C: Load or Create data file
+					// C: Create datafile if needed, otherwise, load file contents
 					gDataFile ? doSelectFile() : doCreateFile()
 				})
 				.catch((error) => {
@@ -345,6 +396,9 @@ function doSelectFile() {
 
 					// B:
 					gDataFile.entries = entries || []
+
+					// C:
+					gDataCallback(gDataFile)
 				})
 				.catch((error) => {
 					throw new Error(error)

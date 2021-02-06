@@ -207,7 +207,7 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 						<div className='col-12 col-md d-flex mb-5 mb-md-0'>
 							<div className='card flex-fill'>
 								<div className={'card-header' + (this.props.authState.status === AuthState.Authenticated ? ' bg-success' : ' bg-warning')}>
-									<h5 className='card-title text-white mb-0'>{this.props.authState.status}</h5>
+									<h5 className='card-title text-white mb-0'>{this.props.authState.status || '???'}</h5>
 								</div>
 								<div className='card-body bg-light text-dark'>{cardAuthUser}</div>
 							</div>
