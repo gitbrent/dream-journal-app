@@ -273,6 +273,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 			.then(() => this.modalClose())
 			.catch((ex) => {
 				// TODO: Show error message somewhere on dialog! (20190324)
+				// Set errstate and show message in DialogFooter
 				alert(ex)
 			})
 			.finally(() => this.setState({ isBusy: false }))
@@ -467,7 +468,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 
 					{this.state.isBusy ? (
 						<Modal.Footer className='px-4'>
-							<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
+							<div className='spinner-border spinner-border-lg text-primary' role='status'>
 								<span className='sr-only' />
 							</div>
 						</Modal.Footer>
