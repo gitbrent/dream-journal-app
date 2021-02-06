@@ -383,8 +383,8 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 						<Modal.Title className='text-white h6'>Journal Entry</Modal.Title>
 					</Modal.Header>
 
-					<Modal.Body className='bg-light'>
-						<div className='container'>
+					<Modal.Body className='bg-light p-4'>
+						<div className='container px-0'>
 							<div className='row mb-4'>
 								<div className='col-6 mb-2 required'>
 									<label className='text-muted text-uppercase text-sm'>Entry Date</label>
@@ -466,13 +466,13 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 					</Modal.Body>
 
 					{this.state.isBusy ? (
-						<Modal.Footer>
+						<Modal.Footer className='px-4'>
 							<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
 								<span className='sr-only' />
 							</div>
 						</Modal.Footer>
 					) : (
-						<Modal.Footer>
+						<Modal.Footer className='px-4'>
 							<div className='d-block d-sm-none'>
 								<button type='button' className='btn btn-outline-danger' onClick={this.handleDelete}>
 									Delete
