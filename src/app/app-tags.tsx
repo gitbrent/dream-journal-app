@@ -330,14 +330,15 @@ export default class TabSearch extends React.Component<IAppTagsProps, IAppTagsSt
 					</div>
 				</section>
 
-				{this.state.searchMatches && this.state.searchMatches.length > 0 && (
+				{/*
+					this.state.searchMatches && this.state.searchMatches.length > 0 && (
 					<SearchResults
 						handleEntryEdit={this.handleEntryEdit}
 						searchMatches={this.state.searchMatches}
 						searchOptScope={this.state.optionDisplay}
 						totalDreams={totalDreams}
 					/>
-				)}
+					)*/}
 			</div>
 		)
 	}
