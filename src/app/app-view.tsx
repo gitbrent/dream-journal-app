@@ -1,36 +1,37 @@
-/*\
-|*|  :: Brain Cloud Dream Journal ::
-|*|
-|*|  Dream Journal App - Record and Search Daily Dream Entries
-|*|  https://github.com/gitbrent/dream-journal-app
-|*|
-|*|  This library is released under the MIT Public License (MIT)
-|*|
-|*|  Dream Journal App (C) 2019-present Brent Ely (https://github.com/gitbrent)
-|*|
-|*|  Permission is hereby granted, free of charge, to any person obtaining a copy
-|*|  of this software and associated documentation files (the "Software"), to deal
-|*|  in the Software without restriction, including without limitation the rights
-|*|  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-|*|  copies of the Software, and to permit persons to whom the Software is
-|*|  furnished to do so, subject to the following conditions:
-|*|
-|*|  The above copyright notice and this permission notice shall be included in all
-|*|  copies or substantial portions of the Software.
-|*|
-|*|  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-|*|  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-|*|  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-|*|  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-|*|  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-|*|  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-|*|  SOFTWARE.
-\*/
+/*
+ *  :: Brain Cloud Dream Journal ::
+ *
+ *  Dream Journal App - Record and Search Daily Dream Entries
+ *  https://github.com/gitbrent/dream-journal-app
+ *
+ *  This library is released under the MIT Public License (MIT)
+ *
+ *  Dream Journal App (C) 2019-present Brent Ely (https://github.com/gitbrent)
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
 
 import * as React from 'react'
 import DateRangePicker from './comp-other/date-range-picker'
 import Pagination from './comp-other/pagination'
 import { IJournalEntry, IDriveFile, IDreamSignTag } from './app.types'
+import { CheckCircleFill, StarFill, SortDownAlt } from 'react-bootstrap-icons'
 
 export interface IAppViewProps {
 	dataFile: IDriveFile
@@ -76,7 +77,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 		this.props.onShowModal({
 			show: true,
 			tags: this.props.dreamSignTags,
-			editEntry: this.props.dataFile.entries.filter(entry => entry.entryDate === editEntryDate)[0],
+			editEntry: this.props.dataFile.entries.filter((entry) => entry.entryDate === editEntryDate)[0],
 		})
 	}
 
@@ -91,7 +92,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 	// @see: http://react-day-picker.js.org/examples/elements-cell
 	render() {
 		// A: filter entries
-		let arrEntries = (this.props.dataFile && this.props.dataFile.entries ? this.props.dataFile.entries : []).filter(entry => {
+		let arrEntries = (this.props.dataFile && this.props.dataFile.entries ? this.props.dataFile.entries : []).filter((entry) => {
 			let dateEntry = new Date(entry.entryDate + ' 00:00:00')
 			// FIXME: doesnt work if you select the day of an entry (eg: jan1 - jan3 works, nut select jan 2 and nothing)
 			if (this.state.dateRangeFrom && this.state.dateRangeTo && dateEntry >= this.state.dateRangeFrom && dateEntry <= this.state.dateRangeTo) return true
@@ -113,7 +114,8 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 					<thead className='thead'>
 						<tr>
 							<th>
-								Date<span className='float-right'>▲</span>
+								Date
+								<SortDownAlt size='16' className='ml-1' />
 							</th>
 							<th className='text-center d-none d-lg-table-cell'>Bed</th>
 							<th className='text-center'>Dreams</th>
@@ -133,7 +135,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 							.map((entry: IJournalEntry, idx) => {
 								// This is a harsh thing to compile inline below, so do it here
 								let dreamSignsUnq: string[] = []
-								entry.dreams.forEach(dream =>
+								entry.dreams.forEach((dream) =>
 									Array.isArray(dream.dreamSigns)
 										? (dreamSignsUnq = [...new Set(dream.dreamSigns.concat(dreamSignsUnq))])
 										: dream.dreamSigns
@@ -143,24 +145,22 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 
 								return (
 									<tr key={'journalrow' + idx}>
-										<td className='text-nowrap'>{entry.entryDate}</td>
-										<td className='text-center d-none d-lg-table-cell'>{entry.bedTime}</td>
-										<td className='text-center'>{entry.dreams.length}</td>
-										<td className='text-left d-none d-md-table-cell'>
+										<td className='align-middle text-nowrap'>{entry.entryDate}</td>
+										<td className='align-middle text-center d-none d-lg-table-cell'>{entry.bedTime}</td>
+										<td className='align-middle text-center'>{entry.dreams.length}</td>
+										<td className='align-middle text-left d-none d-md-table-cell'>
 											{dreamSignsUnq.sort().map((sign, idy) => (
-												<div className='badge badge-info text-lowercase p-2 mr-2 mb-1' key={idx + '-' + idy}>
+												<div key={`${idx}-${idy}`} className='badge badge-info p-2 mr-2'>
 													{sign}
 												</div>
 											))}
 										</td>
-										<td className='text-center d-none d-md-table-cell'>{entry.starred ? <div className='iconSvg star-on size16' /> : ''}</td>
-										<td className='text-center'>
-											{entry.dreams.filter(dream => dream.isLucidDream === true).length > 0 && (
-												<div className='iconSvg size24 circle check' title='Lucid Dream Success!' />
-											)}
+										<td className='align-middle text-center d-none d-md-table-cell'>{entry.starred && <StarFill size='24' className='text-warning' />}</td>
+										<td className='align-middle text-center'>
+											{entry.dreams.filter((dream) => dream.isLucidDream === true).length > 0 && <CheckCircleFill size='24' className='text-success' />}
 										</td>
 										<td className='text-center'>
-											<button className='btn btn-sm btn-outline-primary px-4' onClick={event => this.handleEntryEdit(event, entry.entryDate)}>
+											<button className='btn btn-sm btn-outline-primary px-4' onClick={(event) => this.handleEntryEdit(event, entry.entryDate)}>
 												Edit
 											</button>
 										</td>
