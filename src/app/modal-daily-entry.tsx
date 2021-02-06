@@ -33,6 +33,8 @@ import ReactTags from 'react-tag-autocomplete'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import * as GDrive from './google-oauth'
+import { Star, StarFill, Trash } from 'react-bootstrap-icons'
+
 // FUTURE: `react-bootstrap` added hooks in 1.0.0-beta.6 which breaks the whole app (even with react-16.8)
 // FUTURE: swtich to: https://reactstrap.github.io/components/modals/#app
 
@@ -332,7 +334,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 				<div className='col-2 col-lg-auto'>
 					<label className='text-muted text-uppercase text-sm d-block'>Delete</label>
 					<button type='button' title='Delete Dream' className='btn btn-outline-danger' onClick={(event) => this.handleDeleteDream(dreamIdx, event)}>
-						<div className='iconSvg size16 small circle no cursor-pointer' />
+						<Trash size='16' />
 					</button>
 				</div>
 			</div>
@@ -403,14 +405,15 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 								<div className='col-auto px-0 mb-2'>
 									<label className='text-muted text-uppercase text-sm'>&nbsp;</label>
 									<div
-										className={'d-block iconSvg size32 cursor-pointer ' + (this.state.dailyEntry.starred ? 'star-on' : 'star-off')}
+										className={'d-block cursor-link'}
 										title={this.state.dailyEntry.starred ? 'Un-Star Entry' : 'Star Entry'}
 										onClick={() => {
 											let newState = this.state.dailyEntry
 											newState.starred = this.state.dailyEntry.starred ? false : true
 											this.setState({ dailyEntry: newState })
-										}}
-									/>
+										}}>
+										{this.state.dailyEntry.starred ? <StarFill size='32' className='text-warning' /> : <Star size='32' />}
+									</div>
 								</div>
 								<div className='col-12 col-md-6 mb-2'>
 									<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
