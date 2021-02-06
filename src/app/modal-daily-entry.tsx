@@ -1,38 +1,39 @@
-/*\
-|*|  :: Brain Cloud Dream Journal ::
-|*|
-|*|  Dream Journal App - Record and Search Daily Dream Entries
-|*|  https://github.com/gitbrent/dream-journal-app
-|*|
-|*|  This library is released under the MIT Public License (MIT)
-|*|
-|*|  Dream Journal App (C) 2019-present Brent Ely (https://github.com/gitbrent)
-|*|
-|*|  Permission is hereby granted, free of charge, to any person obtaining a copy
-|*|  of this software and associated documentation files (the "Software"), to deal
-|*|  in the Software without restriction, including without limitation the rights
-|*|  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-|*|  copies of the Software, and to permit persons to whom the Software is
-|*|  furnished to do so, subject to the following conditions:
-|*|
-|*|  The above copyright notice and this permission notice shall be included in all
-|*|  copies or substantial portions of the Software.
-|*|
-|*|  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-|*|  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-|*|  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-|*|  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-|*|  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-|*|  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-|*|  SOFTWARE.
-\*/
+/*
+ *  :: Brain Cloud Dream Journal ::
+ *
+ *  Dream Journal App - Record and Search Daily Dream Entries
+ *  https://github.com/gitbrent/dream-journal-app
+ *
+ *  This library is released under the MIT Public License (MIT)
+ *
+ *  Dream Journal App (C) 2019-present Brent Ely (https://github.com/gitbrent)
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
 import * as React from 'react'
-import { IJournalDream, IJournalEntry, InductionTypes, IDreamSignTag } from '../app.types'
+import { IJournalDream, IJournalEntry, InductionTypes, IDreamSignTag } from './app.types'
 import BootstrapSwitchButton from 'bootstrap-switch-button-react' // '../../../bootstrap-switch-button-react'
 import ReactTags from 'react-tag-autocomplete'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
-// FUTURE: `react-bootstrap` added hooks in 1.0.0-beta.6 which break the whole app (even with react-16.8)
+import * as GDrive from './google-oauth'
+// FUTURE: `react-bootstrap` added hooks in 1.0.0-beta.6 which breaks the whole app (even with react-16.8)
 // FUTURE: swtich to: https://reactstrap.github.io/components/modals/#app
 
 const KeyCodes = {
@@ -63,11 +64,7 @@ const NEW_ENTRY = Object.freeze({
 
 export interface IAppModalProps {
 	dreamSignTags: IDreamSignTag[]
-	doCreateEntry: Function
-	doDeleteEntry: Function
-	doUpdateEntry: Function
 	editEntry?: IJournalEntry
-	isExistingEntryDate: Function
 	onShowModal: Function
 	show?: boolean
 }
@@ -155,7 +152,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 
 		// A: allow edit of Entry Date, but check for dupe date so PK isnt corrupted
 		if (this.props.editEntry && name === 'entryDate' && value !== this.state.origEntryDate) {
-			this.setState({ isDateDupe: this.props.isExistingEntryDate(value) })
+			this.setState({ isDateDupe: GDrive.checkEntryDate(value.toString()) })
 		}
 
 		// B:
@@ -173,7 +170,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 
 		// A: allow edit of Entry Date, but check for dupe date so PK isnt corrupted
 		if (this.props.editEntry && name === 'entryDate' && value !== this.state.origEntryDate) {
-			this.setState({ isDateDupe: this.props.isExistingEntryDate(value) })
+			this.setState({ isDateDupe: GDrive.checkEntryDate(value) })
 		}
 
 		// B:
@@ -242,39 +239,36 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 
 	handleDelete = (event: React.MouseEvent<HTMLInputElement>) => {
 		if (confirm('Delete entry ' + this.state.dailyEntry.entryDate + '?')) {
-			this.props
-				.doDeleteEntry(this.state.dailyEntry.entryDate)
-				.catch((err: any) => {
-					alert('Unable to delete!\n' + err)
-				})
-				.then((res: Boolean) => {
-					if (res === true) this.modalClose()
-				})
+			try {
+				GDrive.doEntryDelete(this.state.dailyEntry.entryDate)
+				GDrive.doSaveFile()
+				this.modalClose()
+			} catch (err) {
+				alert('Unable to delete!\n' + err.toString())
+			}
 		}
 
 		event.preventDefault()
 	}
 	handleSubmit = (event: React.MouseEvent<HTMLButtonElement>) => {
-		let arrPromises = []
+		if (!GDrive.checkEntryDate(this.state.dailyEntry.entryDate)) {
+			alert('Date already exists!')
+			return
+		}
 
-		// 1
 		this.setState({ isBusy: true })
 
 		if (this.props.editEntry) {
-			arrPromises.push(this.props.doUpdateEntry(this.state.dailyEntry, this.state.origEntryDate))
+			GDrive.doEntryEdit(this.state.dailyEntry, this.state.origEntryDate)
 		} else {
-			arrPromises.push(this.props.doCreateEntry(this.state.dailyEntry))
+			GDrive.doEntryAdd(this.state.dailyEntry)
 		}
 
-		Promise.all(arrPromises)
+		GDrive.doSaveFile()
 			.catch((err) => {
-				throw err
+				throw new Error(err)
 			})
-			.then((arrArrays) => {
-				let result = arrArrays && arrArrays[0] ? arrArrays[0] : 'NO RESULTS'
-				if (typeof result === 'boolean' && result === true) this.modalClose()
-				else throw result
-			})
+			.then(() => this.modalClose())
 			.catch((ex) => {
 				// TODO: Show error message somewhere on dialog! (20190324)
 				alert(ex)
