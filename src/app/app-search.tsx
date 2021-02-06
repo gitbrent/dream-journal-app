@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { IDriveFile, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
+import { Search } from 'react-bootstrap-icons'
 import Alert from 'react-bootstrap/Alert'
 import SearchResults from './comp-app/search-results'
 
@@ -75,7 +76,7 @@ export default function TabSearch(props: IAppSearchProps) {
 	function handleEntryEdit(entryDate: string) {
 		props.onShowModal({
 			show: true,
-			editEntry: props.dataFile.entries.filter(entry => entry.entryDate === entryDate)[0],
+			editEntry: props.dataFile.entries.filter((entry) => entry.entryDate === entryDate)[0],
 		})
 	}
 
@@ -98,13 +99,13 @@ export default function TabSearch(props: IAppSearchProps) {
 		else if (searchOptMatchType === SearchMatchTypes.starts) regex = new RegExp('\\b' + searchTerm, 'gi')
 		if (!props.dataFile || props.dataFile.entries.length <= 0) return
 
-		props.dataFile.entries.forEach(entry => {
-			;(entry.dreams || []).forEach(dream => {
+		props.dataFile.entries.forEach((entry) => {
+			;(entry.dreams || []).forEach((dream) => {
 				if (searchOptScope === SearchScopes.all) {
 					if (
 						(dream.notes || '').match(regex) ||
 						(dream.title || '').match(regex) ||
-						(Array.isArray(dream.dreamSigns) && dream.dreamSigns.filter(sign => sign.match(regex)).length > 0)
+						(Array.isArray(dream.dreamSigns) && dream.dreamSigns.filter((sign) => sign.match(regex)).length > 0)
 					) {
 						arrFound.push({
 							entryDate: entry.entryDate,
@@ -121,7 +122,7 @@ export default function TabSearch(props: IAppSearchProps) {
 						})
 					}
 				} else if (searchOptScope === SearchScopes.signs) {
-					if (Array.isArray(dream.dreamSigns) && dream.dreamSigns.filter(sign => sign.match(regex)).length > 0) {
+					if (Array.isArray(dream.dreamSigns) && dream.dreamSigns.filter((sign) => sign.match(regex)).length > 0) {
 						arrFound.push({
 							entryDate: entry.entryDate,
 							starred: entry.starred,
@@ -150,9 +151,9 @@ export default function TabSearch(props: IAppSearchProps) {
 
 		if (type === SearchScopes._starred) {
 			props.dataFile.entries
-				.filter(entry => entry.starred)
-				.forEach(entry => {
-					;(entry.dreams || []).forEach(dream => {
+				.filter((entry) => entry.starred)
+				.forEach((entry) => {
+					;(entry.dreams || []).forEach((dream) => {
 						arrFound.push({
 							entryDate: entry.entryDate,
 							starred: entry.starred,
@@ -161,8 +162,8 @@ export default function TabSearch(props: IAppSearchProps) {
 					})
 				})
 		} else {
-			props.dataFile.entries.forEach(entry => {
-				;(entry.dreams || []).forEach(dream => {
+			props.dataFile.entries.forEach((entry) => {
+				;(entry.dreams || []).forEach((dream) => {
 					if (dream.isLucidDream) {
 						arrFound.push({
 							entryDate: entry.entryDate,
@@ -182,10 +183,10 @@ export default function TabSearch(props: IAppSearchProps) {
 	let totalStarred = 0
 
 	if (props.dataFile && props.dataFile.entries) {
-		props.dataFile.entries.forEach(entry => {
+		props.dataFile.entries.forEach((entry) => {
 			if (entry.starred) totalStarred++
 			totalDreams += entry.dreams.length
-			totalLucids += entry.dreams.filter(dream => dream.isLucidDream).length
+			totalLucids += entry.dreams.filter((dream) => dream.isLucidDream).length
 		})
 	}
 
@@ -267,9 +268,9 @@ export default function TabSearch(props: IAppSearchProps) {
 								<h5 className='card-title text-white mb-0'>Keyword Search</h5>
 							</div>
 							<div className='card-body bg-light p-4'>
-								<div className='row align-items-end'>
+								<div className='row align-items-center'>
 									<div className='col-auto d-none d-md-block'>
-										<div className='iconSvg size48 search' />
+										<Search size={48} className='text-secondary' />
 									</div>
 									<div className='col'>
 										<label className='text-uppercase text-muted'>Keyword or Phrase</label>
@@ -277,8 +278,8 @@ export default function TabSearch(props: IAppSearchProps) {
 											type='text'
 											value={searchTerm}
 											className='form-control'
-											onKeyPress={event => (event.key === 'Enter' ? doKeywordSearch() : null)}
-											onChange={event => {
+											onKeyPress={(event) => (event.key === 'Enter' ? doKeywordSearch() : null)}
+											onChange={(event) => {
 												setSearchTerm(event.target.value)
 												if (!event.target.value) setSearchMatches([])
 											}}
@@ -287,8 +288,8 @@ export default function TabSearch(props: IAppSearchProps) {
 										<div className={searchTermInvalidMsg ? 'invalid-feedback d-block' : 'invalid-feedback'}>{searchTermInvalidMsg}</div>
 									</div>
 									<div className='w-100 mb-3 d-md-none' />
-									<div className='col-12 col-md-auto'>
-										<button type='button' className='btn btn-outline-primary w-100' onClick={doKeywordSearch} disabled={!props.dataFile ? true : false}>
+									<div className='col-12 col-md-auto pt-4'>
+										<button type='button' className='btn btn-outline-dark w-100' onClick={doKeywordSearch} disabled={!props.dataFile ? true : false}>
 											Search
 										</button>
 									</div>
@@ -307,8 +308,8 @@ export default function TabSearch(props: IAppSearchProps) {
 										<label className='text-uppercase text-muted'>Fields</label>
 										<select className='form-control' defaultValue={searchOptScope} onChange={handleScopeChange}>
 											{Object.keys(SearchScopes)
-												.filter(key => key.indexOf('_') === -1)
-												.map(val => (
+												.filter((key) => key.indexOf('_') === -1)
+												.map((val) => (
 													<option value={SearchScopes[val]} key={'enum' + val}>
 														{SearchScopes[val]}
 													</option>
@@ -318,7 +319,7 @@ export default function TabSearch(props: IAppSearchProps) {
 									<div className='col-12 col-md-6'>
 										<label className='text-uppercase text-muted'>Type</label>
 										<select className='form-control' defaultValue={searchOptMatchType} onChange={handleTypeChange}>
-											{Object.keys(SearchMatchTypes).map(val => (
+											{Object.keys(SearchMatchTypes).map((val) => (
 												<option value={SearchMatchTypes[val]} key={'enum' + val}>
 													{SearchMatchTypes[val]}
 												</option>
