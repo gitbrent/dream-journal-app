@@ -21,19 +21,66 @@ export interface IAppSearchState {
 
 export default function TabSearch(props: IAppSearchProps) {
 	let localShowAlert = JSON.parse(localStorage.getItem('show-alert-search'))
-
+	const [showAlert, setShowAlert] = useState(typeof localShowAlert === 'boolean' ? localShowAlert : true)
+	const [totalDreams, setTotalDreams] = useState(0)
+	const [totalLucids, setTotalLucids] = useState(0)
+	const [totalStarred, setTotalStarred] = useState(0)
+	const [totalMonths, setTotalMonths] = useState(0)
+	const [totalYears, setTotalYears] = useState(0)
 	const [searchMatches, setSearchMatches] = useState(props.searchState && props.searchState['searchMatches'] ? props.searchState['searchMatches'] : [])
-	const [searchOptMatchType, setSearchOptMatchType] = useState(
-		props.searchState && props.searchState['searchOptMatchType'] ? props.searchState['searchOptMatchType'] : SearchMatchTypes.whole
-	)
 	const [searchOptScope, setSearchOptScope] = useState(props.searchState && props.searchState['searchOptScope'] ? props.searchState['searchOptScope'] : SearchScopes.all)
 	const [searchTerm, setSearchTerm] = useState(props.searchState && props.searchState['searchTerm'] ? props.searchState['searchTerm'] : '')
 	const [searchTermInvalidMsg, setSearchTermInvalidMsg] = useState(
 		props.searchState && props.searchState['searchTermInvalidMsg'] ? props.searchState['searchTermInvalidMsg'] : ''
 	)
-	const [showAlert, setShowAlert] = useState(typeof localShowAlert === 'boolean' ? localShowAlert : true)
+	const [searchOptMatchType, setSearchOptMatchType] = useState(
+		props.searchState && props.searchState['searchOptMatchType'] ? props.searchState['searchOptMatchType'] : SearchMatchTypes.whole
+	)
 
-	// Push state up whenever it changes
+	/** Gather all metrics */
+	useEffect(() => {
+		if (props.dataFile && props.dataFile.entries) {
+			// Total: dreams, stars, lucids
+			{
+				let tmpTotalStarred = 0
+				let tmpTotalDreams = 0
+				let tmpTotalLucids = 0
+
+				props.dataFile.entries.forEach((entry) => {
+					if (entry.starred) tmpTotalStarred++
+					tmpTotalDreams += entry.dreams.length
+					tmpTotalLucids += entry.dreams.filter((dream) => dream.isLucidDream).length
+				})
+
+				setTotalStarred(tmpTotalStarred)
+				setTotalDreams(tmpTotalDreams)
+				setTotalLucids(tmpTotalLucids)
+			}
+
+			// Total Months
+			{
+				let d1 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
+				let d2 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
+				let months: number
+				months = (d2.getFullYear() - d1.getFullYear()) * 12
+				months -= d1.getMonth() + 1
+				months += d2.getMonth()
+				months += 2 // include both first and last months
+
+				setTotalMonths(months <= 0 ? 0 : months)
+			}
+
+			// Total Years
+			{
+				let d1 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
+				let d2 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
+
+				setTotalYears(d2.getFullYear() - d1.getFullYear() + 1)
+			}
+		}
+	}, [props.dataFile])
+
+	/** Push state up whenever it changes */
 	useEffect(() => {
 		props.doSaveSearchState({
 			searchMatches: searchMatches,
@@ -45,32 +92,11 @@ export default function TabSearch(props: IAppSearchProps) {
 		})
 	}, [searchMatches, searchOptMatchType, searchOptScope, searchTerm, searchTermInvalidMsg, showAlert])
 
+	// ------------------------------------------------------------------------
+
 	function handleHideAlert() {
 		localStorage.setItem('show-alert-search', 'false')
 		setShowAlert(false)
-	}
-
-	function getTotalMonths(): number {
-		if (!props.dataFile || (props.dataFile.entries || []).length === 0) return 0
-
-		let d1 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
-		let d2 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
-
-		let months: number
-		months = (d2.getFullYear() - d1.getFullYear()) * 12
-		months -= d1.getMonth() + 1
-		months += d2.getMonth()
-		months += 2 // include both first and last months
-
-		return months <= 0 ? 0 : months
-	}
-	function getYearSpan(): number {
-		if (!props.dataFile || (props.dataFile.entries || []).length === 0) return 0
-
-		let d1 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
-		let d2 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
-
-		return d2.getFullYear() - d1.getFullYear() + 1
 	}
 
 	function handleEntryEdit(entryDate: string) {
@@ -85,12 +111,15 @@ export default function TabSearch(props: IAppSearchProps) {
 		else if (event.target.value === SearchMatchTypes.starts) setSearchOptMatchType(SearchMatchTypes.starts)
 		else if (event.target.value === SearchMatchTypes.whole) setSearchOptMatchType(SearchMatchTypes.whole)
 	}
+
 	function handleScopeChange(event: React.ChangeEvent<HTMLSelectElement>) {
 		if (event.target.value === SearchScopes.all) setSearchOptScope(SearchScopes.all)
 		else if (event.target.value === SearchScopes.notes) setSearchOptScope(SearchScopes.notes)
 		else if (event.target.value === SearchScopes.signs) setSearchOptScope(SearchScopes.signs)
 		else if (event.target.value === SearchScopes.title) setSearchOptScope(SearchScopes.title)
 	}
+
+	// ------------------------------------------------------------------------
 
 	function doKeywordSearch() {
 		let arrFound = []
@@ -178,18 +207,6 @@ export default function TabSearch(props: IAppSearchProps) {
 		setSearchMatches(arrFound)
 	}
 
-	let totalDreams = 0
-	let totalLucids = 0
-	let totalStarred = 0
-
-	if (props.dataFile && props.dataFile.entries) {
-		props.dataFile.entries.forEach((entry) => {
-			if (entry.starred) totalStarred++
-			totalDreams += entry.dreams.length
-			totalLucids += entry.dreams.filter((dream) => dream.isLucidDream).length
-		})
-	}
-
 	return (
 		<div>
 			<header className='container my-5'>
@@ -218,16 +235,16 @@ export default function TabSearch(props: IAppSearchProps) {
 					<div className='card-body bg-light'>
 						<div className='row align-items-start justify-content-around'>
 							<div className='col-auto text-center d-none d-md-block'>
-								<h1 className='text-primary mb-1 x3'>{getTotalMonths() || '-'}</h1>
+								<h1 className='text-primary mb-1 x3'>{totalMonths || '-'}</h1>
 								<label className='text-primary text-uppercase'>Months</label>
-								<div className='badge badge-pill badge-primary w-100'>{getYearSpan() + ' years'}</div>
+								<div className='badge badge-pill badge-primary w-100'>{totalYears + ' years'}</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-primary mb-1 x3'>{props.dataFile && props.dataFile.entries ? props.dataFile.entries.length : '-'}</h1>
 								<label className='text-primary text-uppercase'>Days</label>
 								<div className='badge badge-pill badge-primary w-100'>
-									{getTotalMonths() * 30 > 0 && props.dataFile && props.dataFile.entries
-										? (props.dataFile.entries.length / getTotalMonths()).toFixed(2) + ' / mon'
+									{totalMonths * 30 > 0 && props.dataFile && props.dataFile.entries
+										? (props.dataFile.entries.length / totalMonths).toFixed(2) + ' / mon'
 										: '-'}
 								</div>
 							</div>
@@ -235,7 +252,7 @@ export default function TabSearch(props: IAppSearchProps) {
 								<h1 className='text-info mb-1 x3'>{totalDreams || '-'}</h1>
 								<label className='text-info text-uppercase d-block'>Dreams</label>
 								<div className='badge badge-pill badge-info w-100'>
-									{getTotalMonths() * 30 > 0 && props.dataFile && props.dataFile.entries
+									{totalMonths * 30 > 0 && props.dataFile && props.dataFile.entries
 										? (totalDreams / props.dataFile.entries.length).toFixed(2) + ' / day'
 										: '-'}
 								</div>
