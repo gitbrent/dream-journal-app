@@ -278,18 +278,27 @@ export default function TabSearch(props: IAppSearchProps) {
 			</header>
 
 			<section className='container my-5'>
-				<div className='row'>
-					<div className='col-12 col-lg-8'>
-						<div className='card mb-5 mb-lg-0'>
-							<div className='card-header bg-info'>
-								<h5 className='card-title text-white mb-0'>Keyword Search</h5>
+				<div className='card'>
+					<div className='card-header bg-info text-white'>
+						<div className='row'>
+							<div className='col'>
+								<h5 className='mb-0'>Keyword Search</h5>
 							</div>
-							<div className='card-body bg-light p-4'>
-								<div className='row align-items-center'>
-									<div className='col-auto d-none d-md-block'>
+							<div className='col-auto'>
+								<h5 className='mb-0'>
+									{searchMatches.length} Dreams ({((searchMatches.length / totalDreams) * 100).toFixed(1)}%)
+								</h5>
+							</div>
+						</div>
+					</div>
+					<div className='card-body bg-light border-bottom border-secondary' data-desc='commandbar'>
+						<div className='row align-items-center'>
+							<div className='col-6 col-md-8'>
+								<div className='row align-items-center no-gutters'>
+									<div className='col-auto d-none d-md-block pr-3'>
 										<Search size={48} className='text-secondary' />
 									</div>
-									<div className='col'>
+									<div className='col pr-2'>
 										<label className='text-uppercase text-muted'>Keyword or Phrase</label>
 										<input
 											type='text'
@@ -304,66 +313,59 @@ export default function TabSearch(props: IAppSearchProps) {
 										/>
 										<div className={searchTermInvalidMsg ? 'invalid-feedback d-block' : 'invalid-feedback'}>{searchTermInvalidMsg}</div>
 									</div>
-									<div className='w-100 mb-3 d-md-none' />
-									<div className='col-12 col-md-auto pt-4'>
+									<div className='col-auto'>
+										<label className='text-uppercase text-muted'>&nbsp;</label>
 										<button type='button' className='btn btn-outline-dark w-100' onClick={doKeywordSearch} disabled={!props.dataFile ? true : false}>
 											Search
 										</button>
 									</div>
 								</div>
 							</div>
+							<div className='col-3 col-md-2'>
+								<label className='text-uppercase text-muted'>Fields</label>
+								<select className='form-control' defaultValue={searchOptScope} onChange={handleScopeChange}>
+									{Object.keys(SearchScopes)
+										.filter((key) => key.indexOf('_') === -1)
+										.map((val) => (
+											<option value={SearchScopes[val]} key={'enum' + val}>
+												{SearchScopes[val]}
+											</option>
+										))}
+								</select>
+							</div>
+							<div className='col-3 col-md-2'>
+								<label className='text-uppercase text-muted'>Type</label>
+								<select className='form-control' defaultValue={searchOptMatchType} onChange={handleTypeChange}>
+									{Object.keys(SearchMatchTypes).map((val) => (
+										<option value={SearchMatchTypes[val]} key={'enum' + val}>
+											{SearchMatchTypes[val]}
+										</option>
+									))}
+								</select>
+							</div>
 						</div>
 					</div>
-					<div className='col-12 col-lg-4'>
-						<div className='card'>
-							<div className='card-header bg-secondary'>
-								<h5 className='card-title text-white mb-0'>Search Options</h5>
-							</div>
-							<div className='card-body bg-light p-4'>
-								<div className='row align-items-center'>
-									<div className='col-12 col-md-6'>
-										<label className='text-uppercase text-muted'>Fields</label>
-										<select className='form-control' defaultValue={searchOptScope} onChange={handleScopeChange}>
-											{Object.keys(SearchScopes)
-												.filter((key) => key.indexOf('_') === -1)
-												.map((val) => (
-													<option value={SearchScopes[val]} key={'enum' + val}>
-														{SearchScopes[val]}
-													</option>
-												))}
-										</select>
-									</div>
-									<div className='col-12 col-md-6'>
-										<label className='text-uppercase text-muted'>Type</label>
-										<select className='form-control' defaultValue={searchOptMatchType} onChange={handleTypeChange}>
-											{Object.keys(SearchMatchTypes).map((val) => (
-												<option value={SearchMatchTypes[val]} key={'enum' + val}>
-													{SearchMatchTypes[val]}
-												</option>
-											))}
-										</select>
-									</div>
+					<div className='card-body' data-desc='tag cards'>
+						<div className='card-columns'>
+							{searchMatches ? (
+								searchMatches.map((match) => (
+									<SearchResults
+										handleEntryEdit={handleEntryEdit}
+										searchMatch={match}
+										searchTerm={searchTerm}
+										searchOptScope={searchOptScope}
+										searchOptMatchType={searchOptMatchType}
+									/>
+								))
+							) : (
+								<div className='container'>
+									<h4 className='bg-light text-center text-muted mb-0 py-5'>(enter a keyword above to search)</h4>
 								</div>
-							</div>
+							)}
 						</div>
 					</div>
 				</div>
 			</section>
-
-			{searchTerm ? (
-				<SearchResults
-					handleEntryEdit={handleEntryEdit}
-					searchMatches={searchMatches}
-					searchOptScope={searchOptScope}
-					searchOptMatchType={searchOptMatchType}
-					searchTerm={searchTerm}
-					totalDreams={totalDreams}
-				/>
-			) : (
-				<div className='container'>
-					<h4 className='bg-light text-center text-muted mb-0 py-5'>(enter a keyword above to search)</h4>
-				</div>
-			)}
 		</div>
 	)
 }
