@@ -244,18 +244,14 @@ export function doSaveFile(): Promise<any> {
 						resolve(true)
 					})
 					.catch((error) => {
-						if (error.code === '401') {
-							doAuthSignIn()
-						} else {
-							// TODO: Show message onscreen
-							console.error ? console.error(error) : console.log(error)
-						}
+						throw new Error(error)
 					})
 			})
 			.catch((error) => {
 				if (error.code === '401') {
 					doAuthSignIn()
 				} else {
+					console.error ? console.error(error) : console.log(error)
 					reject(error)
 				}
 			})
