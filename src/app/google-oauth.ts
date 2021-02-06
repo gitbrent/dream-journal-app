@@ -67,7 +67,7 @@ export function doAuthUpdate() {
 						gAuthCallback(gAuthState)
 
 						// C: Go ahead and load data file since we need it
-						driveGetFileList()
+						doGetDataFile()
 					}
 				})
 				.catch((error) => {
@@ -147,7 +147,9 @@ export function doAuthSignOut() {
 		})
 }
 
-/** Does this entry date already exist in the datafile */
+/**
+ * Does this entry date already exist in the datafile
+ */
 export function checkEntryDate(checkDate: string): boolean {
 	return gDataFile.entries.filter((item) => item.entryDate === checkDate).length > 0 ? true : false
 }
@@ -238,7 +240,7 @@ export function doSaveFile(): Promise<any> {
 					.json()
 					.then((_fileResource) => {
 						// A: refresh file list (to update "size", "modified")
-						driveGetFileList()
+						doGetDataFile()
 
 						// Done
 						resolve(true)
@@ -252,7 +254,7 @@ export function doSaveFile(): Promise<any> {
 					doAuthSignIn()
 				} else {
 					console.error ? console.error(error) : console.log(error)
-					reject(error)
+					reject(error.message || 'UNABLE TO SAVE')
 				}
 			})
 	})
@@ -260,7 +262,7 @@ export function doSaveFile(): Promise<any> {
 
 // INTERNAL METHODS ----------------------------------------------------------
 
-function driveGetFileList() {
+function doGetDataFile() {
 	let params = JSON.parse(localStorage.getItem('oauth2-params'))
 	if (!params || !params['access_token']) {
 		doAuthSignIn()
@@ -296,11 +298,7 @@ function driveGetFileList() {
 					gDataFile ? doSelectFile() : doCreateFile()
 				})
 				.catch((error) => {
-					if (error.code === '401') {
-						doAuthSignIn()
-					} else {
-						console.error ? console.error(error) : console.log(error)
-					}
+					throw new Error(error)
 				})
 		})
 		.catch((error) => {
@@ -342,7 +340,7 @@ function doCreateFile() {
 			response
 				.json()
 				.then((_json) => {
-					driveGetFileList()
+					doGetDataFile()
 				})
 				.catch((error) => {
 					throw new Error(error)
@@ -356,6 +354,7 @@ function doCreateFile() {
 			}
 		})
 }
+
 /**
  * @see: https://developers.google.com/drive/api/v3/manage-downloads
  */
