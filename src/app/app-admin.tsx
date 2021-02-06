@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDriveFile, IJournalEntry } from './app.types'
-import DreamSignTag from './comp-app/dreamsign-tag'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
+import DreamSignTag from './comp-app/dreamsign-tag'
+import * as GDrive from './google-oauth'
 
 export interface IAppAdminProps {
 	dataFile: IDriveFile
@@ -125,6 +126,23 @@ export default function TabAdmin(props: IAppAdminProps) {
 		}
 	}, [props.dataFile])
 
+	// -----------------------------------------------------------------------
+
+	function doMassUpdateBedtime() {
+		badBedTimes.forEach((entry) => {
+			entry.bedTime = '00:00'
+			GDrive.doEntryEdit(entry, entry.entryDate)
+		})
+
+		GDrive.doSaveFile()
+			.then(() => {
+				alert(`Updated ${badBedTimes.length} items`)
+			})
+			.catch((err) => alert(err))
+	}
+
+	// -----------------------------------------------------------------------
+
 	function renderHeader(): JSX.Element {
 		return (
 			<header className='my-5'>
@@ -190,88 +208,70 @@ export default function TabAdmin(props: IAppAdminProps) {
 
 	function renderTagGroups(): JSX.Element {
 		return (
-			<div className='card'>
-				<div className='card-header bg-secondary text-white'>
-					<div className='row'>
-						<div className='col'>
-							<h5 className='mb-0'>Search DreamSigns/Tags</h5>
-						</div>
-						<div className='col-auto'>
-							<h5 className='mb-0'>{dreamTagGroups.length}</h5>
-						</div>
+			<section>
+				<div className='row mb-3'>
+					<div className='col'>
+						<h5 className='text-primary'>Search DreamSigns/Tags</h5>
+					</div>
+					<div className='col-auto'>
+						<h5 className='text-primary'>Unique Tags: {dreamTagGroups.length}</h5>
 					</div>
 				</div>
-				<div className='card-body bg-light border-bottom border-secondary' data-desc='commandbar'>
-					<div className='row align-items-center'>
-						<div className='col-auto d-none d-md-block'>
-							<Search size={48} className='text-secondary' />
-						</div>
-						<div className='col-12 col-md mb-3 mb-md-0'>
-							<label className='text-uppercase text-muted'>DreamSign/Tag</label>
-							<input
-								type='text'
-								value={searchTerm}
-								className='form-control'
-								onChange={(event) => setSearchTerm(event.target.value)}
-								disabled={!props.dataFile ? true : false}
-							/>
-						</div>
-						<div className='col-auto'>
-							<label className='text-uppercase text-muted'>Tag Size</label>
-							<select
-								defaultValue={filterViewType}
-								onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
-								className='form-control'>
-								{Object.keys(CardDreamSignGrpViewType).map((val) => (
-									<option value={CardDreamSignGrpViewType[val]} key={'viewType' + val}>
-										{CardDreamSignGrpViewType[val]}
-									</option>
-								))}
-							</select>
-						</div>
-						<div className='col-auto'>
-							<label className='text-uppercase text-muted'>Sort Order</label>
-							<select defaultValue={filterSortOrder} onChange={(ev) => setFilterSortOrder(ev.currentTarget.value as FilterSortOrder)} className='form-control'>
-								{Object.keys(FilterSortOrder).map((val) => (
-									<option value={FilterSortOrder[val]} key={'sortOrder' + val}>
-										{FilterSortOrder[val]}
-									</option>
-								))}
-							</select>
-						</div>
+
+				<div className='row align-items-center border-top border-secondary py-3 mb-3' data-desc='commandbar'>
+					<div className='col-auto d-none d-md-block'>
+						<Search size={48} className='text-secondary' />
 					</div>
-				</div>
-				<div className='card-body bg-light' data-desc='tag cards'>
-					<div className='card-deck'>
-						{dreamTagGroups
-							.filter(
-								(tagGrp) => !searchTerm || tagGrp.dreamSign.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || searchTerm.indexOf(tagGrp.dreamSign) > -1
-							)
-							.sort((a, b) => {
-								if (filterSortOrder === FilterSortOrder.title) return a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
-								else if (filterSortOrder === FilterSortOrder.highlow)
-									return a.totalOccurs > b.totalOccurs
-										? -1
-										: a.totalOccurs < b.totalOccurs
-										? 1
-										: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
-										? -1
-										: 1
-								else if (filterSortOrder === FilterSortOrder.lowhigh)
-									return a.totalOccurs < b.totalOccurs
-										? -1
-										: a.totalOccurs > b.totalOccurs
-										? 1
-										: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
-										? -1
-										: 1
-							})
-							.map((tagGrp) => (
-								<DreamSignTag tagGrp={tagGrp} onShowModal={props.onShowModal} viewType={filterViewType} />
+					<div className='col-12 col-md mb-3 mb-md-0'>
+						<label className='text-uppercase text-muted'>DreamSign/Tag</label>
+						<input
+							type='text'
+							value={searchTerm}
+							className='form-control'
+							onChange={(event) => setSearchTerm(event.target.value)}
+							disabled={!props.dataFile ? true : false}
+						/>
+					</div>
+					<div className='col-auto'>
+						<label className='text-uppercase text-muted'>Tag Size</label>
+						<select
+							defaultValue={filterViewType}
+							onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
+							className='form-control'>
+							{Object.keys(CardDreamSignGrpViewType).map((val) => (
+								<option value={CardDreamSignGrpViewType[val]} key={'viewType' + val}>
+									{CardDreamSignGrpViewType[val]}
+								</option>
 							))}
+						</select>
+					</div>
+					<div className='col-auto'>
+						<label className='text-uppercase text-muted'>Sort Order</label>
+						<select defaultValue={filterSortOrder} onChange={(ev) => setFilterSortOrder(ev.currentTarget.value as FilterSortOrder)} className='form-control'>
+							{Object.keys(FilterSortOrder).map((val) => (
+								<option value={FilterSortOrder[val]} key={'sortOrder' + val}>
+									{FilterSortOrder[val]}
+								</option>
+							))}
+						</select>
 					</div>
 				</div>
-			</div>
+
+				<div className='card-deck'>
+					{dreamTagGroups
+						.filter((tagGrp) => !searchTerm || tagGrp.dreamSign.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || searchTerm.indexOf(tagGrp.dreamSign) > -1)
+						.sort((a, b) => {
+							if (filterSortOrder === FilterSortOrder.title) return a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
+							else if (filterSortOrder === FilterSortOrder.highlow)
+								return a.totalOccurs > b.totalOccurs ? -1 : a.totalOccurs < b.totalOccurs ? 1 : a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
+							else if (filterSortOrder === FilterSortOrder.lowhigh)
+								return a.totalOccurs < b.totalOccurs ? -1 : a.totalOccurs > b.totalOccurs ? 1 : a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
+						})
+						.map((tagGrp) => (
+							<DreamSignTag tagGrp={tagGrp} onShowModal={props.onShowModal} viewType={filterViewType} />
+						))}
+				</div>
+			</section>
 		)
 	}
 
@@ -310,6 +310,12 @@ export default function TabAdmin(props: IAppAdminProps) {
 							No results
 						</div>
 					)}
+				</div>
+
+				<div className='mt-4 text-center'>
+					<button className='btn btn-danger' onClick={() => doMassUpdateBedtime()}>
+						Mass Update All
+					</button>
 				</div>
 			</section>
 		)
