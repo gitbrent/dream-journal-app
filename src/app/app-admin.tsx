@@ -165,13 +165,20 @@ export default function TabAdmin(props: IAppAdminProps) {
 		)
 	}
 
-	function renderFilters(): JSX.Element {
+	function renderDreamSignTags(): JSX.Element {
 		return (
 			<div className='card my-5'>
-				<div className='card-header bg-secondary'>
-					<h5 className='card-title text-white mb-0'>Search Options</h5>
+				<div className='card-header bg-secondary text-white'>
+					<div className='row'>
+						<div className='col'>
+							<h5 className='mb-0'>Search DreamSigns/Tags</h5>
+						</div>
+						<div className='col-auto'>
+							<h5 className='mb-0'>{dreamTagGroups.length}</h5>
+						</div>
+					</div>
 				</div>
-				<div className='card-body bg-light p-4'>
+				<div className='card-body bg-light border-bottom border-secondary' data-desc="commandbar">
 					<div className='row align-items-center'>
 						<div className='col-auto d-none d-md-block'>
 							<Search size={48} className='text-secondary' />
@@ -211,24 +218,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 						</div>
 					</div>
 				</div>
-			</div>
-		)
-	}
-
-	function renderDreamSignTags(): JSX.Element {
-		return (
-			<div className='card my-5'>
-				<div className='card-header bg-primary text-white'>
-					<div className='row'>
-						<div className='col'>
-							<h5 className='mb-0'>Dream Signs/Tags</h5>
-						</div>
-						<div className='col-auto'>
-							<h5 className='mb-0'>{dreamTagGroups.length}</h5>
-						</div>
-					</div>
-				</div>
-				<div className='card-body bg-light'>
+				<div className='card-body bg-light' data-desc="tag cards">
 					<div className='card-deck'>
 						{dreamTagGroups
 							.filter(
@@ -284,7 +274,6 @@ export default function TabAdmin(props: IAppAdminProps) {
 		return (
 			<main className='container'>
 				{renderHeader()}
-				{renderFilters()}
 				{renderDreamSignTags()}
 				{renderDupeTags()}
 			</main>
