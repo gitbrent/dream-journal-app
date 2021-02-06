@@ -15,7 +15,7 @@
 	background-color: var(--indigo) !important;
 }
 .bg-info-800 {
-	background-color: #6A1B9A !important;
+	background-color: #6a1b9a !important;
 }
 
 .cursor-help {
@@ -40,3 +40,9 @@
   border-radius: .3rem;
 }
 */
+
+/* react-tag-autocomplete with Cyborg.css */
+.react-tags__selected-tag,
+.react-tags__search-input {
+	background-color: #555 !important;
+}

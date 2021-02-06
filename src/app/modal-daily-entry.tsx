@@ -339,27 +339,29 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 			<div className='row mb-3'>
 				<div className='col-12 col-lg mb-3 mb-lg-0'>
 					<label className='text-muted text-uppercase text-sm d-block'>DreamSign Tags</label>
-					<ReactTags
-						allowNew={true}
-						allowBackspace={false}
-						minQueryLength={1}
-						tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign.toLowerCase() }))}
-						suggestions={this.props.dreamSignTags}
-						onDelete={(idx: number) => {
-							let newState = this.state.dailyEntry
-							newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
-							this.setState({ dailyEntry: newState })
-						}}
-						onAddition={(tag: IDreamSignTag) => {
-							let newState = this.state.dailyEntry
-							// Dont allow dupes
-							if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase().trim())
-							this.setState({ dailyEntry: newState })
-						}}
-						addOnBlur={true}
-						delimiters={delimiters}
-						className='form-control'
-					/>
+					<div className='bg-white'>
+						<ReactTags
+							allowNew={true}
+							allowBackspace={false}
+							minQueryLength={1}
+							tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign.toLowerCase() }))}
+							suggestions={this.props.dreamSignTags}
+							onDelete={(idx: number) => {
+								let newState = this.state.dailyEntry
+								newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
+								this.setState({ dailyEntry: newState })
+							}}
+							onAddition={(tag: IDreamSignTag) => {
+								let newState = this.state.dailyEntry
+								// Dont allow dupes
+								if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1)
+									newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase().trim())
+								this.setState({ dailyEntry: newState })
+							}}
+							addOnBlur={true}
+							delimiters={delimiters}
+						/>
+					</div>
 				</div>
 			</div>
 			<div className='row'>
