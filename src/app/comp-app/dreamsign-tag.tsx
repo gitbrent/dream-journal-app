@@ -21,7 +21,7 @@ export default function DreamSignTag(props: IDreamSignTagProps) {
 			className='card m-3'
 			key={`cardTag${props.tagGrp.dreamSign}`}
 			style={{ minWidth: props.viewType === CardDreamSignGrpViewType.lg ? (!showEditBtns ? '200px' : '600px') : !showEditBtns ? '125px' : '400px' }}>
-			<div className={`card-header bg-info-800 text-white ${props.viewType === CardDreamSignGrpViewType.md ? 'h-100' : ''}`}>
+			<div className={`card-header bg-info-800 text-white`}>
 				<div className={`row align-tiems-center mb-0 ${props.viewType === CardDreamSignGrpViewType.lg ? 'h5' : 'h6'}`}>
 					<div className='col text-breakword pr-0'>{props.tagGrp.dreamSign}</div>
 					<div className='col-auto text-white-50 pl-1'>{props.tagGrp.totalOccurs}</div>
