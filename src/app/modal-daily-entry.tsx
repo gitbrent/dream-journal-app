@@ -386,8 +386,8 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 
 					<Modal.Body className='bg-light p-4'>
 						<div className='container px-0'>
-							<div className='row mb-4'>
-								<div className='col-6 mb-2 required'>
+							<div className='row mb-2'>
+								<div className='col-6 required'>
 									<label className='text-muted text-uppercase text-sm'>Entry Date</label>
 									<input
 										name='entryDate'
@@ -399,11 +399,11 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 									/>
 									<div className='invalid-feedback'>Entry Date already exists in Dream Journal!</div>
 								</div>
-								<div className='col mb-2'>
+								<div className='col pr-0'>
 									<label className='text-muted text-uppercase text-sm'>Bed Time</label>
 									<input name='bedTime' type='time' value={this.state.dailyEntry.bedTime} onChange={this.handleInputChange} className='form-control w-100' />
 								</div>
-								<div className='col-auto px-0 mb-2'>
+								<div className='col-auto'>
 									<label className='text-muted text-uppercase text-sm'>&nbsp;</label>
 									<div
 										className={'d-block cursor-link'}
@@ -416,6 +416,8 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 										{this.state.dailyEntry.starred ? <StarFill size='32' className='text-warning' /> : <Star size='32' />}
 									</div>
 								</div>
+							</div>
+							<div className='row mb-4'>
 								<div className='col-12 col-md-6 mb-2'>
 									<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
 									<textarea
