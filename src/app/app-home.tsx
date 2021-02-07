@@ -182,10 +182,10 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 								<img src={LogoBase64} width='150' height='150' className='mr-4' alt='Logo' />
 								Brain Cloud - Dream Journal
 							</h1>
-							<h1 className='text-primary mb-0 d-none d-md-none d-lg-block d-xl-none'>
+							<h3 className='text-primary mb-0 d-none d-md-none d-lg-block d-xl-none'>
 								<img src={LogoBase64} width='75' height='75' className='mr-4' alt='Logo' />
 								Brain Cloud - Dream Journal
-							</h1>
+							</h3>
 							<h1 className='text-primary mb-0 d-none d-md-block d-lg-none'>Brain Cloud - Dream Journal</h1>
 							<h1 className='text-primary mb-0 d-block d-md-none'>Brain Cloud</h1>
 						</div>
@@ -194,7 +194,8 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 								Create
 								<br />
 								Entry
-								<Plus size='64' className='d-none d-md-none d-xl-block' />
+								<Plus size='64' className='d-none  d-md-none d-lg-block' />
+								<Plus size='32' className='d-block d-lg-none' />
 							</button>
 						</div>
 					</div>
