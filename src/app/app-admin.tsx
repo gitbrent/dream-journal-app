@@ -128,6 +128,29 @@ export default function TabAdmin(props: IAppAdminProps) {
 
 	// -----------------------------------------------------------------------
 
+	function doMassUpdateTag(oldName: string, newName: string) {
+		let numUpdated = 0
+
+		props.dataFile.entries.forEach((entry) => {
+			let entryCopy = JSON.parse(JSON.stringify(entry)) as IJournalEntry
+			entryCopy.dreams.forEach((dream) =>
+				dream.dreamSigns.forEach((sign, idx, arr) => {
+					if (sign === oldName) {
+						arr[idx] = newName.toLowerCase().trim()
+						GDrive.doEntryEdit(entryCopy)
+						numUpdated++
+					}
+				})
+			)
+		})
+
+		GDrive.doSaveFile()
+			.then(() => {
+				alert(`Updated ${numUpdated} dreams`)
+			})
+			.catch((err) => alert(err))
+	}
+
 	function doMassUpdateBedtime() {
 		badBedTimes.forEach((entry) => {
 			entry.bedTime = '00:00'
@@ -233,7 +256,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 						/>
 					</div>
 					<div className='col-auto'>
-						<label className='text-uppercase text-muted'>Tag Size</label>
+						<label className='text-uppercase text-muted'>Display</label>
 						<select
 							defaultValue={filterViewType}
 							onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
@@ -268,7 +291,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 								return a.totalOccurs < b.totalOccurs ? -1 : a.totalOccurs > b.totalOccurs ? 1 : a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
 						})
 						.map((tagGrp) => (
-							<DreamSignTag tagGrp={tagGrp} onShowModal={props.onShowModal} viewType={filterViewType} />
+							<DreamSignTag tagGrp={tagGrp} onShowModal={props.onShowModal} viewType={filterViewType} doMassUpdateTag={doMassUpdateTag} />
 						))}
 				</div>
 			</section>
@@ -313,7 +336,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 				</div>
 
 				<div className='mt-4 text-center'>
-					<button className='btn btn-danger' onClick={() => doMassUpdateBedtime()}>
+					<button className='btn btn-danger' onClick={() => doMassUpdateBedtime()} disabled={badBedTimes.length === 0}>
 						Mass Update All
 					</button>
 				</div>
@@ -324,7 +347,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<div />
 	) : (
-		<main className='container'>
+		<main className='container mb-5'>
 			{renderHeader()}
 
 			<ul className='nav nav-tabs nav-fill' id='adminTab' role='tablist'>

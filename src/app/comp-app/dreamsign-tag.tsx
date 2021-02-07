@@ -6,13 +6,13 @@ export interface IDreamSignTagProps {
 	tagGrp: IDreamSignTagGroup
 	onShowModal: Function
 	viewType: CardDreamSignGrpViewType
-}
-export interface IDreamSignTagState {
-	showEditBtns: boolean
+	doMassUpdateTag: Function
 }
 
 export default function DreamSignTag(props: IDreamSignTagProps) {
-	const [showEditBtns, setShowEditBtns] = useState(false)
+	const [showDreams, setShowDreams] = useState(false)
+	const [showRename, setShowRename] = useState(false)
+	const [renameValue, setRenameValue] = useState('')
 
 	return !props || !props.tagGrp ? (
 		<div />
@@ -20,16 +20,16 @@ export default function DreamSignTag(props: IDreamSignTagProps) {
 		<div
 			className='card m-3'
 			key={`cardTag${props.tagGrp.dreamSign}`}
-			style={{ minWidth: props.viewType === CardDreamSignGrpViewType.lg ? (!showEditBtns ? '200px' : '600px') : !showEditBtns ? '125px' : '400px' }}>
+			style={{ minWidth: props.viewType === CardDreamSignGrpViewType.lg ? (!showDreams ? '200px' : '600px') : !showDreams ? '125px' : '400px' }}>
 			<div className={`card-header bg-info-800 text-white`}>
 				<div className={`row align-tiems-center mb-0 ${props.viewType === CardDreamSignGrpViewType.lg ? 'h5' : 'h6'}`}>
-					<div className='col text-breakword pr-0'>{props.tagGrp.dreamSign}</div>
+					<div className='col text-breakword pr-0'>{props.tagGrp.dreamSign.replace(':', ': ')}</div>
 					<div className='col-auto text-white-50 pl-1'>{props.tagGrp.totalOccurs}</div>
 				</div>
 			</div>
 			<div className={`card-body ${props.viewType === CardDreamSignGrpViewType.md ? 'p-2' : ''}`}>
 				<div>
-					{showEditBtns &&
+					{showDreams &&
 						props.tagGrp.dailyEntries.map((entry, idy) => (
 							<div
 								key={`cardTagDate${props.tagGrp.dreamSign}${idy}`}
@@ -46,19 +46,33 @@ export default function DreamSignTag(props: IDreamSignTagProps) {
 							</div>
 						))}
 				</div>
-				<div className='row align-items-center no-gutters flex-nowrap'>
+				<div className='row align-items-end no-gutters flex-nowrap'>
 					<div className='col pr-1'>
-						<button className='btn btn-sm btn-outline-info w-100' onClick={() => setShowEditBtns(!showEditBtns)}>
-							{showEditBtns ? 'Hide' : 'Show'}
+						<button className='btn btn-sm btn-outline-secondary w-100' onClick={() => setShowDreams(!showDreams)}>
+							{showDreams ? 'Hide' : 'Show'}
 						</button>
 					</div>
 					<div className='col pl-1'>
-						<button className='btn btn-sm btn-outline-dark w-100' onClick={() => console.log('TODO:')}>
-							Rename
+						<button className='btn btn-sm btn-outline-secondary w-100' onClick={() => setShowRename(!showRename)}>
+							Edit
 						</button>
 					</div>
 				</div>
 			</div>
+			{showRename && (
+				<div className='card-footer p-2'>
+					<input className='form-control' value={renameValue} onChange={(ev) => setRenameValue(ev.target.value.toLowerCase())} />
+					<button
+						className='btn btn-sm btn-warning w-100 mt-2'
+						onClick={() => {
+							props.doMassUpdateTag(props.tagGrp.dreamSign, renameValue)
+							setRenameValue('')
+							setShowRename(false)
+						}}>
+						Edit
+					</button>
+				</div>
+			)}
 		</div>
 	) : (
 		<div key={`badgeTag${props.tagGrp.dreamSign}`} className='d-inline-block text-nowrap bg-info text-white m-2'>
