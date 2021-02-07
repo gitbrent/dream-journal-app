@@ -150,7 +150,7 @@ export function doAuthSignOut() {
 /**
  * Does this entry date already exist in the datafile
  */
-export function checkEntryDate(checkDate: string): boolean {
+export function doesEntryDateExist(checkDate: string): boolean {
 	return gDataFile.entries.filter((item) => item.entryDate === checkDate).length > 0 ? true : false
 }
 
@@ -193,16 +193,16 @@ export function doSaveFile(): Promise<any> {
 	return new Promise((resolve, reject) => {
 		let params = JSON.parse(localStorage.getItem('oauth2-params'))
 
-		// DATA FIXES: (20191101): vvv TODO: (several entries were loaded before code was solid and created non-array dreamsigns)
+		// DATA FIXES: (20191101):
 		/*
-				newState.entries.forEach(entry => {
-					entry.dreams.forEach(dream => {
-						// WORKED! if (typeof dream.dreamSigns === 'string') dream.dreamSigns = (dream.dreamSigns as string).split(',')
-						// WORKED! dream.dreamSigns = dream.dreamSigns.map(sign=>{ return sign.trim() })
-						// WORKED (20210127) dream.dreamSigns = dream.dreamSigns.map((sign) => sign.toLowerCase().trim())
-					})
+			newState.entries.forEach(entry => {
+				entry.dreams.forEach(dream => {
+					// WORKED! if (typeof dream.dreamSigns === 'string') dream.dreamSigns = (dream.dreamSigns as string).split(',')
+					// WORKED! dream.dreamSigns = dream.dreamSigns.map(sign=>{ return sign.trim() })
+					// WORKED (20210127) dream.dreamSigns = dream.dreamSigns.map((sign) => sign.toLowerCase().trim())
 				})
-			*/
+			})
+		*/
 
 		// A: Fix [null] dates that can be created by import data/formatting, etc.
 		let entriesFix = gDataFile.entries
