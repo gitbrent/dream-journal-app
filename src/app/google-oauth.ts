@@ -164,10 +164,10 @@ export function doEntryAdd(entry: IJournalEntry) {
 /**
  * Edit existing `IJournalEntry` from selected `IDriveFile`
  */
-export function doEntryEdit(entry: IJournalEntry, origEntryDate: IJournalEntry['entryDate']) {
+export function doEntryEdit(entry: IJournalEntry, origEntryDate?: IJournalEntry['entryDate']) {
 	if (!gDataFile || !gDataFile.entries) throw new Error('No datafile!')
 
-	let editEntry = gDataFile.entries.filter((item) => item.entryDate === (origEntryDate !== entry.entryDate ? origEntryDate : entry.entryDate))[0]
+	let editEntry = gDataFile.entries.filter((item) => item.entryDate === (origEntryDate && origEntryDate !== entry.entryDate ? origEntryDate : entry.entryDate))[0]
 	if (!editEntry) throw new Error('Unable to find entry!')
 
 	Object.keys(entry).forEach((key) => {
