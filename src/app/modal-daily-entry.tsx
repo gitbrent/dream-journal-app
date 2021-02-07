@@ -41,9 +41,10 @@ import { Star, StarFill, Trash } from 'react-bootstrap-icons'
 const KeyCodes = {
 	comma: 188,
 	enter: 13,
+	tab: 9,
 }
 
-const delimiters = [KeyCodes.comma, KeyCodes.enter]
+const delimiters = [KeyCodes.comma, KeyCodes.enter, KeyCodes.tab]
 
 const EMPTY_DREAM = {
 	title: '',
@@ -143,6 +144,15 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 			selectedTab: dailyEntryNew.dreams.length - 1,
 		})
 	}
+	handleDeleteDream = (dreamIdx: number, event: React.MouseEvent<HTMLButtonElement>) => {
+		if (confirm('Delete Dream #' + (dreamIdx + 1) + '?')) {
+			let dailyEntryNew = this.state.dailyEntry
+			dailyEntryNew.dreams.splice(dreamIdx, 1)
+			this.setState({ dailyEntry: dailyEntryNew, selectedTab: 0 })
+		}
+
+		event.preventDefault()
+	}
 
 	handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const target = event.target
@@ -153,8 +163,8 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 		newState[name] = value
 
 		// A: allow edit of Entry Date, but check for dupe date so PK isnt corrupted
-		if (this.props.editEntry && name === 'entryDate' && value !== this.state.origEntryDate) {
-			this.setState({ isDateDupe: GDrive.checkEntryDate(value.toString()) })
+		if (name === 'entryDate' && value !== this.state.origEntryDate) {
+			this.setState({ isDateDupe: GDrive.doesEntryDateExist(value.toString()) })
 		}
 
 		// B:
@@ -172,7 +182,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 
 		// A: allow edit of Entry Date, but check for dupe date so PK isnt corrupted
 		if (this.props.editEntry && name === 'entryDate' && value !== this.state.origEntryDate) {
-			this.setState({ isDateDupe: GDrive.checkEntryDate(value) })
+			this.setState({ isDateDupe: GDrive.doesEntryDateExist(value) })
 		}
 
 		// B:
@@ -229,16 +239,6 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 		this.setState({ dailyEntry: newState })
 	}
 
-	handleDeleteDream = (dreamIdx: number, event: React.MouseEvent<HTMLButtonElement>) => {
-		if (confirm('Delete Dream #' + (dreamIdx + 1) + '?')) {
-			let dailyEntryNew = this.state.dailyEntry
-			dailyEntryNew.dreams.splice(dreamIdx, 1)
-			this.setState({ dailyEntry: dailyEntryNew, selectedTab: 0 })
-		}
-
-		event.preventDefault()
-	}
-
 	handleDelete = (event: React.MouseEvent<HTMLInputElement>) => {
 		if (confirm('Delete entry ' + this.state.dailyEntry.entryDate + '?')) {
 			try {
@@ -253,18 +253,17 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 		event.preventDefault()
 	}
 	handleSubmit = (event: React.MouseEvent<HTMLButtonElement>) => {
-		if (!GDrive.checkEntryDate(this.state.dailyEntry.entryDate)) {
-			alert('Date already exists!')
-			return
-		}
-
-		this.setState({ isBusy: true })
-
 		if (this.props.editEntry) {
 			GDrive.doEntryEdit(this.state.dailyEntry, this.state.origEntryDate)
 		} else {
+			if (GDrive.doesEntryDateExist(this.state.dailyEntry.entryDate)) {
+				alert('Date already exists!')
+				return
+			}
 			GDrive.doEntryAdd(this.state.dailyEntry)
 		}
+
+		this.setState({ isBusy: true })
 
 		GDrive.doSaveFile()
 			.catch((err) => {
@@ -349,6 +348,9 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 							minQueryLength={1}
 							tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign.toLowerCase() }))}
 							suggestions={this.props.dreamSignTags}
+							suggestionsTransform={(query: string, suggestions: { id: number; name: string }[]) => {
+								return suggestions.filter((item) => item.name.toLowerCase().indexOf(query) > -1)
+							}}
 							onDelete={(idx: number) => {
 								let newState = this.state.dailyEntry
 								newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
