@@ -417,6 +417,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 									</div>
 								</div>
 							</div>
+
 							<div className='row mb-4'>
 								<div className='col-12 col-md-6 mb-2'>
 									<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
@@ -464,6 +465,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 									</button>
 								</div>
 							</div>
+
 							<div className='tab-content'>{this.state.dailyEntry.dreams.map((dream, idx) => this.renderDreamTab(dream, idx))}</div>
 						</div>
 					</Modal.Body>
