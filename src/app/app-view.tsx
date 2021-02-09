@@ -150,7 +150,7 @@ export default class TabView extends React.Component<IAppViewProps, IAppViewStat
 										<td className='align-middle text-center'>{entry.dreams.length}</td>
 										<td className='align-middle text-left d-none d-md-table-cell'>
 											{dreamSignsUnq.sort().map((sign, idy) => (
-												<div key={`${idx}-${idy}`} className='badge badge-info p-2 mr-2'>
+												<div key={`${idx}-${idy}`} className='badge badge-info p-2 mr-2 mb-2'>
 													{sign}
 												</div>
 											))}
