@@ -38,14 +38,6 @@ import { Star, StarFill, Trash } from 'react-bootstrap-icons'
 // FUTURE: `react-bootstrap` added hooks in 1.0.0-beta.6 which breaks the whole app (even with react-16.8)
 // FUTURE: swtich to: https://reactstrap.github.io/components/modals/#app
 
-const KeyCodes = {
-	comma: 188,
-	enter: 13,
-	tab: 9,
-}
-
-const delimiters = [KeyCodes.comma, KeyCodes.enter, KeyCodes.tab]
-
 const EMPTY_DREAM = {
 	title: '',
 	notes: '',
@@ -345,12 +337,11 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 						<ReactTags
 							allowNew={true}
 							allowBackspace={false}
-							minQueryLength={1}
-							tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign.toLowerCase() }))}
+							minQueryLength={2}
+							maxSuggestionsLength={6}
+							tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign }))}
 							suggestions={this.props.dreamSignTags}
-							suggestionsTransform={(query: string, suggestions: { id: number; name: string }[]) => {
-								return suggestions.filter((item) => item.name.toLowerCase().indexOf(query) > -1)
-							}}
+							suggestionsFilter={(item: { id: number; name: string }, query: string) => item.name.indexOf(query.toLowerCase()) > -1}
 							onDelete={(idx: number) => {
 								let newState = this.state.dailyEntry
 								newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
@@ -359,12 +350,12 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 							onAddition={(tag: IDreamSignTag) => {
 								let newState = this.state.dailyEntry
 								// Dont allow dupes
-								if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1)
-									newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase().trim())
+								if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) {
+									newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase())
+								}
 								this.setState({ dailyEntry: newState })
 							}}
 							addOnBlur={true}
-							delimiters={delimiters}
 						/>
 					</div>
 				</div>
