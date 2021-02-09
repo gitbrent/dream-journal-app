@@ -28,9 +28,9 @@
  */
 
 import * as React from 'react'
-import { AuthState, IAuthState, IDriveFile } from './app.types'
-import LogoBase64 from '../img/logo_base64'
+import { APP_VER, AuthState, IAuthState, IDriveFile } from './app.types'
 import { Plus } from 'react-bootstrap-icons'
+import LogoBase64 from '../img/logo_base64'
 
 function getReadableFileSizeString(fileSizeInBytes: number) {
 	let idx = -1
@@ -100,11 +100,17 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 		if (this.props.authState.status === AuthState.Authenticated) {
 			cardAuthUser = (
 				<div>
-					<p className='card-text mb-4'>
-						<label className='text-muted text-uppercase d-block'>User Name</label>
-						{this.props.authState.userName}
-					</p>
-					<div className='row align-items-end'>
+					<div className='row mb-4'>
+						<div className='col'>
+							<label className='text-muted text-uppercase d-block'>User Name</label>
+							{this.props.authState.userName}
+						</div>
+						<div className='col-auto text-right'>
+							<label className='text-muted text-uppercase d-block'>App Version</label>
+							{APP_VER}
+						</div>
+					</div>
+					<div className='row mb-0'>
 						<div className='col'>
 							<button className='btn btn-outline-primary w-100' onClick={this.handleAuthSignIn}>
 								Renew
