@@ -13,9 +13,9 @@
     "url": "https://github.com/gitbrent/dream-journal-app.git"
   },
   "scripts": {
-    "build": "webpack --config webpack.prod.js",
-    "deploy": "firebase deploy",
-    "start": "webpack serve --config webpack.dev.js"
+    "1-start server": "webpack serve --config webpack.dev.js",
+    "2-build only": "webpack --config webpack.prod.js",
+    "3-build+deploy": "webpack --config webpack.prod.js && firebase deploy"
   },
   "dependencies": {
     "@types/react-router-dom": "^5.1.7",
