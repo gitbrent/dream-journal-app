@@ -4,6 +4,10 @@ import { InfoCircle, Search } from 'react-bootstrap-icons'
 import DreamSignTag from './comp-app/dreamsign-tag'
 import * as GDrive from './google-oauth'
 
+// WIP:
+// import ModalEntry from './modal-entry'
+// <ModalEntry currEntry={null} />
+
 export interface IAppAdminProps {
 	dataFile: IDriveFile
 	onShowModal: Function
@@ -290,8 +294,8 @@ export default function TabAdmin(props: IAppAdminProps) {
 							else if (filterSortOrder === FilterSortOrder.lowhigh)
 								return a.totalOccurs < b.totalOccurs ? -1 : a.totalOccurs > b.totalOccurs ? 1 : a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
 						})
-						.map((tagGrp) => (
-							<DreamSignTag tagGrp={tagGrp} onShowModal={props.onShowModal} viewType={filterViewType} doMassUpdateTag={doMassUpdateTag} />
+						.map((tagGrp,idx) => (
+							<DreamSignTag key={`keyTagGrp${idx}`} tagGrp={tagGrp} onShowModal={props.onShowModal} viewType={filterViewType} doMassUpdateTag={doMassUpdateTag} />
 						))}
 				</div>
 			</section>
