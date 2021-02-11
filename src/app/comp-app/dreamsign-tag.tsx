@@ -75,7 +75,7 @@ export default function DreamSignTag(props: IDreamSignTagProps) {
 			)}
 		</div>
 	) : (
-		<div key={`badgeTag${props.tagGrp.dreamSign}`} className='d-inline-block text-nowrap bg-info text-white m-2'>
+		<div className='d-inline-block text-nowrap bg-info text-white m-2'>
 			<div className='row no-gutters'>
 				<div className='col px-3 py-2'>{props.tagGrp.dreamSign}</div>
 				<div className='col-auto px-3 py-2 text-white-50 bg-trans-25'>{props.tagGrp.totalOccurs}</div>
