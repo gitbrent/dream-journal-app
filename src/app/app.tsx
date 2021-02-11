@@ -283,7 +283,7 @@ class App extends React.Component<IAppProps, IAppState> {
 							</li>
 							<li className='nav-item'>
 								<NavLink to='/tags' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-									Dreamsign Tags
+									Dream Tags
 								</NavLink>
 							</li>
 							<li className='nav-item'>
@@ -293,7 +293,7 @@ class App extends React.Component<IAppProps, IAppState> {
 							</li>
 							<li className='nav-item'>
 								<NavLink to='/admin' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-									Admin
+									Entry Maint
 								</NavLink>
 							</li>
 						</ul>
