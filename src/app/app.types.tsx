@@ -111,3 +111,10 @@ export interface IDreamSignTagGroup {
 	/** sums `dream` array under `dailyEntries` (save us time!) */
 	totalOccurs: number
 }
+
+export interface IDreamTagByCat {
+	/** @example 'Action' */
+	dreamCat: string
+	/** @example ['Action:Crime', 'Action:Military'] */
+	dreamTagGroups: IDreamSignTagGroup[]
+}
