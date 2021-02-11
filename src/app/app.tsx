@@ -293,7 +293,7 @@ class App extends React.Component<IAppProps, IAppState> {
 							</li>
 							<li className='nav-item'>
 								<NavLink to='/admin' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-									Entry Maint
+									Data Maint
 								</NavLink>
 							</li>
 						</ul>
