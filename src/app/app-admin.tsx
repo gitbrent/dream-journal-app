@@ -5,8 +5,8 @@ import DreamSignTag from './comp-app/dreamsign-tag'
 import * as GDrive from './google-oauth'
 
 // WIP:
-// import ModalEntry from './modal-entry'
-// <ModalEntry currEntry={null} />
+import ModalEntry from './modal-entry'
+//<ModalEntry currEntry={null} />
 
 export interface IAppAdminProps {
 	dataFile: IDriveFile
@@ -294,8 +294,14 @@ export default function TabAdmin(props: IAppAdminProps) {
 							else if (filterSortOrder === FilterSortOrder.lowhigh)
 								return a.totalOccurs < b.totalOccurs ? -1 : a.totalOccurs > b.totalOccurs ? 1 : a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
 						})
-						.map((tagGrp,idx) => (
-							<DreamSignTag key={`keyTagGrp${idx}`} tagGrp={tagGrp} onShowModal={props.onShowModal} viewType={filterViewType} doMassUpdateTag={doMassUpdateTag} />
+						.map((tagGrp, idx) => (
+							<DreamSignTag
+								key={`keyTagGrp${idx}`}
+								tagGrp={tagGrp}
+								onShowModal={props.onShowModal}
+								viewType={filterViewType}
+								doMassUpdateTag={doMassUpdateTag}
+							/>
 						))}
 				</div>
 			</section>
@@ -353,6 +359,8 @@ export default function TabAdmin(props: IAppAdminProps) {
 	) : (
 		<main className='container mb-5'>
 			{renderHeader()}
+
+			<ModalEntry currEntry={null} showDialog={false} />
 
 			<ul className='nav nav-tabs nav-fill' id='adminTab' role='tablist'>
 				<li className='nav-item' role='presentation'>
