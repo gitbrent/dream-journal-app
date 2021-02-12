@@ -148,13 +148,6 @@ export function doAuthSignOut() {
 }
 
 /**
- * Does this entry date already exist in the datafile
- */
-export function doesEntryDateExist(checkDate: string): boolean {
-	return gDataFile.entries.filter((item) => item.entryDate === checkDate).length > 0 ? true : false
-}
-
-/**
  * Add new `IJournalEntry` into selected `IDriveFile`
  */
 export function doEntryAdd(entry: IJournalEntry) {
@@ -258,6 +251,32 @@ export function doSaveFile(): Promise<any> {
 				}
 			})
 	})
+}
+
+/**
+ * Does this entry date already exist in the datafile
+ */
+export function doesEntryDateExist(checkDate: string): boolean {
+	return gDataFile.entries.filter((item) => item.entryDate === checkDate).length > 0 ? true : false
+}
+
+/**
+ * Does this entry date already exist in the datafile
+ */
+export function getUniqueDreamTags(): string[] {
+	let arrTags: string[] = []
+
+	gDataFile.entries
+		.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
+		.forEach((entry) =>
+			entry.dreams.forEach((dream) =>
+				dream.dreamSigns.forEach((tag) => {
+					if (arrTags.indexOf(tag) === -1) arrTags.push(tag)
+				})
+			)
+		)
+
+	return arrTags.sort()
 }
 
 // INTERNAL METHODS ----------------------------------------------------------
