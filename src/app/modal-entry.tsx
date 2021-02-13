@@ -328,8 +328,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 
 				<Modal.Body className='container bg-light p-0'>
 					{renderTopToolbar()}
-					<div className='border-bottom border-secondary px-4'>
-						<ul className='nav nav-tabs' role='tablist'>
+						<ul className='nav nav-tabs px-4' role='tablist'>
 							<li className='nav-item' key='tabDream00'>
 								<a href='#' onClick={() => setSelectedTab(-1)} className={'nav-link' + (selectedTab === -1 ? ' active' : '')} data-toggle='tab' role='tab'>
 									Notes
@@ -343,7 +342,6 @@ export default function TabAdmin(props: IModalEntryProps) {
 								</li>
 							))}
 						</ul>
-					</div>
 					<div className='tab-content py-3 px-4'>
 						{selectedTab === -1 ? renderDreamTabNotes() : <div className='tab-content'>{renderDreamTab(selectedTab)}</div>}
 					</div>
