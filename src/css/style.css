@@ -31,7 +31,7 @@
 .text-breakword {
 	word-break: break-word;
 }
-
+/*
 .modal-dialog .nav-tabs .nav-link,
 .modal-dialog .nav-pills .nav-link {
 	background-color: #555;
@@ -41,7 +41,7 @@
 	background-color: #2a9fd6;
 	border-bottom-color: #2a9fd6;
 }
-
+*/
 /* Need for Bootstrap 5
 .jumbotron {
   padding: 2rem 1rem;

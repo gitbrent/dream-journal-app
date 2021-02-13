@@ -366,7 +366,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 		<main className='container mb-5'>
 			{renderHeader()}
 
-			<ModalEntry currEntry={currEntry} showDialog={showModal} setShowDialog={setShowModal} />
+			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
 
 			<ul className='nav nav-tabs nav-fill' id='adminTab' role='tablist'>
 				<li className='nav-item' role='presentation'>

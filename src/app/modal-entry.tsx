@@ -7,12 +7,12 @@ import { IDreamSignTag, IJournalDream, IJournalEntry, InductionTypes } from './a
 import ReactTags from 'react-tag-autocomplete'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
-import { Calendar3, Clock, PlusCircle, Save, Star, StarFill, Trash, Check } from 'react-bootstrap-icons'
+import { Calendar3, Clock, PlusCircle, Save, Star, StarFill, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
 
 export interface IModalEntryProps {
 	currEntry: IJournalEntry
-	showDialog: boolean
-	setShowDialog: Function
+	showModal: boolean
+	setShowModal: Function
 }
 
 export default function TabAdmin(props: IModalEntryProps) {
@@ -22,7 +22,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 		dreamSigns: [],
 		dreamImages: [],
 		isLucidDream: false,
-		lucidMethod: InductionTypes.dild,
+		lucidMethod: null,
 	}
 	const NEW_ENTRY = {
 		// TODO: need better idea - UTC shows wrong date half the time (1 day ahead)
@@ -42,16 +42,19 @@ export default function TabAdmin(props: IModalEntryProps) {
 	const [selectedTab, setSelectedTab] = useState(-1)
 
 	/** Set/Clear Entry */
-	useEffect(() => setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry])
-	useEffect(() => setUniqueTags(GDrive.getUniqueDreamTags), [props.showDialog])
-	useEffect(() => setShowModal(props.showDialog), [props.showDialog])
+	useEffect(() => {
+		console.log(props.currEntry) // FIXME: entries wont load
+
+		setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY })
+	}, [props.currEntry])
+	useEffect(() => setUniqueTags(GDrive.getUniqueDreamTags), [props.showModal])
+	useEffect(() => setShowModal(props.showModal), [props.showModal])
 
 	// -----------------------------------------------------------------------
 
-	function renderToolbar(): JSX.Element {
+	function renderTopToolbar(): JSX.Element {
 		return (
 			<nav>
-				{/* border-bottom border-secondary */}
 				<div className='row px-4 pt-4'>
 					<div className='col-6 col-md-3 mb-4'>
 						<div className='input-group'>
@@ -99,7 +102,14 @@ export default function TabAdmin(props: IModalEntryProps) {
 					</div>
 					<div className='col mb-4'>
 						<div className='btn-group btn-group-sm my-auto w-100' role='group'>
-							<button type='button' onClick={(_ev) => console.log('TODO:create_new')} className='btn btn-sm btn-success w-100'>
+							<button
+								type='button'
+								onClick={(_ev) => {
+									let updEntry = { ...currEntry }
+									updEntry.dreams.push({ ...NEW_DREAM })
+									setCurrEntry(updEntry)
+								}}
+								className='btn btn-sm btn-success w-100'>
 								<div className='row no-gutters align-items-center'>
 									<div className='col-auto'>
 										<PlusCircle size='1.2rem' />
@@ -189,38 +199,60 @@ export default function TabAdmin(props: IModalEntryProps) {
 						/>
 					</div>
 					<div className='col-auto'>
-						<div className='btn-group my-auto w-100' role='group'>
+						<div className='btn-group my-auto' role='group' aria-label='dream toolbar group'>
 							<button
 								type='button'
+								title={isLucid ? 'Lucid Dream' : 'Non-Lucid Dream'}
 								onClick={(_ev) => {
 									let updEntry = { ...currEntry }
 									updEntry.dreams[dreamIdx].isLucidDream = !updEntry.dreams[dreamIdx].isLucidDream
 									setCurrEntry(updEntry)
 								}}
-								className={`btn btn-${isLucid ? 'success px-1' : 'secondary'} w-100`}>
-								{isLucid ? <Check size='1.2rem' /> : 'Normal'}
+								className={`btn btn-${isLucid ? 'success' : 'secondary'} px-2`}>
+								{isLucid ? <TrophyFill size='1.2rem' /> : <Trophy size='1.2rem' />}
 							</button>
 							{dream.isLucidDream && (
-								<select
-									name='lucidMethod'
-									value={dream.lucidMethod || InductionTypes.dild}
-									disabled={isBusySave}
-									data-dream-idx={dreamIdx}
-									onChange={(ev) => {
-										let newState = { ...currEntry }
-										newState.dreams[dreamIdx].lucidMethod = ev.currentTarget.value as InductionTypes
-										setCurrEntry(newState)
-									}}
-									className='form-control w-100'
-									style={{ minWidth: '100px' }}>
-									{Object.keys(InductionTypes).map((type) => (
-										<option value={type} key={'lucid-' + type + '-' + dreamIdx}>
-											{InductionTypes[type]}
-										</option>
-									))}
-								</select>
+								<div className='btn-group' role='lucid type group'>
+									<button
+										id='btnGroupDropIndType'
+										type='button'
+										title='Induction Type'
+										data-toggle='dropdown'
+										aria-haspopup='true'
+										aria-expanded='false'
+										className='btn btn-success text-white dropdown-toggle'>
+										{dream.lucidMethod ? InductionTypes[dream.lucidMethod] : '...'}
+									</button>
+									<div className='dropdown-menu' aria-labelledby='btnGroupDropIndType'>
+										{Object.keys(InductionTypes).map((type) => (
+											<a
+												key={`lucid-${type}-${dreamIdx}`}
+												className={`dropdown-item ${dream.lucidMethod === type ? 'active' : ''}`}
+												href='#'
+												onClick={(_ev) => {
+													let newState = { ...currEntry }
+													newState.dreams[dreamIdx].lucidMethod = type as InductionTypes
+													setCurrEntry(newState)
+												}}>
+												{InductionTypes[type]}
+											</a>
+										))}
+									</div>
+								</div>
 							)}
-							<button type='button' title='Delete Dream' onClick={() => console.log('TODO:')} className='btn btn-danger'>
+							<button
+								type='button'
+								title='Delete Dream'
+								onClick={(_ev) => {
+									if (confirm(`Delete Dream #${dreamIdx + 1}?`)) {
+										let newState = { ...currEntry }
+										newState.dreams.splice(dreamIdx, 1)
+										if (newState.dreams.length === 0) newState.dreams.push({ ...NEW_DREAM })
+										setCurrEntry(newState)
+										setSelectedTab(0)
+									}
+								}}
+								className='btn btn-danger px-2'>
 								<Trash size='1.2rem' />
 							</button>
 						</div>
@@ -282,13 +314,20 @@ export default function TabAdmin(props: IModalEntryProps) {
 
 	return (
 		<section>
-			<Modal size='lg' show={showModal} onHide={() => props.setShowDialog(false)} backdrop='static'>
-				<Modal.Header className='bg-info' closeButton>
+			<Modal
+				size='lg'
+				show={showModal}
+				onHide={() => {
+					setShowModal(false)
+					props.setShowModal(false)
+				}}
+				backdrop='static'>
+				<Modal.Header className='bg-primary' closeButton>
 					<Modal.Title className='text-white h6'>Journal Entry</Modal.Title>
 				</Modal.Header>
 
 				<Modal.Body className='container bg-light p-0'>
-					{renderToolbar()}
+					{renderTopToolbar()}
 					<div className='border-bottom border-secondary px-4'>
 						<ul className='nav nav-tabs' role='tablist'>
 							<li className='nav-item' key='tabDream00'>
@@ -318,7 +357,14 @@ export default function TabAdmin(props: IModalEntryProps) {
 					</Modal.Footer>
 				) : (
 					<Modal.Footer className='px-4'>
-						<Button type='button' variant='outline-secondary' className='mr-2' onClick={() => props.setShowDialog(false)}>
+						<Button
+							type='button'
+							variant='outline-secondary'
+							className='mr-2'
+							onClick={() => {
+								setShowModal(false)
+								props.setShowModal(false)
+							}}>
 							Cancel
 						</Button>
 						<button type='submit' className='btn btn-primary px-5' onClick={() => console.log('TODO:')}>
@@ -329,7 +375,6 @@ export default function TabAdmin(props: IModalEntryProps) {
 				)}
 			</Modal>
 
-			{/* TEMP BELOW - move to using `props.showModal` */}
 			<button className='btn btn-success' onClick={() => setShowModal(true)}>
 				Edit Entry
 			</button>
