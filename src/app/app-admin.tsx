@@ -4,10 +4,6 @@ import { InfoCircle, Search } from 'react-bootstrap-icons'
 import DreamSignTag from './comp-app/dreamsign-tag'
 import * as GDrive from './google-oauth'
 
-// WIP:
-import ModalEntry from './modal-entry'
-//<ModalEntry currEntry={null} />
-
 export interface IAppAdminProps {
 	dataFile: IDriveFile
 	onShowModal: Function
@@ -33,9 +29,6 @@ enum FilterSortOrder {
 }
 
 export default function TabAdmin(props: IAppAdminProps) {
-	const [showModal, setShowModal] = useState(false)
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
-	//
 	const [totalMonths, setTotalMonths] = useState(0)
 	const [totalYears, setTotalYears] = useState(0)
 	const [totalEntries, setTotalEntries] = useState(0)
@@ -301,10 +294,6 @@ export default function TabAdmin(props: IAppAdminProps) {
 							<DreamSignTag
 								key={`keyTagGrp${idx}`}
 								tagGrp={tagGrp}
-								onShowModal={(show: boolean, entry: IJournalEntry) => {
-									setCurrEntry(entry)
-									setShowModal(show)
-								}}
 								viewType={filterViewType}
 								doMassUpdateTag={doMassUpdateTag}
 							/>
@@ -365,8 +354,6 @@ export default function TabAdmin(props: IAppAdminProps) {
 	) : (
 		<main className='container mb-5'>
 			{renderHeader()}
-
-			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
 
 			<ul className='nav nav-tabs nav-fill' id='adminTab' role='tablist'>
 				<li className='nav-item' role='presentation'>

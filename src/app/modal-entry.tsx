@@ -42,11 +42,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 	const [selectedTab, setSelectedTab] = useState(-1)
 
 	/** Set/Clear Entry */
-	useEffect(() => {
-		console.log(props.currEntry) // FIXME: entries wont load
-
-		setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY })
-	}, [props.currEntry])
+	useEffect(() => setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry])
 	useEffect(() => setUniqueTags(GDrive.getUniqueDreamTags), [props.showModal])
 	useEffect(() => setShowModal(props.showModal), [props.showModal])
 
@@ -328,20 +324,21 @@ export default function TabAdmin(props: IModalEntryProps) {
 
 				<Modal.Body className='container bg-light p-0'>
 					{renderTopToolbar()}
-						<ul className='nav nav-tabs px-4' role='tablist'>
-							<li className='nav-item' key='tabDream00'>
-								<a href='#' onClick={() => setSelectedTab(-1)} className={'nav-link' + (selectedTab === -1 ? ' active' : '')} data-toggle='tab' role='tab'>
-									Notes
+
+					<ul className='nav nav-tabs px-4' role='tablist'>
+						<li className='nav-item' key='tabDream00'>
+							<a href='#' onClick={() => setSelectedTab(-1)} className={'nav-link' + (selectedTab === -1 ? ' active' : '')} data-toggle='tab' role='tab'>
+								Notes
+							</a>
+						</li>
+						{currEntry.dreams.map((_dream, idx) => (
+							<li className='nav-item' key={`tabDream${idx}`}>
+								<a href='#' onClick={() => setSelectedTab(idx)} className={`nav-link ${idx === selectedTab ? 'active' : ''}`} data-toggle='tab' role='tab'>
+									{`Dream ${idx + 1}`}
 								</a>
 							</li>
-							{currEntry.dreams.map((_dream, idx) => (
-								<li className='nav-item' key={`tabDream${idx}`}>
-									<a href='#' onClick={() => setSelectedTab(idx)} className={`nav-link ${idx === selectedTab ? 'active' : ''}`} data-toggle='tab' role='tab'>
-										{`Dream ${idx + 1}`}
-									</a>
-								</li>
-							))}
-						</ul>
+						))}
+					</ul>
 					<div className='tab-content py-3 px-4'>
 						{selectedTab === -1 ? renderDreamTabNotes() : <div className='tab-content'>{renderDreamTab(selectedTab)}</div>}
 					</div>
@@ -372,10 +369,6 @@ export default function TabAdmin(props: IModalEntryProps) {
 					</Modal.Footer>
 				)}
 			</Modal>
-
-			<button className='btn btn-success' onClick={() => setShowModal(true)}>
-				Edit Entry
-			</button>
 		</section>
 	)
 }

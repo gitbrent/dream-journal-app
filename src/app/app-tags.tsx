@@ -3,8 +3,6 @@ import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveFil
 import { InfoCircle, Search } from 'react-bootstrap-icons'
 import DreamSignTag from './comp-app/dreamsign-tag'
 import * as GDrive from './google-oauth'
-// import ModalEntry from './modal-entry' // WIP:
-// <ModalEntry currEntry={null} />
 
 export interface IAppTagsProps {
 	dataFile: IDriveFile
@@ -261,7 +259,6 @@ export default function TabAdmin(props: IAppTagsProps) {
 							<DreamSignTag
 								key={`keyTagGrp${idx}`}
 								tagGrp={tagGrp}
-								onShowModal={props.onShowModal}
 								viewType={filterViewType}
 								doMassUpdateTag={doMassUpdateTag}
 							/>
@@ -322,7 +319,6 @@ export default function TabAdmin(props: IAppTagsProps) {
 												<DreamSignTag
 													key={`keyTagGrp${idx}`}
 													tagGrp={tagGrp}
-													onShowModal={props.onShowModal}
 													viewType={filterViewType}
 													doMassUpdateTag={doMassUpdateTag}
 												/>
