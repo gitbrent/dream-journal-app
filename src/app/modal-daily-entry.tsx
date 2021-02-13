@@ -44,7 +44,7 @@ const EMPTY_DREAM = {
 	dreamSigns: [],
 	dreamImages: [],
 	isLucidDream: false,
-	lucidMethod: InductionTypes.none,
+	lucidMethod: InductionTypes.dild,
 }
 const NEW_ENTRY = Object.freeze({
 	// TODO: need better idea - UTC shows wrong date half the time (1 day ahead)
@@ -311,7 +311,7 @@ export default class EntryModal extends React.Component<IAppModalProps, IAppModa
 					<label className='text-muted text-uppercase text-sm d-block'>Method</label>
 					<select
 						name='lucidMethod'
-						value={dream.lucidMethod || InductionTypes.none}
+						value={dream.lucidMethod || InductionTypes.dild}
 						disabled={!dream.isLucidDream}
 						data-dream-idx={dreamIdx}
 						onChange={this.handleSelectDreamChange}

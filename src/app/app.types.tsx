@@ -1,5 +1,5 @@
 // APP
-export const APP_BLD = '20210210-2120'
+export const APP_BLD = '20210212-2320'
 export const APP_VER = `1.1.0-WIP-${APP_BLD}`
 
 // CONST
@@ -16,7 +16,6 @@ export enum ImportTypes {
 	'xlsx' = 'Spreadsheet',
 }
 export enum InductionTypes {
-	'none' = '(n/a)',
 	'dild' = 'DILD',
 	'mild' = 'MILD',
 	'wbtb' = 'WBTB',

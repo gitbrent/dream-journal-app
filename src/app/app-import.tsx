@@ -1230,7 +1230,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 													<label className='text-uppercase text-muted d-block'>Lucid Method</label>
 													<select
 														name='lucidMethod'
-														value={dream.lucidMethod || InductionTypes.none}
+														value={dream.lucidMethod || InductionTypes.dild}
 														onChange={(event) => this.handleResultChange(event, idx, idy)}
 														className='form-control'>
 														{Object.keys(InductionTypes).map((type) => (
