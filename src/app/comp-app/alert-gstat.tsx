@@ -13,22 +13,20 @@ export default function AlertGdriveStatus() {
 	})
 
 	return (
-		<section className='container my-5'>
+		<section className='container text-center my-5'>
 			{isBusyLoad ? (
-				<div className='alert alert-primary w-50 mx-auto' role='alert'>
+				<div className='alert alert-primary text-nowrap d-inline-block' role='alert'>
 					<div className='row align-items-center'>
 						<div className='col-auto pr-0'>
 							<div className='spinner-border text-white' role='status'>
 								<span className='sr-only'>Loading...</span>
 							</div>
 						</div>
-						<div className='col'>
-							<h5 className='mb-0'>Loading cloud data...</h5>
-						</div>
+						<div className='col'>Loading cloud data...</div>
 					</div>
 				</div>
 			) : (
-				<div className='alert alert-warning' role='alert'>
+				<div className='alert alert-warning text-nowrap d-inline-block' role='alert'>
 					<div className='row align-items-center'>
 						<div className='col-auto'>
 							<CloudSlash size='36' />
