@@ -12,13 +12,10 @@ export interface IDreamSignTagProps {
 export default function DreamSignTag(props: IDreamSignTagProps) {
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
+	//
 	const [showDreams, setShowDreams] = useState(false)
 	const [showRename, setShowRename] = useState(false)
 	const [renameValue, setRenameValue] = useState('')
-
-	useEffect(() => {
-		if (currEntry) setShowModal(true)
-	}, [currEntry])
 
 	return !props || !props.tagGrp ? (
 		<div />
@@ -42,7 +39,10 @@ export default function DreamSignTag(props: IDreamSignTagProps) {
 							<div
 								key={`cardTagDate${props.tagGrp.dreamSign}${idy}`}
 								title={Math.abs(Math.round(moment(entry.entryDate).diff(moment(new Date()), 'months', true))) + ' months ago'}
-								onClick={() => setCurrEntry(entry)}
+								onClick={(_ev) => {
+									setCurrEntry(entry)
+									setShowModal(true)
+								}}
 								className='cursor-link text-center text-sm d-inline-block mb-3 mr-3'
 								style={{ userSelect: 'none', minWidth: '65px' }}>
 								<div className='bg-danger px-2 py-1 text-white align-text-middle rounded-top'>
