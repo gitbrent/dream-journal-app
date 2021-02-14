@@ -5,8 +5,8 @@ import * as GDrive from '../google-oauth'
 export default function AlertGdriveStatus() {
 	const [isBusyLoad, setIsBusyLoad] = useState(false)
 
-	/** @see https://stackoverflow.com/a/60907638 */
 	useEffect(() => {
+		/** @see https://stackoverflow.com/a/60907638 */
 		let isMounted = true // note this flag denote mount status
 		GDrive.busyLoadCallback((stat: boolean) => isMounted && setIsBusyLoad(stat)) // async operation here
 		return () => (isMounted = false) // use effect cleanup to set flag false, if unmounted
