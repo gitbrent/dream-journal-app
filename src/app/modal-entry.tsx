@@ -48,6 +48,35 @@ export default function TabAdmin(props: IModalEntryProps) {
 
 	// -----------------------------------------------------------------------
 
+	function handleSave() {
+		if (props.currEntry) {
+			GDrive.doEntryEdit(currEntry, props.currEntry.entryDate)
+		} else {
+			if (GDrive.doesEntryDateExist(currEntry.entryDate)) {
+				alert('Date already exists!')
+				return
+			}
+			GDrive.doEntryAdd(currEntry)
+		}
+
+		setIsBusySave(true)
+
+		GDrive.doSaveFile()
+			.then(() => {
+				props.setShowModal(false)
+				setIsBusySave(false)
+				setShowModal(false)
+			})
+			.catch((ex) => {
+				setIsBusySave(false)
+				// TODO: Show error message somewhere on dialog! (20190324)
+				// Set errstate and show message in DialogFooter
+				alert(ex)
+			})
+	}
+
+	// -----------------------------------------------------------------------
+
 	function renderTopToolbar(): JSX.Element {
 		return (
 			<nav>
@@ -344,30 +373,26 @@ export default function TabAdmin(props: IModalEntryProps) {
 					</div>
 				</Modal.Body>
 
-				{isBusySave ? (
-					<Modal.Footer className='px-4'>
-						<div className='spinner-border spinner-border-lg text-primary' role='status'>
-							<span className='sr-only' />
-						</div>
-					</Modal.Footer>
-				) : (
-					<Modal.Footer className='px-4'>
-						<Button
-							type='button'
-							variant='outline-secondary'
-							className='mr-2'
-							onClick={() => {
-								setShowModal(false)
-								props.setShowModal(false)
-							}}>
-							Cancel
-						</Button>
-						<button type='submit' className='btn btn-primary px-5' onClick={() => console.log('TODO:')}>
+				<Modal.Footer className='px-4'>
+					<Button
+						type='button'
+						variant='outline-secondary'
+						className='mr-2'
+						onClick={() => {
+							setShowModal(false)
+							props.setShowModal(false)
+						}}>
+						Cancel
+					</Button>
+					<button type='submit' onClick={() => handleSave()} className='btn btn-primary px-5'>
+						{isBusySave ? (
+							<span className='spinner-border spinner-border-sm mr-2' role='status' aria-hidden='true'></span>
+						) : (
 							<Save size='16' className='mt-n1 mr-2' />
-							Save
-						</button>
-					</Modal.Footer>
-				)}
+						)}
+						Save
+					</button>
+				</Modal.Footer>
 			</Modal>
 		</section>
 	)
