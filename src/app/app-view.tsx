@@ -27,8 +27,8 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect } from 'react'
-import { IJournalEntry, IDriveFile, IDreamSignTag } from './app.types'
+import React, { useState } from 'react'
+import { IJournalEntry, IDriveFile } from './app.types'
 import { CheckCircleFill, StarFill, SortDownAlt } from 'react-bootstrap-icons'
 import DateRangePicker from './comp-other/date-range-picker'
 import Pagination from './comp-other/pagination'
@@ -37,12 +37,9 @@ import ModalEntry from './modal-entry'
 
 export interface Props {
 	dataFile: IDriveFile
-	dreamSignTags: IDreamSignTag[]
-	onShowModal: Function
 	doSaveViewState: Function
 	viewState: IAppViewState
 }
-
 export interface IAppViewState {
 	dateRangeFrom: Date
 	dateRangeTo: Date
@@ -59,9 +56,7 @@ export default function TabView(props: Props) {
 	const [dateRangeFrom, setDateRangeFrom] = useState(null)
 	const [dateRangeTo, setDateRangeTo] = useState(null)
 
-	useEffect(() => {
-		// TODO: return props.doSaveViewState(this.state)
-	}, [])
+	// TODO: useEffect: return props.doSaveViewState(this.state)
 
 	function onDateRangeChange(opts: { dateFrom: Date; dateTo: Date }) {
 		setDateRangeFrom(opts.dateFrom || null)

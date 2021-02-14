@@ -98,8 +98,8 @@ class App extends React.Component<IAppProps, IAppState> {
 
 	initSetupOauth = () => {
 		// Set 2 necessary callbacks to capture auth/file state changes
-		GDrive.authStateCallback((result) => this.setState({ auth: result }))
-		GDrive.dataFileCallback((result) => this.setState({ dataFile: result }))
+		GDrive.authStateCallback((result: IAuthState) => this.setState({ auth: result }))
+		GDrive.dataFileCallback((result: IDriveFile) => this.setState({ dataFile: result }))
 
 		// Make initial call at startup, if we're logged in, the datafile will be loaded and auth state set, otherwise, wait for user to click "Login"
 		GDrive.doAuthUpdate()
@@ -199,17 +199,9 @@ class App extends React.Component<IAppProps, IAppState> {
 
 	// App Pages
 
-	Home = () => <TabHome />
+	Home = () => <TabHome authState={this.state.auth} dataFile={this.state.dataFile || null} />
 
-	Journal = () => (
-		<TabView
-			dataFile={this.state.dataFile || null}
-			dreamSignTags={this.getDreamSignTags()}
-			onShowModal={this.chgShowModal}
-			doSaveViewState={this.doSaveViewState}
-			viewState={this.state.childViewState}
-		/>
-	)
+	Journal = () => <TabView dataFile={this.state.dataFile || null} doSaveViewState={this.doSaveViewState} viewState={this.state.childViewState} />
 
 	Search = () => (
 		<TabSearch
