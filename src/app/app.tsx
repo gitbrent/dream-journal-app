@@ -53,6 +53,7 @@ interface IAppProps {
 	showModal?: boolean
 }
 interface IAppState {
+	appErrMsg: string
 	auth: IAuthState
 	childImportState: object
 	childSearchState: IAppSearchState
@@ -61,13 +62,14 @@ interface IAppState {
 	childAdminState: IAppAdminState
 	dataFile: IDriveFile
 	editEntry: IJournalEntry
-	showModal: boolean
+	showModal: boolean // TODO: remove
 }
 class App extends React.Component<IAppProps, IAppState> {
 	constructor(props: Readonly<IAppProps>) {
 		super(props)
 
 		this.state = {
+			appErrMsg: '',
 			auth: {
 				status: AuthState.Unauthenticated,
 				userName: '',
@@ -86,6 +88,12 @@ class App extends React.Component<IAppProps, IAppState> {
 		this.initSetupOauth()
 
 		console.log(APP_VER)
+	}
+
+	componentDidCatch = (error, errorInfo) => {
+		this.setState({ appErrMsg: error.toString() })
+		console.error(error)
+		console.error(errorInfo)
 	}
 
 	initSetupOauth = () => {
@@ -308,12 +316,7 @@ class App extends React.Component<IAppProps, IAppState> {
 				<Route path='/import' render={this.Import} />
 				<Route path='/admin' render={this.Admin} />
 
-				<EntryModal
-					dreamSignTags={this.getDreamSignTags()}
-					editEntry={this.state.editEntry}
-					onShowModal={this.chgShowModal}
-					show={this.state.showModal}
-				/>
+				<EntryModal dreamSignTags={this.getDreamSignTags()} editEntry={this.state.editEntry} onShowModal={this.chgShowModal} show={this.state.showModal} />
 			</Router>
 		)
 	}
