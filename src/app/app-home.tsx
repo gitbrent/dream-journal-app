@@ -27,26 +27,31 @@
  *  SOFTWARE.
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { APP_VER, AuthState, IAuthState, IDriveFile } from './app.types'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
 import ModalEntry from './modal-entry'
+import * as GDrive from './google-oauth'
 
-export interface Props {
-	authState: IAuthState
-	dataFile: IDriveFile
-	doAuthSignIn: Function
-	doAuthSignOut: Function
-	onShowModal: Function
-}
-
-export default function TabHome(props: Props) {
+export default function TabHome() {
 	const [showModal, setShowModal] = useState(false)
+	const [authState, setAuthState] = useState<IAuthState>(null)
+	const [dataFile, setDataFile] = useState<IDriveFile>(null)
+	const [isBusyLoad, setIsBusyLoad] = useState(false)
 	//const [errorMessage, setErrorMessage] = useState('')
 	//const [isRenaming, setIsRenaming] = useState(false)
 	//const [fileBeingRenamed, setFileBeingRenamed] = useState<IDriveFile>(null)
 	//const [newFileName, setNewFileName] = useState('')
+
+	useEffect(() => {
+		/** @see https://stackoverflow.com/a/60907638 */
+		let isMounted = true // note this flag denote mount status
+		GDrive.authStateCallback((res: IAuthState) => isMounted && setAuthState(res))
+		GDrive.busyLoadCallback((res: boolean) => isMounted && setIsBusyLoad(res))
+		GDrive.dataFileCallback((res: IDriveFile) => isMounted && setDataFile(res))
+		return () => (isMounted = false) // use effect cleanup to set flag false, if unmounted
+	})
 
 	function getReadableFileSizeString(fileSizeInBytes: number) {
 		let idx = -1
@@ -61,13 +66,13 @@ export default function TabHome(props: Props) {
 
 	function renderCardAuthUser(): JSX.Element {
 		let cardAuthUser: JSX.Element
-		if (props.authState.status === AuthState.Authenticated) {
+		if (authState && authState.status === AuthState.Authenticated) {
 			cardAuthUser = (
 				<div>
 					<div className='row mb-4'>
 						<div className='col'>
 							<label className='text-muted text-uppercase d-block'>User Name</label>
-							{props.authState.userName}
+							{authState.userName}
 						</div>
 						<div className='col-auto text-right'>
 							<label className='text-muted text-uppercase d-block'>App Version</label>
@@ -76,23 +81,23 @@ export default function TabHome(props: Props) {
 					</div>
 					<div className='row mb-0'>
 						<div className='col'>
-							<button className='btn btn-outline-primary w-100' onClick={() => props.doAuthSignIn()}>
+							<button className='btn btn-outline-primary w-100' onClick={() => GDrive.doAuthSignIn()}>
 								Renew
 							</button>
 						</div>
 						<div className='col'>
-							<button className='btn btn-outline-secondary w-100' onClick={() => props.doAuthSignOut()}>
+							<button className='btn btn-outline-secondary w-100' onClick={() => GDrive.doAuthSignOut()}>
 								Sign Out
 							</button>
 						</div>
 					</div>
 				</div>
 			)
-		} else if (props.authState.status === AuthState.Expired) {
+		} else if (authState && authState.status === AuthState.Expired) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Your session has expired. Please re-authenticate to continue.</p>
-					<button className='btn btn-warning' onClick={() => props.doAuthSignIn()}>
+					<button className='btn btn-warning' onClick={() => GDrive.doAuthSignIn()}>
 						Sign In
 					</button>
 				</div>
@@ -101,7 +106,7 @@ export default function TabHome(props: Props) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Please sign-in to allow access to Google Drive space.</p>
-					<button className='btn btn-primary' onClick={() => props.doAuthSignIn()}>
+					<button className='btn btn-primary' onClick={() => GDrive.doAuthSignIn()}>
 						Sign In/Authorize
 					</button>
 				</div>
@@ -112,33 +117,33 @@ export default function TabHome(props: Props) {
 	}
 
 	function renderCardDataFile(): JSX.Element {
-		return props.dataFile && (props.dataFile._isSaving || props.dataFile._isLoading) ? (
+		return dataFile && (dataFile._isSaving || dataFile._isLoading || isBusyLoad) ? (
 			<div className='text-center'>
 				<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
 					<span className='sr-only' />
 				</div>
 				<div>Loading/Saving...</div>
 			</div>
-		) : props.dataFile ? (
+		) : dataFile ? (
 			<div>
 				<div className='row mb-3'>
 					<div className='col'>
 						<label className='text-muted text-uppercase d-block'>File Name</label>
-						{props.dataFile.name}
+						{dataFile.name}
 					</div>
 					<div className='col-auto text-right'>
 						<label className='text-muted text-uppercase d-block'>Entries</label>
-						{props.dataFile.entries ? props.dataFile.entries.length : '?'}
+						{dataFile.entries ? dataFile.entries.length : '?'}
 					</div>
 				</div>
 				<div className='row'>
 					<div className='col'>
 						<label className='text-muted text-uppercase d-block'>Last Saved</label>
-						{props.dataFile ? new Date(props.dataFile.modifiedTime).toLocaleString() : '-'}
+						{dataFile ? new Date(dataFile.modifiedTime).toLocaleString() : '-'}
 					</div>
 					<div className='col-auto text-right'>
 						<label className='text-muted text-uppercase d-block'>File Size</label>
-						{getReadableFileSizeString(Number(props.dataFile.size))}
+						{getReadableFileSizeString(Number(dataFile.size))}
 					</div>
 				</div>
 			</div>
@@ -149,7 +154,7 @@ export default function TabHome(props: Props) {
 
 	return (
 		<div className='container mt-5'>
-			<ModalEntry currEntry={null} showModal={showModal} setShowModal={(show) => setShowModal(show)} />
+			<ModalEntry currEntry={null} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
 
 			<div className='jumbotron'>
 				<div className='row align-items-center no-gutters'>
@@ -166,7 +171,7 @@ export default function TabHome(props: Props) {
 						<h1 className='text-primary mb-0 d-block d-md-none'>Brain Cloud</h1>
 					</div>
 					<div className='col-auto'>
-						<button className='btn btn-primary px-4 text-uppercase' type='button' disabled={!props.dataFile} onClick={() => setShowModal(true)}>
+						<button className='btn btn-primary px-4 text-uppercase' type='button' disabled={!dataFile} onClick={() => setShowModal(true)}>
 							Create
 							<br />
 							Entry
@@ -182,8 +187,8 @@ export default function TabHome(props: Props) {
 				<div className='row mb-5'>
 					<div className='col-12 col-md d-flex mb-5 mb-md-0'>
 						<div className='card flex-fill'>
-							<div className={'card-header' + (props.authState.status === AuthState.Authenticated ? ' bg-success' : ' bg-warning')}>
-								<h5 className='card-title text-white mb-0'>{props.authState.status || '???'}</h5>
+							<div className={'card-header' + (authState && authState.status === AuthState.Authenticated ? ' bg-success' : ' bg-warning')}>
+								<h5 className='card-title text-white mb-0'>{authState ? authState.status : '???'}</h5>
 							</div>
 							<div className='card-body bg-light text-dark'>{renderCardAuthUser()}</div>
 						</div>

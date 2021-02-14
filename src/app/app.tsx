@@ -39,7 +39,7 @@ import '../css/react-tags.css'
 import '../css/svg-images.css'
 import '../css/style.css'
 import LogoBase64 from '../img/logo_base64'
-import * as GDrive from './google-oauth' // load before tabs so it'll init
+import * as GDrive from './google-oauth'
 import TabHome from '../app/app-home'
 import TabView, { IAppViewState } from '../app/app-view'
 import TabImport from '../app/app-import'
@@ -199,15 +199,7 @@ class App extends React.Component<IAppProps, IAppState> {
 
 	// App Pages
 
-	Home = () => (
-		<TabHome
-			authState={this.state.auth}
-			dataFile={this.state.dataFile || null}
-			doAuthSignIn={GDrive.doAuthSignIn}
-			doAuthSignOut={GDrive.doAuthSignOut}
-			onShowModal={this.chgShowModal}
-		/>
-	)
+	Home = () => <TabHome />
 
 	Journal = () => (
 		<TabView
