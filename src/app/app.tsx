@@ -39,6 +39,7 @@ import '../css/react-tags.css'
 import '../css/svg-images.css'
 import '../css/style.css'
 import LogoBase64 from '../img/logo_base64'
+import * as GDrive from './google-oauth' // load before tabs so it'll init
 import TabHome from '../app/app-home'
 import TabView, { IAppViewState } from '../app/app-view'
 import TabImport from '../app/app-import'
@@ -46,7 +47,6 @@ import TabSearch, { IAppSearchState } from '../app/app-search'
 import TabAdmin, { IAppAdminState } from '../app/app-admin'
 import TabTags, { IAppTagsState } from '../app/app-tags'
 import EntryModal from './modal-daily-entry'
-import * as GDrive from './google-oauth'
 
 // App Logic
 interface IAppProps {
