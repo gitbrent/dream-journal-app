@@ -63,10 +63,6 @@ export default function TabView(props: Props) {
 		// TODO: return props.doSaveViewState(this.state)
 	}, [])
 
-	useEffect(() => {
-		if (currEntry) setShowModal(true)
-	}, [currEntry])
-
 	function onDateRangeChange(opts: { dateFrom: Date; dateTo: Date }) {
 		setDateRangeFrom(opts.dateFrom || null)
 		setDateRangeTo(opts.dateTo || null)
@@ -139,7 +135,12 @@ export default function TabView(props: Props) {
 											{entry.dreams.filter((dream) => dream.isLucidDream === true).length > 0 && <CheckCircleFill size='24' className='text-success' />}
 										</td>
 										<td className='text-center'>
-											<button onClick={(_ev) => setCurrEntry(entry)} className='btn btn-sm btn-outline-primary px-4'>
+											<button
+												onClick={(_ev) => {
+													setCurrEntry(entry)
+													setShowModal(true)
+												}}
+												className='btn btn-sm btn-outline-primary px-4'>
 												Edit
 											</button>
 										</td>
