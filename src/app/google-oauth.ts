@@ -295,7 +295,7 @@ function doGetDataFile() {
 		return
 	}
 
-	if (gBusyLoadCallback) gBusyLoadCallback(true)
+	gBusyLoadCallback(true)
 
 	/**
 	 * GET https://www.googleapis.com/drive/v3/files/
@@ -330,7 +330,7 @@ function doGetDataFile() {
 				})
 		})
 		.catch((error) => {
-			if (gBusyLoadCallback) gBusyLoadCallback(false)
+			gBusyLoadCallback(false)
 			if (error.code === '401') {
 				doAuthSignIn()
 			} else {
@@ -423,7 +423,7 @@ function doSelectFile() {
 
 					// C:
 					gDataCallback(gDataFile)
-					if (gBusyLoadCallback) gBusyLoadCallback(false)
+					gBusyLoadCallback(false)
 				})
 				.catch((error) => {
 					throw new Error(error)
