@@ -1,6 +1,8 @@
 /**
  * NAME: google-oauth.js
  * DESC: Singleton instance for oatuh vars/methods
+ * @see https://developers.google.com/drive/api/v3/appdata
+ * @see https://developers.google.com/drive/api/v3/search-parameters#file_fields
  */
 import { AuthState, IAuthState, IDriveFile, IJournalEntry } from './app.types'
 
