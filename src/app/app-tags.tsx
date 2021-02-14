@@ -3,6 +3,7 @@ import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveFil
 import { InfoCircle, Search } from 'react-bootstrap-icons'
 import DreamSignTag from './comp-app/dreamsign-tag'
 import * as GDrive from './google-oauth'
+import ModalEntry from './modal-entry'
 
 export interface IAppTagsProps {
 	dataFile: IDriveFile
@@ -19,6 +20,9 @@ enum FilterSortOrder {
 }
 
 export default function TabAdmin(props: IAppTagsProps) {
+	const [showModal, setShowModal] = useState(false)
+	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
+	//
 	const [totalMonths, setTotalMonths] = useState(0)
 	const [totalYears, setTotalYears] = useState(0)
 	const [totalEntries, setTotalEntries] = useState(0)
@@ -258,6 +262,8 @@ export default function TabAdmin(props: IAppTagsProps) {
 						.map((tagGrp, idx) => (
 							<DreamSignTag
 								key={`keyTagGrp${idx}`}
+								setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
+								setShowModal={(show: boolean) => setShowModal(show)}
 								tagGrp={tagGrp}
 								viewType={filterViewType}
 								doMassUpdateTag={doMassUpdateTag}
@@ -272,6 +278,8 @@ export default function TabAdmin(props: IAppTagsProps) {
 	function renderTagsByCat(): JSX.Element {
 		return (
 			<section className='bg-light p-4'>
+				<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
+
 				<div className='row mb-3'>
 					<div className='col'>
 						<h5 className='text-primary'>Search Dream Tags</h5>
@@ -318,6 +326,8 @@ export default function TabAdmin(props: IAppTagsProps) {
 											.map((tagGrp, idx) => (
 												<DreamSignTag
 													key={`keyTagGrp${idx}`}
+													setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
+													setShowModal={(show: boolean) => setShowModal(show)}
 													tagGrp={tagGrp}
 													viewType={filterViewType}
 													doMassUpdateTag={doMassUpdateTag}

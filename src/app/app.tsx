@@ -223,14 +223,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		/>
 	)
 
-	Admin = () => (
-		<TabAdmin
-			dataFile={this.state.dataFile && this.state.dataFile.entries ? this.state.dataFile : null}
-			onShowModal={this.chgShowModal}
-			doSaveAdminState={this.doSaveAdminState}
-			adminState={this.state.childAdminState}
-		/>
-	)
+	Admin = () => <TabAdmin dataFile={this.state.dataFile || null} doSaveAdminState={this.doSaveAdminState} adminState={this.state.childAdminState} />
 
 	render() {
 		return (

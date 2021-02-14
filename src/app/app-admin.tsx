@@ -33,10 +33,10 @@ import { InfoCircle, Search } from 'react-bootstrap-icons'
 import * as GDrive from './google-oauth'
 import DreamSignTag from './comp-app/dreamsign-tag'
 import AlertGdriveStatus from './comp-app/alert-gstat'
+import ModalEntry from './modal-entry'
 
 export interface IAppAdminProps {
 	dataFile: IDriveFile
-	onShowModal: Function
 	doSaveAdminState: Function
 	adminState: IAppAdminState
 }
@@ -59,6 +59,9 @@ enum FilterSortOrder {
 }
 
 export default function TabAdmin(props: IAppAdminProps) {
+	const [showModal, setShowModal] = useState(false)
+	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
+	//
 	const [totalMonths, setTotalMonths] = useState(0)
 	const [totalYears, setTotalYears] = useState(0)
 	const [totalEntries, setTotalEntries] = useState(0)
@@ -321,7 +324,14 @@ export default function TabAdmin(props: IAppAdminProps) {
 								return a.totalOccurs < b.totalOccurs ? -1 : a.totalOccurs > b.totalOccurs ? 1 : a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
 						})
 						.map((tagGrp, idx) => (
-							<DreamSignTag key={`keyTagGrp${idx}`} tagGrp={tagGrp} viewType={filterViewType} doMassUpdateTag={doMassUpdateTag} />
+							<DreamSignTag
+								key={`keyTagGrp${idx}`}
+								setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
+								setShowModal={(show: boolean) => setShowModal(show)}
+								tagGrp={tagGrp}
+								viewType={filterViewType}
+								doMassUpdateTag={doMassUpdateTag}
+							/>
 						))}
 				</div>
 			</section>
@@ -335,7 +345,13 @@ export default function TabAdmin(props: IAppAdminProps) {
 
 				<div className='mt-4'>
 					{dupeDreamSigns.map((entry, idx) => (
-						<button key={`tagDupe${idx}`} onClick={() => props.onShowModal({ show: true, editEntry: entry })} className='btn btn-sm btn-secondary mb-2 mr-2'>
+						<button
+							key={`tagDupe${idx}`}
+							onClick={(_ev) => {
+								setCurrEntry(entry)
+								setShowModal(true)
+							}}
+							className='btn btn-sm btn-secondary mb-2 mr-2'>
 							{entry.entryDate}
 						</button>
 					))}
@@ -353,7 +369,13 @@ export default function TabAdmin(props: IAppAdminProps) {
 
 				<div className='mt-4'>
 					{badBedTimes.map((entry, idx) => (
-						<button key={`badTime${idx}`} onClick={() => props.onShowModal({ show: true, editEntry: entry })} className='btn btn-sm btn-secondary mb-2 mr-2'>
+						<button
+							key={`badTime${idx}`}
+							onClick={(_ev) => {
+								setCurrEntry(entry)
+								setShowModal(true)
+							}}
+							className='btn btn-sm btn-secondary mb-2 mr-2'>
 							{entry.bedTime || '(empty)'}
 						</button>
 					))}
@@ -378,6 +400,8 @@ export default function TabAdmin(props: IAppAdminProps) {
 		<AlertGdriveStatus />
 	) : (
 		<main className='container mb-5'>
+			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
+
 			{renderHeader()}
 
 			<ul className='nav nav-tabs nav-fill' id='adminTab' role='tablist'>

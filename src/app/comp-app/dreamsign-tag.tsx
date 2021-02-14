@@ -1,18 +1,16 @@
 import React, { useState } from 'react'
 import moment from 'moment'
-import { CardDreamSignGrpViewType, IDreamSignTagGroup, IJournalEntry, MONTHS } from '../app.types'
-import ModalEntry from '../modal-entry'
+import { CardDreamSignGrpViewType, IDreamSignTagGroup, MONTHS } from '../app.types'
 
-export interface IDreamSignTagProps {
+export interface Props {
+	setCurrEntry: Function
+	setShowModal: Function
 	tagGrp: IDreamSignTagGroup
 	viewType: CardDreamSignGrpViewType
 	doMassUpdateTag: Function
 }
 
-export default function DreamSignTag(props: IDreamSignTagProps) {
-	const [showModal, setShowModal] = useState(false)
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
-	//
+export default function DreamSignTag(props: Props) {
 	const [showDreams, setShowDreams] = useState(false)
 	const [showRename, setShowRename] = useState(false)
 	const [renameValue, setRenameValue] = useState('')
@@ -32,16 +30,14 @@ export default function DreamSignTag(props: IDreamSignTagProps) {
 			</div>
 			<div className={`card-body ${props.viewType === CardDreamSignGrpViewType.md ? 'p-2' : ''}`}>
 				<div>
-					<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
-
 					{showDreams &&
 						props.tagGrp.dailyEntries.map((entry, idy) => (
 							<div
 								key={`cardTagDate${props.tagGrp.dreamSign}${idy}`}
 								title={Math.abs(Math.round(moment(entry.entryDate).diff(moment(new Date()), 'months', true))) + ' months ago'}
 								onClick={(_ev) => {
-									setCurrEntry(entry)
-									setShowModal(true)
+									props.setCurrEntry(entry)
+									props.setShowModal(true)
 								}}
 								className='cursor-link text-center text-sm d-inline-block mb-3 mr-3'
 								style={{ userSelect: 'none', minWidth: '65px' }}>
