@@ -14,7 +14,7 @@ const JOURNAL_HEADER = {
 	mimeType: 'application/json',
 }
 
-let gAuthState: IAuthState = null
+let gAuthState: IAuthState = { status: AuthState.Unauthenticated, userName: '', userPhoto: '' }
 let gDataFile: IDriveFile = null
 let gAuthCallback: Function = null
 let gDataCallback: Function = null
@@ -69,7 +69,7 @@ export function doAuthUpdate() {
 						}
 
 						// B: Notify listeners
-						gAuthCallback(gAuthState)
+						if (gAuthCallback) gAuthCallback(gAuthState)
 
 						// C: Go ahead and load data file since we need it
 						doGetDataFile()
@@ -82,7 +82,7 @@ export function doAuthUpdate() {
 						gAuthState.status = AuthState.Unauthenticated
 						console.error ? console.error(error) : console.log(error)
 					}
-					gAuthCallback(gAuthState)
+					if (gAuthCallback) gAuthCallback(gAuthState)
 				})
 		})
 	}
@@ -141,9 +141,9 @@ export function doAuthSignOut() {
 				userName: '',
 				userPhoto: '',
 			}
-			gAuthCallback(gAuthState)
+			if (gAuthCallback) gAuthCallback(gAuthState)
 			gDataFile = null
-			gDataCallback(gDataFile)
+			if (gDataCallback) gDataCallback(gDataFile)
 
 			localStorage.setItem('journal-selected-fileid', null)
 		})
@@ -295,7 +295,7 @@ function doGetDataFile() {
 		return
 	}
 
-	gBusyLoadCallback(true)
+	if (gBusyLoadCallback) gBusyLoadCallback(true)
 
 	/**
 	 * GET https://www.googleapis.com/drive/v3/files/
@@ -330,7 +330,7 @@ function doGetDataFile() {
 				})
 		})
 		.catch((error) => {
-			gBusyLoadCallback(false)
+			if (gBusyLoadCallback) gBusyLoadCallback(false)
 			if (error.code === '401') {
 				doAuthSignIn()
 			} else {
@@ -422,8 +422,8 @@ function doSelectFile() {
 					gDataFile.entries = entries || []
 
 					// C:
-					gDataCallback(gDataFile)
-					gBusyLoadCallback(false)
+					if (gDataCallback) gDataCallback(gDataFile)
+					if (gBusyLoadCallback) gBusyLoadCallback(false)
 				})
 				.catch((error) => {
 					throw new Error(error)
