@@ -32,9 +32,14 @@
 	word-break: break-word;
 }
 
+/* yetiborg adjustments */
 .nav-tabs {
 	border-bottom: 1px solid #3c3c3c;
 }
+.modal-footer {
+	border-top: 1px solid #3c3c3c;
+}
+
 /*
 .modal-dialog .nav-tabs .nav-link,
 .modal-dialog .nav-pills .nav-link {

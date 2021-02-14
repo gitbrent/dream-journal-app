@@ -95,7 +95,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 	function renderTopToolbar(): JSX.Element {
 		return (
 			<nav>
-				<div className='row px-4 pt-4'>
+				<div className='row pt-4'>
 					<div className='col-6 col-lg-3 mb-4'>
 						<div className='input-group'>
 							<div className='input-group-prepend' title='Entry Date'>
@@ -397,10 +397,10 @@ export default function TabAdmin(props: IModalEntryProps) {
 					<Modal.Title className='text-white h6'>Journal Entry</Modal.Title>
 				</Modal.Header>
 
-				<Modal.Body className='container bg-light p-0'>
+				<Modal.Body className='container bg-light py-0 px-4'>
 					{renderTopToolbar()}
 
-					<ul className='nav nav-tabs px-4' role='tablist'>
+					<ul className='nav nav-tabs' role='tablist'>
 						<li className='nav-item' key='tabDream00'>
 							<a href='#' onClick={() => setSelectedTab(-1)} className={'nav-link' + (selectedTab === -1 ? ' active' : '')} data-toggle='tab' role='tab'>
 								Notes
@@ -414,7 +414,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 							</li>
 						))}
 					</ul>
-					<div className='tab-content py-3 px-4'>{selectedTab === -1 ? renderTabNotes() : <div className='tab-content'>{renderTabDream(selectedTab)}</div>}</div>
+					<div className='tab-content py-3'>{selectedTab === -1 ? renderTabNotes() : <div className='tab-content'>{renderTabDream(selectedTab)}</div>}</div>
 				</Modal.Body>
 
 				<Modal.Footer className='px-4'>
