@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import moment from 'moment'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IJournalEntry, MONTHS } from '../app.types'
 import ModalEntry from '../modal-entry'
@@ -46,10 +46,10 @@ export default function DreamSignTag(props: IDreamSignTagProps) {
 								className='cursor-link text-center text-sm d-inline-block mb-3 mr-3'
 								style={{ userSelect: 'none', minWidth: '65px' }}>
 								<div className='bg-danger px-2 py-1 text-white align-text-middle rounded-top'>
-									<h6 className='mb-0'>{new Date(entry.entryDate).getFullYear()}</h6>
+									<h6 className='mb-0'>{moment(entry.entryDate).format('YYYY')}</h6>
 								</div>
 								<div className='bg-white px-2 py-3 rounded-bottom'>
-									{MONTHS[new Date(entry.entryDate).getMonth()]} {new Date(entry.entryDate).getDate()}
+									{MONTHS[Number(moment(entry.entryDate).format('M')) - 1]} {moment(entry.entryDate).format('DD')}
 								</div>
 							</div>
 						))}
