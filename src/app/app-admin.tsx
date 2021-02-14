@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDriveFile, IJournalEntry } from './app.types'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
-import DreamSignTag from './comp-app/dreamsign-tag'
 import * as GDrive from './google-oauth'
+import DreamSignTag from './comp-app/dreamsign-tag'
+import AlertGdriveStatus from './comp-app/alert-gstat'
 
 export interface IAppAdminProps {
 	dataFile: IDriveFile
@@ -291,12 +292,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 								return a.totalOccurs < b.totalOccurs ? -1 : a.totalOccurs > b.totalOccurs ? 1 : a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
 						})
 						.map((tagGrp, idx) => (
-							<DreamSignTag
-								key={`keyTagGrp${idx}`}
-								tagGrp={tagGrp}
-								viewType={filterViewType}
-								doMassUpdateTag={doMassUpdateTag}
-							/>
+							<DreamSignTag key={`keyTagGrp${idx}`} tagGrp={tagGrp} viewType={filterViewType} doMassUpdateTag={doMassUpdateTag} />
 						))}
 				</div>
 			</section>
@@ -350,7 +346,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 	}
 
 	return !props.dataFile || !props.dataFile.entries ? (
-		<div />
+		<AlertGdriveStatus />
 	) : (
 		<main className='container mb-5'>
 			{renderHeader()}
