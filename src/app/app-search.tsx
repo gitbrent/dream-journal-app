@@ -3,6 +3,7 @@ import { IDriveFile, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.
 import { Search } from 'react-bootstrap-icons'
 import Alert from 'react-bootstrap/Alert'
 import SearchResults from './comp-app/search-results'
+import AlertGdriveStatus from './comp-app/alert-gstat'
 
 export interface IAppSearchProps {
 	dataFile: IDriveFile
@@ -207,7 +208,9 @@ export default function TabSearch(props: IAppSearchProps) {
 		setSearchMatches(arrFound)
 	}
 
-	return (
+	return !props.dataFile || !props.dataFile.entries ? (
+		<AlertGdriveStatus />
+	) : (
 		<div>
 			<header className='container my-5'>
 				{showAlert && (
