@@ -31,6 +31,7 @@ import * as React from 'react'
 import { APP_VER, AuthState, IAuthState, IDriveFile } from './app.types'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
+import ModalEntry from './modal-entry'
 
 function getReadableFileSizeString(fileSizeInBytes: number) {
 	let idx = -1
@@ -52,6 +53,7 @@ export interface IHomeProps {
 }
 interface IHomeState {
 	errorMessage: string
+	showModal: boolean
 	fileBeingRenamed: IDriveFile
 	newFileName: string
 	isRenaming: boolean
@@ -63,6 +65,7 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 
 		this.state = {
 			errorMessage: '',
+			showModal: false,
 			fileBeingRenamed: null,
 			newFileName: '',
 			isRenaming: false,
@@ -83,12 +86,6 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 	}
 	handleAuthSignOut = (_event: React.MouseEvent<HTMLButtonElement>) => {
 		this.props.doAuthSignOut()
-	}
-
-	handleNewModal = (_event: React.MouseEvent<HTMLInputElement>) => {
-		this.props.onShowModal({
-			show: true,
-		})
 	}
 
 	/**
@@ -181,6 +178,8 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 
 		return (
 			<div className='container mt-5'>
+				<ModalEntry currEntry={null} showModal={this.state.showModal} setShowModal={(show) => this.setState({ showModal: show })} />
+
 				<div className='jumbotron'>
 					<div className='row align-items-center no-gutters'>
 						<div className='col'>
@@ -196,7 +195,11 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 							<h1 className='text-primary mb-0 d-block d-md-none'>Brain Cloud</h1>
 						</div>
 						<div className='col-auto'>
-							<button className='btn btn-primary px-4 text-uppercase' type='button' disabled={!this.props.dataFile} onClick={this.handleNewModal}>
+							<button
+								className='btn btn-primary px-4 text-uppercase'
+								type='button'
+								disabled={!this.props.dataFile}
+								onClick={() => this.setState({ showModal: true })}>
 								Create
 								<br />
 								Entry
