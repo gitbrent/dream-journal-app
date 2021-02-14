@@ -271,7 +271,7 @@ export function doesEntryDateExist(checkDate: string): boolean {
 export function getUniqueDreamTags(): string[] {
 	let arrTags: string[] = []
 
-	if (!gDataFile) return []
+	if (!gDataFile || !gDataFile.entries) return []
 
 	gDataFile.entries
 		.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
