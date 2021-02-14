@@ -27,80 +27,47 @@
  *  SOFTWARE.
  */
 
-import * as React from 'react'
+import React, { useState } from 'react'
 import { APP_VER, AuthState, IAuthState, IDriveFile } from './app.types'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
 import ModalEntry from './modal-entry'
 
-function getReadableFileSizeString(fileSizeInBytes: number) {
-	let idx = -1
-	let byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB']
-	do {
-		fileSizeInBytes = fileSizeInBytes / 1024
-		idx++
-	} while (fileSizeInBytes > 1024)
-
-	return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[idx]
-}
-
-export interface IHomeProps {
+export interface Props {
 	authState: IAuthState
 	dataFile: IDriveFile
 	doAuthSignIn: Function
 	doAuthSignOut: Function
 	onShowModal: Function
 }
-interface IHomeState {
-	errorMessage: string
-	showModal: boolean
-	fileBeingRenamed: IDriveFile
-	newFileName: string
-	isRenaming: boolean
-}
 
-export default class TabHome extends React.Component<IHomeProps, IHomeState> {
-	constructor(props: Readonly<IHomeProps>) {
-		super(props)
+export default function TabHome(props: Props) {
+	const [showModal, setShowModal] = useState(false)
+	//const [errorMessage, setErrorMessage] = useState('')
+	//const [isRenaming, setIsRenaming] = useState(false)
+	//const [fileBeingRenamed, setFileBeingRenamed] = useState<IDriveFile>(null)
+	//const [newFileName, setNewFileName] = useState('')
 
-		this.state = {
-			errorMessage: '',
-			showModal: false,
-			fileBeingRenamed: null,
-			newFileName: '',
-			isRenaming: false,
-		}
+	function getReadableFileSizeString(fileSizeInBytes: number) {
+		let idx = -1
+		let byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB']
+		do {
+			fileSizeInBytes = fileSizeInBytes / 1024
+			idx++
+		} while (fileSizeInBytes > 1024)
+
+		return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[idx]
 	}
 
-	/**
-	 * Detect prop (auth) changes, then re-render file list
-	 */
-	componentDidUpdate(prevProps: any) {
-		if (this.props.authState.status !== prevProps.authState.status) {
-			// TODO: (?): this.handleDriveFileList(null)
-		}
-	}
-
-	handleAuthSignIn = (_event: React.MouseEvent<HTMLButtonElement>) => {
-		this.props.doAuthSignIn()
-	}
-	handleAuthSignOut = (_event: React.MouseEvent<HTMLButtonElement>) => {
-		this.props.doAuthSignOut()
-	}
-
-	/**
-	 * @see: https://developers.google.com/drive/api/v3/appdata
-	 * @see: https://developers.google.com/drive/api/v3/search-parameters#file_fields
-	 */
-	render() {
+	function renderCardAuthUser(): JSX.Element {
 		let cardAuthUser: JSX.Element
-		if (this.props.authState.status === AuthState.Authenticated) {
+		if (props.authState.status === AuthState.Authenticated) {
 			cardAuthUser = (
 				<div>
 					<div className='row mb-4'>
 						<div className='col'>
 							<label className='text-muted text-uppercase d-block'>User Name</label>
-							{this.props.authState.userName}
+							{props.authState.userName}
 						</div>
 						<div className='col-auto text-right'>
 							<label className='text-muted text-uppercase d-block'>App Version</label>
@@ -109,23 +76,23 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 					</div>
 					<div className='row mb-0'>
 						<div className='col'>
-							<button className='btn btn-outline-primary w-100' onClick={this.handleAuthSignIn}>
+							<button className='btn btn-outline-primary w-100' onClick={() => props.doAuthSignIn()}>
 								Renew
 							</button>
 						</div>
 						<div className='col'>
-							<button className='btn btn-outline-secondary w-100' onClick={this.handleAuthSignOut}>
+							<button className='btn btn-outline-secondary w-100' onClick={() => props.doAuthSignOut()}>
 								Sign Out
 							</button>
 						</div>
 					</div>
 				</div>
 			)
-		} else if (this.props.authState.status === AuthState.Expired) {
+		} else if (props.authState.status === AuthState.Expired) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Your session has expired. Please re-authenticate to continue.</p>
-					<button className='btn btn-warning' onClick={this.handleAuthSignIn}>
+					<button className='btn btn-warning' onClick={() => props.doAuthSignIn()}>
 						Sign In
 					</button>
 				</div>
@@ -134,126 +101,125 @@ export default class TabHome extends React.Component<IHomeProps, IHomeState> {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Please sign-in to allow access to Google Drive space.</p>
-					<button className='btn btn-primary' onClick={this.handleAuthSignIn}>
+					<button className='btn btn-primary' onClick={() => props.doAuthSignIn()}>
 						Sign In/Authorize
 					</button>
 				</div>
 			)
 		}
 
-		let cardDataFile: JSX.Element =
-			this.props.dataFile && (this.props.dataFile._isSaving || this.props.dataFile._isLoading) ? (
-				<div className='text-center'>
-					<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
-						<span className='sr-only' />
-					</div>
-					<div>Loading/Saving...</div>
+		return cardAuthUser
+	}
+
+	function renderCardDataFile(): JSX.Element {
+		return props.dataFile && (props.dataFile._isSaving || props.dataFile._isLoading) ? (
+			<div className='text-center'>
+				<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
+					<span className='sr-only' />
 				</div>
-			) : this.props.dataFile ? (
-				<div>
-					<div className='row mb-3'>
-						<div className='col'>
-							<label className='text-muted text-uppercase d-block'>File Name</label>
-							{this.props.dataFile.name}
-						</div>
-						<div className='col-auto text-right'>
-							<label className='text-muted text-uppercase d-block'>Entries</label>
-							{this.props.dataFile.entries ? this.props.dataFile.entries.length : '?'}
-						</div>
+				<div>Loading/Saving...</div>
+			</div>
+		) : props.dataFile ? (
+			<div>
+				<div className='row mb-3'>
+					<div className='col'>
+						<label className='text-muted text-uppercase d-block'>File Name</label>
+						{props.dataFile.name}
 					</div>
-					<div className='row'>
-						<div className='col'>
-							<label className='text-muted text-uppercase d-block'>Last Saved</label>
-							{this.props.dataFile ? new Date(this.props.dataFile.modifiedTime).toLocaleString() : '-'}
-						</div>
-						<div className='col-auto text-right'>
-							<label className='text-muted text-uppercase d-block'>File Size</label>
-							{getReadableFileSizeString(Number(this.props.dataFile.size))}
-						</div>
+					<div className='col-auto text-right'>
+						<label className='text-muted text-uppercase d-block'>Entries</label>
+						{props.dataFile.entries ? props.dataFile.entries.length : '?'}
 					</div>
 				</div>
-			) : (
-				<div className='text-muted'>(none)</div>
-			)
+				<div className='row'>
+					<div className='col'>
+						<label className='text-muted text-uppercase d-block'>Last Saved</label>
+						{props.dataFile ? new Date(props.dataFile.modifiedTime).toLocaleString() : '-'}
+					</div>
+					<div className='col-auto text-right'>
+						<label className='text-muted text-uppercase d-block'>File Size</label>
+						{getReadableFileSizeString(Number(props.dataFile.size))}
+					</div>
+				</div>
+			</div>
+		) : (
+			<div className='text-muted'>(none)</div>
+		)
+	}
 
-		return (
-			<div className='container mt-5'>
-				<ModalEntry currEntry={null} showModal={this.state.showModal} setShowModal={(show) => this.setState({ showModal: show })} />
+	return (
+		<div className='container mt-5'>
+			<ModalEntry currEntry={null} showModal={showModal} setShowModal={(show) => setShowModal(show)} />
 
-				<div className='jumbotron'>
-					<div className='row align-items-center no-gutters'>
-						<div className='col'>
-							<h1 className='display-4 text-primary mb-0 d-none d-md-none d-xl-block'>
-								<img src={LogoBase64} width='150' height='150' className='mr-4' alt='Logo' />
-								Brain Cloud - Dream Journal
-							</h1>
-							<h3 className='text-primary mb-0 d-none d-md-none d-lg-block d-xl-none'>
-								<img src={LogoBase64} width='75' height='75' className='mr-4' alt='Logo' />
-								Brain Cloud - Dream Journal
-							</h3>
-							<h1 className='text-primary mb-0 d-none d-md-block d-lg-none'>Brain Cloud - Dream Journal</h1>
-							<h1 className='text-primary mb-0 d-block d-md-none'>Brain Cloud</h1>
-						</div>
-						<div className='col-auto'>
-							<button
-								className='btn btn-primary px-4 text-uppercase'
-								type='button'
-								disabled={!this.props.dataFile}
-								onClick={() => this.setState({ showModal: true })}>
-								Create
-								<br />
-								Entry
-								<Plus size='64' className='d-none  d-md-none d-lg-block' />
-								<Plus size='32' className='d-block d-lg-none' />
-							</button>
+			<div className='jumbotron'>
+				<div className='row align-items-center no-gutters'>
+					<div className='col'>
+						<h1 className='display-4 text-primary mb-0 d-none d-md-none d-xl-block'>
+							<img src={LogoBase64} width='150' height='150' className='mr-4' alt='Logo' />
+							Brain Cloud - Dream Journal
+						</h1>
+						<h3 className='text-primary mb-0 d-none d-md-none d-lg-block d-xl-none'>
+							<img src={LogoBase64} width='75' height='75' className='mr-4' alt='Logo' />
+							Brain Cloud - Dream Journal
+						</h3>
+						<h1 className='text-primary mb-0 d-none d-md-block d-lg-none'>Brain Cloud - Dream Journal</h1>
+						<h1 className='text-primary mb-0 d-block d-md-none'>Brain Cloud</h1>
+					</div>
+					<div className='col-auto'>
+						<button className='btn btn-primary px-4 text-uppercase' type='button' disabled={!props.dataFile} onClick={() => setShowModal(true)}>
+							Create
+							<br />
+							Entry
+							<Plus size='64' className='d-none  d-md-none d-lg-block' />
+							<Plus size='32' className='d-block d-lg-none' />
+						</button>
+					</div>
+				</div>
+
+				<p className='lead mt-3'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</p>
+				<hr className='my-4' />
+
+				<div className='row mb-5'>
+					<div className='col-12 col-md d-flex mb-5 mb-md-0'>
+						<div className='card flex-fill'>
+							<div className={'card-header' + (props.authState.status === AuthState.Authenticated ? ' bg-success' : ' bg-warning')}>
+								<h5 className='card-title text-white mb-0'>{props.authState.status || '???'}</h5>
+							</div>
+							<div className='card-body bg-light text-dark'>{renderCardAuthUser()}</div>
 						</div>
 					</div>
-
-					<p className='lead mt-3'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</p>
-					<hr className='my-4' />
-
-					<div className='row mb-5'>
-						<div className='col-12 col-md d-flex mb-5 mb-md-0'>
-							<div className='card flex-fill'>
-								<div className={'card-header' + (this.props.authState.status === AuthState.Authenticated ? ' bg-success' : ' bg-warning')}>
-									<h5 className='card-title text-white mb-0'>{this.props.authState.status || '???'}</h5>
-								</div>
-								<div className='card-body bg-light text-dark'>{cardAuthUser}</div>
+					<div className='col-12 col-md d-flex'>
+						<div className='card flex-fill'>
+							<div className='card-header bg-info'>
+								<h5 className='card-title text-white mb-0'>Dream Journal</h5>
 							</div>
-						</div>
-						<div className='col-12 col-md d-flex'>
-							<div className='card flex-fill'>
-								<div className='card-header bg-info'>
-									<h5 className='card-title text-white mb-0'>Dream Journal</h5>
-								</div>
-								<div className='card-body bg-light text-dark'>{cardDataFile}</div>
-							</div>
+							<div className='card-body bg-light text-dark'>{renderCardDataFile()}</div>
 						</div>
 					</div>
+				</div>
 
-					<div className='row mb-0'>
-						<div className='col-12 col-md d-flex'>
-							<div className='card'>
-								<div className='card-header bg-secondary'>
-									<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
-								</div>
-								<div className='card-body bg-light text-dark'>
-									<p className='card-text'>
-										This application uses your Google Drive to store dream journals so they are safe, secure, and accessible on any of your devices.
-									</p>
-									<p className='card-text'>
-										Click "Sign In", select the Google account to use with this app, view the request permissions page asking to create and modify{' '}
-										<strong>
-											<u>only its own files</u>
-										</strong>{' '}
-										on your Google Drive. (This app cannot access your other Google Drive files)
-									</p>
-								</div>
+				<div className='row mb-0'>
+					<div className='col-12 col-md d-flex'>
+						<div className='card'>
+							<div className='card-header bg-secondary'>
+								<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
+							</div>
+							<div className='card-body bg-light text-dark'>
+								<p className='card-text'>
+									This application uses your Google Drive to store dream journals so they are safe, secure, and accessible on any of your devices.
+								</p>
+								<p className='card-text'>
+									Click "Sign In", select the Google account to use with this app, view the request permissions page asking to create and modify{' '}
+									<strong>
+										<u>only its own files</u>
+									</strong>{' '}
+									on your Google Drive. (This app cannot access your other Google Drive files)
+								</p>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		)
-	}
+		</div>
+	)
 }
