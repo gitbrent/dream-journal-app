@@ -201,7 +201,7 @@ class App extends React.Component<IAppProps, IAppState> {
 
 	Home = () => <TabHome authState={this.state.auth} dataFile={this.state.dataFile || null} />
 
-	Journal = () => <TabView dataFile={this.state.dataFile || null} doSaveViewState={this.doSaveViewState} viewState={this.state.childViewState} />
+	View = () => <TabView dataFile={this.state.dataFile || null} doSaveViewState={this.doSaveViewState} viewState={this.state.childViewState} />
 
 	Search = () => (
 		<TabSearch
@@ -294,7 +294,7 @@ class App extends React.Component<IAppProps, IAppState> {
 				</nav>
 
 				<Route path='/' exact render={this.Home} />
-				<Route path='/journal' render={this.Journal} />
+				<Route path='/view' render={this.View} />
 				<Route path='/search' render={this.Search} />
 				<Route path='/tags' render={this.Tags} />
 				<Route path='/import' render={this.Import} />
