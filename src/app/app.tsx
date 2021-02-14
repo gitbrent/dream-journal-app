@@ -203,14 +203,7 @@ class App extends React.Component<IAppProps, IAppState> {
 
 	View = () => <TabView dataFile={this.state.dataFile || null} doSaveViewState={this.doSaveViewState} viewState={this.state.childViewState} />
 
-	Search = () => (
-		<TabSearch
-			dataFile={this.state.dataFile || null}
-			onShowModal={this.chgShowModal}
-			doSaveSearchState={this.doSaveSearchState}
-			searchState={this.state.childSearchState}
-		/>
-	)
+	Search = () => <TabSearch dataFile={this.state.dataFile || null} doSaveSearchState={this.doSaveSearchState} searchState={this.state.childSearchState} />
 
 	Tags = () => (
 		<TabTags
@@ -265,7 +258,7 @@ class App extends React.Component<IAppProps, IAppState> {
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/journal' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+								<NavLink to='/view' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
 									View Journal
 								</NavLink>
 							</li>

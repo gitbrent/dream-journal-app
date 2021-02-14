@@ -98,9 +98,8 @@ export interface IDreamSignTag {
  * An IJournalDream dream with parent entry's date and starred status
  */
 export interface ISearchMatch {
-	entryDate: IJournalEntry['entryDate']
-	starred: IJournalEntry['starred']
-	dream: IJournalDream
+	entry: IJournalEntry
+	dreamIdx: number
 }
 
 export interface IDreamSignTagGroup {

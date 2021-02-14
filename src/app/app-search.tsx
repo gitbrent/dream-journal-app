@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { IDriveFile, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
+import { IDriveFile, IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
 import { Search } from 'react-bootstrap-icons'
 import Alert from 'react-bootstrap/Alert'
 import SearchResults from './comp-app/search-results'
 import AlertGdriveStatus from './comp-app/alert-gstat'
+import ModalEntry from './modal-entry'
 
-export interface IAppSearchProps {
+export interface Props {
 	dataFile: IDriveFile
 	doSaveSearchState: Function
-	onShowModal: Function
 	searchState: IAppSearchState
 }
 export interface IAppSearchState {
@@ -20,8 +20,12 @@ export interface IAppSearchState {
 	showAlert: boolean
 }
 
-export default function TabSearch(props: IAppSearchProps) {
+export default function TabSearch(props: Props) {
 	let localShowAlert = JSON.parse(localStorage.getItem('show-alert-search'))
+	//
+	const [showModal, setShowModal] = useState(false)
+	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
+	//
 	const [showAlert, setShowAlert] = useState(typeof localShowAlert === 'boolean' ? localShowAlert : true)
 	const [totalDreams, setTotalDreams] = useState(0)
 	const [totalLucids, setTotalLucids] = useState(0)
@@ -100,13 +104,6 @@ export default function TabSearch(props: IAppSearchProps) {
 		setShowAlert(false)
 	}
 
-	function handleEntryEdit(entryDate: string) {
-		props.onShowModal({
-			show: true,
-			editEntry: props.dataFile.entries.filter((entry) => entry.entryDate === entryDate)[0],
-		})
-	}
-
 	function handleTypeChange(event: React.ChangeEvent<HTMLSelectElement>) {
 		if (event.target.value === SearchMatchTypes.contains) setSearchOptMatchType(SearchMatchTypes.contains)
 		else if (event.target.value === SearchMatchTypes.starts) setSearchOptMatchType(SearchMatchTypes.starts)
@@ -123,14 +120,15 @@ export default function TabSearch(props: IAppSearchProps) {
 	// ------------------------------------------------------------------------
 
 	function doKeywordSearch() {
-		let arrFound = []
+		let arrFound: ISearchMatch[] = []
 		let regex = new RegExp(searchTerm, 'gi') // SearchMatchTypes.contains
+
 		if (searchOptMatchType === SearchMatchTypes.whole) regex = new RegExp('\\b' + searchTerm + '\\b', 'gi')
 		else if (searchOptMatchType === SearchMatchTypes.starts) regex = new RegExp('\\b' + searchTerm, 'gi')
 		if (!props.dataFile || props.dataFile.entries.length <= 0) return
 
 		props.dataFile.entries.forEach((entry) => {
-			;(entry.dreams || []).forEach((dream) => {
+			;(entry.dreams || []).forEach((dream, idx) => {
 				if (searchOptScope === SearchScopes.all) {
 					if (
 						(dream.notes || '').match(regex) ||
@@ -138,33 +136,29 @@ export default function TabSearch(props: IAppSearchProps) {
 						(Array.isArray(dream.dreamSigns) && dream.dreamSigns.filter((sign) => sign.match(regex)).length > 0)
 					) {
 						arrFound.push({
-							entryDate: entry.entryDate,
-							starred: entry.starred,
-							dream: dream,
+							entry: entry,
+							dreamIdx: idx,
 						})
 					}
 				} else if (searchOptScope === SearchScopes.notes) {
 					if ((dream.notes || '').match(regex)) {
 						arrFound.push({
-							entryDate: entry.entryDate,
-							starred: entry.starred,
-							dream: dream,
+							entry: entry,
+							dreamIdx: idx,
 						})
 					}
 				} else if (searchOptScope === SearchScopes.signs) {
 					if (Array.isArray(dream.dreamSigns) && dream.dreamSigns.filter((sign) => sign.match(regex)).length > 0) {
 						arrFound.push({
-							entryDate: entry.entryDate,
-							starred: entry.starred,
-							dream: dream,
+							entry: entry,
+							dreamIdx: idx,
 						})
 					}
 				} else if (searchOptScope === SearchScopes.title) {
 					if ((dream.title || '').match(regex)) {
 						arrFound.push({
-							entryDate: entry.entryDate,
-							starred: entry.starred,
-							dream: dream,
+							entry: entry,
+							dreamIdx: idx,
 						})
 					}
 				}
@@ -212,6 +206,8 @@ export default function TabSearch(props: IAppSearchProps) {
 		<AlertGdriveStatus />
 	) : (
 		<div>
+			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
+
 			<header className='container my-5'>
 				{showAlert && (
 					<Alert variant='secondary'>
@@ -353,7 +349,8 @@ export default function TabSearch(props: IAppSearchProps) {
 							{searchMatches ? (
 								searchMatches.map((match) => (
 									<SearchResults
-										handleEntryEdit={handleEntryEdit}
+										setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
+										setShowModal={(show: boolean) => setShowModal(show)}
 										searchMatch={match}
 										searchTerm={searchTerm}
 										searchOptScope={searchOptScope}
