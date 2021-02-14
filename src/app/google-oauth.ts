@@ -18,6 +18,7 @@ let gAuthState: IAuthState = null
 let gDataFile: IDriveFile = null
 let gAuthCallback: Function = null
 let gDataCallback: Function = null
+let gBusyLoadCallback: Function = null
 
 // PUBLIC METHODS ------------------------------------------------------------
 
@@ -27,6 +28,10 @@ export function authStateCallback(callback: Function) {
 export function dataFileCallback(callback: Function) {
 	gDataCallback = callback
 }
+export function busyLoadCallback(callback: Function) {
+	gBusyLoadCallback = callback
+}
+// TODO: export function busySaveCallback(callback: Function) {
 
 export function doAuthUpdate() {
 	// A: Get *current* value for `access_token` from location.href
@@ -266,6 +271,8 @@ export function doesEntryDateExist(checkDate: string): boolean {
 export function getUniqueDreamTags(): string[] {
 	let arrTags: string[] = []
 
+	if (!gDataFile) return []
+
 	gDataFile.entries
 		.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 		.forEach((entry) =>
@@ -287,6 +294,8 @@ function doGetDataFile() {
 		doAuthSignIn()
 		return
 	}
+
+	if (gBusyLoadCallback) gBusyLoadCallback(true)
 
 	/**
 	 * GET https://www.googleapis.com/drive/v3/files/
@@ -321,6 +330,7 @@ function doGetDataFile() {
 				})
 		})
 		.catch((error) => {
+			if (gBusyLoadCallback) gBusyLoadCallback(false)
 			if (error.code === '401') {
 				doAuthSignIn()
 			} else {
@@ -413,6 +423,7 @@ function doSelectFile() {
 
 					// C:
 					gDataCallback(gDataFile)
+					if (gBusyLoadCallback) gBusyLoadCallback(false)
 				})
 				.catch((error) => {
 					throw new Error(error)
