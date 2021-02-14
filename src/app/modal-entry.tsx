@@ -42,9 +42,13 @@ export default function TabAdmin(props: IModalEntryProps) {
 	const [selectedTab, setSelectedTab] = useState(-1)
 
 	/** Set/Clear Entry */
+	useEffect(() => {
+		setShowModal(props.showModal)
+		setUniqueTags(GDrive.getUniqueDreamTags)
+		if (props.showModal) setSelectedTab(-1)
+	}, [props.showModal])
+
 	useEffect(() => setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry])
-	useEffect(() => setUniqueTags(GDrive.getUniqueDreamTags), [props.showModal])
-	useEffect(() => setShowModal(props.showModal), [props.showModal])
 
 	// -----------------------------------------------------------------------
 
@@ -59,13 +63,24 @@ export default function TabAdmin(props: IModalEntryProps) {
 			GDrive.doEntryAdd(currEntry)
 		}
 
+		doSaveDataFile()
+	}
+
+	function handleDelete() {
+		if (!confirm('PLEASE CONFIRM\n^^^^^^ ^^^^^^^\n\nYou are deleting this *entire journal entry*!')) return
+
+		GDrive.doEntryDelete(currEntry.entryDate)
+		doSaveDataFile()
+	}
+
+	function doSaveDataFile() {
 		setIsBusySave(true)
 
 		GDrive.doSaveFile()
 			.then(() => {
-				props.setShowModal(false)
-				setIsBusySave(false)
 				setShowModal(false)
+				setIsBusySave(false)
+				props.setShowModal(false)
 			})
 			.catch((ex) => {
 				setIsBusySave(false)
@@ -81,7 +96,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 		return (
 			<nav>
 				<div className='row px-4 pt-4'>
-					<div className='col-6 col-md-3 mb-4'>
+					<div className='col-6 col-lg-3 mb-4'>
 						<div className='input-group'>
 							<div className='input-group-prepend' title='Entry Date'>
 								<span className='input-group-text bg-secondary px-2'>
@@ -99,12 +114,12 @@ export default function TabAdmin(props: IModalEntryProps) {
 									setCurrEntry(chgEntry)
 									setIsDateDupe(GDrive.doesEntryDateExist(ev.currentTarget.value))
 								}}
-								className={'form-control form-control-sm'}
+								className={`form-control form-control-sm ${isDateDupe && 'is-invalid'}`}
 								required
 							/>
 						</div>
 					</div>
-					<div className='col-6 col-md-3 mb-4'>
+					<div className='col-6 col-lg-3 mb-4'>
 						<div className='input-group'>
 							<div className='input-group-prepend' title='Bed Time'>
 								<span className='input-group-text bg-secondary px-2'>
@@ -133,6 +148,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 									let updEntry = { ...currEntry }
 									updEntry.dreams.push({ ...NEW_DREAM })
 									setCurrEntry(updEntry)
+									setSelectedTab(updEntry.dreams.length - 1)
 								}}
 								className='btn btn-sm btn-success w-100'>
 								<div className='row no-gutters align-items-center'>
@@ -155,7 +171,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 									<div className='col'>{currEntry.starred ? 'Starred' : 'Un-Starred'}</div>
 								</div>
 							</button>
-							<button type='button' onClick={() => console.log('TODO:')} className='btn btn-sm btn-danger w-25'>
+							<button type='button' onClick={() => handleDelete()} className='btn btn-sm btn-danger w-25'>
 								<Trash size='1.2rem' />
 							</button>
 						</div>
@@ -165,15 +181,15 @@ export default function TabAdmin(props: IModalEntryProps) {
 		)
 	}
 
-	function renderDreamTabNotes(): JSX.Element {
+	function renderTabNotes_Horiz(): JSX.Element {
 		return (
 			<div role='tabpanel' aria-labelledby='drmtabNOTES-tab' key='dreamrowNOTES'>
 				<div className='row'>
-					<div className='col-12 col-md-6 mb-2'>
+					<div className='col-12 col-md-6'>
 						<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
 						<textarea
 							name='notesPrep'
-							rows={10}
+							rows={18}
 							value={currEntry.notesPrep}
 							onChange={(ev) => {
 								let newState = { ...currEntry }
@@ -183,11 +199,11 @@ export default function TabAdmin(props: IModalEntryProps) {
 							className='form-control'
 						/>
 					</div>
-					<div className='col-12 col-md-6 mb-2'>
+					<div className='col-12 col-md-6'>
 						<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
 						<textarea
 							name='notesWake'
-							rows={10}
+							rows={18}
 							value={currEntry.notesWake}
 							onChange={(ev) => {
 								let newState = { ...currEntry }
@@ -202,13 +218,48 @@ export default function TabAdmin(props: IModalEntryProps) {
 		)
 	}
 
-	function renderDreamTab(dreamIdx: number): JSX.Element {
+	function renderTabNotes(): JSX.Element {
+		return (
+			<div role='tabpanel' aria-labelledby='drmtabNOTES-tab' key='dreamrowNOTES'>
+				<div className='mb-3'>
+					<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
+					<textarea
+						name='notesPrep'
+						rows={10}
+						value={currEntry.notesPrep}
+						onChange={(ev) => {
+							let newState = { ...currEntry }
+							newState.notesPrep = ev.currentTarget.value
+							setCurrEntry(newState)
+						}}
+						className='form-control'
+					/>
+				</div>
+				<div>
+					<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
+					<textarea
+						name='notesWake'
+						rows={7}
+						value={currEntry.notesWake}
+						onChange={(ev) => {
+							let newState = { ...currEntry }
+							newState.notesWake = ev.currentTarget.value
+							setCurrEntry(newState)
+						}}
+						className='form-control'
+					/>
+				</div>
+			</div>
+		)
+	}
+
+	function renderTabDream(dreamIdx: number): JSX.Element {
 		let dream: IJournalDream = currEntry.dreams[dreamIdx]
 		let isLucid = currEntry.dreams[dreamIdx].isLucidDream
 
 		return (
 			<div data-desc='dream-tab-pane'>
-				<div className='row align-items-center mb-3' data-desc='title/btnGrp'>
+				<div className='row align-items-center' data-desc='title/btnGrp'>
 					<div className='col'>
 						<input
 							name='title'
@@ -246,7 +297,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 										aria-haspopup='true'
 										aria-expanded='false'
 										className='btn btn-success text-white dropdown-toggle'>
-										{dream.lucidMethod ? InductionTypes[dream.lucidMethod] : '...'}
+										{dream.lucidMethod ? InductionTypes[dream.lucidMethod] : InductionTypes.dild}
 									</button>
 									<div className='dropdown-menu' aria-labelledby='btnGroupDropIndType'>
 										{Object.keys(InductionTypes).map((type) => (
@@ -283,47 +334,42 @@ export default function TabAdmin(props: IModalEntryProps) {
 						</div>
 					</div>
 				</div>
-				<div className='row mb-3' data-desc='tags'>
-					<div className='col-12 col-lg mb-3 mb-lg-0'>
-						<div className='bg-white'>
-							<ReactTags
-								allowNew={true}
-								allowBackspace={false}
-								minQueryLength={2}
-								maxSuggestionsLength={6}
-								tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign }))}
-								suggestions={uniqueTags.map((sign, idx) => new Object({ id: idx, name: sign }))}
-								onChange={(ev) => {
-									let newState = { ...currEntry }
-									newState.dreams[dreamIdx].dreamSigns = [...ev.currentTarget.value]
-									setCurrEntry(newState)
-								}}
-								suggestionsFilter={(item: { id: number; name: string }, query: string) => item.name.indexOf(query.toLowerCase()) > -1}
-								onDelete={(idx: number) => {
-									let newState = { ...currEntry }
-									newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
-									setCurrEntry(newState)
-								}}
-								onAddition={(tag: IDreamSignTag) => {
-									let newState = { ...currEntry }
-									// Dont allow dupes
-									if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) {
-										newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase())
-									}
-									setCurrEntry(newState)
-								}}
-								addOnBlur={true}
-							/>
-						</div>
-					</div>
-				</div>
-				<div className='row mb-0' data-desc='details'>
+				<ReactTags
+					allowNew={true}
+					allowBackspace={false}
+					minQueryLength={2}
+					maxSuggestionsLength={6}
+					tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign }))}
+					suggestions={uniqueTags.map((sign, idx) => new Object({ id: idx, name: sign }))}
+					suggestionsFilter={(item: { id: number; name: string }, query: string) => item.name.indexOf(query.toLowerCase()) > -1}
+					addOnBlur={true}
+					onAddition={(tag: IDreamSignTag) => {
+						let newState = { ...currEntry }
+						// Dont allow dupes
+						if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) {
+							newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase())
+						}
+						setCurrEntry(newState)
+					}}
+					onChange={(ev) => {
+						let newState = { ...currEntry }
+						newState.dreams[dreamIdx].dreamSigns = [...ev.currentTarget.value]
+						setCurrEntry(newState)
+					}}
+					onDelete={(idx: number) => {
+						let newState = { ...currEntry }
+						newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
+						setCurrEntry(newState)
+					}}
+					className='my-2'
+				/>
+				<div className='row' data-desc='details'>
 					<div className='col'>
 						<label className='text-muted text-uppercase text-sm'>Dream Details</label>
 						<textarea
 							name='notes'
 							className='form-control'
-							rows={14}
+							rows={16}
 							value={dream.notes}
 							onChange={(ev) => {
 								let newState = { ...currEntry }
@@ -368,9 +414,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 							</li>
 						))}
 					</ul>
-					<div className='tab-content py-3 px-4'>
-						{selectedTab === -1 ? renderDreamTabNotes() : <div className='tab-content'>{renderDreamTab(selectedTab)}</div>}
-					</div>
+					<div className='tab-content py-3 px-4'>{selectedTab === -1 ? renderTabNotes() : <div className='tab-content'>{renderTabDream(selectedTab)}</div>}</div>
 				</Modal.Body>
 
 				<Modal.Footer className='px-4'>
@@ -384,7 +428,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 						}}>
 						Cancel
 					</Button>
-					<button type='submit' onClick={() => handleSave()} className='btn btn-primary px-5'>
+					<button type='submit' onClick={() => handleSave()} className='btn btn-primary px-5' disabled={isDateDupe}>
 						{isBusySave ? (
 							<span className='spinner-border spinner-border-sm mr-2' role='status' aria-hidden='true'></span>
 						) : (
