@@ -205,19 +205,12 @@ class App extends React.Component<IAppProps, IAppState> {
 
 	Search = () => <TabSearch dataFile={this.state.dataFile || null} doSaveSearchState={this.doSaveSearchState} searchState={this.state.childSearchState} />
 
-	Tags = () => (
-		<TabTags
-			dataFile={this.state.dataFile && this.state.dataFile.entries ? this.state.dataFile : null}
-			onShowModal={this.chgShowModal}
-			doSaveTagsState={this.doSaveTagsState}
-			tagsState={this.state.childTagsState}
-		/>
-	)
+	Tags = () => <TabTags dataFile={this.state.dataFile || null} doSaveTagsState={this.doSaveTagsState} tagsState={this.state.childTagsState} />
 
 	Import = () => (
 		<TabImport
 			dataFile={this.state.dataFile || null}
-			doImportEntries={this.doImportEntries}
+			doImportEntries={this.doImportEntries} // TODO: move to tab
 			doSaveImportState={this.doSaveImportState}
 			importState={this.state.childImportState}
 		/>

@@ -7,7 +7,6 @@ import ModalEntry from './modal-entry'
 
 export interface IAppTagsProps {
 	dataFile: IDriveFile
-	onShowModal: Function
 	doSaveTagsState: Function
 	tagsState: IAppTagsState
 }
