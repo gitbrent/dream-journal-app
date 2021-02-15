@@ -32,13 +32,13 @@ import { IDriveFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes }
 import BootstrapSwitchButton from 'bootstrap-switch-button-react' // '../../../bootstrap-switch-button-react'
 import ContentEditable from 'react-contenteditable'
 import { Upload } from 'react-bootstrap-icons'
+import * as GDrive from './google-oauth'
 
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
 const VERBOSE = false
 
 export interface IAppTabProps {
 	dataFile: IDriveFile
-	doImportEntries: Function
 	doSaveImportState: Function
 	importState: object
 }
@@ -651,8 +651,9 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				_invalidSections: arrInvalidSects,
 			})
 		} else {
-			this.props
-				.doImportEntries(this.state._parsedSections)
+			this.state._parsedSections.forEach((sect) => GDrive.doEntryAdd(sect))
+
+			GDrive.doSaveFile()
 				.catch((err) => {
 					// TODO: show onscreen
 					alert('ERROR: ' + err)
