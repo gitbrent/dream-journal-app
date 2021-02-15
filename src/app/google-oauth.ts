@@ -3,6 +3,7 @@
  * DESC: Singleton instance for oatuh vars/methods
  * @see https://developers.google.com/drive/api/v3/appdata
  * @see https://developers.google.com/drive/api/v3/search-parameters#file_fields
+ * FUTURE: [Auth redirect](https://reacttraining.com/react-router/web/example/auth-workflow)
  */
 import { AuthState, IAuthState, IDriveFile, IJournalEntry } from './app.types'
 
