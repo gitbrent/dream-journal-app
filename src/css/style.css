@@ -1,3 +1,21 @@
+:root {
+	--primary: #2a9fd6;
+	--white: #fff;
+	--bgBlack90: #131313;
+	--secbgd: #3c3c3c;
+}
+
+.bg-secbgd {
+	background-color: var(--secbgd);
+}
+
+.form-output {
+	min-height: calc(1.5em + 0.75rem + 2px);
+	border-left: 1px solid var(--primary);
+	background-color: var(--secbgd);
+	color: var(--white);
+}
+
 /* Brent BS addons */
 
 .x3 {
@@ -9,6 +27,13 @@
 
 .text-sm {
 	font-size: 0.75rem;
+}
+
+.bg-black {
+	background-color: #000;
+}
+.bg-black-90 {
+	background-color: var(--bgBlack90);
 }
 
 .bg-indigo {
@@ -34,10 +59,10 @@
 
 /* yetiborg adjustments */
 .nav-tabs {
-	border-bottom: 1px solid #3c3c3c;
+	border-bottom: 1px solid var(--secbgd);
 }
 .modal-footer {
-	border-top: 1px solid #3c3c3c;
+	border-top: 1px solid var(--secbgd);
 }
 
 /*

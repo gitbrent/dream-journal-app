@@ -278,7 +278,7 @@ export default function TabSearch(props: Props) {
 
 			<section className='container my-5'>
 				<div className='card'>
-					<div className='card-header bg-info text-white'>
+					<div className='card-header bg-secondary text-white'>
 						<div className='row'>
 							<div className='col'>
 								<h5 className='mb-0'>Keyword Search</h5>
@@ -314,7 +314,7 @@ export default function TabSearch(props: Props) {
 									</div>
 									<div className='col-auto'>
 										<label className='text-uppercase text-muted'>&nbsp;</label>
-										<button type='button' className='btn btn-outline-dark w-100' onClick={doKeywordSearch} disabled={!props.dataFile ? true : false}>
+										<button type='button' className='btn btn-outline-secondary w-100' onClick={doKeywordSearch} disabled={!props.dataFile ? true : false}>
 											Search
 										</button>
 									</div>
@@ -344,7 +344,7 @@ export default function TabSearch(props: Props) {
 							</div>
 						</div>
 					</div>
-					<div className='card-body' data-desc='tag cards'>
+					<div className='card-body bg-light' data-desc='tag cards'>
 						<div className='card-columns'>
 							{searchMatches ? (
 								searchMatches.map((match) => (
