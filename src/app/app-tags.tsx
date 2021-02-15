@@ -3,6 +3,7 @@ import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveFil
 import { InfoCircle, Search } from 'react-bootstrap-icons'
 import DreamSignTag from './comp-app/dreamsign-tag'
 import * as GDrive from './google-oauth'
+import AlertGdriveStatus from './comp-app/alert-gstat'
 import ModalEntry from './modal-entry'
 
 export interface IAppTagsProps {
@@ -342,7 +343,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 	}
 
 	return !props.dataFile || !props.dataFile.entries ? (
-		<div />
+		<AlertGdriveStatus />
 	) : (
 		<main className='container mb-5'>
 			{renderHeader()}
