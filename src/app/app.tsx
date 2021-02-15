@@ -27,8 +27,6 @@
  *  SOFTWARE.
  */
 
-// FUTURE: [Auth redirect](https://reacttraining.com/react-router/web/example/auth-workflow)
-
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom'
@@ -146,52 +144,12 @@ class App extends React.Component<IAppProps, IAppState> {
 		})
 	}
 
-	doImportEntries = (entries: Array<IJournalEntry>) =>
-		new Promise((resolve, reject) => {
-			let newState = this.state.dataFile
-			if (!newState || !newState.id) {
-				reject('No data file currently selected')
-			} else {
-				// 1: Add new entries
-				newState.entries = [...newState.entries, ...entries].sort((a, b) => {
-					if (a.entryDate < b.entryDate) return 1
-					if (a.entryDate > b.entryDate) return -1
-					return 0
-				})
-
-				return GDrive.doSaveFile()
-					.catch((err) => {
-						throw err
-					})
-					.then((res) => {
-						if (res !== true) throw res
-						resolve(true)
-					})
-					.catch((err) => {
-						reject(err)
-					})
-			}
-		})
-
 	// App Pages
-
 	Home = () => <TabHome authState={this.state.auth} dataFile={this.state.dataFile || null} />
-
 	View = () => <TabView dataFile={this.state.dataFile || null} doSaveViewState={this.doSaveViewState} viewState={this.state.childViewState} />
-
 	Search = () => <TabSearch dataFile={this.state.dataFile || null} doSaveSearchState={this.doSaveSearchState} searchState={this.state.childSearchState} />
-
 	Tags = () => <TabTags dataFile={this.state.dataFile || null} doSaveTagsState={this.doSaveTagsState} tagsState={this.state.childTagsState} />
-
-	Import = () => (
-		<TabImport
-			dataFile={this.state.dataFile || null}
-			doImportEntries={this.doImportEntries} // TODO: move to tab
-			doSaveImportState={this.doSaveImportState}
-			importState={this.state.childImportState}
-		/>
-	)
-
+	Import = () => <TabImport dataFile={this.state.dataFile || null} doSaveImportState={this.doSaveImportState} importState={this.state.childImportState} />
 	Admin = () => <TabAdmin dataFile={this.state.dataFile || null} doSaveAdminState={this.doSaveAdminState} adminState={this.state.childAdminState} />
 
 	render() {
