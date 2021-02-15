@@ -160,6 +160,7 @@ export function doAuthSignOut() {
 export function doEntryAdd(entry: IJournalEntry) {
 	if (!gDataFile || !gDataFile.entries) throw new Error('No datafile!')
 	gDataFile.entries.push(entry)
+	gDataFile.entries.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 }
 /**
  * Edit existing `IJournalEntry` from selected `IDriveFile`
