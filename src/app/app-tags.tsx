@@ -36,7 +36,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 	const [tagsByCat, setTagsByCat] = useState<IDreamTagByCat[]>([])
 	//
 	const [searchTerm, setSearchTerm] = useState('')
-	const [filterViewType, setFilterViewType] = useState<CardDreamSignGrpViewType>(CardDreamSignGrpViewType.md)
+	const [filterViewType, setFilterViewType] = useState<CardDreamSignGrpViewType>(CardDreamSignGrpViewType.sm)
 	const [filterSortOrder, setFilterSortOrder] = useState<FilterSortOrder>(FilterSortOrder.title)
 
 	useEffect(() => {
@@ -285,7 +285,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 						<h5 className='text-primary'>Search Dream Tags</h5>
 					</div>
 					<div className='col-auto'>
-						<h5 className='text-primary'>Unique Tags: {dreamTagGroups.length}</h5>
+						<h5 className='text-primary'>{tagsByCat.length} Categories ({dreamTagGroups.length} Tags)</h5>
 					</div>
 				</div>
 
@@ -293,10 +293,10 @@ export default function TabAdmin(props: IAppTagsProps) {
 					{tagsByCat
 						.sort((a, b) => (a.dreamCat < b.dreamCat ? -1 : 1))
 						.map((catItem, idx) => (
-							<div key={`keyCatItem${idx}`} className='col-6 col-md-4'>
+							<div key={`keyCatItem${idx}`} className='col-12 col-md-6 col-lg-4'>
 								<div className='card mb-4'>
-									<div className='card-header'>{catItem.dreamCat}</div>
-									<div className='card-body bg-white'>
+									<div className='card-header bg-secbgd h6'>{catItem.dreamCat}</div>
+									<div className='card-body bg-black-90 p-2'>
 										{catItem.dreamTagGroups
 											.filter(
 												(tagGrp) =>

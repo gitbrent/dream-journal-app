@@ -15,6 +15,31 @@ export default function DreamSignTag(props: Props) {
 	const [showRename, setShowRename] = useState(false)
 	const [renameValue, setRenameValue] = useState('')
 
+	function renderShowDreams(): JSX.Element {
+		return (
+			<section>
+				{props.tagGrp.dailyEntries.map((entry, idy) => (
+					<div
+						key={`cardTagDate${props.tagGrp.dreamSign}${idy}`}
+						title={Math.abs(Math.round(moment(entry.entryDate).diff(moment(new Date()), 'months', true))) + ' months ago'}
+						onClick={(_ev) => {
+							props.setCurrEntry(entry)
+							props.setShowModal(true)
+						}}
+						className='cursor-link text-center text-sm d-inline-block mb-3 mr-3'
+						style={{ userSelect: 'none', minWidth: '65px' }}>
+						<div className='bg-danger px-2 py-1 text-white align-text-middle rounded-top'>
+							<h6 className='mb-0'>{moment(entry.entryDate).format('YYYY')}</h6>
+						</div>
+						<div className='bg-white px-2 py-3 rounded-bottom'>
+							{MONTHS[Number(moment(entry.entryDate).format('M')) - 1]} {moment(entry.entryDate).format('DD')}
+						</div>
+					</div>
+				))}
+			</section>
+		)
+	}
+
 	return !props || !props.tagGrp ? (
 		<div />
 	) : props.viewType === CardDreamSignGrpViewType.lg || props.viewType === CardDreamSignGrpViewType.md ? (
@@ -29,27 +54,7 @@ export default function DreamSignTag(props: Props) {
 				</div>
 			</div>
 			<div className={`card-body ${props.viewType === CardDreamSignGrpViewType.md ? 'p-2' : ''}`}>
-				<div>
-					{showDreams &&
-						props.tagGrp.dailyEntries.map((entry, idy) => (
-							<div
-								key={`cardTagDate${props.tagGrp.dreamSign}${idy}`}
-								title={Math.abs(Math.round(moment(entry.entryDate).diff(moment(new Date()), 'months', true))) + ' months ago'}
-								onClick={(_ev) => {
-									props.setCurrEntry(entry)
-									props.setShowModal(true)
-								}}
-								className='cursor-link text-center text-sm d-inline-block mb-3 mr-3'
-								style={{ userSelect: 'none', minWidth: '65px' }}>
-								<div className='bg-danger px-2 py-1 text-white align-text-middle rounded-top'>
-									<h6 className='mb-0'>{moment(entry.entryDate).format('YYYY')}</h6>
-								</div>
-								<div className='bg-white px-2 py-3 rounded-bottom'>
-									{MONTHS[Number(moment(entry.entryDate).format('M')) - 1]} {moment(entry.entryDate).format('DD')}
-								</div>
-							</div>
-						))}
-				</div>
+				{showDreams && renderShowDreams()}
 				<div className='row align-items-end no-gutters flex-nowrap'>
 					<div className='col pr-1'>
 						<button className='btn btn-sm btn-outline-secondary w-100' onClick={() => setShowDreams(!showDreams)}>
@@ -79,11 +84,16 @@ export default function DreamSignTag(props: Props) {
 			)}
 		</div>
 	) : (
-		<div className='d-inline-block text-nowrap bg-info text-white m-2'>
-			<div className='row no-gutters'>
-				<div className='col px-3 py-2'>{props.tagGrp.dreamSign}</div>
-				<div className='col-auto px-3 py-2 text-white-50 bg-trans-25'>{props.tagGrp.totalOccurs}</div>
+		<div className='d-inline-block m-2'>
+			<div className='text-nowrap bg-info text-white'>
+				<div className='row no-gutters'>
+					<div className='col px-3 py-2 cursor-link' title='click to view dreams' onClick={() => setShowDreams(!showDreams)}>
+						{props.tagGrp.dreamSign}
+					</div>
+					<div className='col-auto px-3 py-2 text-white-50 bg-trans-25'>{props.tagGrp.totalOccurs}</div>
+				</div>
 			</div>
+			{showDreams && <div className='bg-secbgd p-3'>{renderShowDreams()}</div>}
 		</div>
 	)
 }
