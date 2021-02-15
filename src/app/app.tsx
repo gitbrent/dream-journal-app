@@ -46,7 +46,6 @@ import TabImport from '../app/app-import'
 import TabSearch, { IAppSearchState } from '../app/app-search'
 import TabAdmin, { IAppAdminState } from '../app/app-admin'
 import TabTags, { IAppTagsState } from '../app/app-tags'
-import EntryModal from './modal-daily-entry'
 
 // App Logic
 interface IAppProps {
@@ -147,13 +146,6 @@ class App extends React.Component<IAppProps, IAppState> {
 		})
 	}
 
-	chgShowModal = (options: { editEntry: IJournalEntry; show: boolean }) => {
-		this.setState({
-			editEntry: options.editEntry,
-			showModal: options.show,
-		})
-	}
-
 	doImportEntries = (entries: Array<IJournalEntry>) =>
 		new Promise((resolve, reject) => {
 			let newState = this.state.dataFile
@@ -180,22 +172,6 @@ class App extends React.Component<IAppProps, IAppState> {
 					})
 			}
 		})
-
-	getDreamSignTags = (): IDreamSignTag[] => {
-		let allTags: string[] = []
-
-		if (!this.state.dataFile || !this.state.dataFile.entries) return []
-
-		this.state.dataFile.entries.forEach((entry) => {
-			entry.dreams.forEach((dream) => {
-				dream.dreamSigns.forEach((sign) => {
-					if (sign && allTags.indexOf(sign.toLowerCase()) === -1) allTags.push(sign.toLowerCase())
-				})
-			})
-		})
-
-		return allTags.sort().map((sign, idx) => new Object({ id: idx, name: sign }) as IDreamSignTag)
-	}
 
 	// App Pages
 
@@ -278,8 +254,6 @@ class App extends React.Component<IAppProps, IAppState> {
 				<Route path='/tags' render={this.Tags} />
 				<Route path='/import' render={this.Import} />
 				<Route path='/admin' render={this.Admin} />
-
-				<EntryModal dreamSignTags={this.getDreamSignTags()} editEntry={this.state.editEntry} onShowModal={this.chgShowModal} show={this.state.showModal} />
 			</Router>
 		)
 	}
