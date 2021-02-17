@@ -169,16 +169,16 @@ export default function TabHome(props: Props) {
 							<img src={LogoBase64} width='75' height='75' className='mr-4' alt='Logo' />
 							Brain Cloud - Dream Journal
 						</h3>
-						<h1 className='text-primary mb-0 d-none d-md-block d-lg-none'>Brain Cloud - Dream Journal</h1>
-						<h1 className='text-primary mb-0 d-block d-md-none'>Brain Cloud</h1>
+						<h2 className='text-primary mb-0 d-none d-md-block d-lg-none'>Brain Cloud<br/>Dream Journal</h2>
+						<h3 className='text-primary mb-0 d-block d-md-none'>Brain Cloud</h3>
 					</div>
 					<div className='col-auto'>
-						<button className='btn btn-primary px-4 text-uppercase' type='button' disabled={!props.dataFile} onClick={() => setShowModal(true)}>
+						<button className='btn btn-primary px-3 px-md-4 text-uppercase' type='button' disabled={!props.dataFile} onClick={() => setShowModal(true)}>
 							Create
 							<br />
 							Entry
 							<Plus size='64' className='d-none  d-md-none d-lg-block' />
-							<Plus size='32' className='d-block d-lg-none' />
+							<Plus size='32' className='d-block d-lg-none mx-auto' />
 						</button>
 					</div>
 				</div>
