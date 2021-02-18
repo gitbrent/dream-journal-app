@@ -26,7 +26,7 @@ export default function DreamSignTag(props: Props) {
 							props.setCurrEntry(entry)
 							props.setShowModal(true)
 						}}
-						className='cursor-link text-center text-sm d-inline-block mb-3 mr-3'
+						className='cursor-link text-center text-sm d-inline-block mb-3 me-3'
 						style={{ userSelect: 'none', minWidth: '65px' }}>
 						<div className='bg-danger px-2 py-1 text-white align-text-middle rounded-top'>
 							<h6 className='mb-0'>{moment(entry.entryDate).format('YYYY')}</h6>
@@ -49,19 +49,19 @@ export default function DreamSignTag(props: Props) {
 			style={{ minWidth: props.viewType === CardDreamSignGrpViewType.lg ? (!showDreams ? '200px' : '600px') : !showDreams ? '125px' : '400px' }}>
 			<div className={`card-header bg-info-800 text-white`}>
 				<div className={`row align-tiems-center mb-0 ${props.viewType === CardDreamSignGrpViewType.lg ? 'h5' : 'h6'}`}>
-					<div className='col text-breakword pr-0'>{props.tagGrp.dreamSign.replace(':', ': ')}</div>
-					<div className='col-auto text-white-50 pl-1'>{props.tagGrp.totalOccurs}</div>
+					<div className='col text-breakword pe-0'>{props.tagGrp.dreamSign.replace(':', ': ')}</div>
+					<div className='col-auto text-white-50 ps-1'>{props.tagGrp.totalOccurs}</div>
 				</div>
 			</div>
 			<div className={`card-body ${props.viewType === CardDreamSignGrpViewType.md ? 'p-2' : ''}`}>
 				{showDreams && renderShowDreams()}
 				<div className='row align-items-end g-0 flex-nowrap'>
-					<div className='col pr-1'>
+					<div className='col pe-1'>
 						<button className='btn btn-sm btn-outline-secondary w-100' onClick={() => setShowDreams(!showDreams)}>
 							{showDreams ? 'Hide' : 'Show'}
 						</button>
 					</div>
-					<div className='col pl-1'>
+					<div className='col ps-1'>
 						<button className='btn btn-sm btn-outline-secondary w-100' onClick={() => setShowRename(!showRename)}>
 							Edit
 						</button>
