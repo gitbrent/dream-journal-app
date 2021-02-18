@@ -279,37 +279,50 @@ export default function TabAdmin(props: IAppAdminProps) {
 						<Search size={48} className='text-secondary' />
 					</div>
 					<div className='col-12 col-md mb-3 mb-md-0'>
-						<label>DreamSign/Tag</label>
-						<input
-							type='text'
-							value={searchTerm}
-							className='form-control'
-							onChange={(event) => setSearchTerm(event.target.value)}
-							disabled={!props.dataFile ? true : false}
-						/>
+						<div className='form-floating'>
+							<input
+								id='floatingDreamtag'
+								type='text'
+								value={searchTerm}
+								className='form-control'
+								onChange={(event) => setSearchTerm(event.target.value)}
+								disabled={!props.dataFile ? true : false}
+							/>
+							<label htmlFor='floatingDreamtag'>Dream Tag</label>
+						</div>
 					</div>
 					<div className='col-auto'>
-						<label>Display</label>
-						<select
-							defaultValue={filterViewType}
-							onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
-							className='form-control'>
-							{Object.keys(CardDreamSignGrpViewType).map((val) => (
-								<option value={CardDreamSignGrpViewType[val]} key={'viewType' + val}>
-									{CardDreamSignGrpViewType[val]}
-								</option>
-							))}
-						</select>
+						<div className='form-floating'>
+							<select
+								id='floatingDisplay'
+								defaultValue={filterViewType}
+								disabled={!props.dataFile ? true : false}
+								onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
+								className='form-control'>
+								{Object.keys(CardDreamSignGrpViewType).map((val) => (
+									<option value={CardDreamSignGrpViewType[val]} key={'viewType' + val}>
+										{CardDreamSignGrpViewType[val]}
+									</option>
+								))}
+							</select>
+							<label htmlFor='floatingDisplay'>Display</label>
+						</div>
 					</div>
 					<div className='col-auto'>
-						<label>Sort Order</label>
-						<select defaultValue={filterSortOrder} onChange={(ev) => setFilterSortOrder(ev.currentTarget.value as FilterSortOrder)} className='form-control'>
-							{Object.keys(FilterSortOrder).map((val) => (
-								<option value={FilterSortOrder[val]} key={'sortOrder' + val}>
-									{FilterSortOrder[val]}
-								</option>
-							))}
-						</select>
+						<div className='form-floating'>
+							<select
+								id='floatingSortOrder'
+								defaultValue={filterSortOrder}
+								onChange={(ev) => setFilterSortOrder(ev.currentTarget.value as FilterSortOrder)}
+								className='form-control'>
+								{Object.keys(FilterSortOrder).map((val) => (
+									<option value={FilterSortOrder[val]} key={'sortOrder' + val}>
+										{FilterSortOrder[val]}
+									</option>
+								))}
+							</select>
+							<label htmlFor='floatingSortOrder'>Sort Order</label>
+						</div>
 					</div>
 				</div>
 
