@@ -19,7 +19,7 @@ export default function AlertGdriveStatus() {
 					<div className='row align-items-center'>
 						<div className='col-auto pr-0'>
 							<div className='spinner-border text-white' role='status'>
-								<span className='sr-only'>Loading...</span>
+								<span className='visually-hidden'>Loading...</span>
 							</div>
 						</div>
 						<div className='col'>Loading cloud data...</div>

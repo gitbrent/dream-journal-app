@@ -122,7 +122,7 @@ export default function TabHome(props: Props) {
 		return props.dataFile && (props.dataFile._isSaving || props.dataFile._isLoading || isBusyLoad) ? (
 			<div className='text-center'>
 				<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
-					<span className='sr-only' />
+					<span className='visually-hidden' />
 				</div>
 				<div>Loading/Saving...</div>
 			</div>

@@ -77,7 +77,7 @@ export default function TabView(props: Props) {
 		return props.dataFile && props.dataFile._isLoading ? (
 			<div className='align-middle text-center text-warning mb-4'>
 				<div className='spinner-border spinner-border-sm mr-2' role='status'>
-					<span className='sr-only' />
+					<span className='visually-hidden' />
 				</div>
 				Saving/Loading...
 			</div>
