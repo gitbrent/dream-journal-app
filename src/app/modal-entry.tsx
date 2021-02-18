@@ -151,7 +151,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 									setSelectedTab(updEntry.dreams.length - 1)
 								}}
 								className='btn btn-sm btn-success w-100'>
-								<div className='row no-gutters align-items-center'>
+								<div className='row g-0 align-items-center'>
 									<div className='col-auto'>
 										<PlusCircle size='1.2rem' />
 									</div>
@@ -166,7 +166,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 									setCurrEntry(updEntry)
 								}}
 								className='btn btn-sm btn-warning w-100'>
-								<div className='row no-gutters align-items-center'>
+								<div className='row g-0 align-items-center'>
 									<div className='col-auto'>{currEntry.starred ? <StarFill size='1.2rem' /> : <Star size='1.2rem' />}</div>
 									<div className='col'>{currEntry.starred ? 'Starred' : 'Un-Starred'}</div>
 								</div>

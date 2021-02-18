@@ -42,7 +42,7 @@ export default function SearchResults(props: Props) {
 	return (
 		<div key={`searchResultCard${props.searchMatch.entry.entryDate}`} className='card mb-4'>
 			<div className={props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'card-header bg-success' : 'card-header bg-secbgd'}>
-				<div className='row no-gutters align-items-center'>
+				<div className='row g-0 align-items-center'>
 					<div className='col-auto'>
 						<div
 							className='text-center'

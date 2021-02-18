@@ -761,7 +761,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 								</span>
 							</div>
 							<div className='col'>
-								<div className='row no-gutters'>
+								<div className='row g-0'>
 									<div className='col'>
 										<select name='_selEntryType' className='form-control' onChange={this.handleSelectChange} value={this.state._selEntryType}>
 											<option value='match'>Regex</option>
@@ -806,7 +806,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<div className='row align-items-top mb-3'>
 							<div className='col-3'>Prep Notes</div>
 							<div className='col'>
-								<div className='row no-gutters'>
+								<div className='row g-0'>
 									<div className='col-auto'>
 										<select name='_selNotePrepType' className='form-control' onChange={this.handleSelectChange} value={this.state._selNotePrepType}>
 											<option value='single'>Single-line</option>
@@ -824,7 +824,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										/>
 									</div>
 								</div>
-								<div className={this.state._selNotePrepType === 'multi' ? 'row no-gutters mt-1' : 'd-none'}>
+								<div className={this.state._selNotePrepType === 'multi' ? 'row g-0 mt-1' : 'd-none'}>
 									<input
 										name='_notesPrepEnd'
 										value={this.state._notesPrepEnd}
@@ -844,7 +844,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<div className='row align-items-top mb-3'>
 							<div className='col-3'>Wake Notes</div>
 							<div className='col'>
-								<div className='row no-gutters'>
+								<div className='row g-0'>
 									<div className='col-auto'>
 										<select name='_selNoteWakeType' className='form-control' onChange={this.handleSelectChange} value={this.state._selNoteWakeType}>
 											<option value='single'>Single-line</option>
@@ -862,7 +862,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										/>
 									</div>
 								</div>
-								<div className={this.state._selNoteWakeType === 'multi' ? 'row no-gutters mt-1' : 'd-none'}>
+								<div className={this.state._selNoteWakeType === 'multi' ? 'row g-0 mt-1' : 'd-none'}>
 									<input
 										name='_notesWakeEnd'
 										value={this.state._notesWakeEnd}
@@ -921,7 +921,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<div className='row align-items-center mb-3'>
 							<div className='col-3'>Dream Signs</div>
 							<div className='col'>
-								<div className='row no-gutters'>
+								<div className='row g-0'>
 									<div className='col mr-1'>
 										<input
 											name='_dreamSigns'
@@ -964,7 +964,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<div className='row align-items-top mb-3'>
 							<div className='col-3'>Dream Notes</div>
 							<div className='col'>
-								<div className='row no-gutters'>
+								<div className='row g-0'>
 									<div className='col'>
 										<select name='_selDreamNotes' className='form-control' onChange={this.handleSelectChange} value={this.state._selDreamNotes}>
 											<option value='match'>Regex</option>
@@ -1131,7 +1131,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				<ul className='list-group mb-4'>
 					{this.state._parsedSections.map((sect, idx) => (
 						<li className='list-group-item' key={'parsedsect' + idx}>
-							<div className='row no-gutters'>
+							<div className='row g-0'>
 								<div className='col'>
 									<h4 className='text-primary'>Entry {idx + 1}</h4>
 								</div>

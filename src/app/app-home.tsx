@@ -159,7 +159,7 @@ export default function TabHome(props: Props) {
 			<ModalEntry currEntry={null} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
 
 			<div className='jumbotron'>
-				<div className='row align-items-center no-gutters'>
+				<div className='row align-items-center g-0'>
 					<div className='col'>
 						<h1 className='display-4 text-primary mb-0 d-none d-md-none d-xl-block'>
 							<img src={LogoBase64} width='150' height='150' className='me-4' alt='Logo' />

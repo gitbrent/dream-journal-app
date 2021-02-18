@@ -55,7 +55,7 @@ export default function DreamSignTag(props: Props) {
 			</div>
 			<div className={`card-body ${props.viewType === CardDreamSignGrpViewType.md ? 'p-2' : ''}`}>
 				{showDreams && renderShowDreams()}
-				<div className='row align-items-end no-gutters flex-nowrap'>
+				<div className='row align-items-end g-0 flex-nowrap'>
 					<div className='col pr-1'>
 						<button className='btn btn-sm btn-outline-secondary w-100' onClick={() => setShowDreams(!showDreams)}>
 							{showDreams ? 'Hide' : 'Show'}
@@ -86,7 +86,7 @@ export default function DreamSignTag(props: Props) {
 	) : (
 		<div className='d-inline-block m-2'>
 			<div className='text-nowrap bg-info text-white'>
-				<div className='row no-gutters'>
+				<div className='row g-0'>
 					<div className='col px-3 py-2 cursor-link' title='click to view dreams' onClick={() => setShowDreams(!showDreams)}>
 						{props.tagGrp.dreamSign}
 					</div>

@@ -293,7 +293,7 @@ export default function TabSearch(props: Props) {
 					<div className='card-body bg-light border-bottom border-secondary' data-desc='commandbar'>
 						<div className='row align-items-center'>
 							<div className='col-6 col-md-8'>
-								<div className='row align-items-center no-gutters'>
+								<div className='row align-items-center g-0'>
 									<div className='col-auto d-none d-md-block pr-3'>
 										<Search size={48} className='text-secondary' />
 									</div>
