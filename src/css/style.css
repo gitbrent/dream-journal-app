@@ -2,6 +2,9 @@
 	--primary: #2a9fd6;
 	--white: #fff;
 	--bgBlack90: #131313;
+	--bgBlack80: #282828;
+	--bgBlack70: #3c3c3c;
+	--bgBlack50: #5c5c5c;
 	--secbgd: #3c3c3c;
 }
 
@@ -14,6 +17,15 @@
 	border-left: 1px solid var(--primary);
 	background-color: var(--secbgd);
 	color: var(--white);
+}
+
+.card label,
+.row label {
+	display: block;
+	color: var(--bgBlack50);
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	margin-bottom: 0.5rem; /* cyborg-bs5-default = 0 */
 }
 
 /* Brent BS addons */
@@ -77,11 +89,10 @@
 }
 */
 
-/* Need for Bootstrap 5
+/* Need for Bootstrap 5 */
 .jumbotron {
-  padding: 2rem 1rem;
-  margin-bottom: 2rem;
-  background-color: #e9ecef;
-  border-radius: .3rem;
+	padding: 4rem 2rem;
+	margin-bottom: 2rem;
+	background-color: var(--bgBlack80);
+	border-radius: 0.3rem;
 }
-*/

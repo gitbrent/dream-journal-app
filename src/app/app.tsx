@@ -31,10 +31,9 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom'
 import { IAuthState, IDriveFile, IJournalEntry, AuthState, IDreamSignTag, APP_VER } from './app.types'
-import '../css/bootstrap.yetiborg.css'
-//import '../css/bootstrap.cyborg.v5.0.0-beta1.css' // FUTURE:
+//import '../css/bootstrap.yetiborg.css' // TODO: REMOVE: after BS5
+import '../css/bootstrap.cyborg.v5.0.0-beta1.css' // WIP:
 import '../css/react-tags.css'
-import '../css/svg-images.css'
 import '../css/style.css'
 import LogoBase64 from '../img/logo_base64'
 import * as GDrive from './google-oauth'
@@ -156,53 +155,55 @@ class App extends React.Component<IAppProps, IAppState> {
 		return (
 			<Router>
 				<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
-					<a className='navbar-brand' href='/'>
-						<img src={LogoBase64} width='30' height='30' className='d-inline-block align-top mr-3' alt='' />
-						Brain Cloud
-					</a>
-					<button
-						className='navbar-toggler'
-						type='button'
-						data-toggle='collapse'
-						data-target='#navbarNav'
-						aria-controls='navbarNav'
-						aria-expanded='false'
-						aria-label='Toggle navigation'>
-						<span className='navbar-toggler-icon' />
-					</button>
-					<div className='collapse navbar-collapse' id='navbarNav'>
-						<ul className='navbar-nav'>
-							<li className='nav-item'>
-								<NavLink to='/' exact={true} activeClassName='active' className='nav-link'>
-									Home
-								</NavLink>
-							</li>
-							<li className='nav-item'>
-								<NavLink to='/view' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-									View Journal
-								</NavLink>
-							</li>
-							<li className='nav-item'>
-								<NavLink to='/search' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-									Search Journal
-								</NavLink>
-							</li>
-							<li className='nav-item'>
-								<NavLink to='/tags' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-									Dream Tags
-								</NavLink>
-							</li>
-							<li className='nav-item'>
-								<NavLink to='/import' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-									Import Dreams
-								</NavLink>
-							</li>
-							<li className='nav-item'>
-								<NavLink to='/admin' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-									Data Maint
-								</NavLink>
-							</li>
-						</ul>
+					<div className='container-fluid'>
+						<a className='navbar-brand' href='/'>
+							<img src={LogoBase64} width='30' height='30' className='d-inline-block align-top me-3' alt='' />
+							Brain Cloud
+						</a>
+						<button
+							className='navbar-toggler'
+							type='button'
+							data-toggle='collapse'
+							data-target='#navbarNav'
+							aria-controls='navbarNav'
+							aria-expanded='false'
+							aria-label='Toggle navigation'>
+							<span className='navbar-toggler-icon' />
+						</button>
+						<div className='collapse navbar-collapse' id='navbarNav'>
+							<ul className='navbar-nav me-auto mb-2 mb-lg-0'>
+								<li className='nav-item'>
+									<NavLink to='/' exact={true} activeClassName='active' className='nav-link'>
+										Home
+									</NavLink>
+								</li>
+								<li className='nav-item'>
+									<NavLink to='/view' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+										View Journal
+									</NavLink>
+								</li>
+								<li className='nav-item'>
+									<NavLink to='/search' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+										Search Journal
+									</NavLink>
+								</li>
+								<li className='nav-item'>
+									<NavLink to='/tags' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+										Dream Tags
+									</NavLink>
+								</li>
+								<li className='nav-item'>
+									<NavLink to='/import' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+										Import Dreams
+									</NavLink>
+								</li>
+								<li className='nav-item'>
+									<NavLink to='/admin' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+										Data Maint
+									</NavLink>
+								</li>
+							</ul>
+						</div>
 					</div>
 				</nav>
 

@@ -211,49 +211,49 @@ export default function TabAdmin(props: IAppAdminProps) {
 							<div className='col-auto text-center d-none d-md-block'>
 								<h1 className='text-primary mb-1 x3'>{totalMonths}</h1>
 								<label className='text-primary text-uppercase'>Months</label>
-								<div className='badge badge-pill badge-primary w-100'>{`${totalYears} years`}</div>
+								<div className='badge rounded-pill bg-primary w-100'>{`${totalYears} years`}</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-primary mb-1 x3'>{totalEntries}</h1>
 								<label className='text-primary text-uppercase'>Days</label>
-								<div className='badge badge-pill badge-primary w-100'>{totalMonths * 30 > 0 ? (totalEntries / totalMonths).toFixed(2) + ' / mon' : '-'}</div>
+								<div className='badge rounded-pill bg-primary w-100'>{totalMonths * 30 > 0 ? (totalEntries / totalMonths).toFixed(2) + ' / mon' : '-'}</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-info mb-1 x3'>{totalDreams}</h1>
 								<label className='text-info text-uppercase d-block'>Dreams</label>
-								<div className='badge badge-pill badge-info w-100'>{totalMonths * 30 > 0 ? (totalDreams / totalEntries).toFixed(2) + ' / day' : '-'}</div>
+								<div className='badge rounded-pill bg-info w-100'>{totalMonths * 30 > 0 ? (totalDreams / totalEntries).toFixed(2) + ' / day' : '-'}</div>
 							</div>
 							<div className='w-100 mb-3 d-md-none mb-md-0' />
 							<div className='col-auto text-center'>
 								<h1 className='text-warning mb-1 x3'>{totalStars}</h1>
 								<label className='text-warning text-uppercase d-block'>Starred</label>
-								<div className='badge badge-pill badge-warning w-100'>
+								<div className='badge rounded-pill bg-warning w-100'>
 									{totalDreams && totalStars ? ((totalStars / totalDreams) * 100).toFixed(2) + '%' : '-'}
 								</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-success mb-1 x3'>{totalLucid}</h1>
 								<label className='text-success text-uppercase d-block'>Lucids</label>
-								<div className='badge badge-pill badge-success w-100'>
+								<div className='badge rounded-pill bg-success w-100'>
 									{totalDreams && totalLucid ? ((totalLucid / totalDreams) * 100).toFixed(2) + '%' : '-'}
 								</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-primary mb-1 x3'>{totalDreamSigns}</h1>
 								<label className='text-primary text-uppercase d-block'>DreamSigns</label>
-								<div className='badge badge-pill badge-primary w-100'>-</div>
+								<div className='badge rounded-pill bg-primary w-100'>-</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-info mb-1 x3'>{totalDreams - totalUntagged}</h1>
 								<label className='text-info text-uppercase d-block'>Tagged</label>
-								<div className='badge badge-pill badge-info w-100'>
+								<div className='badge rounded-pill bg-info w-100'>
 									{totalDreams ? (((totalDreams - totalUntagged) / totalDreams) * 100).toFixed(2) + '%' : '0%'}
 								</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-warning mb-1 x3'>{totalUntagged || '0'}</h1>
 								<label className='text-warning text-uppercase d-block'>Untagged</label>
-								<div className='badge badge-pill badge-warning w-100'>{totalDreams ? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
+								<div className='badge rounded-pill bg-warning w-100'>{totalDreams ? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
 							</div>
 						</div>
 					</div>
@@ -279,7 +279,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 						<Search size={48} className='text-secondary' />
 					</div>
 					<div className='col-12 col-md mb-3 mb-md-0'>
-						<label className='text-uppercase text-muted'>DreamSign/Tag</label>
+						<label>DreamSign/Tag</label>
 						<input
 							type='text'
 							value={searchTerm}
@@ -289,7 +289,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 						/>
 					</div>
 					<div className='col-auto'>
-						<label className='text-uppercase text-muted'>Display</label>
+						<label>Display</label>
 						<select
 							defaultValue={filterViewType}
 							onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
@@ -302,7 +302,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 						</select>
 					</div>
 					<div className='col-auto'>
-						<label className='text-uppercase text-muted'>Sort Order</label>
+						<label>Sort Order</label>
 						<select defaultValue={filterSortOrder} onChange={(ev) => setFilterSortOrder(ev.currentTarget.value as FilterSortOrder)} className='form-control'>
 							{Object.keys(FilterSortOrder).map((val) => (
 								<option value={FilterSortOrder[val]} key={'sortOrder' + val}>
@@ -351,7 +351,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 								setCurrEntry(entry)
 								setShowModal(true)
 							}}
-							className='btn btn-sm btn-secondary mb-2 mr-2'>
+							className='btn btn-sm btn-secondary mb-2 me-2'>
 							{entry.entryDate}
 						</button>
 					))}
@@ -375,13 +375,13 @@ export default function TabAdmin(props: IAppAdminProps) {
 								setCurrEntry(entry)
 								setShowModal(true)
 							}}
-							className='btn btn-sm btn-secondary mb-2 mr-2'>
+							className='btn btn-sm btn-secondary mb-2 me-2'>
 							{entry.bedTime || '(empty)'}
 						</button>
 					))}
 					{badBedTimes.length === 0 && (
 						<div className='alert alert-secondary' role='alert'>
-							<InfoCircle size='16' className='mr-2' />
+							<InfoCircle size='16' className='me-2' />
 							No results
 						</div>
 					)}

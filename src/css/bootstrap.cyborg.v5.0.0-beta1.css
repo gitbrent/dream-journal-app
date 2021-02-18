@@ -37,6 +37,7 @@
   --bs-font-sans-serif: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+  --bgBlack50: #5c5c5c;
 }
 
 *,
@@ -82,7 +83,8 @@ hr:not([size]) {
 h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
   margin-top: 0;
   margin-bottom: 0.5rem;
-  font-weight: 500;
+  /* FORK: font-weight: 500; */
+  font-weight: 300;
   line-height: 1.2;
   color: #fff;
 }
@@ -2119,10 +2121,13 @@ progress {
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #212529;
-  background-color: #fff;
+  /* BDE: FORK: color: #282828; */
+  color: #f1f1f1;
+  /* BDE: FORK: background-color: #fff; */
+  background-color: #000;
   background-clip: padding-box;
-  border: 0 solid #fff;
+  /* BDE: FORK: border: 0 solid #fff;*/
+  border: 0 solid var(--bgBlack50);
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -2145,8 +2150,10 @@ progress {
 }
 
 .form-control:focus {
-  color: #212529;
-  background-color: #fff;
+  /* BDE: FORK: color: #212529; */
+  color: #f1f1f1;
+  /* BDE: FORK: background-color: #fff; */
+  background-color: #000;
   border-color: #95cfeb;
   outline: 0;
   box-shadow: 0 0 0 0.25rem rgba(42, 159, 214, 0.25);
