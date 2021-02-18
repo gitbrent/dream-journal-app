@@ -69,7 +69,7 @@ export default function DreamTagCard(props: Props) {
 				</div>
 			</div>
 			{showRename && (
-				<div className='card-footer p-2'>
+				<div className='card-footer py-2'>
 					<div className='form-floating'>
 						<input id='floatingInput' className='form-control' type='text' value={renameValue} onChange={(ev) => setRenameValue(ev.target.value.toLowerCase())} />
 						<label htmlFor='floatingInput'>New Tag</label>
