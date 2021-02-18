@@ -5,17 +5,12 @@
 	--bgBlack80: #282828;
 	--bgBlack70: #3c3c3c;
 	--bgBlack50: #5c5c5c;
-	--secbgd: #3c3c3c;
-}
-
-.bg-secbgd {
-	background-color: var(--secbgd);
 }
 
 .form-output {
 	min-height: calc(1.5em + 0.75rem + 2px);
 	border-left: 1px solid var(--primary);
-	background-color: var(--secbgd);
+	background-color: var(--bgBlack70);
 	color: var(--white);
 }
 
@@ -47,6 +42,12 @@
 .bg-black-90 {
 	background-color: var(--bgBlack90);
 }
+.bg-black-80 {
+	background-color: var(--bgBlack80);
+}
+.bg-black-70 {
+	background-color: var(--bgBlack70);
+}
 
 .bg-indigo {
 	background-color: var(--indigo) !important;
@@ -71,10 +72,10 @@
 
 /* yetiborg adjustments */
 .nav-tabs {
-	border-bottom: 1px solid var(--secbgd);
+	border-bottom: 1px solid var(--bgBlack70);
 }
 .modal-footer {
-	border-top: 1px solid var(--secbgd);
+	border-top: 1px solid var(--bgBlack70);
 }
 
 /*

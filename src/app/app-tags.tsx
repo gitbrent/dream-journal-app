@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveFile, IJournalEntry } from './app.types'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
-import DreamSignTag from './comp-app/dreamsign-tag'
+import DreamTagCard from './comp-app/dreamtag-card'
 import * as GDrive from './google-oauth'
 import AlertGdriveStatus from './comp-app/alert-gstat'
 import ModalEntry from './modal-entry'
@@ -260,7 +260,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 								return a.totalOccurs < b.totalOccurs ? -1 : a.totalOccurs > b.totalOccurs ? 1 : a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
 						})
 						.map((tagGrp, idx) => (
-							<DreamSignTag
+							<DreamTagCard
 								key={`keyTagGrp${idx}`}
 								setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
 								setShowModal={(show: boolean) => setShowModal(show)}
@@ -297,7 +297,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 						.map((catItem, idx) => (
 							<div key={`keyCatItem${idx}`} className='col-12 col-md-6 col-lg-4'>
 								<div className='card mb-4'>
-									<div className='card-header bg-secbgd h6'>{catItem.dreamCat}</div>
+									<div className='card-header bg-black-70 h6'>{catItem.dreamCat}</div>
 									<div className='card-body bg-black-90 p-2'>
 										{catItem.dreamTagGroups
 											.filter(
@@ -326,7 +326,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 														: 1
 											})
 											.map((tagGrp, idx) => (
-												<DreamSignTag
+												<DreamTagCard
 													key={`keyTagGrp${idx}`}
 													setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
 													setShowModal={(show: boolean) => setShowModal(show)}

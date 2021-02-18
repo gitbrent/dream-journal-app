@@ -31,7 +31,7 @@ import React, { useState, useEffect } from 'react'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDriveFile, IJournalEntry } from './app.types'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
 import * as GDrive from './google-oauth'
-import DreamSignTag from './comp-app/dreamsign-tag'
+import DreamTagCard from './comp-app/dreamtag-card'
 import AlertGdriveStatus from './comp-app/alert-gstat'
 import ModalEntry from './modal-entry'
 
@@ -313,7 +313,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 					</div>
 				</div>
 
-				<div className='card-deck'>
+				<div className='row row-cols-auto g-3 justify-content-between'>
 					{dreamTagGroups
 						.filter((tagGrp) => !searchTerm || tagGrp.dreamSign.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || searchTerm.indexOf(tagGrp.dreamSign) > -1)
 						.sort((a, b) => {
@@ -324,14 +324,15 @@ export default function TabAdmin(props: IAppAdminProps) {
 								return a.totalOccurs < b.totalOccurs ? -1 : a.totalOccurs > b.totalOccurs ? 1 : a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
 						})
 						.map((tagGrp, idx) => (
-							<DreamSignTag
-								key={`keyTagGrp${idx}`}
-								setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
-								setShowModal={(show: boolean) => setShowModal(show)}
-								tagGrp={tagGrp}
-								viewType={filterViewType}
-								doMassUpdateTag={doMassUpdateTag}
-							/>
+							<div className='col' key={`keyTagGrp${idx}`}>
+								<DreamTagCard
+									setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
+									setShowModal={(show: boolean) => setShowModal(show)}
+									tagGrp={tagGrp}
+									viewType={filterViewType}
+									doMassUpdateTag={doMassUpdateTag}
+								/>
+							</div>
 						))}
 				</div>
 			</section>
