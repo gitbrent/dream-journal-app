@@ -10,7 +10,7 @@ export interface Props {
 	doMassUpdateTag: Function
 }
 
-export default function DreamSignTag(props: Props) {
+export default function DreamTagCard(props: Props) {
 	const [showDreams, setShowDreams] = useState(false)
 	const [showRename, setShowRename] = useState(false)
 	const [renameValue, setRenameValue] = useState('')
@@ -44,7 +44,7 @@ export default function DreamSignTag(props: Props) {
 		<div />
 	) : props.viewType === CardDreamSignGrpViewType.lg || props.viewType === CardDreamSignGrpViewType.md ? (
 		<div
-			className='card m-3'
+			className='card'
 			key={`cardTag${props.tagGrp.dreamSign}`}
 			style={{ minWidth: props.viewType === CardDreamSignGrpViewType.lg ? (!showDreams ? '200px' : '600px') : !showDreams ? '125px' : '400px' }}>
 			<div className={`card-header bg-info-800 text-white`}>
@@ -53,7 +53,7 @@ export default function DreamSignTag(props: Props) {
 					<div className='col-auto text-white-50 ps-1'>{props.tagGrp.totalOccurs}</div>
 				</div>
 			</div>
-			<div className={`card-body ${props.viewType === CardDreamSignGrpViewType.md ? 'p-2' : ''}`}>
+			<div className={`card-body ${props.viewType === CardDreamSignGrpViewType.md ? 'py-2' : ''}`}>
 				{showDreams && renderShowDreams()}
 				<div className='row align-items-end g-0 flex-nowrap'>
 					<div className='col pe-1'>
@@ -70,7 +70,10 @@ export default function DreamSignTag(props: Props) {
 			</div>
 			{showRename && (
 				<div className='card-footer p-2'>
-					<input className='form-control' value={renameValue} onChange={(ev) => setRenameValue(ev.target.value.toLowerCase())} />
+					<div className='form-floating'>
+						<input id='floatingInput' className='form-control' type='text' value={renameValue} onChange={(ev) => setRenameValue(ev.target.value.toLowerCase())} />
+						<label htmlFor='floatingInput'>New Tag</label>
+					</div>
 					<button
 						className='btn btn-sm btn-warning w-100 mt-2'
 						onClick={() => {
@@ -93,7 +96,7 @@ export default function DreamSignTag(props: Props) {
 					<div className='col-auto px-3 py-2 text-white-50 bg-trans-25'>{props.tagGrp.totalOccurs}</div>
 				</div>
 			</div>
-			{showDreams && <div className='bg-secbgd p-3'>{renderShowDreams()}</div>}
+			{showDreams && <div className='bg-black-70 p-3'>{renderShowDreams()}</div>}
 		</div>
 	)
 }
