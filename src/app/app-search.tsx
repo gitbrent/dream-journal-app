@@ -294,10 +294,10 @@ export default function TabSearch(props: Props) {
 						<div className='row align-items-center'>
 							<div className='col-6 col-md-8'>
 								<div className='row align-items-center g-0'>
-									<div className='col-auto d-none d-md-block pr-3'>
+									<div className='col-auto d-none d-md-block pe-3'>
 										<Search size={48} className='text-secondary' />
 									</div>
-									<div className='col pr-2'>
+									<div className='col pe-2'>
 										<label className='text-uppercase text-muted'>Keyword or Phrase</label>
 										<input
 											type='text'

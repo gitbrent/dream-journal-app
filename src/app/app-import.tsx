@@ -768,7 +768,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 											<option value='first'>First line is the Entry Date</option>
 										</select>
 									</div>
-									<div className={this.state._selEntryType === 'first' ? 'd-none' : 'col-7 pl-1'}>
+									<div className={this.state._selEntryType === 'first' ? 'd-none' : 'col-7 ps-1'}>
 										<input
 											name='_entryDate'
 											value={this.state._entryDate}
@@ -813,7 +813,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 											<option value='multi'>Multi-line</option>
 										</select>
 									</div>
-									<div className='col pl-1'>
+									<div className='col ps-1'>
 										<input
 											name='_notesPrep'
 											value={this.state._notesPrep}
@@ -851,7 +851,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 											<option value='multi'>Multi-line</option>
 										</select>
 									</div>
-									<div className='col pl-1'>
+									<div className='col ps-1'>
 										<input
 											name='_notesWake'
 											value={this.state._notesWake}
@@ -922,7 +922,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							<div className='col-3'>Dream Signs</div>
 							<div className='col'>
 								<div className='row g-0'>
-									<div className='col mr-1'>
+									<div className='col me-1'>
 										<input
 											name='_dreamSigns'
 											value={this.state._dreamSigns}
@@ -971,7 +971,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 											<option value='after'>All text after Dream Title</option>
 										</select>
 									</div>
-									<div className={this.state._selDreamNotes === 'after' ? 'd-none' : 'col-7 pl-2'}>
+									<div className={this.state._selDreamNotes === 'after' ? 'd-none' : 'col-7 ps-2'}>
 										<input
 											name='_notes'
 											value={this.state._notes}
