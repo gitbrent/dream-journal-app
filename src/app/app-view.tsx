@@ -210,9 +210,7 @@ export default function TabView(props: Props) {
 									numberOfMonths={1}
 									dateRangeFrom={dateRangeFrom}
 									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => {
-										onDateRangeChange(opts)
-									}}
+									onChange={(opts: any) => onDateRangeChange(opts)}
 								/>
 							</div>
 							<div className='text-center d-none d-sm-block d-md-none'>
@@ -220,9 +218,7 @@ export default function TabView(props: Props) {
 									numberOfMonths={2}
 									dateRangeFrom={dateRangeFrom}
 									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => {
-										onDateRangeChange(opts)
-									}}
+									onChange={(opts: any) => onDateRangeChange(opts)}
 								/>
 							</div>
 							<div className='text-center d-none d-md-block d-lg-none'>
@@ -230,29 +226,23 @@ export default function TabView(props: Props) {
 									numberOfMonths={2}
 									dateRangeFrom={dateRangeFrom}
 									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => {
-										onDateRangeChange(opts)
-									}}
+									onChange={(opts: any) => onDateRangeChange(opts)}
 								/>
 							</div>
-							<div className='text-center d-none d-lg-block d-xl-none'>
+							<div className='text-center d-none d-lg-block d-xxl-none'>
 								<DateRangePicker
 									numberOfMonths={3}
 									dateRangeFrom={dateRangeFrom}
 									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => {
-										onDateRangeChange(opts)
-									}}
+									onChange={(opts: any) => onDateRangeChange(opts)}
 								/>
 							</div>
-							<div className='text-center d-none d-xl-block'>
+							<div className='text-center d-none d-xxl-block'>
 								<DateRangePicker
 									numberOfMonths={4}
 									dateRangeFrom={dateRangeFrom}
 									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => {
-										onDateRangeChange(opts)
-									}}
+									onChange={(opts: any) => onDateRangeChange(opts)}
 								/>
 							</div>
 
