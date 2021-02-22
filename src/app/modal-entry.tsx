@@ -311,35 +311,39 @@ export default function TabAdmin(props: IModalEntryProps) {
 						</div>
 					</div>
 				</div>
-				<ReactTags
-					allowNew={true}
-					allowBackspace={false}
-					minQueryLength={2}
-					maxSuggestionsLength={6}
-					tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign }))}
-					suggestions={uniqueTags.map((sign, idx) => new Object({ id: idx, name: sign }))}
-					suggestionsFilter={(item: { id: number; name: string }, query: string) => item.name.indexOf(query.toLowerCase()) > -1}
-					addOnBlur={true}
-					onAddition={(tag: IDreamSignTag) => {
-						let newState = { ...currEntry }
-						// Dont allow dupes
-						if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) {
-							newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase())
-						}
-						setCurrEntry(newState)
-					}}
-					onChange={(ev) => {
-						let newState = { ...currEntry }
-						newState.dreams[dreamIdx].dreamSigns = [...ev.currentTarget.value]
-						setCurrEntry(newState)
-					}}
-					onDelete={(idx: number) => {
-						let newState = { ...currEntry }
-						newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
-						setCurrEntry(newState)
-					}}
-					className='my-2'
-				/>
+				<div className='row'>
+					<div className='col'>
+						<ReactTags
+							allowNew={true}
+							allowBackspace={false}
+							minQueryLength={2}
+							maxSuggestionsLength={6}
+							tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign }))}
+							suggestions={uniqueTags.map((sign, idx) => new Object({ id: idx, name: sign }))}
+							suggestionsFilter={(item: { id: number; name: string }, query: string) => item.name.indexOf(query.toLowerCase()) > -1}
+							addOnBlur={true}
+							onAddition={(tag: IDreamSignTag) => {
+								let newState = { ...currEntry }
+								// Dont allow dupes
+								if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) {
+									newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase())
+								}
+								setCurrEntry(newState)
+							}}
+							onChange={(ev) => {
+								let newState = { ...currEntry }
+								newState.dreams[dreamIdx].dreamSigns = [...ev.currentTarget.value]
+								setCurrEntry(newState)
+							}}
+							onDelete={(idx: number) => {
+								let newState = { ...currEntry }
+								newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
+								setCurrEntry(newState)
+							}}
+							className='my-2'
+						/>
+					</div>
+				</div>
 				<div className='row' data-desc='details'>
 					<div className='col'>
 						<div className='form-floating'>
