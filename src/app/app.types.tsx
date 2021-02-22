@@ -1,6 +1,10 @@
 // APP
-export const APP_BLD = '20210217-2021'
+export const APP_BLD = '20210221-1324'
 export const APP_VER = `1.1.0-BS5-WIP-${APP_BLD}`
+
+// TODO: react-tags doesnt work on iOS!!
+// `react-tags__suggestions` is appearing beneath the new floatingLabel textarea
+// only reproducable on iPhone plugged into Safari desktop
 
 // CONST
 export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
