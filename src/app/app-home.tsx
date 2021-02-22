@@ -169,8 +169,16 @@ export default function TabHome(props: Props) {
 							<img src={LogoBase64} width='75' height='75' className='me-4' alt='Logo' />
 							Brain Cloud - Dream Journal
 						</h3>
-						<h2 className='text-primary mb-0 d-none d-md-block d-lg-none'>Brain Cloud<br/>Dream Journal</h2>
-						<h3 className='text-primary mb-0 d-block d-md-none'>Brain Cloud</h3>
+						<h2 className='text-primary mb-0 d-none d-md-block d-lg-none'>
+							Brain Cloud
+							<br />
+							Dream Journal
+						</h2>
+						<h3 className='text-primary mb-0 d-block d-md-none'>
+							Brain Cloud
+							<br />
+							Dream Journal
+						</h3>
 					</div>
 					<div className='col-auto'>
 						<button className='btn btn-primary px-3 px-md-4 text-uppercase' type='button' disabled={!props.dataFile} onClick={() => setShowModal(true)}>
@@ -186,8 +194,8 @@ export default function TabHome(props: Props) {
 				<p className='lead mt-3'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</p>
 				<hr className='my-4' />
 
-				<div className='row mb-5'>
-					<div className='col-12 col-md d-flex mb-5 mb-md-0'>
+				<div className='row g-4 row-cols-1 row-cols-md-2 mb-4'>
+					<div className='col d-flex'>
 						<div className='card flex-fill'>
 							<div className={'card-header' + (props.authState && props.authState.status === AuthState.Authenticated ? ' bg-success' : ' bg-warning')}>
 								<h5 className='card-title text-white mb-0'>{props.authState ? props.authState.status : '???'}</h5>
@@ -195,7 +203,7 @@ export default function TabHome(props: Props) {
 							<div className='card-body bg-light text-dark'>{renderCardAuthUser()}</div>
 						</div>
 					</div>
-					<div className='col-12 col-md d-flex'>
+					<div className='col d-flex'>
 						<div className='card flex-fill'>
 							<div className='card-header bg-info'>
 								<h5 className='card-title text-white mb-0'>Dream Journal</h5>
@@ -204,9 +212,8 @@ export default function TabHome(props: Props) {
 						</div>
 					</div>
 				</div>
-
-				<div className='row mb-0'>
-					<div className='col-12 col-md d-flex'>
+				<div className='row g-4 row-cols-1'>
+					<div className='col'>
 						<div className='card'>
 							<div className='card-header bg-secondary'>
 								<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
