@@ -155,11 +155,11 @@ export default function TabHome(props: Props) {
 	}
 
 	return (
-		<div className='container-xl mt-5'>
+		<div className='container-xl my-5'>
 			<ModalEntry currEntry={null} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
 
 			<div className='jumbotron'>
-				<div className='row align-items-center g-0'>
+				<div className='row align-items-center g-0 mb-3'>
 					<div className='col'>
 						<h1 className='display-4 text-primary mb-0 d-none d-md-none d-xl-block'>
 							<img src={LogoBase64} width='150' height='150' className='me-4' alt='Logo' />
@@ -191,10 +191,9 @@ export default function TabHome(props: Props) {
 					</div>
 				</div>
 
-				<p className='lead mt-3'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</p>
-				<hr className='my-4' />
+				<div className='mb-5'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</div>
 
-				<div className='row g-4 row-cols-1 row-cols-md-2 mb-4'>
+				<div className='row g-5 row-cols-1 row-cols-md-2 mb-5'>
 					<div className='col d-flex'>
 						<div className='card flex-fill'>
 							<div className={'card-header' + (props.authState && props.authState.status === AuthState.Authenticated ? ' bg-success' : ' bg-warning')}>

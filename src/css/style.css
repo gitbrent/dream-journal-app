@@ -92,8 +92,7 @@
 
 /* Need for Bootstrap 5 */
 .jumbotron {
-	padding: 4rem 2rem;
-	margin-bottom: 2rem;
+	padding: 3rem; /* `p-5` */
 	background-color: var(--bgBlack80);
 	border-radius: 0.3rem;
 }
