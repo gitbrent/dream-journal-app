@@ -1026,17 +1026,19 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<h5 className='text-primary'>Bed Time Format</h5>
 						<label>Used to parse "12:30" in am/pm or 24-hour time</label>
 
-						<BootstrapSwitchButton
-							onChange={(checked: boolean) => {
-								this.setState({ _isTime24Hour: checked })
-							}}
-							checked={this.state._isTime24Hour}
-							onlabel='24-Hour Format'
-							onstyle='primary'
-							offlabel='AM/PM Format'
-							offstyle='secondary'
-							style='w-50'
-						/>
+						<div className='row align-items-center g-2'>
+							<div className='col-auto'>
+								<div className='form-check form-switch'>
+									<input
+										className='form-check-input'
+										type='checkbox'
+										checked={this.state._isTime24Hour}
+										onChange={(ev) => this.setState({ _isTime24Hour: ev.currentTarget.checked })}
+									/>
+								</div>
+							</div>
+							<div className='col'>{this.state._isTime24Hour ? '24-Hour Format' : 'AM/PM Format'}</div>
+						</div>
 					</div>
 					<div className='col'>
 						<h5 className='text-primary'>Default Bed Time</h5>

@@ -54,6 +54,15 @@
 	margin-bottom: 0.5rem; /* cyborg-bs5-default = 0 */
 }
 
+/* Brent BS upgrades */
+.form-check {
+	min-height: 2.25rem; /* 32px - matches button height (24+6+6) in BS5 */
+}
+.form-switch .form-check-input {
+	width: 4.5rem;
+	height: 2.25rem;
+}
+
 /* Brent BS addons */
 
 .x3 {
