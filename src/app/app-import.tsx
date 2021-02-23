@@ -29,7 +29,7 @@
 
 import React from 'react'
 import { IDriveFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './app.types'
-import BootstrapSwitchButton from 'bootstrap-switch-button-react' // '../../../bootstrap-switch-button-react'
+import BootstrapSwitchButton from 'bootstrap-switch-button-react' // TODO: BS5: Swap for new toggle
 import ContentEditable from 'react-contenteditable'
 import { Upload } from 'react-bootstrap-icons'
 import * as GDrive from './google-oauth'
