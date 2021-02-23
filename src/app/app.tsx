@@ -31,11 +31,6 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom'
 import { IAuthState, IDriveFile, IJournalEntry, AuthState, IDreamSignTag, APP_VER } from './app.types'
-//import '../css/bootstrap.yetiborg.css' // TODO: REMOVE: after BS5
-import '../css/bootstrap.cyborg.v5.0.0-beta1.css' // WIP:
-import '../css/react-tags.css'
-import '../css/style.css'
-import LogoBase64 from '../img/logo_base64'
 import * as GDrive from './google-oauth'
 import TabHome from '../app/app-home'
 import TabView, { IAppViewState } from '../app/app-view'
@@ -43,6 +38,10 @@ import TabImport from '../app/app-import'
 import TabSearch, { IAppSearchState } from '../app/app-search'
 import TabAdmin, { IAppAdminState } from '../app/app-admin'
 import TabTags, { IAppTagsState } from '../app/app-tags'
+import LogoBase64 from '../img/logo_base64'
+import '../css/bootstrap.cyborg.v5.0.0-beta1.css'
+import '../css/react-tags.css'
+import '../css/style.css'
 
 // App Logic
 interface IAppProps {
