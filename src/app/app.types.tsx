@@ -1,5 +1,5 @@
 // APP
-export const APP_BLD = '20210221-1324'
+export const APP_BLD = '20210222-1921'
 export const APP_VER = `1.1.0-BS5-WIP-${APP_BLD}`
 
 // TODO: react-tags doesnt work on iOS!!
