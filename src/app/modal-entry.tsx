@@ -25,14 +25,12 @@ export default function TabAdmin(props: IModalEntryProps) {
 		lucidMethod: null,
 	}
 	const NEW_ENTRY = {
-		// TODO: need better idea - UTC shows wrong date half the time (1 day ahead)
-		//entryDate: new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDay(), // TODO: mon/day both need zero-padding (eg: "06")
-		entryDate: new Date().toISOString().substring(0, 10),
-		bedTime: '',
+		entryDate: new Date().toLocaleDateString('en-CA'),
+		bedTime: '01:30',
 		notesPrep: '',
 		notesWake: '',
 		starred: false,
-		dreams: [NEW_DREAM],
+		dreams: [{ ...NEW_DREAM }],
 	}
 	const [showModal, setShowModal] = useState(false)
 	const [isBusySave, setIsBusySave] = useState(false)
@@ -43,6 +41,8 @@ export default function TabAdmin(props: IModalEntryProps) {
 
 	/** Set/Clear Entry */
 	useEffect(() => {
+		setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry]
+
 		setShowModal(props.showModal)
 		setUniqueTags(GDrive.getUniqueDreamTags)
 		if (props.showModal) setSelectedTab(-1)
@@ -97,7 +97,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 			<nav>
 				<div className='row align-items-center pt-4'>
 					<div className='col-6 col-lg-3 mb-4'>
-						<div className='input-group'>
+						<div className='input-group match-btn-group-sm'>
 							<div className='input-group-prepend' title='Entry Date'>
 								<span className='input-group-text bg-secondary px-2'>
 									<Calendar3 />
@@ -120,7 +120,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 						</div>
 					</div>
 					<div className='col-6 col-lg-3 mb-4'>
-						<div className='input-group'>
+						<div className='input-group match-btn-group-sm'>
 							<div className='input-group-prepend' title='Bed Time'>
 								<span className='input-group-text bg-secondary px-2'>
 									<Clock />

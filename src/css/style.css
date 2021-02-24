@@ -55,6 +55,11 @@
 }
 
 /* Brent BS upgrades */
+/* Set `.form-control-sm` elements and their input-group to 31px high instead of 29 to match `btn-group-sm` */
+.input-group.match-btn-group-sm .input-group-text {
+	padding: 8px 6px 7px 6px;
+}
+
 .form-check {
 	min-height: 2.25rem; /* 32px - matches button height (24+6+6) in BS5 */
 }
