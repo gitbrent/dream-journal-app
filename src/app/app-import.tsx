@@ -532,7 +532,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						} else if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
 							// DESIGN: Some people (*ahem*) choose to put DREAMSIGNS at the top-level (not as a Dream section field)
 							let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
-							if (keyVal[1].trim()) tmpDreamSigns = keyVal[1].trim().split(this.state._dreamSignsDelim || strDreamSignDelim)
+							if (keyVal[1].trim()) tmpDreamSigns = keyVal[1].trim().toLowerCase().split(this.state._dreamSignsDelim || strDreamSignDelim)
 						}
 					} else if (line) {
 						// DESIGN: the last `else if` above created an item in `objEntry.dreams`
@@ -552,9 +552,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						// B: Capture other `dream` fields
 						if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
 							let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
-							// FIXME: TODO:
-							if (!keyVal[1]) console.log(line)
-							if (keyVal[1].trim()) objDream.dreamSigns = tmpDreamSigns || keyVal[1].trim().split(this.state._dreamSignsDelim || strDreamSignDelim)
+							if (!keyVal[1].trim()) console.log(line) // FIXME:
+							if (keyVal[1].trim()) objDream.dreamSigns = tmpDreamSigns || keyVal[1].trim().toLowerCase().split(this.state._dreamSignsDelim || strDreamSignDelim)
 						} else if (line.trim().match(new RegExp(this.state._isLucidDream, 'g'))) {
 							let keyVal = line.trim().split(new RegExp(this.state._isLucidDream, 'g'))
 							if (keyVal[1].trim()) objDream.isLucidDream = keyVal[1].trim() ? true : false
