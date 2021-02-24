@@ -73,11 +73,11 @@ export default function TabHome(props: Props) {
 				<div>
 					<div className='row mb-4'>
 						<div className='col'>
-							<label className='text-muted text-uppercase d-block'>User Name</label>
+							<label>User Name</label>
 							{props.authState.userName}
 						</div>
 						<div className='col-auto text-right'>
-							<label className='text-muted text-uppercase d-block'>App Version</label>
+							<label>App Version</label>
 							{APP_VER}
 						</div>
 					</div>
@@ -122,7 +122,7 @@ export default function TabHome(props: Props) {
 		return props.dataFile && (props.dataFile._isSaving || props.dataFile._isLoading || isBusyLoad) ? (
 			<div className='text-center'>
 				<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
-					<span className='sr-only' />
+					<span className='visually-hidden' />
 				</div>
 				<div>Loading/Saving...</div>
 			</div>
@@ -130,21 +130,21 @@ export default function TabHome(props: Props) {
 			<div>
 				<div className='row mb-3'>
 					<div className='col'>
-						<label className='text-muted text-uppercase d-block'>File Name</label>
+						<label>File Name</label>
 						{props.dataFile.name}
 					</div>
 					<div className='col-auto text-right'>
-						<label className='text-muted text-uppercase d-block'>Entries</label>
+						<label>Entries</label>
 						{props.dataFile.entries ? props.dataFile.entries.length : '?'}
 					</div>
 				</div>
 				<div className='row'>
 					<div className='col'>
-						<label className='text-muted text-uppercase d-block'>Last Saved</label>
+						<label>Last Saved</label>
 						{props.dataFile ? new Date(props.dataFile.modifiedTime).toLocaleString() : '-'}
 					</div>
 					<div className='col-auto text-right'>
-						<label className='text-muted text-uppercase d-block'>File Size</label>
+						<label>File Size</label>
 						{getReadableFileSizeString(Number(props.dataFile.size))}
 					</div>
 				</div>
@@ -155,22 +155,30 @@ export default function TabHome(props: Props) {
 	}
 
 	return (
-		<div className='container mt-5'>
+		<div className='container-xl my-5'>
 			<ModalEntry currEntry={null} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
 
 			<div className='jumbotron'>
-				<div className='row align-items-center no-gutters'>
+				<div className='row align-items-center g-0 mb-3'>
 					<div className='col'>
 						<h1 className='display-4 text-primary mb-0 d-none d-md-none d-xl-block'>
-							<img src={LogoBase64} width='150' height='150' className='mr-4' alt='Logo' />
+							<img src={LogoBase64} width='150' height='150' className='me-4' alt='Logo' />
 							Brain Cloud - Dream Journal
 						</h1>
 						<h3 className='text-primary mb-0 d-none d-md-none d-lg-block d-xl-none'>
-							<img src={LogoBase64} width='75' height='75' className='mr-4' alt='Logo' />
+							<img src={LogoBase64} width='75' height='75' className='me-4' alt='Logo' />
 							Brain Cloud - Dream Journal
 						</h3>
-						<h2 className='text-primary mb-0 d-none d-md-block d-lg-none'>Brain Cloud<br/>Dream Journal</h2>
-						<h3 className='text-primary mb-0 d-block d-md-none'>Brain Cloud</h3>
+						<h2 className='text-primary mb-0 d-none d-md-block d-lg-none'>
+							Brain Cloud
+							<br />
+							Dream Journal
+						</h2>
+						<h3 className='text-primary mb-0 d-block d-md-none'>
+							Brain Cloud
+							<br />
+							Dream Journal
+						</h3>
 					</div>
 					<div className='col-auto'>
 						<button className='btn btn-primary px-3 px-md-4 text-uppercase' type='button' disabled={!props.dataFile} onClick={() => setShowModal(true)}>
@@ -183,11 +191,10 @@ export default function TabHome(props: Props) {
 					</div>
 				</div>
 
-				<p className='lead mt-3'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</p>
-				<hr className='my-4' />
+				<div className='mb-5'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</div>
 
-				<div className='row mb-5'>
-					<div className='col-12 col-md d-flex mb-5 mb-md-0'>
+				<div className='row g-5 row-cols-1 row-cols-md-2 mb-5'>
+					<div className='col d-flex'>
 						<div className='card flex-fill'>
 							<div className={'card-header' + (props.authState && props.authState.status === AuthState.Authenticated ? ' bg-success' : ' bg-warning')}>
 								<h5 className='card-title text-white mb-0'>{props.authState ? props.authState.status : '???'}</h5>
@@ -195,7 +202,7 @@ export default function TabHome(props: Props) {
 							<div className='card-body bg-light text-dark'>{renderCardAuthUser()}</div>
 						</div>
 					</div>
-					<div className='col-12 col-md d-flex'>
+					<div className='col d-flex'>
 						<div className='card flex-fill'>
 							<div className='card-header bg-info'>
 								<h5 className='card-title text-white mb-0'>Dream Journal</h5>
@@ -204,9 +211,8 @@ export default function TabHome(props: Props) {
 						</div>
 					</div>
 				</div>
-
-				<div className='row mb-0'>
-					<div className='col-12 col-md d-flex'>
+				<div className='row g-4 row-cols-1'>
+					<div className='col'>
 						<div className='card'>
 							<div className='card-header bg-secondary'>
 								<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>

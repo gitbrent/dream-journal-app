@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveFile, IJournalEntry } from './app.types'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
-import DreamSignTag from './comp-app/dreamsign-tag'
+import DreamTagCard from './comp-app/dreamtag-card'
 import * as GDrive from './google-oauth'
 import AlertGdriveStatus from './comp-app/alert-gstat'
 import ModalEntry from './modal-entry'
@@ -147,49 +147,49 @@ export default function TabAdmin(props: IAppTagsProps) {
 							<div className='col-auto text-center d-none d-md-block'>
 								<h1 className='text-primary mb-1 x3'>{totalMonths}</h1>
 								<label className='text-primary text-uppercase'>Months</label>
-								<div className='badge badge-pill badge-primary w-100'>{`${totalYears} years`}</div>
+								<div className='badge rounded-pill bg-primary w-100'>{`${totalYears} years`}</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-primary mb-1 x3'>{totalEntries}</h1>
 								<label className='text-primary text-uppercase'>Days</label>
-								<div className='badge badge-pill badge-primary w-100'>{totalMonths * 30 > 0 ? (totalEntries / totalMonths).toFixed(2) + ' / mon' : '-'}</div>
+								<div className='badge rounded-pill bg-primary w-100'>{totalMonths * 30 > 0 ? (totalEntries / totalMonths).toFixed(2) + ' / mon' : '-'}</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-info mb-1 x3'>{totalDreams}</h1>
-								<label className='text-info text-uppercase d-block'>Dreams</label>
-								<div className='badge badge-pill badge-info w-100'>{totalMonths * 30 > 0 ? (totalDreams / totalEntries).toFixed(2) + ' / day' : '-'}</div>
+								<label className='text-info'>Dreams</label>
+								<div className='badge rounded-pill bg-info w-100'>{totalMonths * 30 > 0 ? (totalDreams / totalEntries).toFixed(2) + ' / day' : '-'}</div>
 							</div>
 							<div className='w-100 mb-3 d-md-none mb-md-0' />
 							<div className='col-auto text-center'>
 								<h1 className='text-warning mb-1 x3'>{totalStars}</h1>
-								<label className='text-warning text-uppercase d-block'>Starred</label>
-								<div className='badge badge-pill badge-warning w-100'>
+								<label className='text-warning'>Starred</label>
+								<div className='badge rounded-pill bg-warning w-100'>
 									{totalDreams && totalStars ? ((totalStars / totalDreams) * 100).toFixed(2) + '%' : '-'}
 								</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-success mb-1 x3'>{totalLucid}</h1>
-								<label className='text-success text-uppercase d-block'>Lucids</label>
-								<div className='badge badge-pill badge-success w-100'>
+								<label className='text-success'>Lucids</label>
+								<div className='badge rounded-pill bg-success w-100'>
 									{totalDreams && totalLucid ? ((totalLucid / totalDreams) * 100).toFixed(2) + '%' : '-'}
 								</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-primary mb-1 x3'>{totalDreamSigns}</h1>
-								<label className='text-primary text-uppercase d-block'>DreamSigns</label>
-								<div className='badge badge-pill badge-primary w-100'>-</div>
+								<label className='text-primary'>DreamSigns</label>
+								<div className='badge rounded-pill bg-primary w-100'>-</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-info mb-1 x3'>{totalDreams - totalUntagged}</h1>
-								<label className='text-info text-uppercase d-block'>Tagged</label>
-								<div className='badge badge-pill badge-info w-100'>
+								<label className='text-info'>Tagged</label>
+								<div className='badge rounded-pill bg-info w-100'>
 									{totalDreams ? (((totalDreams - totalUntagged) / totalDreams) * 100).toFixed(2) + '%' : '0%'}
 								</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-warning mb-1 x3'>{totalUntagged || '0'}</h1>
-								<label className='text-warning text-uppercase d-block'>Untagged</label>
-								<div className='badge badge-pill badge-warning w-100'>{totalDreams ? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
+								<label className='text-warning'>Untagged</label>
+								<div className='badge rounded-pill bg-warning w-100'>{totalDreams ? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
 							</div>
 						</div>
 					</div>
@@ -260,7 +260,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 								return a.totalOccurs < b.totalOccurs ? -1 : a.totalOccurs > b.totalOccurs ? 1 : a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
 						})
 						.map((tagGrp, idx) => (
-							<DreamSignTag
+							<DreamTagCard
 								key={`keyTagGrp${idx}`}
 								setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
 								setShowModal={(show: boolean) => setShowModal(show)}
@@ -285,7 +285,9 @@ export default function TabAdmin(props: IAppTagsProps) {
 						<h5 className='text-primary'>Search Dream Tags</h5>
 					</div>
 					<div className='col-auto'>
-						<h5 className='text-primary'>{tagsByCat.length} Categories ({dreamTagGroups.length} Tags)</h5>
+						<h5 className='text-primary'>
+							{tagsByCat.length} Categories ({dreamTagGroups.length} Tags)
+						</h5>
 					</div>
 				</div>
 
@@ -295,7 +297,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 						.map((catItem, idx) => (
 							<div key={`keyCatItem${idx}`} className='col-12 col-md-6 col-lg-4'>
 								<div className='card mb-4'>
-									<div className='card-header bg-secbgd h6'>{catItem.dreamCat}</div>
+									<div className='card-header bg-black-70 h6'>{catItem.dreamCat}</div>
 									<div className='card-body bg-black-90 p-2'>
 										{catItem.dreamTagGroups
 											.filter(
@@ -324,7 +326,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 														: 1
 											})
 											.map((tagGrp, idx) => (
-												<DreamSignTag
+												<DreamTagCard
 													key={`keyTagGrp${idx}`}
 													setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
 													setShowModal={(show: boolean) => setShowModal(show)}

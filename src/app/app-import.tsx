@@ -29,7 +29,7 @@
 
 import React from 'react'
 import { IDriveFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './app.types'
-import BootstrapSwitchButton from 'bootstrap-switch-button-react' // '../../../bootstrap-switch-button-react'
+import BootstrapSwitchButton from 'bootstrap-switch-button-react' // TODO: BS5: Swap for new toggle
 import ContentEditable from 'react-contenteditable'
 import { Upload } from 'react-bootstrap-icons'
 import * as GDrive from './google-oauth'
@@ -107,22 +107,22 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			_parsedSections: config._parsedSections || [],
 			_selBreakType: config._selBreakType || 'blankLine',
 			_selDreamNotes: config._selDreamNotes || 'match',
-			_selEntryType: config._selEntryType || 'match',
+			_selEntryType: config._selEntryType || 'first',
 			_selNotePrepType: config._selNotePrepType || 'multi',
 			_selNoteWakeType: config._selNoteWakeType || 'single',
 			_showImporter: ImportTypes.docx,
 
-			_bedTime: config._bedTime || '',
-			_dreamBreak: config._dreamBreak || '',
-			_dreamSigns: config._dreamSigns || '',
-			_entryDate: config._entryDate || '',
-			_isLucidDream: config._isLucidDream || '',
+			_bedTime: config._bedTime || 'BED:',
+			_dreamBreak: config._dreamBreak || 'DREAM \d+:',
+			_dreamSigns: config._dreamSigns || 'DREAMSIGNS:',
+			_entryDate: config._entryDate || '\d\d/\d\d:',
+			_isLucidDream: config._isLucidDream || 'SUCCESS',
 			_notes: config._notes || [],
-			_notesPrep: config._notesPrep || '',
-			_notesPrepEnd: config._notesPrepEnd || '',
-			_notesWake: config._notesWake || '',
-			_notesWakeEnd: config._notesWakeEnd || '',
-			_title: config._title || '',
+			_notesPrep: config._notesPrep || 'PREP:',
+			_notesPrepEnd: config._notesPrepEnd || 'WAKES:',
+			_notesWake: config._notesWake || 'WAKES:',
+			_notesWakeEnd: config._notesWakeEnd || 'WAKES:',
+			_title: config._title || 'DREAM \d+:',
 
 			bedTime: null,
 			dreamBreak: [],
@@ -397,7 +397,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	 */
 	handleParse = () => {
 		const strDreamSignDelim = ','
-		let arrEntries: Array<IJournalEntry> = []
+		let arrEntries: IJournalEntry[] = []
 		let strSecBreak = new RegExp('\n\n')
 		let strImportText = this.state._importText
 		if (this.state._selBreakType === 'blankLine') strSecBreak = new RegExp('\n\n')
@@ -425,9 +425,13 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		// D: parse text
 		if (VERBOSE) {
 			console.log('-------------------------------------------')
+			console.log(`this.state._selBreakType = ${this.state._selBreakType}`);
+			console.log('this.state._importText');
+			console.log(this.state._importText);
 			console.log('strImportText split into sections:')
 			console.log(strImportText.split(strSecBreak))
 			console.log('-------------------------------------------')
+			return
 		}
 		strImportText
 			.split(strSecBreak)
@@ -689,22 +693,28 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				<span className='text-white'>03/08:</span>
 				<ul>
 					<li>
+						<span className='text-white'>DREAMSIGNS:</span> Dad, Camping
+					</li>
+					<li>
 						<span className='text-white'>BED:</span> 11:30
 					</li>
 					<li>
-						<span className='text-white'>PREP:</span>
+						<span className='text-white'>PREP: Long day</span>
+						{/*<span className='text-white'>PREP:</span>
 						<ul>
 							<li>Watched Netflix from 8-10</li>
 							<li>Talked to mom</li>
 							<li>Bubble bath</li>
-						</ul>
+						</ul>*/}
 					</li>
 					<li>
 						<span className='text-white'>WAKES:</span> 06:00 for bio break
 					</li>
+					{/*
 					<li>
-						<span className='text-white'>DREAMSIGNS:</span> Dad, Camping
+						<span className='text-white'>NOTE:</span> Something
 					</li>
+					*/}
 					<li>
 						<span className='text-white'>DREAM 1:</span> At the mall
 					</li>
@@ -761,14 +771,14 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 								</span>
 							</div>
 							<div className='col'>
-								<div className='row no-gutters'>
+								<div className='row g-0'>
 									<div className='col'>
 										<select name='_selEntryType' className='form-control' onChange={this.handleSelectChange} value={this.state._selEntryType}>
 											<option value='match'>Regex</option>
 											<option value='first'>First line is the Entry Date</option>
 										</select>
 									</div>
-									<div className={this.state._selEntryType === 'first' ? 'd-none' : 'col-7 pl-1'}>
+									<div className={this.state._selEntryType === 'first' ? 'd-none' : 'col-7 ps-1'}>
 										<input
 											name='_entryDate'
 											value={this.state._entryDate}
@@ -806,14 +816,14 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<div className='row align-items-top mb-3'>
 							<div className='col-3'>Prep Notes</div>
 							<div className='col'>
-								<div className='row no-gutters'>
+								<div className='row g-0'>
 									<div className='col-auto'>
 										<select name='_selNotePrepType' className='form-control' onChange={this.handleSelectChange} value={this.state._selNotePrepType}>
 											<option value='single'>Single-line</option>
 											<option value='multi'>Multi-line</option>
 										</select>
 									</div>
-									<div className='col pl-1'>
+									<div className='col ps-1'>
 										<input
 											name='_notesPrep'
 											value={this.state._notesPrep}
@@ -824,7 +834,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										/>
 									</div>
 								</div>
-								<div className={this.state._selNotePrepType === 'multi' ? 'row no-gutters mt-1' : 'd-none'}>
+								<div className={this.state._selNotePrepType === 'multi' ? 'row g-0 mt-1' : 'd-none'}>
 									<input
 										name='_notesPrepEnd'
 										value={this.state._notesPrepEnd}
@@ -844,14 +854,14 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<div className='row align-items-top mb-3'>
 							<div className='col-3'>Wake Notes</div>
 							<div className='col'>
-								<div className='row no-gutters'>
+								<div className='row g-0'>
 									<div className='col-auto'>
 										<select name='_selNoteWakeType' className='form-control' onChange={this.handleSelectChange} value={this.state._selNoteWakeType}>
 											<option value='single'>Single-line</option>
 											<option value='multi'>Multi-line</option>
 										</select>
 									</div>
-									<div className='col pl-1'>
+									<div className='col ps-1'>
 										<input
 											name='_notesWake'
 											value={this.state._notesWake}
@@ -862,7 +872,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										/>
 									</div>
 								</div>
-								<div className={this.state._selNoteWakeType === 'multi' ? 'row no-gutters mt-1' : 'd-none'}>
+								<div className={this.state._selNoteWakeType === 'multi' ? 'row g-0 mt-1' : 'd-none'}>
 									<input
 										name='_notesWakeEnd'
 										value={this.state._notesWakeEnd}
@@ -921,8 +931,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<div className='row align-items-center mb-3'>
 							<div className='col-3'>Dream Signs</div>
 							<div className='col'>
-								<div className='row no-gutters'>
-									<div className='col mr-1'>
+								<div className='row g-0'>
+									<div className='col me-1'>
 										<input
 											name='_dreamSigns'
 											value={this.state._dreamSigns}
@@ -964,14 +974,14 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<div className='row align-items-top mb-3'>
 							<div className='col-3'>Dream Notes</div>
 							<div className='col'>
-								<div className='row no-gutters'>
+								<div className='row g-0'>
 									<div className='col'>
 										<select name='_selDreamNotes' className='form-control' onChange={this.handleSelectChange} value={this.state._selDreamNotes}>
 											<option value='match'>Regex</option>
 											<option value='after'>All text after Dream Title</option>
 										</select>
 									</div>
-									<div className={this.state._selDreamNotes === 'after' ? 'd-none' : 'col-7 pl-2'}>
+									<div className={this.state._selDreamNotes === 'after' ? 'd-none' : 'col-7 ps-2'}>
 										<input
 											name='_notes'
 											value={this.state._notes}
@@ -1026,17 +1036,19 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<h5 className='text-primary'>Bed Time Format</h5>
 						<label>Used to parse "12:30" in am/pm or 24-hour time</label>
 
-						<BootstrapSwitchButton
-							onChange={(checked: boolean) => {
-								this.setState({ _isTime24Hour: checked })
-							}}
-							checked={this.state._isTime24Hour}
-							onlabel='24-Hour Format'
-							onstyle='primary'
-							offlabel='AM/PM Format'
-							offstyle='secondary'
-							style='w-50'
-						/>
+						<div className='row align-items-center g-2'>
+							<div className='col-auto'>
+								<div className='form-check form-switch'>
+									<input
+										className='form-check-input'
+										type='checkbox'
+										checked={this.state._isTime24Hour}
+										onChange={(ev) => this.setState({ _isTime24Hour: ev.currentTarget.checked })}
+									/>
+								</div>
+							</div>
+							<div className='col'>{this.state._isTime24Hour ? '24-Hour Format' : 'AM/PM Format'}</div>
+						</div>
 					</div>
 					<div className='col'>
 						<h5 className='text-primary'>Default Bed Time</h5>
@@ -1131,7 +1143,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				<ul className='list-group mb-4'>
 					{this.state._parsedSections.map((sect, idx) => (
 						<li className='list-group-item' key={'parsedsect' + idx}>
-							<div className='row no-gutters'>
+							<div className='row g-0'>
 								<div className='col'>
 									<h4 className='text-primary'>Entry {idx + 1}</h4>
 								</div>

@@ -41,8 +41,8 @@ export default function SearchResults(props: Props) {
 
 	return (
 		<div key={`searchResultCard${props.searchMatch.entry.entryDate}`} className='card mb-4'>
-			<div className={props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'card-header bg-success' : 'card-header bg-secbgd'}>
-				<div className='row no-gutters align-items-center'>
+			<div className={props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'card-header bg-success' : 'card-header bg-black-70'}>
+				<div className='row g-0 align-items-center'>
 					<div className='col-auto'>
 						<div
 							className='text-center'
@@ -87,7 +87,7 @@ export default function SearchResults(props: Props) {
 						Array.isArray(props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns)
 							? props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns.map((sign, idx) => {
 									return (
-										<div className='badge badge-info text-lowercase p-2 mr-2 mb-2' key={'sign' + idx}>
+										<div className='badge badge-info text-lowercase p-2 me-2 mb-2' key={'sign' + idx}>
 											{sign}
 										</div>
 									)

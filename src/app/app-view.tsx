@@ -76,8 +76,8 @@ export default function TabView(props: Props) {
 
 		return props.dataFile && props.dataFile._isLoading ? (
 			<div className='align-middle text-center text-warning mb-4'>
-				<div className='spinner-border spinner-border-sm mr-2' role='status'>
-					<span className='sr-only' />
+				<div className='spinner-border spinner-border-sm me-2' role='status'>
+					<span className='visually-hidden' />
 				</div>
 				Saving/Loading...
 			</div>
@@ -88,7 +88,7 @@ export default function TabView(props: Props) {
 						<tr>
 							<th>
 								Date
-								<SortDownAlt size='16' className='ml-1' />
+								<SortDownAlt size='16' className='ms-1' />
 							</th>
 							<th className='text-center d-none d-lg-table-cell'>Bed</th>
 							<th className='text-center'>Dreams</th>
@@ -120,7 +120,7 @@ export default function TabView(props: Props) {
 										<td className='align-middle text-center'>{entry.dreams.length}</td>
 										<td className='align-middle text-left d-none d-md-table-cell'>
 											{dreamSignsUnq.sort().map((sign, idy) => (
-												<div key={`${idx}-${idy}`} className='badge badge-info p-2 mr-2 mb-2'>
+												<div key={`${idx}-${idy}`} className='badge badge-info p-2 me-2 mb-2'>
 													{sign}
 												</div>
 											))}
@@ -210,9 +210,7 @@ export default function TabView(props: Props) {
 									numberOfMonths={1}
 									dateRangeFrom={dateRangeFrom}
 									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => {
-										onDateRangeChange(opts)
-									}}
+									onChange={(opts: any) => onDateRangeChange(opts)}
 								/>
 							</div>
 							<div className='text-center d-none d-sm-block d-md-none'>
@@ -220,9 +218,7 @@ export default function TabView(props: Props) {
 									numberOfMonths={2}
 									dateRangeFrom={dateRangeFrom}
 									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => {
-										onDateRangeChange(opts)
-									}}
+									onChange={(opts: any) => onDateRangeChange(opts)}
 								/>
 							</div>
 							<div className='text-center d-none d-md-block d-lg-none'>
@@ -230,29 +226,23 @@ export default function TabView(props: Props) {
 									numberOfMonths={2}
 									dateRangeFrom={dateRangeFrom}
 									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => {
-										onDateRangeChange(opts)
-									}}
+									onChange={(opts: any) => onDateRangeChange(opts)}
 								/>
 							</div>
-							<div className='text-center d-none d-lg-block d-xl-none'>
+							<div className='text-center d-none d-lg-block d-xxl-none'>
 								<DateRangePicker
 									numberOfMonths={3}
 									dateRangeFrom={dateRangeFrom}
 									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => {
-										onDateRangeChange(opts)
-									}}
+									onChange={(opts: any) => onDateRangeChange(opts)}
 								/>
 							</div>
-							<div className='text-center d-none d-xl-block'>
+							<div className='text-center d-none d-xxl-block'>
 								<DateRangePicker
 									numberOfMonths={4}
 									dateRangeFrom={dateRangeFrom}
 									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => {
-										onDateRangeChange(opts)
-									}}
+									onChange={(opts: any) => onDateRangeChange(opts)}
 								/>
 							</div>
 

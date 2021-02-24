@@ -236,12 +236,12 @@ export default function TabSearch(props: Props) {
 							<div className='col-auto text-center d-none d-md-block'>
 								<h1 className='text-primary mb-1 x3'>{totalMonths || '-'}</h1>
 								<label className='text-primary text-uppercase'>Months</label>
-								<div className='badge badge-pill badge-primary w-100'>{totalYears + ' years'}</div>
+								<div className='badge rounded-pill bg-primary w-100'>{totalYears + ' years'}</div>
 							</div>
 							<div className='col-auto text-center'>
 								<h1 className='text-primary mb-1 x3'>{props.dataFile && props.dataFile.entries ? props.dataFile.entries.length : '-'}</h1>
 								<label className='text-primary text-uppercase'>Days</label>
-								<div className='badge badge-pill badge-primary w-100'>
+								<div className='badge rounded-pill bg-primary w-100'>
 									{totalMonths * 30 > 0 && props.dataFile && props.dataFile.entries
 										? (props.dataFile.entries.length / totalMonths).toFixed(2) + ' / mon'
 										: '-'}
@@ -250,7 +250,7 @@ export default function TabSearch(props: Props) {
 							<div className='col-auto text-center'>
 								<h1 className='text-info mb-1 x3'>{totalDreams || '-'}</h1>
 								<label className='text-info text-uppercase d-block'>Dreams</label>
-								<div className='badge badge-pill badge-info w-100'>
+								<div className='badge rounded-pill bg-info w-100'>
 									{totalMonths * 30 > 0 && props.dataFile && props.dataFile.entries
 										? (totalDreams / props.dataFile.entries.length).toFixed(2) + ' / day'
 										: '-'}
@@ -260,14 +260,14 @@ export default function TabSearch(props: Props) {
 							<div className='col-auto text-center' onClick={() => doShowByType(SearchScopes._starred)}>
 								<h1 className='text-warning mb-1 x3'>{totalStarred || '-'}</h1>
 								<label className='text-warning text-uppercase d-block'>Starred</label>
-								<div className='badge badge-pill badge-warning w-100'>
+								<div className='badge rounded-pill bg-warning w-100'>
 									{totalDreams && totalStarred ? ((totalStarred / totalDreams) * 100).toFixed(2) + '%' : '-'}
 								</div>
 							</div>
 							<div className='col-auto text-center' onClick={() => doShowByType(SearchScopes._isLucid)}>
 								<h1 className='text-success mb-1 x3'>{totalLucids || '-'}</h1>
 								<label className='text-success text-uppercase d-block'>Lucids</label>
-								<div className='badge badge-pill badge-success w-100'>
+								<div className='badge rounded-pill bg-success w-100'>
 									{totalDreams && totalLucids ? ((totalLucids / totalDreams) * 100).toFixed(2) + '%' : '-'}
 								</div>
 							</div>
@@ -293,11 +293,11 @@ export default function TabSearch(props: Props) {
 					<div className='card-body bg-light border-bottom border-secondary' data-desc='commandbar'>
 						<div className='row align-items-center'>
 							<div className='col-6 col-md-8'>
-								<div className='row align-items-center no-gutters'>
-									<div className='col-auto d-none d-md-block pr-3'>
+								<div className='row align-items-center g-0'>
+									<div className='col-auto d-none d-md-block pe-3'>
 										<Search size={48} className='text-secondary' />
 									</div>
-									<div className='col pr-2'>
+									<div className='col pe-2'>
 										<label className='text-uppercase text-muted'>Keyword or Phrase</label>
 										<input
 											type='text'

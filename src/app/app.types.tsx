@@ -1,6 +1,6 @@
 // APP
-export const APP_BLD = '20210216-2101'
-export const APP_VER = `1.1.0-WIP-${APP_BLD}`
+export const APP_BLD = '20210222-2050'
+export const APP_VER = `1.1.0-BS5-WIP-${APP_BLD}`
 
 // CONST
 export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -115,4 +115,14 @@ export interface IDreamTagByCat {
 	dreamCat: string
 	/** @example ['Action:Crime', 'Action:Military'] */
 	dreamTagGroups: IDreamSignTagGroup[]
+}
+
+export enum NightlyAffirmations {
+	'SMALL' = `Tonight, I will recognize my Dream Symbols and become aware I am dreaming.`,
+	'MILD (Naiya-Style)' = `Relax and completely de-stress.` +
+		`Visualize as best you can the last vivid dream - now imagine yourself becoming Lucid in the dream.` +
+		`Repeat to yourself, "I will have a lucid dream tonight."`,
+	'MILD 1' = `I resolve to become aware in my dreams tonight and have a Lucid Dream.` +
+		`Tonight, I will recognize my Dream-Signs and become aware I am dreaming.` +
+		`I can see myself becoming aware in my dreams and I can see myself surrounded by Dream-Signs.`,
 }

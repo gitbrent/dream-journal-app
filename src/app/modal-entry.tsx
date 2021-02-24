@@ -95,7 +95,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 	function renderTopToolbar(): JSX.Element {
 		return (
 			<nav>
-				<div className='row pt-4'>
+				<div className='row align-items-center pt-4'>
 					<div className='col-6 col-lg-3 mb-4'>
 						<div className='input-group'>
 							<div className='input-group-prepend' title='Entry Date'>
@@ -150,10 +150,10 @@ export default function TabAdmin(props: IModalEntryProps) {
 									setCurrEntry(updEntry)
 									setSelectedTab(updEntry.dreams.length - 1)
 								}}
-								className='btn btn-sm btn-success w-100'>
-								<div className='row no-gutters align-items-center'>
+								className='btn btn-success w-100'>
+								<div className='row g-0 align-items-center'>
 									<div className='col-auto'>
-										<PlusCircle size='1.2rem' />
+										<PlusCircle style={{ marginTop: '-2px' }} />
 									</div>
 									<div className='col'>Add Dream</div>
 								</div>
@@ -165,14 +165,16 @@ export default function TabAdmin(props: IModalEntryProps) {
 									updEntry.starred = !updEntry.starred
 									setCurrEntry(updEntry)
 								}}
-								className='btn btn-sm btn-warning w-100'>
-								<div className='row no-gutters align-items-center'>
-									<div className='col-auto'>{currEntry.starred ? <StarFill size='1.2rem' /> : <Star size='1.2rem' />}</div>
+								className='btn btn-warning w-100'>
+								<div className='row g-0 align-items-center'>
+									<div className='col-auto'>
+										{currEntry.starred ? <StarFill size='1rem' style={{ marginTop: '-2px' }} /> : <Star size='1rem' style={{ marginTop: '-2px' }} />}
+									</div>
 									<div className='col'>{currEntry.starred ? 'Starred' : 'Un-Starred'}</div>
 								</div>
 							</button>
-							<button type='button' onClick={() => handleDelete()} className='btn btn-sm btn-danger w-25'>
-								<Trash size='1.2rem' />
+							<button type='button' onClick={() => handleDelete()} className='btn btn-danger w-25'>
+								<Trash size='1rem' style={{ marginTop: '-2px' }} />
 							</button>
 						</div>
 					</div>
@@ -181,15 +183,15 @@ export default function TabAdmin(props: IModalEntryProps) {
 		)
 	}
 
-	function renderTabNotes_Horiz(): JSX.Element {
+	function renderTabNotes(): JSX.Element {
 		return (
 			<div role='tabpanel' aria-labelledby='drmtabNOTES-tab' key='dreamrowNOTES'>
-				<div className='row'>
-					<div className='col-12 col-md-6'>
-						<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
+				<div className='mb-3'>
+					<div className='form-floating'>
 						<textarea
+							id='notesPrep'
 							name='notesPrep'
-							rows={18}
+							//rows={10}
 							value={currEntry.notesPrep}
 							onChange={(ev) => {
 								let newState = { ...currEntry }
@@ -197,13 +199,19 @@ export default function TabAdmin(props: IModalEntryProps) {
 								setCurrEntry(newState)
 							}}
 							className='form-control'
+							style={{ height: '240px' }}
 						/>
+						<label htmlFor='notesPrep' className='text-muted text-uppercase text-sm'>
+							Prep Notes
+						</label>
 					</div>
-					<div className='col-12 col-md-6'>
-						<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
+				</div>
+				<div>
+					<div className='form-floating'>
 						<textarea
+							id='notesWake'
 							name='notesWake'
-							rows={18}
+							//rows={7}
 							value={currEntry.notesWake}
 							onChange={(ev) => {
 								let newState = { ...currEntry }
@@ -211,43 +219,12 @@ export default function TabAdmin(props: IModalEntryProps) {
 								setCurrEntry(newState)
 							}}
 							className='form-control'
+							style={{ height: '180px' }}
 						/>
+						<label htmlFor='notesWake' className='text-muted text-uppercase text-sm'>
+							Wake Notes
+						</label>
 					</div>
-				</div>
-			</div>
-		)
-	}
-
-	function renderTabNotes(): JSX.Element {
-		return (
-			<div role='tabpanel' aria-labelledby='drmtabNOTES-tab' key='dreamrowNOTES'>
-				<div className='mb-3'>
-					<label className='text-muted text-uppercase text-sm'>Prep Notes</label>
-					<textarea
-						name='notesPrep'
-						rows={10}
-						value={currEntry.notesPrep}
-						onChange={(ev) => {
-							let newState = { ...currEntry }
-							newState.notesPrep = ev.currentTarget.value
-							setCurrEntry(newState)
-						}}
-						className='form-control'
-					/>
-				</div>
-				<div>
-					<label className='text-muted text-uppercase text-sm'>Wake Notes</label>
-					<textarea
-						name='notesWake'
-						rows={7}
-						value={currEntry.notesWake}
-						onChange={(ev) => {
-							let newState = { ...currEntry }
-							newState.notesWake = ev.currentTarget.value
-							setCurrEntry(newState)
-						}}
-						className='form-control'
-					/>
 				</div>
 			</div>
 		)
@@ -285,7 +262,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 									setCurrEntry(updEntry)
 								}}
 								className={`btn btn-${isLucid ? 'success' : 'secondary'} px-2`}>
-								{isLucid ? <TrophyFill size='1.2rem' /> : <Trophy size='1.2rem' />}
+								{isLucid ? <TrophyFill size='1rem' /> : <Trophy size='1rem' />}
 							</button>
 							{dream.isLucidDream && (
 								<div className='btn-group' role='lucid type group'>
@@ -329,54 +306,62 @@ export default function TabAdmin(props: IModalEntryProps) {
 									}
 								}}
 								className='btn btn-danger px-2'>
-								<Trash size='1.2rem' />
+								<Trash size='1rem' />
 							</button>
 						</div>
 					</div>
 				</div>
-				<ReactTags
-					allowNew={true}
-					allowBackspace={false}
-					minQueryLength={2}
-					maxSuggestionsLength={6}
-					tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign }))}
-					suggestions={uniqueTags.map((sign, idx) => new Object({ id: idx, name: sign }))}
-					suggestionsFilter={(item: { id: number; name: string }, query: string) => item.name.indexOf(query.toLowerCase()) > -1}
-					addOnBlur={true}
-					onAddition={(tag: IDreamSignTag) => {
-						let newState = { ...currEntry }
-						// Dont allow dupes
-						if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) {
-							newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase())
-						}
-						setCurrEntry(newState)
-					}}
-					onChange={(ev) => {
-						let newState = { ...currEntry }
-						newState.dreams[dreamIdx].dreamSigns = [...ev.currentTarget.value]
-						setCurrEntry(newState)
-					}}
-					onDelete={(idx: number) => {
-						let newState = { ...currEntry }
-						newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
-						setCurrEntry(newState)
-					}}
-					className='my-2'
-				/>
-				<div className='row' data-desc='details'>
+				<div className='row'>
 					<div className='col'>
-						<label className='text-muted text-uppercase text-sm'>Dream Details</label>
-						<textarea
-							name='notes'
-							className='form-control'
-							rows={16}
-							value={dream.notes}
-							onChange={(ev) => {
+						<ReactTags
+							allowNew={true}
+							allowBackspace={false}
+							minQueryLength={2}
+							maxSuggestionsLength={6}
+							tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign }))}
+							suggestions={uniqueTags.map((sign, idx) => new Object({ id: idx, name: sign }))}
+							suggestionsFilter={(item: { id: number; name: string }, query: string) => item.name.indexOf(query.toLowerCase()) > -1}
+							addOnBlur={true}
+							onAddition={(tag: IDreamSignTag) => {
 								let newState = { ...currEntry }
-								newState.dreams[dreamIdx].notes = ev.currentTarget.value
+								// Dont allow dupes
+								if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) {
+									newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase())
+								}
 								setCurrEntry(newState)
 							}}
+							onChange={(ev) => {
+								let newState = { ...currEntry }
+								newState.dreams[dreamIdx].dreamSigns = [...ev.currentTarget.value]
+								setCurrEntry(newState)
+							}}
+							onDelete={(idx: number) => {
+								let newState = { ...currEntry }
+								newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
+								setCurrEntry(newState)
+							}}
+							className='my-2'
 						/>
+					</div>
+				</div>
+				<div className='row' data-desc='details'>
+					<div className='col'>
+						<div className='form-floating'>
+							<textarea
+								id='notes'
+								name='notes'
+								//rows={16}
+								value={dream.notes}
+								onChange={(ev) => {
+									let newState = { ...currEntry }
+									newState.dreams[dreamIdx].notes = ev.currentTarget.value
+									setCurrEntry(newState)
+								}}
+								className='form-control'
+								style={{ height: '350px' }}
+							/>
+							<label htmlFor='notes'>Dream Summary</label>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -421,7 +406,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 					<Button
 						type='button'
 						variant='outline-secondary'
-						className='mr-2'
+						className='me-2'
 						onClick={() => {
 							setShowModal(false)
 							props.setShowModal(false)
@@ -430,9 +415,9 @@ export default function TabAdmin(props: IModalEntryProps) {
 					</Button>
 					<button type='submit' onClick={() => handleSave()} className='btn btn-primary px-5' disabled={isDateDupe}>
 						{isBusySave ? (
-							<span className='spinner-border spinner-border-sm mr-2' role='status' aria-hidden='true'></span>
+							<span className='spinner-border spinner-border-sm me-2' role='status' aria-hidden='true'></span>
 						) : (
-							<Save size='16' className='mt-n1 mr-2' />
+							<Save size='16' className='mt-n1 me-2' />
 						)}
 						Save
 					</button>
