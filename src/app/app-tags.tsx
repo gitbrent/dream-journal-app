@@ -291,12 +291,12 @@ export default function TabAdmin(props: IAppTagsProps) {
 					</div>
 				</div>
 
-				<div className='row'>
+				<div className='row row-cols-auto g-3 justify-content-between'>
 					{tagsByCat
 						.sort((a, b) => (a.dreamCat < b.dreamCat ? -1 : 1))
 						.map((catItem, idx) => (
-							<div key={`keyCatItem${idx}`} className='col-12 col-md-6 col-lg-4'>
-								<div className='card mb-4'>
+							<div key={`keyCatItem${idx}`} className='col'>
+								<div className='card'>
 									<div className='card-header bg-black-70 h6'>{catItem.dreamCat}</div>
 									<div className='card-body bg-black-90 p-2'>
 										{catItem.dreamTagGroups
