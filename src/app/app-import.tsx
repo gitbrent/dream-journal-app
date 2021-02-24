@@ -115,7 +115,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			_bedTime: config._bedTime || 'BED:',
 			_dreamBreak: config._dreamBreak || 'DREAM \d+:',
 			_dreamSigns: config._dreamSigns || 'DREAMSIGNS:',
-			_entryDate: config._entryDate || '',
+			_entryDate: config._entryDate || '\d\d/\d\d:',
 			_isLucidDream: config._isLucidDream || 'SUCCESS',
 			_notes: config._notes || [],
 			_notesPrep: config._notesPrep || 'PREP:',
@@ -397,7 +397,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	 */
 	handleParse = () => {
 		const strDreamSignDelim = ','
-		let arrEntries: Array<IJournalEntry> = []
+		let arrEntries: IJournalEntry[] = []
 		let strSecBreak = new RegExp('\n\n')
 		let strImportText = this.state._importText
 		if (this.state._selBreakType === 'blankLine') strSecBreak = new RegExp('\n\n')
@@ -425,9 +425,13 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		// D: parse text
 		if (VERBOSE) {
 			console.log('-------------------------------------------')
+			console.log(`this.state._selBreakType = ${this.state._selBreakType}`);
+			console.log('this.state._importText');
+			console.log(this.state._importText);
 			console.log('strImportText split into sections:')
 			console.log(strImportText.split(strSecBreak))
 			console.log('-------------------------------------------')
+			return
 		}
 		strImportText
 			.split(strSecBreak)
@@ -689,22 +693,28 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				<span className='text-white'>03/08:</span>
 				<ul>
 					<li>
+						<span className='text-white'>DREAMSIGNS:</span> Dad, Camping
+					</li>
+					<li>
 						<span className='text-white'>BED:</span> 11:30
 					</li>
 					<li>
-						<span className='text-white'>PREP:</span>
+						<span className='text-white'>PREP: Long day</span>
+						{/*<span className='text-white'>PREP:</span>
 						<ul>
 							<li>Watched Netflix from 8-10</li>
 							<li>Talked to mom</li>
 							<li>Bubble bath</li>
-						</ul>
+						</ul>*/}
 					</li>
 					<li>
 						<span className='text-white'>WAKES:</span> 06:00 for bio break
 					</li>
+					{/*
 					<li>
-						<span className='text-white'>DREAMSIGNS:</span> Dad, Camping
+						<span className='text-white'>NOTE:</span> Something
 					</li>
+					*/}
 					<li>
 						<span className='text-white'>DREAM 1:</span> At the mall
 					</li>
