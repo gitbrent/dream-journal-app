@@ -118,6 +118,7 @@ export interface IDreamTagByCat {
 }
 
 export enum NightlyAffirmations {
+	'SMALL' = `Tonight, I will recognize my Dream Symbols and become aware I am dreaming.`,
 	'MILD (Naiya-Style)' = `Relax and completely de-stress.` +
 		`Visualize as best you can the last vivid dream - now imagine yourself becoming Lucid in the dream.` +
 		`Repeat to yourself, "I will have a lucid dream tonight."`,
