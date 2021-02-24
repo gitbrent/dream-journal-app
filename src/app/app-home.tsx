@@ -158,7 +158,7 @@ export default function TabHome(props: Props) {
 		<div className='container-xl my-5'>
 			<ModalEntry currEntry={null} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
 
-			<div className='jumbotron'>
+			<div className='jumbotron p-4 p-md-5'>
 				<div className='row align-items-center g-0 mb-3'>
 					<div className='col'>
 						<h1 className='display-4 text-primary mb-0 d-none d-md-none d-xl-block'>
@@ -211,7 +211,7 @@ export default function TabHome(props: Props) {
 						</div>
 					</div>
 				</div>
-				<div className='row g-4 row-cols-1'>
+				<div className='row g-5 row-cols-1'>
 					<div className='col'>
 						<div className='card'>
 							<div className='card-header bg-secondary'>

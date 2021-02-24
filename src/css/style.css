@@ -132,7 +132,6 @@
 
 /* Need for Bootstrap 5 */
 .jumbotron {
-	padding: 3rem; /* `p-5` */
 	background-color: var(--bgBlack80);
 	border-radius: 0.3rem;
 }
