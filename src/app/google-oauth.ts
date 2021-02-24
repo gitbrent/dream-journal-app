@@ -240,15 +240,21 @@ export function doSaveFile(): Promise<any> {
 			.then((response) => {
 				response
 					.json()
-					.then((_fileResource) => {
-						// A: refresh file list (to update "size", "modified")
+					.then((json) => {
+						let data = json
+
+						// A: Check for errors
+						if (data && data.error && data.error.code) throw new Error(data.error.message) // Google error: `{error:{errors:[], code:401, message:"..."}}`
+
+						// B: refresh file list (to update "size", "modified")
 						doGetDataFile()
 
 						// Done
 						resolve(true)
 					})
 					.catch((error) => {
-						throw new Error(error)
+						console.error ? console.error(error) : console.log(error)
+						reject(error || 'UNABLE TO SAVE')
 					})
 			})
 			.catch((error) => {
@@ -256,7 +262,7 @@ export function doSaveFile(): Promise<any> {
 					doAuthSignIn()
 				} else {
 					console.error ? console.error(error) : console.log(error)
-					reject(error.message || 'UNABLE TO SAVE')
+					reject(error || 'UNABLE TO SAVE')
 				}
 			})
 	})
