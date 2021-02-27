@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { IDriveFile, IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
 import { Search } from 'react-bootstrap-icons'
 import Alert from 'react-bootstrap/Alert'
-import SearchResults from './comp-app/search-results'
-import AlertGdriveStatus from './comp-app/alert-gstat'
+import SearchResults from './components/search-results'
+import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
 
 export interface Props {

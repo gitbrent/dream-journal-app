@@ -31,8 +31,8 @@ import React, { useState, useEffect } from 'react'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDriveFile, IJournalEntry } from './app.types'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
 import * as GDrive from './google-oauth'
-import DreamTagCard from './comp-app/dreamtag-card'
-import AlertGdriveStatus from './comp-app/alert-gstat'
+import DreamTagCard from './components/dreamtag-card'
+import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
 
 export interface IAppAdminProps {

@@ -32,7 +32,7 @@ import { IJournalEntry, IDriveFile } from './app.types'
 import { CheckCircleFill, StarFill, SortDownAlt } from 'react-bootstrap-icons'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
 import ReactPaginate from 'react-paginate'
-import AlertGdriveStatus from './comp-app/alert-gstat'
+import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
 // FUTURE: https://github.com/hypeserver/react-date-range
 
@@ -250,8 +250,8 @@ export default function TabView(props: Props) {
 								<SortDownAlt size='16' className='ms-1' />
 							</th>
 							<th className='text-center d-none d-lg-table-cell'>Bed</th>
-							<th className='text-left'>Dreams</th>
-							<th className='text-center d-none d-md-table-cell'>Tags</th>
+							<th className='text-center'>Dreams</th>
+							<th className='text-left d-none d-md-table-cell'>Tags</th>
 							<th className='text-center d-none d-md-table-cell'>Starred?</th>
 							<th className='text-center'>Lucid?</th>
 							<th className='text-center'>&nbsp;</th>
