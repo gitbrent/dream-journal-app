@@ -53,6 +53,12 @@
 	text-transform: uppercase;
 	margin-bottom: 0.5rem; /* cyborg-bs5-default = 0 */
 }
+.form-floating label {
+	color: inherit;
+	font-size: inherit; /* override above */
+	text-transform: uppercase;
+	margin-bottom: inherit;
+}
 
 /* Brent BS upgrades */
 /* Set `.form-control-sm` elements and their input-group to 31px high instead of 29 to match `btn-group-sm` */

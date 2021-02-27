@@ -191,6 +191,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 						<textarea
 							id='notesPrep'
 							name='notesPrep'
+							placeholder='Prep Notes'
 							//rows={10}
 							value={currEntry.notesPrep}
 							onChange={(ev) => {
@@ -201,9 +202,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 							className='form-control'
 							style={{ height: '240px' }}
 						/>
-						<label htmlFor='notesPrep' className='text-muted text-uppercase text-sm'>
-							Prep Notes
-						</label>
+						<label htmlFor='notesPrep'>Prep Notes</label>
 					</div>
 				</div>
 				<div>
@@ -211,6 +210,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 						<textarea
 							id='notesWake'
 							name='notesWake'
+							placeholder='Wake Notes'
 							//rows={7}
 							value={currEntry.notesWake}
 							onChange={(ev) => {
@@ -221,9 +221,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 							className='form-control'
 							style={{ height: '180px' }}
 						/>
-						<label htmlFor='notesWake' className='text-muted text-uppercase text-sm'>
-							Wake Notes
-						</label>
+						<label htmlFor='notesWake'>Wake Notes</label>
 					</div>
 				</div>
 			</div>
@@ -350,6 +348,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 							<textarea
 								id='notes'
 								name='notes'
+								placeholder='Dream Summary'
 								//rows={16}
 								value={dream.notes}
 								onChange={(ev) => {
