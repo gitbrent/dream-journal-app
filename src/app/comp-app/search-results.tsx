@@ -31,7 +31,7 @@ export default function SearchResults(props: Props) {
 		return (
 			<span>
 				{parts.map((part, i) => (
-					<span key={i} className={part.toLowerCase() === highlight.toLowerCase() ? 'badge badge-warning' : ''}>
+					<span key={i} className={part.toLowerCase() === highlight.toLowerCase() ? 'badge bg-warning' : ''}>
 						{part}
 					</span>
 				))}
@@ -87,7 +87,7 @@ export default function SearchResults(props: Props) {
 						Array.isArray(props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns)
 							? props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns.map((sign, idx) => {
 									return (
-										<div className='badge badge-info text-lowercase p-2 me-2 mb-2' key={'sign' + idx}>
+										<div className='badge bg-info text-lowercase p-2 me-2 mb-2' key={'sign' + idx}>
 											{sign}
 										</div>
 									)

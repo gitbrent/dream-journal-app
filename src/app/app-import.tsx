@@ -924,7 +924,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 								/>
 							</div>
 							<div className='col'>
-								<div className='form-output p-2'>{this.state.isLucidDream && <div className='badge badge-success font-weight-light p-2'>YES</div>}</div>
+								<div className='form-output p-2'>{this.state.isLucidDream && <div className='badge bg-success font-weight-light p-2'>YES</div>}</div>
 							</div>
 						</div>
 						<div className='row align-items-center mb-3'>

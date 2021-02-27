@@ -283,18 +283,20 @@ export default function TabAdmin(props: IAppAdminProps) {
 							<input
 								id='floatingDreamtag'
 								type='text'
+								placeholder='search dream tags'
 								value={searchTerm}
 								className='form-control'
 								onChange={(event) => setSearchTerm(event.target.value)}
 								disabled={!props.dataFile ? true : false}
 							/>
-							<label htmlFor='floatingDreamtag'>Dream Tag</label>
+							<label htmlFor='floatingDreamtag'>Search Dream Tags</label>
 						</div>
 					</div>
 					<div className='col-auto'>
 						<div className='form-floating'>
 							<select
 								id='floatingDisplay'
+								placeholder='card size'
 								defaultValue={filterViewType}
 								disabled={!props.dataFile ? true : false}
 								onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
@@ -305,13 +307,16 @@ export default function TabAdmin(props: IAppAdminProps) {
 									</option>
 								))}
 							</select>
-							<label htmlFor='floatingDisplay'>Display</label>
+							<label htmlFor='floatingDisplay' className='text-nowrap'>
+								Card Size
+							</label>
 						</div>
 					</div>
 					<div className='col-auto'>
 						<div className='form-floating'>
 							<select
 								id='floatingSortOrder'
+								placeholder='sort order'
 								defaultValue={filterSortOrder}
 								onChange={(ev) => setFilterSortOrder(ev.currentTarget.value as FilterSortOrder)}
 								className='form-control'>
@@ -321,7 +326,9 @@ export default function TabAdmin(props: IAppAdminProps) {
 									</option>
 								))}
 							</select>
-							<label htmlFor='floatingSortOrder'>Sort Order</label>
+							<label htmlFor='floatingSortOrder' className='text-nowrap'>
+								Sort Order
+							</label>
 						</div>
 					</div>
 				</div>
