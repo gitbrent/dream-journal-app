@@ -34,6 +34,7 @@ import { InfoCircle, Search } from 'react-bootstrap-icons'
 import ReactPaginate from 'react-paginate'
 import AlertGdriveStatus from './comp-app/alert-gstat'
 import ModalEntry from './modal-entry'
+// FUTURE: https://github.com/hypeserver/react-date-range
 
 export interface Props {
 	dataFile: IDriveFile
@@ -41,8 +42,8 @@ export interface Props {
 	viewState: IAppViewState
 }
 export interface IAppViewState {
-	dateRangeFrom: Date
-	dateRangeTo: Date
+	//dateRangeFrom: Date
+	//dateRangeTo: Date
 	pagingCurrIdx: number
 	pagingPageSize: number
 }
@@ -66,10 +67,10 @@ export default function TabView(props: Props) {
 	const [searchTerm, setSearchTerm] = useState('')
 	const [filterEntry, setFilterEntry] = useState<FilterEntry>(FilterEntry.all)
 	//
-	const [pagingCurrIdx, setPagingCurrIdx] = useState(1)
+	const [pagingCurrIdx, setPagingCurrIdx] = useState(0)
 	const [pagingPageSize, setPagingPageSize] = useState(10)
-	const [dateRangeFrom, setDateRangeFrom] = useState(null)
-	const [dateRangeTo, setDateRangeTo] = useState(null)
+	//const [dateRangeFrom, setDateRangeFrom] = useState(null)
+	//const [dateRangeTo, setDateRangeTo] = useState(null)
 
 	/** Gather all metrics */
 	useEffect(() => {
@@ -114,7 +115,7 @@ export default function TabView(props: Props) {
 		}
 	}, [props.dataFile])
 
-	useEffect(() => setPagingCurrIdx(1), [filterEntry])
+	useEffect(() => setPagingCurrIdx(0), [filterEntry])
 
 	// TODO: useEffect: return props.doSaveViewState(this.state)
 
@@ -241,7 +242,7 @@ export default function TabView(props: Props) {
 			</div>
 		) : (
 			<section>
-				<table className='table'>
+				<table className='table table-sm mb-4'>
 					<thead className='thead'>
 						<tr>
 							<th>
@@ -249,8 +250,8 @@ export default function TabView(props: Props) {
 								<SortDownAlt size='16' className='ms-1' />
 							</th>
 							<th className='text-center d-none d-lg-table-cell'>Bed</th>
-							<th className='text-center'>Dreams</th>
-							<th className='text-center d-none d-md-table-cell'>Dream Signs</th>
+							<th className='text-left'>Dreams</th>
+							<th className='text-center d-none d-md-table-cell'>Tags</th>
 							<th className='text-center d-none d-md-table-cell'>Starred?</th>
 							<th className='text-center'>Lucid?</th>
 							<th className='text-center'>&nbsp;</th>
@@ -259,8 +260,8 @@ export default function TabView(props: Props) {
 					<tbody>
 						{filteredEntries
 							.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
-							.filter((_entry, idx) => idx >= pagingPageSize * (pagingCurrIdx - 1) && idx < pagingPageSize * pagingCurrIdx)
-							.map((entry: IJournalEntry, idx) => {
+							.filter((_entry, idx) => idx >= pagingPageSize * pagingCurrIdx && idx < pagingPageSize * (pagingCurrIdx+1))
+							.map((entry, idx) => {
 								// This is a harsh thing to compile inline below, so do it here
 								let dreamSignsUnq: string[] = []
 								entry.dreams.forEach((dream) =>
@@ -277,11 +278,13 @@ export default function TabView(props: Props) {
 										<td className='align-middle text-center d-none d-lg-table-cell'>{entry.bedTime}</td>
 										<td className='align-middle text-center'>{entry.dreams.length}</td>
 										<td className='align-middle text-left d-none d-md-table-cell'>
-											{dreamSignsUnq.sort().map((sign, idy) => (
-												<div key={`${idx}-${idy}`} className='badge bg-info p-2 me-2 mb-2'>
-													{sign}
-												</div>
-											))}
+											<div className='row row-cols-auto g-2'>
+												{dreamSignsUnq.sort().map((sign, idy) => (
+													<div key={`${idx}-${idy}`} className='col'>
+														<div className='badge bg-info p-2'>{sign}</div>
+													</div>
+												))}
+											</div>
 										</td>
 										<td className='align-middle text-center d-none d-md-table-cell'>{entry.starred && <StarFill size='24' className='text-warning' />}</td>
 										<td className='align-middle text-center'>
@@ -319,19 +322,25 @@ export default function TabView(props: Props) {
 					</tfoot>
 				</table>
 
-				<div className='text-center d-block d-sm-none'>
+				<div className='align-items-center d-block d-sm-none'>
 					<ReactPaginate
-						previousLabel={'prev'}
-						nextLabel={'next'}
-						breakLabel={'...'}
-						breakClassName={'break-me'}
 						pageCount={Math.ceil(filteredEntries.length / pagingPageSize)}
-						marginPagesDisplayed={2}
-						pageRangeDisplayed={5}
+						pageRangeDisplayed={1}
+						marginPagesDisplayed={1}
+						previousLabel={'←'}
+						nextLabel={'→'}
+						breakLabel={'...'}
 						onPageChange={(data: { selected: number }) => setPagingCurrIdx(data.selected)}
-						containerClassName={'pagination'}
-						subContainerClassName={'page-item'}
+						containerClassName={'pagination justify-content-center mb-0 user-select-none'}
 						activeClassName={'active'}
+						breakClassName={'page-item'}
+						breakLinkClassName={'page-link'}
+						pageClassName={'page-item'}
+						pageLinkClassName={'page-link'}
+						previousClassName={'page-item'}
+						previousLinkClassName={'page-link'}
+						nextClassName={'page-item'}
+						nextLinkClassName={'page-link'}
 					/>
 				</div>
 				<div className='align-items-center d-none d-sm-block'>
