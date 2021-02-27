@@ -33,6 +33,7 @@ import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
 import ModalEntry from './modal-entry'
 import * as GDrive from './google-oauth'
+import { useIsMounted } from './components/useIsMounted'
 
 interface Props {
 	authState: IAuthState
@@ -47,12 +48,8 @@ export default function TabHome(props: Props) {
 	//const [fileBeingRenamed, setFileBeingRenamed] = useState<IDriveFile>(null)
 	//const [newFileName, setNewFileName] = useState('')
 
-	useEffect(() => {
-		/** @see https://stackoverflow.com/a/60907638 */
-		let isMounted = true // note this flag denote mount status
-		GDrive.busyLoadCallback((res: boolean) => isMounted && setIsBusyLoad(res))
-		return () => (isMounted = false) // use effect cleanup to set flag false, if unmounted
-	})
+	const isMounted = useIsMounted()
+	useEffect(() => GDrive.busyLoadCallback((res: boolean) => isMounted && setIsBusyLoad(res)), [isMounted])
 
 	function getReadableFileSizeString(fileSizeInBytes: number) {
 		let idx = -1
