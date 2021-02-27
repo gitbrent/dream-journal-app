@@ -27,10 +27,10 @@
  *  SOFTWARE.
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { IJournalEntry, IDriveFile } from './app.types'
 import { CheckCircleFill, StarFill, SortDownAlt } from 'react-bootstrap-icons'
-import DateRangePicker from './comp-other/date-range-picker'
+import { InfoCircle, Search } from 'react-bootstrap-icons'
 import Pagination from './comp-other/pagination'
 import AlertGdriveStatus from './comp-app/alert-gstat'
 import ModalEntry from './modal-entry'
@@ -47,24 +47,176 @@ export interface IAppViewState {
 	pagingPageSize: number
 }
 
+enum FilterEntry {
+	all = '(Show All)',
+	lucid = 'Lucid Dreams',
+	star = 'Starred',
+}
+
 export default function TabView(props: Props) {
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
+	//
+	const [totalDreams, setTotalDreams] = useState(0)
+	const [totalLucids, setTotalLucids] = useState(0)
+	const [totalStarred, setTotalStarred] = useState(0)
+	const [totalMonths, setTotalMonths] = useState(0)
+	const [totalYears, setTotalYears] = useState(0)
+	//
+	const [searchTerm, setSearchTerm] = useState('')
+	const [filterEntry, setFilterEntry] = useState<FilterEntry>(FilterEntry.all)
 	//
 	const [pagingCurrIdx, setPagingCurrIdx] = useState(1)
 	const [pagingPageSize, setPagingPageSize] = useState(10)
 	const [dateRangeFrom, setDateRangeFrom] = useState(null)
 	const [dateRangeTo, setDateRangeTo] = useState(null)
 
+	/** Gather all metrics */
+	useEffect(() => {
+		if (props.dataFile && props.dataFile.entries) {
+			// Total: dreams, stars, lucids
+			{
+				let tmpTotalStarred = 0
+				let tmpTotalDreams = 0
+				let tmpTotalLucids = 0
+
+				props.dataFile.entries.forEach((entry) => {
+					if (entry.starred) tmpTotalStarred++
+					tmpTotalDreams += entry.dreams.length
+					tmpTotalLucids += entry.dreams.filter((dream) => dream.isLucidDream).length
+				})
+
+				setTotalStarred(tmpTotalStarred)
+				setTotalDreams(tmpTotalDreams)
+				setTotalLucids(tmpTotalLucids)
+			}
+
+			// Total Months
+			{
+				let d1 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
+				let d2 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
+				let months: number
+				months = (d2.getFullYear() - d1.getFullYear()) * 12
+				months -= d1.getMonth() + 1
+				months += d2.getMonth()
+				months += 2 // include both first and last months
+
+				setTotalMonths(months <= 0 ? 0 : months)
+			}
+
+			// Total Years
+			{
+				let d1 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
+				let d2 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
+
+				setTotalYears(d2.getFullYear() - d1.getFullYear() + 1)
+			}
+		}
+	}, [props.dataFile])
+
+	useEffect(() => setPagingCurrIdx(1), [filterEntry])
+
 	// TODO: useEffect: return props.doSaveViewState(this.state)
 
-	function onDateRangeChange(opts: { dateFrom: Date; dateTo: Date }) {
-		setDateRangeFrom(opts.dateFrom || null)
-		setDateRangeTo(opts.dateTo || null)
+	// ------------------------------------------------------------------------
+
+	function renderHeader(): JSX.Element {
+		//return (<h1 className='display-4 mb-3'>View Dream Journals</h1>)
+		return (
+			<header className='card mb-5'>
+				<div className='card-header bg-primary'>
+					<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
+				</div>
+				<div className='card-body bg-light'>
+					<div className='row align-items-end justify-content-around row-cols-3 row-cols-md-auto mb-3'>
+						<div className='col text-center'>
+							<h3 className='text-primary'>{totalMonths || '-'}</h3>
+							<label className='text-primary text-uppercase mb-0'>Months</label>
+						</div>
+						<div className='col text-center'>
+							<h3 className='text-primary'>{props.dataFile && props.dataFile.entries ? props.dataFile.entries.length : '-'}</h3>
+							<label className='text-primary text-uppercase mb-0'>Days</label>
+						</div>
+						<div className='col text-center'>
+							<h3 className='text-info'>{totalDreams || '-'}</h3>
+							<label className='text-info text-uppercase mb-0'>Dreams</label>
+						</div>
+						<div className='col text-center'>
+							<h3 className='text-warning'>{totalStarred || '-'}</h3>
+							<label className='text-warning text-uppercase mb-0'>Starred</label>
+						</div>
+						<div className='col text-center'>
+							<h3 className='text-success'>{totalLucids || '-'}</h3>
+							<label className='text-success text-uppercase mb-0'>Lucids</label>
+						</div>
+						<div className='col'>
+							<div className='form-floating'>
+								<select
+									id='floatingFilterEntry'
+									placeholder='entry type'
+									defaultValue={filterEntry}
+									onChange={(ev) => setFilterEntry(ev.currentTarget.value as FilterEntry)}
+									className='form-control'>
+									{Object.keys(FilterEntry).map((val) => (
+										<option value={FilterEntry[val]} key={'entryType' + val}>
+											{FilterEntry[val]}
+										</option>
+									))}
+								</select>
+								<label htmlFor='floatingFilterEntry' className='text-nowrap'>
+									Entry Type
+								</label>
+							</div>
+						</div>
+					</div>
+					{/*
+					<div className='row align-items-center border-top border-secondary pt-3' data-desc='commandbar'>
+						<div className='col-auto d-none d-md-block'>
+							<Search size={48} className='text-secondary' />
+						</div>
+						<div className='col-12 col-md mb-3 mb-md-0'>
+							<div className='form-floating'>
+								<input
+									id='floatingDreamtag'
+									type='text'
+									placeholder='search dream tags'
+									value={searchTerm}
+									className='form-control'
+									onChange={(event) => setSearchTerm(event.target.value)}
+									disabled={!props.dataFile ? true : false}
+								/>
+								<label htmlFor='floatingDreamtag'>Search Dream Tags</label>
+							</div>
+						</div>
+						<div className='col-auto'>
+							<div className='form-floating'>
+								<select
+									id='floatingFilterEntry'
+									placeholder='entry type'
+									defaultValue={filterEntry}
+									onChange={(ev) => setFilterEntry(ev.currentTarget.value as FilterEntry)}
+									className='form-control'>
+									{Object.keys(FilterEntry).map((val) => (
+										<option value={FilterEntry[val]} key={'entryType' + val}>
+											{FilterEntry[val]}
+										</option>
+									))}
+								</select>
+								<label htmlFor='floatingFilterEntry' className='text-nowrap'>
+									Entry Type
+								</label>
+							</div>
+						</div>
+					</div>
+					*/}
+				</div>
+			</header>
+		)
 	}
 
 	function renderTabFileList(): JSX.Element {
 		// A: filter entries
+		/*
 		let arrEntries = (props.dataFile && props.dataFile.entries ? props.dataFile.entries : []).filter((entry) => {
 			let dateEntry = new Date(entry.entryDate + ' 00:00:00')
 			// FIXME: doesnt work if you select the day of an entry (eg: jan1 - jan3 works, nut select jan 2 and nothing)
@@ -72,6 +224,12 @@ export default function TabView(props: Props) {
 			else if (dateRangeFrom && !dateRangeTo && dateEntry === dateRangeFrom) return true
 			else if (!dateRangeFrom && !dateRangeTo) return true
 			else return false
+		})
+		*/
+		let filteredEntries = (props.dataFile && props.dataFile.entries ? props.dataFile.entries : []).filter((entry) => {
+			if (filterEntry === FilterEntry.star) return entry.starred
+			else if (filterEntry === FilterEntry.lucid) return entry.dreams.filter((dream) => dream.isLucidDream).length > 0
+			else return true
 		})
 
 		return props.dataFile && props.dataFile._isLoading ? (
@@ -99,7 +257,7 @@ export default function TabView(props: Props) {
 						</tr>
 					</thead>
 					<tbody>
-						{arrEntries
+						{filteredEntries
 							.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 							.filter((_entry, idx) => idx >= pagingPageSize * (pagingCurrIdx - 1) && idx < pagingPageSize * pagingCurrIdx)
 							.map((entry: IJournalEntry, idx) => {
@@ -114,13 +272,13 @@ export default function TabView(props: Props) {
 								)
 
 								return (
-									<tr key={'journalrow' + idx}>
+									<tr key={`journalrow${idx}`}>
 										<td className='align-middle text-nowrap'>{entry.entryDate}</td>
 										<td className='align-middle text-center d-none d-lg-table-cell'>{entry.bedTime}</td>
 										<td className='align-middle text-center'>{entry.dreams.length}</td>
 										<td className='align-middle text-left d-none d-md-table-cell'>
 											{dreamSignsUnq.sort().map((sign, idy) => (
-												<div key={`${idx}-${idy}`} className='badge badge-info p-2 me-2 mb-2'>
+												<div key={`${idx}-${idy}`} className='badge bg-info p-2 me-2 mb-2'>
 													{sign}
 												</div>
 											))}
@@ -163,7 +321,7 @@ export default function TabView(props: Props) {
 
 				<div className='text-center d-block d-sm-none'>
 					<Pagination
-						totalRecords={arrEntries.length}
+						totalRecords={filteredEntries.length}
 						pageLimit={pagingPageSize}
 						pageNeighbours={1}
 						currentPage={pagingCurrIdx}
@@ -172,7 +330,7 @@ export default function TabView(props: Props) {
 				</div>
 				<div className='text-center d-none d-sm-block'>
 					<Pagination
-						totalRecords={arrEntries.length}
+						totalRecords={filteredEntries.length}
 						pageLimit={pagingPageSize}
 						pageNeighbours={4}
 						currentPage={pagingCurrIdx}
@@ -183,74 +341,14 @@ export default function TabView(props: Props) {
 		)
 	}
 
-	// TODO: Flag/highlight days with dreams and/or with Lucid success (also show "starred" days) - maybe green and yellow colors?
-	// @see: http://react-day-picker.js.org/examples/elements-cell
-	// TODO: DateRangePicker: add prop for (earliest month of journal) `fromMonth={new Date(2018, 8)}`
-	/* TODO: circle days on cal where LUCID==true!! (soln: add prop for Array<Date>)
-	<DayPicker
-		  initialMonth={new Date(2017, 3)}
-		  selectedDays={[ new Date(2017, 3, 12), ])
-	*/
+	// FUTURE: Flag/highlight days with dreams and/or with Lucid success (also show "starred" days) - maybe green and yellow colors?
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus />
 	) : (
 		<div className='container my-5'>
 			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
-
-			<div className='row justify-content-between'>
-				<div className='col-12'>
-					<div className='card'>
-						<div className='card-header bg-primary'>
-							<h5 className='card-title text-white mb-0'>View Dream Journal</h5>
-						</div>
-						<div className='card-body bg-light'>
-							<p className='lead'>All of your journal entries are shown by default. Use the date range search to find specific entries.</p>
-							<div className='text-center d-block d-sm-none'>
-								<DateRangePicker
-									numberOfMonths={1}
-									dateRangeFrom={dateRangeFrom}
-									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => onDateRangeChange(opts)}
-								/>
-							</div>
-							<div className='text-center d-none d-sm-block d-md-none'>
-								<DateRangePicker
-									numberOfMonths={2}
-									dateRangeFrom={dateRangeFrom}
-									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => onDateRangeChange(opts)}
-								/>
-							</div>
-							<div className='text-center d-none d-md-block d-lg-none'>
-								<DateRangePicker
-									numberOfMonths={2}
-									dateRangeFrom={dateRangeFrom}
-									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => onDateRangeChange(opts)}
-								/>
-							</div>
-							<div className='text-center d-none d-lg-block d-xxl-none'>
-								<DateRangePicker
-									numberOfMonths={3}
-									dateRangeFrom={dateRangeFrom}
-									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => onDateRangeChange(opts)}
-								/>
-							</div>
-							<div className='text-center d-none d-xxl-block'>
-								<DateRangePicker
-									numberOfMonths={4}
-									dateRangeFrom={dateRangeFrom}
-									dateRangeTo={dateRangeTo}
-									onChange={(opts: any) => onDateRangeChange(opts)}
-								/>
-							</div>
-
-							{renderTabFileList()}
-						</div>
-					</div>
-				</div>
-			</div>
+			{renderHeader()}
+			{renderTabFileList()}
 		</div>
 	)
 }
