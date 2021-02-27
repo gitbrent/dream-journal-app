@@ -31,7 +31,7 @@ import React, { useState, useEffect } from 'react'
 import { IJournalEntry, IDriveFile } from './app.types'
 import { CheckCircleFill, StarFill, SortDownAlt } from 'react-bootstrap-icons'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
-import Pagination from './comp-other/pagination'
+import ReactPaginate from 'react-paginate'
 import AlertGdriveStatus from './comp-app/alert-gstat'
 import ModalEntry from './modal-entry'
 
@@ -320,21 +320,39 @@ export default function TabView(props: Props) {
 				</table>
 
 				<div className='text-center d-block d-sm-none'>
-					<Pagination
-						totalRecords={filteredEntries.length}
-						pageLimit={pagingPageSize}
-						pageNeighbours={1}
-						currentPage={pagingCurrIdx}
-						onPageChanged={(event: any) => setPagingCurrIdx(event.currentPage)}
+					<ReactPaginate
+						previousLabel={'prev'}
+						nextLabel={'next'}
+						breakLabel={'...'}
+						breakClassName={'break-me'}
+						pageCount={Math.ceil(filteredEntries.length / pagingPageSize)}
+						marginPagesDisplayed={2}
+						pageRangeDisplayed={5}
+						onPageChange={(data: { selected: number }) => setPagingCurrIdx(data.selected)}
+						containerClassName={'pagination'}
+						subContainerClassName={'page-item'}
+						activeClassName={'active'}
 					/>
 				</div>
-				<div className='text-center d-none d-sm-block'>
-					<Pagination
-						totalRecords={filteredEntries.length}
-						pageLimit={pagingPageSize}
-						pageNeighbours={4}
-						currentPage={pagingCurrIdx}
-						onPageChanged={(event: any) => setPagingCurrIdx(event.currentPage)}
+				<div className='align-items-center d-none d-sm-block'>
+					<ReactPaginate
+						pageCount={Math.ceil(filteredEntries.length / pagingPageSize)}
+						pageRangeDisplayed={5}
+						marginPagesDisplayed={2}
+						previousLabel={'← Prev'}
+						nextLabel={'Next →'}
+						breakLabel={'...'}
+						onPageChange={(data: { selected: number }) => setPagingCurrIdx(data.selected)}
+						containerClassName={'pagination justify-content-center mb-0 user-select-none'}
+						activeClassName={'active'}
+						breakClassName={'page-item'}
+						breakLinkClassName={'page-link'}
+						pageClassName={'page-item'}
+						pageLinkClassName={'page-link'}
+						previousClassName={'page-item'}
+						previousLinkClassName={'page-link'}
+						nextClassName={'page-item'}
+						nextLinkClassName={'page-link'}
 					/>
 				</div>
 			</section>
