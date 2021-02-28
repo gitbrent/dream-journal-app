@@ -128,12 +128,17 @@ export default function TabView(props: Props) {
 			else return false
 		})
 		*/
-		let filteredEntries = (props.dataFile && props.dataFile.entries ? props.dataFile.entries : []).filter((entry) => {
-			// TODO: if (Array.isArray(dream.dreamSigns) && dream.dreamSigns.filter((sign) => sign.match(regex)).length > 0) {
-			if (filterEntry === FilterEntry.star) return entry.starred
-			else if (filterEntry === FilterEntry.lucid) return entry.dreams.filter((dream) => dream.isLucidDream).length > 0
-			else return true
-		})
+		let filteredEntries = (props.dataFile && props.dataFile.entries ? props.dataFile.entries : []).filter(
+			(entry) =>
+				(!filterText ||
+					entry.dreams
+						.map((item) => item.dreamSigns)
+						.join()
+						.indexOf(filterText.toLowerCase()) > -1) &&
+				(filterEntry === FilterEntry.all ||
+					(filterEntry === FilterEntry.star && entry.starred) ||
+					(filterEntry === FilterEntry.lucid && entry.dreams.filter((dream) => dream.isLucidDream).length > 0))
+		)
 
 		return (
 			<section className='bg-black p-3'>
