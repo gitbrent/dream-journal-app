@@ -59,13 +59,7 @@ export default function TabView(props: Props) {
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
 	//
-	const [totalDreams, setTotalDreams] = useState(0)
-	const [totalLucids, setTotalLucids] = useState(0)
-	const [totalStarred, setTotalStarred] = useState(0)
-	const [totalMonths, setTotalMonths] = useState(0)
-	const [totalYears, setTotalYears] = useState(0)
-	//
-	const [searchTerm, setSearchTerm] = useState('')
+	const [filterText, setFilterText] = useState('')
 	const [filterEntry, setFilterEntry] = useState<FilterEntry>(FilterEntry.all)
 	//
 	const [pagingCurrIdx, setPagingCurrIdx] = useState(0)
@@ -73,50 +67,7 @@ export default function TabView(props: Props) {
 	//const [dateRangeFrom, setDateRangeFrom] = useState(null)
 	//const [dateRangeTo, setDateRangeTo] = useState(null)
 
-	/** Gather all metrics */
-	useEffect(() => {
-		if (props.dataFile && props.dataFile.entries) {
-			// Total: dreams, stars, lucids
-			{
-				let tmpTotalStarred = 0
-				let tmpTotalDreams = 0
-				let tmpTotalLucids = 0
-
-				props.dataFile.entries.forEach((entry) => {
-					if (entry.starred) tmpTotalStarred++
-					tmpTotalDreams += entry.dreams.length
-					tmpTotalLucids += entry.dreams.filter((dream) => dream.isLucidDream).length
-				})
-
-				setTotalStarred(tmpTotalStarred)
-				setTotalDreams(tmpTotalDreams)
-				setTotalLucids(tmpTotalLucids)
-			}
-
-			// Total Months
-			{
-				let d1 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
-				let d2 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
-				let months: number
-				months = (d2.getFullYear() - d1.getFullYear()) * 12
-				months -= d1.getMonth() + 1
-				months += d2.getMonth()
-				months += 2 // include both first and last months
-
-				setTotalMonths(months <= 0 ? 0 : months)
-			}
-
-			// Total Years
-			{
-				let d1 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
-				let d2 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
-
-				setTotalYears(d2.getFullYear() - d1.getFullYear() + 1)
-			}
-		}
-	}, [props.dataFile])
-
-	useEffect(() => setPagingCurrIdx(0), [filterEntry])
+	//useEffect(() => setPagingCurrIdx(0), [filterEntry]) // FIXME: Doesnt work, need to use `forcePage` (https://www.npmjs.com/package/react-paginate)
 
 	// TODO: useEffect: return props.doSaveViewState(this.state)
 
@@ -124,25 +75,25 @@ export default function TabView(props: Props) {
 
 	function renderFilters(): JSX.Element {
 		return (
-			<div className='row align-items-center mb-3' data-desc='commandbar'>
-				<div className='col-auto d-none d-md-block'>
-					<Search size={48} className='text-secondary' />
+			<div className='row row-cols g-4 align-items-center justify-content-between mb-4' data-desc='commandbar'>
+				<div className='col-auto d-none d-md-block' data-desc='icon'>
+					<Search size={40} className='text-secondary' />
 				</div>
-				<div className='col-12 col-md mb-3 mb-md-0'>
+				<div className='col' data-desc='search tags'>
 					<div className='form-floating'>
 						<input
 							id='floatingDreamtag'
 							type='text'
-							placeholder='search dream tags'
-							value={searchTerm}
+							value={filterText}
+							placeholder='search tags'
 							className='form-control'
-							onChange={(event) => setSearchTerm(event.target.value)}
+							onChange={(event) => setFilterText(event.target.value)}
 							disabled={!props.dataFile ? true : false}
 						/>
-						<label htmlFor='floatingDreamtag'>Search Dream Tags</label>
+						<label htmlFor='floatingDreamtag'>Search Tags</label>
 					</div>
 				</div>
-				<div className='col-auto'>
+				<div className='col-auto' data-desc='entry type'>
 					<div className='form-floating'>
 						<select
 							id='floatingFilterEntry'
@@ -178,13 +129,14 @@ export default function TabView(props: Props) {
 		})
 		*/
 		let filteredEntries = (props.dataFile && props.dataFile.entries ? props.dataFile.entries : []).filter((entry) => {
+			// TODO: if (Array.isArray(dream.dreamSigns) && dream.dreamSigns.filter((sign) => sign.match(regex)).length > 0) {
 			if (filterEntry === FilterEntry.star) return entry.starred
 			else if (filterEntry === FilterEntry.lucid) return entry.dreams.filter((dream) => dream.isLucidDream).length > 0
 			else return true
 		})
 
 		return (
-			<section className="bg-black p-3">
+			<section className='bg-black p-3'>
 				<table className='table table-sm mb-4'>
 					<thead className='thead'>
 						<tr>
@@ -248,7 +200,7 @@ export default function TabView(props: Props) {
 										<td className='align-middle text-center'>
 											{entry.dreams.filter((dream) => dream.isLucidDream === true).length > 0 && <CheckCircleFill size='24' className='text-success' />}
 										</td>
-										<td className='text-center'>
+										<td className='align-middle text-center'>
 											<button
 												onClick={(_ev) => {
 													setCurrEntry(entry)
@@ -265,15 +217,8 @@ export default function TabView(props: Props) {
 					<tfoot>
 						{props.dataFile && props.dataFile.entries && props.dataFile.entries.length === 0 && (
 							<tr>
-								<td colSpan={6} className='text-center p-3 text-muted'>
-									(No Dream Journal entries found - select "Add Journal Entry" above to create a new one)
-								</td>
-							</tr>
-						)}
-						{!props.dataFile && (
-							<tr>
-								<td colSpan={6} className='text-center p-3'>
-									<h5 className='text-secondary'>(no Dream Journal is currently selected)</h5>
+								<td colSpan={7} className='text-center text-muted p-3'>
+									<h5>(No Dream Journal entries found - select "Add Journal Entry" above to create a new one)</h5>
 								</td>
 							</tr>
 						)}
@@ -333,7 +278,7 @@ export default function TabView(props: Props) {
 		<div className='container my-auto my-md-5'>
 			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
 			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
-			<section className='bg-light p-3'>
+			<section className='bg-light p-4'>
 				{renderFilters()}
 				{renderTabFileList()}
 			</section>

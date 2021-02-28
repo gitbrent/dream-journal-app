@@ -123,51 +123,69 @@ export default function HeaderMetrics(props: Props) {
 	// ------------------------------------------------------------------------
 
 	return (
-		<header className='card mb-auto mb-md-5'>
+		<header className='card mb-2 mb-md-5'>
 			<div className='card-header bg-primary'>
 				<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
 			</div>
 			<div className='card-body bg-light'>
-				<div className='row align-items-end justify-content-around row-cols-3 row-cols-md-auto g-3'>
-					<div className='col-auto text-center d-none d-md-block'>
-						<h6 className='text-primary text-uppercase'>Months</h6>
+				<div className='row align-items-end justify-content-around row-cols-auto row-cols-md-4 row-cols-lg-auto g-4'>
+					<div className='col text-center d-none d-md-block'>
+						<h6 className='text-primary text-uppercase mb-0 mb-0'>Months</h6>
 						<h1 className='text-primary display-5 mb-0'>{totalMonths || '-'}</h1>
-						{props.showStats && <small className='text-primary w-100'>{`${totalYears} years`}</small>}
+						{props.showStats && <div className='badge rounded-pill bg-primary w-100'>{`${totalYears} years`}</div>}
 					</div>
-					<div className='col-auto text-center'>
-						<h6 className='text-primary text-uppercase'>Days</h6>
+					<div className='col text-center d-none d-md-block'>
+						<h6 className='text-primary text-uppercase mb-0'>Days</h6>
 						<h1 className='text-primary display-5 mb-0'>{totalEntries || '-'}</h1>
-						<div className='badge rounded-pill bg-primary w-100'>{totalMonths * 30 > 0 ? (totalEntries / totalMonths).toFixed(2) + ' / mon' : '-'}</div>
+						{props.showStats && (
+							<div className='badge rounded-pill bg-primary w-100'>{totalMonths * 30 > 0 ? (totalEntries / totalMonths).toFixed(2) + ' / mon' : '-'}</div>
+						)}
 					</div>
-					<div className='col-auto text-center'>
-						<h6 className='text-primary text-uppercase'>Dreams</h6>
+					<div className='col text-center'>
+						<h6 className='text-primary text-uppercase mb-0'>Dreams</h6>
 						<h1 className='text-primary display-5 mb-0'>{totalDreams || '-'}</h1>
-						<div className='badge rounded-pill bg-primary w-100'>{totalMonths * 30 > 0 ? (totalDreams / totalEntries).toFixed(2) + ' / day' : '-'}</div>
+						{props.showStats && (
+							<div className='badge rounded-pill bg-primary w-100'>{totalMonths * 30 > 0 ? (totalDreams / totalEntries).toFixed(2) + ' / day' : '-'}</div>
+						)}
 					</div>
-					<div className='col-auto text-center'>
-						<h6 className='text-info text-uppercase'>Tags</h6>
+					<div className='col text-center'>
+						<h6 className='text-info text-uppercase mb-0'>Tags</h6>
 						<h1 className='text-info display-5 mb-0'>{totalDreamSigns || '-'}</h1>
-						<div className='badge rounded-pill bg-info w-100'>-</div>
+						{props.showStats && <div className='badge rounded-pill bg-info w-100'>-</div>}
 					</div>
-					<div className='col-auto text-center'>
-						<h6 className='text-info text-uppercase'>Tagged</h6>
+					<div className='col text-center d-none d-md-block'>
+						<h6 className='text-info text-uppercase mb-0'>Tagged</h6>
 						<h1 className='text-info display-5 mb-0'>{totalDreams - totalUntagged || '-'}</h1>
-						<div className='badge rounded-pill bg-info w-100'>{totalDreams ? (((totalDreams - totalUntagged) / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
+						{props.showStats && (
+							<div className='badge rounded-pill bg-info w-100'>
+								{totalDreams ? (((totalDreams - totalUntagged) / totalDreams) * 100).toFixed(2) + '%' : '0%'}
+							</div>
+						)}
 					</div>
-					<div className='col-auto text-center'>
-						<h6 className='text-info text-uppercase'>Un-Tagged</h6>
+					<div className='col text-center d-none d-md-block'>
+						<h6 className='text-info text-uppercase mb-0'>Un-Tagged</h6>
 						<h1 className='text-info display-5 mb-0'>{totalUntagged || '-'}</h1>
-						<div className='badge rounded-pill bg-info w-100'>{totalDreams ? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
+						{props.showStats && (
+							<div className='badge rounded-pill bg-info w-100'>{totalDreams ? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
+						)}
 					</div>
-					<div className='col-auto text-center'>
-						<h6 className='text-warning text-uppercase'>Starred</h6>
+					<div className='col text-center'>
+						<h6 className='text-warning text-uppercase mb-0'>Starred</h6>
 						<h1 className='text-warning display-5 mb-0'>{totalStarred || '-'}</h1>
-						<div className='badge rounded-pill bg-warning w-100'>{totalDreams && totalStarred ? ((totalStarred / totalDreams) * 100).toFixed(2) + '%' : '-'}</div>
+						{props.showStats && (
+							<div className='badge rounded-pill bg-warning w-100'>
+								{totalDreams && totalStarred ? ((totalStarred / totalDreams) * 100).toFixed(2) + '%' : '-'}
+							</div>
+						)}
 					</div>
-					<div className='col-auto text-center'>
-						<h6 className='text-success text-uppercase'>Lucids</h6>
+					<div className='col text-center'>
+						<h6 className='text-success text-uppercase mb-0'>Lucids</h6>
 						<h1 className='text-success display-5 mb-0'>{totalLucids || '-'}</h1>
-						<div className='badge rounded-pill bg-success w-100'>{totalDreams && totalLucids ? ((totalLucids / totalDreams) * 100).toFixed(2) + '%' : '-'}</div>
+						{props.showStats && (
+							<div className='badge rounded-pill bg-success w-100'>
+								{totalDreams && totalLucids ? ((totalLucids / totalDreams) * 100).toFixed(2) + '%' : '-'}
+							</div>
+						)}
 					</div>
 				</div>
 			</div>
