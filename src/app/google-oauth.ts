@@ -144,9 +144,9 @@ export function doAuthSignOut() {
 				userName: '',
 				userPhoto: '',
 			}
-			if (gAuthCallback) gAuthCallback(gAuthState)
+			if (gAuthCallback) gAuthCallback({ ...gAuthState })
 			gDataFile = null
-			if (gDataCallback) gDataCallback(gDataFile)
+			if (gDataCallback) gDataCallback(null)
 
 			localStorage.setItem('journal-selected-fileid', null)
 		})
@@ -432,7 +432,7 @@ function doSelectFile() {
 					gDataFile.entries = entries || []
 
 					// C:
-					if (gDataCallback) gDataCallback(gDataFile)
+					if (gDataCallback) gDataCallback(JSON.parse(JSON.stringify(gDataFile)) as IDriveFile)
 					if (gBusyLoadCallback) gBusyLoadCallback(false)
 				})
 				.catch((error) => {

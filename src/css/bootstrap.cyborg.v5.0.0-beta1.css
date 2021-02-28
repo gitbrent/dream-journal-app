@@ -1910,7 +1910,8 @@ progress {
 }
 
 .table > :not(:last-child) > :last-child > * {
-  border-bottom-color: currentColor;
+  border-bottom-color: --bs-gray;
+  /* FORK: border-bottom-color: currentColor; */
 }
 
 .caption-top {

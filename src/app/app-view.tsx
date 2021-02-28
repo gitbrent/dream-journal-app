@@ -1,4 +1,4 @@
-/*
+/**
  *  :: Brain Cloud Dream Journal ::
  *
  *  Dream Journal App - Record and Search Daily Dream Entries
@@ -29,15 +29,16 @@
 
 import React, { useState, useEffect } from 'react'
 import { IJournalEntry, IDriveFile } from './app.types'
-import { CheckCircleFill, StarFill, SortDownAlt } from 'react-bootstrap-icons'
-import { InfoCircle, Search } from 'react-bootstrap-icons'
+import { CheckCircleFill, Diagram3Fill, Search, StarFill, SortDownAlt } from 'react-bootstrap-icons'
 import ReactPaginate from 'react-paginate'
 import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
+import HeaderMetrics from './components/header-metrics'
 // FUTURE: https://github.com/hypeserver/react-date-range
 
 export interface Props {
 	dataFile: IDriveFile
+	isBusyLoad: boolean
 	doSaveViewState: Function
 	viewState: IAppViewState
 }
@@ -122,33 +123,12 @@ export default function TabView(props: Props) {
 	// ------------------------------------------------------------------------
 
 	function renderHeader(): JSX.Element {
-		//return (<h1 className='display-4 mb-3'>View Dream Journals</h1>)
 		return (
-			<header className='card mb-5'>
-				<div className='card-header bg-primary'>
-					<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
-				</div>
+			<header className='card mb-auto mb-md-5'>
 				<div className='card-body bg-light'>
-					<div className='row align-items-end justify-content-around row-cols-3 row-cols-md-auto mb-3'>
-						<div className='col text-center'>
-							<h3 className='text-primary'>{totalMonths || '-'}</h3>
-							<label className='text-primary text-uppercase mb-0'>Months</label>
-						</div>
-						<div className='col text-center'>
-							<h3 className='text-primary'>{props.dataFile && props.dataFile.entries ? props.dataFile.entries.length : '-'}</h3>
-							<label className='text-primary text-uppercase mb-0'>Days</label>
-						</div>
-						<div className='col text-center'>
-							<h3 className='text-info'>{totalDreams || '-'}</h3>
-							<label className='text-info text-uppercase mb-0'>Dreams</label>
-						</div>
-						<div className='col text-center'>
-							<h3 className='text-warning'>{totalStarred || '-'}</h3>
-							<label className='text-warning text-uppercase mb-0'>Starred</label>
-						</div>
-						<div className='col text-center'>
-							<h3 className='text-success'>{totalLucids || '-'}</h3>
-							<label className='text-success text-uppercase mb-0'>Lucids</label>
+					<div className='row align-items-center border-top border-secondary pt-3' data-desc='commandbar'>
+						<div className='col-auto d-none d-md-block'>
+							<Search size={48} className='text-secondary' />
 						</div>
 						<div className='col'>
 							<div className='form-floating'>
@@ -170,46 +150,40 @@ export default function TabView(props: Props) {
 							</div>
 						</div>
 					</div>
-					{/*
-					<div className='row align-items-center border-top border-secondary pt-3' data-desc='commandbar'>
-						<div className='col-auto d-none d-md-block'>
-							<Search size={48} className='text-secondary' />
-						</div>
-						<div className='col-12 col-md mb-3 mb-md-0'>
-							<div className='form-floating'>
-								<input
-									id='floatingDreamtag'
-									type='text'
-									placeholder='search dream tags'
-									value={searchTerm}
-									className='form-control'
-									onChange={(event) => setSearchTerm(event.target.value)}
-									disabled={!props.dataFile ? true : false}
-								/>
-								<label htmlFor='floatingDreamtag'>Search Dream Tags</label>
-							</div>
-						</div>
-						<div className='col-auto'>
-							<div className='form-floating'>
-								<select
-									id='floatingFilterEntry'
-									placeholder='entry type'
-									defaultValue={filterEntry}
-									onChange={(ev) => setFilterEntry(ev.currentTarget.value as FilterEntry)}
-									className='form-control'>
-									{Object.keys(FilterEntry).map((val) => (
-										<option value={FilterEntry[val]} key={'entryType' + val}>
-											{FilterEntry[val]}
-										</option>
-									))}
-								</select>
-								<label htmlFor='floatingFilterEntry' className='text-nowrap'>
-									Entry Type
-								</label>
-							</div>
+
+					<div className='col-12 col-md mb-3 mb-md-0'>
+						<div className='form-floating'>
+							<input
+								id='floatingDreamtag'
+								type='text'
+								placeholder='search dream tags'
+								value={searchTerm}
+								className='form-control'
+								onChange={(event) => setSearchTerm(event.target.value)}
+								disabled={!props.dataFile ? true : false}
+							/>
+							<label htmlFor='floatingDreamtag'>Search Dream Tags</label>
 						</div>
 					</div>
-					*/}
+					<div className='col-auto'>
+						<div className='form-floating'>
+							<select
+								id='floatingFilterEntry'
+								placeholder='entry type'
+								defaultValue={filterEntry}
+								onChange={(ev) => setFilterEntry(ev.currentTarget.value as FilterEntry)}
+								className='form-control'>
+								{Object.keys(FilterEntry).map((val) => (
+									<option value={FilterEntry[val]} key={'entryType' + val}>
+										{FilterEntry[val]}
+									</option>
+								))}
+							</select>
+							<label htmlFor='floatingFilterEntry' className='text-nowrap'>
+								Entry Type
+							</label>
+						</div>
+					</div>
 				</div>
 			</header>
 		)
@@ -245,22 +219,37 @@ export default function TabView(props: Props) {
 				<table className='table table-sm mb-4'>
 					<thead className='thead'>
 						<tr>
-							<th>
+							<th style={{ width: '1%' }}>
 								Date
 								<SortDownAlt size='16' className='ms-1' />
 							</th>
 							<th className='text-center d-none d-lg-table-cell'>Bed</th>
-							<th className='text-center'>Dreams</th>
+							<th className='text-center'>
+								<span className='d-block d-md-none'>
+									<Diagram3Fill />
+								</span>
+								<span className='d-none d-md-inline-block'>Dreams</span>
+							</th>
 							<th className='text-left d-none d-md-table-cell'>Tags</th>
-							<th className='text-center d-none d-md-table-cell'>Starred?</th>
-							<th className='text-center'>Lucid?</th>
-							<th className='text-center'>&nbsp;</th>
+							<th className='text-center'>
+								<span className='d-block d-md-none'>
+									<StarFill />
+								</span>
+								<span className='d-none d-md-inline-block'>Starred?</span>
+							</th>
+							<th className='text-center'>
+								<span className='d-block d-md-none'>
+									<CheckCircleFill />
+								</span>
+								<span className='d-none d-md-inline-block'>Lucid?</span>
+							</th>
+							<th style={{ width: '1%' }}>&nbsp;</th>
 						</tr>
 					</thead>
 					<tbody>
 						{filteredEntries
 							.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
-							.filter((_entry, idx) => idx >= pagingPageSize * pagingCurrIdx && idx < pagingPageSize * (pagingCurrIdx+1))
+							.filter((_entry, idx) => idx >= pagingPageSize * pagingCurrIdx && idx < pagingPageSize * (pagingCurrIdx + 1))
 							.map((entry, idx) => {
 								// This is a harsh thing to compile inline below, so do it here
 								let dreamSignsUnq: string[] = []
@@ -286,7 +275,7 @@ export default function TabView(props: Props) {
 												))}
 											</div>
 										</td>
-										<td className='align-middle text-center d-none d-md-table-cell'>{entry.starred && <StarFill size='24' className='text-warning' />}</td>
+										<td className='align-middle text-center'>{entry.starred && <StarFill size='24' className='text-warning' />}</td>
 										<td className='align-middle text-center'>
 											{entry.dreams.filter((dream) => dream.isLucidDream === true).length > 0 && <CheckCircleFill size='24' className='text-success' />}
 										</td>
@@ -372,8 +361,9 @@ export default function TabView(props: Props) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus />
 	) : (
-		<div className='container my-5'>
+		<div className='container my-auto my-md-5'>
 			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
+			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} />
 			{renderHeader()}
 			{renderTabFileList()}
 		</div>
