@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react'
-import { CloudSlash } from 'react-bootstrap-icons'
+import React from 'react'
 import * as GDrive from '../google-oauth'
-import { useIsMounted } from './useIsMounted'
+import { CloudSlash } from 'react-bootstrap-icons'
 
-export default function AlertGdriveStatus() {
-	const [isBusyLoad, setIsBusyLoad] = useState(false)
-	//
-	const isMounted = useIsMounted()
-	useEffect(() => GDrive.busyLoadCallback((res: boolean) => isMounted && setIsBusyLoad(res)), [isMounted])
+interface Props {
+	isBusyLoad: boolean
+}
 
+export default function AlertGdriveStatus(props: Props) {
 	return (
 		<section className='container text-center my-5'>
-			{isBusyLoad ? (
+			{props.isBusyLoad ? (
 				<div className='alert alert-primary text-nowrap d-inline-block' role='alert'>
 					<div className='row align-items-center'>
 						<div className='col-auto pe-0'>

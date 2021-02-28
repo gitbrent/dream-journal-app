@@ -8,6 +8,7 @@ import ModalEntry from './modal-entry'
 
 export interface Props {
 	dataFile: IDriveFile
+	isBusyLoad: boolean
 	doSaveSearchState: Function
 	searchState: IAppSearchState
 }
@@ -203,7 +204,7 @@ export default function TabSearch(props: Props) {
 	}
 
 	return !props.dataFile || !props.dataFile.entries ? (
-		<AlertGdriveStatus />
+		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<div>
 			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />

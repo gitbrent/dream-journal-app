@@ -35,8 +35,9 @@ import DreamTagCard from './components/dreamtag-card'
 import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
 
-export interface IAppAdminProps {
+interface Props {
 	dataFile: IDriveFile
+	isBusyLoad: boolean
 	doSaveAdminState: Function
 	adminState: IAppAdminState
 }
@@ -58,7 +59,7 @@ enum FilterSortOrder {
 	lowhigh = 'Low → High',
 }
 
-export default function TabAdmin(props: IAppAdminProps) {
+export default function TabAdmin(props: Props) {
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
 	//
@@ -418,7 +419,7 @@ export default function TabAdmin(props: IAppAdminProps) {
 	}
 
 	return !props.dataFile || !props.dataFile.entries ? (
-		<AlertGdriveStatus />
+		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<main className='container mb-5'>
 			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />

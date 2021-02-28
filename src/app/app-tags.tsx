@@ -6,8 +6,9 @@ import * as GDrive from './google-oauth'
 import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
 
-export interface IAppTagsProps {
+interface IAppTagsProps {
 	dataFile: IDriveFile
+	isBusyLoad: boolean
 	doSaveTagsState: Function
 	tagsState: IAppTagsState
 }
@@ -345,7 +346,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 	}
 
 	return !props.dataFile || !props.dataFile.entries ? (
-		<AlertGdriveStatus />
+		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<main className='container mb-5'>
 			{renderHeader()}

@@ -359,7 +359,7 @@ export default function TabView(props: Props) {
 
 	// FUTURE: Flag/highlight days with dreams and/or with Lucid success (also show "starred" days) - maybe green and yellow colors?
 	return !props.dataFile || !props.dataFile.entries ? (
-		<AlertGdriveStatus />
+		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<div className='container my-auto my-md-5'>
 			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />

@@ -146,10 +146,21 @@ class App extends React.Component<IAppProps, IAppState> {
 	View = () => (
 		<TabView dataFile={this.state.dataFile || null} doSaveViewState={this.doSaveViewState} viewState={this.state.childViewState} isBusyLoad={this.state.isBusyLoad} />
 	)
-	Search = () => <TabSearch dataFile={this.state.dataFile || null} doSaveSearchState={this.doSaveSearchState} searchState={this.state.childSearchState} />
-	Tags = () => <TabTags dataFile={this.state.dataFile || null} doSaveTagsState={this.doSaveTagsState} tagsState={this.state.childTagsState} />
+	Search = () => (
+		<TabSearch
+			dataFile={this.state.dataFile || null}
+			isBusyLoad={this.state.isBusyLoad}
+			doSaveSearchState={this.doSaveSearchState}
+			searchState={this.state.childSearchState}
+		/>
+	)
+	Tags = () => (
+		<TabTags dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} doSaveTagsState={this.doSaveTagsState} tagsState={this.state.childTagsState} />
+	)
 	Import = () => <TabImport dataFile={this.state.dataFile || null} doSaveImportState={this.doSaveImportState} importState={this.state.childImportState} />
-	Admin = () => <TabAdmin dataFile={this.state.dataFile || null} doSaveAdminState={this.doSaveAdminState} adminState={this.state.childAdminState} />
+	Admin = () => (
+		<TabAdmin dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} doSaveAdminState={this.doSaveAdminState} adminState={this.state.childAdminState} />
+	)
 
 	render() {
 		return (
