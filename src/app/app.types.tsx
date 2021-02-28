@@ -1,5 +1,5 @@
 // APP
-export const APP_BLD = '20210227-2151'
+export const APP_BLD = '20210228-1335'
 export const APP_VER = `1.1.0-WIP-${APP_BLD}`
 
 // CONST
@@ -106,13 +106,13 @@ export interface IDreamSignTagGroup {
 	dreamSign: string
 	/** every journal entry this dreamSign appears in */
 	dailyEntries: IJournalEntry[]
-	/** sums `dream` array under `dailyEntries` (save us time!) */
+	/** sums `dreams` array under `dailyEntries` (save us time!) */
 	totalOccurs: number
 }
 
 export interface IDreamTagByCat {
-	/** @example 'Action' */
+	/** @example 'action' */
 	dreamCat: string
-	/** @example ['Action:Crime', 'Action:Military'] */
+	/** @example ['action:crime', 'action:military'] */
 	dreamTagGroups: IDreamSignTagGroup[]
 }
