@@ -122,70 +122,46 @@ export default function TabView(props: Props) {
 
 	// ------------------------------------------------------------------------
 
-	function renderHeader(): JSX.Element {
+	function renderFilters(): JSX.Element {
 		return (
-			<header className='card mb-auto mb-md-5'>
-				<div className='card-body bg-light'>
-					<div className='row align-items-center border-top border-secondary pt-3' data-desc='commandbar'>
-						<div className='col-auto d-none d-md-block'>
-							<Search size={48} className='text-secondary' />
-						</div>
-						<div className='col'>
-							<div className='form-floating'>
-								<select
-									id='floatingFilterEntry'
-									placeholder='entry type'
-									defaultValue={filterEntry}
-									onChange={(ev) => setFilterEntry(ev.currentTarget.value as FilterEntry)}
-									className='form-control'>
-									{Object.keys(FilterEntry).map((val) => (
-										<option value={FilterEntry[val]} key={'entryType' + val}>
-											{FilterEntry[val]}
-										</option>
-									))}
-								</select>
-								<label htmlFor='floatingFilterEntry' className='text-nowrap'>
-									Entry Type
-								</label>
-							</div>
-						</div>
-					</div>
-
-					<div className='col-12 col-md mb-3 mb-md-0'>
-						<div className='form-floating'>
-							<input
-								id='floatingDreamtag'
-								type='text'
-								placeholder='search dream tags'
-								value={searchTerm}
-								className='form-control'
-								onChange={(event) => setSearchTerm(event.target.value)}
-								disabled={!props.dataFile ? true : false}
-							/>
-							<label htmlFor='floatingDreamtag'>Search Dream Tags</label>
-						</div>
-					</div>
-					<div className='col-auto'>
-						<div className='form-floating'>
-							<select
-								id='floatingFilterEntry'
-								placeholder='entry type'
-								defaultValue={filterEntry}
-								onChange={(ev) => setFilterEntry(ev.currentTarget.value as FilterEntry)}
-								className='form-control'>
-								{Object.keys(FilterEntry).map((val) => (
-									<option value={FilterEntry[val]} key={'entryType' + val}>
-										{FilterEntry[val]}
-									</option>
-								))}
-							</select>
-							<label htmlFor='floatingFilterEntry' className='text-nowrap'>
-								Entry Type
-							</label>
-						</div>
+			<div className='row align-items-center mb-3' data-desc='commandbar'>
+				<div className='col-auto d-none d-md-block'>
+					<Search size={48} className='text-secondary' />
+				</div>
+				<div className='col-12 col-md mb-3 mb-md-0'>
+					<div className='form-floating'>
+						<input
+							id='floatingDreamtag'
+							type='text'
+							placeholder='search dream tags'
+							value={searchTerm}
+							className='form-control'
+							onChange={(event) => setSearchTerm(event.target.value)}
+							disabled={!props.dataFile ? true : false}
+						/>
+						<label htmlFor='floatingDreamtag'>Search Dream Tags</label>
 					</div>
 				</div>
-			</header>
+				<div className='col-auto'>
+					<div className='form-floating'>
+						<select
+							id='floatingFilterEntry'
+							placeholder='entry type'
+							defaultValue={filterEntry}
+							onChange={(ev) => setFilterEntry(ev.currentTarget.value as FilterEntry)}
+							className='form-control'>
+							{Object.keys(FilterEntry).map((val) => (
+								<option value={FilterEntry[val]} key={'entryType' + val}>
+									{FilterEntry[val]}
+								</option>
+							))}
+						</select>
+						<label htmlFor='floatingFilterEntry' className='text-nowrap'>
+							Entry Type
+						</label>
+					</div>
+				</div>
+			</div>
 		)
 	}
 
@@ -207,15 +183,8 @@ export default function TabView(props: Props) {
 			else return true
 		})
 
-		return props.dataFile && props.dataFile._isLoading ? (
-			<div className='align-middle text-center text-warning mb-4'>
-				<div className='spinner-border spinner-border-sm me-2' role='status'>
-					<span className='visually-hidden' />
-				</div>
-				Saving/Loading...
-			</div>
-		) : (
-			<section>
+		return (
+			<section className="bg-black p-3">
 				<table className='table table-sm mb-4'>
 					<thead className='thead'>
 						<tr>
@@ -363,9 +332,11 @@ export default function TabView(props: Props) {
 	) : (
 		<div className='container my-auto my-md-5'>
 			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
-			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} />
-			{renderHeader()}
-			{renderTabFileList()}
+			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
+			<section className='bg-light p-3'>
+				{renderFilters()}
+				{renderTabFileList()}
+			</section>
 		</div>
 	)
 }

@@ -28,13 +28,12 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { IDriveFile } from '../app.types'
-import * as GDrive from '../google-oauth'
+import { IDreamSignTagGroup, IDriveFile } from '../app.types'
 
 interface Props {
 	dataFile: IDriveFile
 	isBusyLoad: boolean
-	//showFull: boolean
+	showStats: boolean
 }
 
 export default function HeaderMetrics(props: Props) {
@@ -94,6 +93,31 @@ export default function HeaderMetrics(props: Props) {
 			setTotalLucids(props.dataFile.entries.map((entry) => entry.dreams.filter((dream) => dream.isLucidDream).length).reduce((a, b) => a + b))
 			setTotalUntagged(props.dataFile.entries.map((entry) => entry.dreams.filter((dream) => dream.dreamSigns.length === 0).length).reduce((a, b) => a + b))
 		}
+
+		// Tag Groups /&/ dupe tags /&/ bad bedTime
+		{
+			let tagGroups: IDreamSignTagGroup[] = []
+
+			props.dataFile.entries
+				.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
+				.forEach((entry) => {
+					entry.dreams.forEach((dream) =>
+						dream.dreamSigns.forEach((sign) => {
+							let tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
+							if (tag) {
+								let existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
+								if (!existingEntry) tag.dailyEntries.push(entry)
+								tag.totalOccurs++
+							} else {
+								tagGroups.push({ dreamSign: sign, dailyEntries: [entry], totalOccurs: 1 })
+							}
+						})
+					)
+				})
+
+			// tagGroup
+			setTotalDreamSigns(tagGroups.length)
+		}
 	}, [props.dataFile])
 
 	// ------------------------------------------------------------------------
@@ -104,28 +128,47 @@ export default function HeaderMetrics(props: Props) {
 				<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
 			</div>
 			<div className='card-body bg-light'>
-				<div className='row align-items-end justify-content-around row-cols-3 row-cols-md-auto g-3 mb-3'>
-					<div className='col text-center'>
-						<h3 className='text-primary'>{totalMonths || '-'}</h3>
-						<label className='text-primary text-uppercase mb-0'>Months</label>
+				<div className='row align-items-end justify-content-around row-cols-3 row-cols-md-auto g-3'>
+					<div className='col-auto text-center d-none d-md-block'>
+						<h6 className='text-primary text-uppercase'>Months</h6>
+						<h1 className='text-primary display-5 mb-0'>{totalMonths || '-'}</h1>
+						{props.showStats && <small className='text-primary w-100'>{`${totalYears} years`}</small>}
 					</div>
-					<div className='col text-center'>
-						<h3 className='text-primary'>{props.dataFile && props.dataFile.entries ? props.dataFile.entries.length : '-'}</h3>
-						<label className='text-primary text-uppercase mb-0'>Days</label>
+					<div className='col-auto text-center'>
+						<h6 className='text-primary text-uppercase'>Days</h6>
+						<h1 className='text-primary display-5 mb-0'>{totalEntries || '-'}</h1>
+						<div className='badge rounded-pill bg-primary w-100'>{totalMonths * 30 > 0 ? (totalEntries / totalMonths).toFixed(2) + ' / mon' : '-'}</div>
 					</div>
-					<div className='col text-center'>
-						<h3 className='text-info'>{totalDreams || '-'}</h3>
-						<label className='text-info text-uppercase mb-0'>Dreams</label>
+					<div className='col-auto text-center'>
+						<h6 className='text-primary text-uppercase'>Dreams</h6>
+						<h1 className='text-primary display-5 mb-0'>{totalDreams || '-'}</h1>
+						<div className='badge rounded-pill bg-primary w-100'>{totalMonths * 30 > 0 ? (totalDreams / totalEntries).toFixed(2) + ' / day' : '-'}</div>
 					</div>
-					<div className='col text-center'>
-						<h3 className='text-warning'>{totalStarred || '-'}</h3>
-						<label className='text-warning text-uppercase mb-0'>Starred</label>
+					<div className='col-auto text-center'>
+						<h6 className='text-info text-uppercase'>Tags</h6>
+						<h1 className='text-info display-5 mb-0'>{totalDreamSigns || '-'}</h1>
+						<div className='badge rounded-pill bg-info w-100'>-</div>
 					</div>
-					<div className='col text-center'>
-						<h3 className='text-success'>{totalLucids || '-'}</h3>
-						<label className='text-success text-uppercase mb-0'>Lucids</label>
+					<div className='col-auto text-center'>
+						<h6 className='text-info text-uppercase'>Tagged</h6>
+						<h1 className='text-info display-5 mb-0'>{totalDreams - totalUntagged || '-'}</h1>
+						<div className='badge rounded-pill bg-info w-100'>{totalDreams ? (((totalDreams - totalUntagged) / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
 					</div>
-					<div className='col'></div>
+					<div className='col-auto text-center'>
+						<h6 className='text-info text-uppercase'>Un-Tagged</h6>
+						<h1 className='text-info display-5 mb-0'>{totalUntagged || '-'}</h1>
+						<div className='badge rounded-pill bg-info w-100'>{totalDreams ? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
+					</div>
+					<div className='col-auto text-center'>
+						<h6 className='text-warning text-uppercase'>Starred</h6>
+						<h1 className='text-warning display-5 mb-0'>{totalStarred || '-'}</h1>
+						<div className='badge rounded-pill bg-warning w-100'>{totalDreams && totalStarred ? ((totalStarred / totalDreams) * 100).toFixed(2) + '%' : '-'}</div>
+					</div>
+					<div className='col-auto text-center'>
+						<h6 className='text-success text-uppercase'>Lucids</h6>
+						<h1 className='text-success display-5 mb-0'>{totalLucids || '-'}</h1>
+						<div className='badge rounded-pill bg-success w-100'>{totalDreams && totalLucids ? ((totalLucids / totalDreams) * 100).toFixed(2) + '%' : '-'}</div>
+					</div>
 				</div>
 			</div>
 		</header>
