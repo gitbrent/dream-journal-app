@@ -30,7 +30,7 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom'
-import { IAuthState, IDriveFile, IJournalEntry, AuthState, IDreamSignTag, APP_VER } from './app.types'
+import { IAuthState, IDriveFile, IJournalEntry, AuthState, APP_VER } from './app.types'
 import * as GDrive from './google-oauth'
 import TabHome from '../app/app-home'
 import TabView, { IAppViewState } from '../app/app-view'
@@ -44,9 +44,7 @@ import '../css/react-tags.css'
 import '../css/style.css'
 
 // App Logic
-interface IAppProps {
-	showModal?: boolean
-}
+interface IAppProps {}
 interface IAppState {
 	appErrMsg: string
 	auth: IAuthState
@@ -56,8 +54,8 @@ interface IAppState {
 	childViewState: IAppViewState
 	childAdminState: IAppAdminState
 	dataFile: IDriveFile
+	isBusyLoad: boolean
 	editEntry: IJournalEntry
-	showModal: boolean // TODO: remove
 }
 class App extends React.Component<IAppProps, IAppState> {
 	constructor(props: Readonly<IAppProps>) {
@@ -76,8 +74,8 @@ class App extends React.Component<IAppProps, IAppState> {
 			childViewState: null,
 			childAdminState: null,
 			dataFile: null,
+			isBusyLoad: false,
 			editEntry: null,
-			showModal: typeof props.showModal === 'boolean' ? props.showModal : false,
 		}
 
 		this.initSetupOauth()
@@ -94,6 +92,7 @@ class App extends React.Component<IAppProps, IAppState> {
 	initSetupOauth = () => {
 		// Set 2 necessary callbacks to capture auth/file state changes
 		GDrive.authStateCallback((result: IAuthState) => this.setState({ auth: result }))
+		GDrive.busyLoadCallback((result: boolean) => this.setState({ isBusyLoad: result }))
 		GDrive.dataFileCallback((result: IDriveFile) => this.setState({ dataFile: result }))
 
 		// Make initial call at startup, if we're logged in, the datafile will be loaded and auth state set, otherwise, wait for user to click "Login"
@@ -143,8 +142,10 @@ class App extends React.Component<IAppProps, IAppState> {
 	}
 
 	// App Pages
-	Home = () => <TabHome authState={this.state.auth} dataFile={this.state.dataFile || null} />
-	View = () => <TabView dataFile={this.state.dataFile || null} doSaveViewState={this.doSaveViewState} viewState={this.state.childViewState} />
+	Home = () => <TabHome dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} authState={this.state.auth} />
+	View = () => (
+		<TabView dataFile={this.state.dataFile || null} doSaveViewState={this.doSaveViewState} viewState={this.state.childViewState} isBusyLoad={this.state.isBusyLoad} />
+	)
 	Search = () => <TabSearch dataFile={this.state.dataFile || null} doSaveSearchState={this.doSaveSearchState} searchState={this.state.childSearchState} />
 	Tags = () => <TabTags dataFile={this.state.dataFile || null} doSaveTagsState={this.doSaveTagsState} tagsState={this.state.childTagsState} />
 	Import = () => <TabImport dataFile={this.state.dataFile || null} doSaveImportState={this.doSaveImportState} importState={this.state.childImportState} />

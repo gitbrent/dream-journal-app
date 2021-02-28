@@ -33,23 +33,19 @@ import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
 import ModalEntry from './modal-entry'
 import * as GDrive from './google-oauth'
-import { useIsMounted } from './components/useIsMounted'
 
 interface Props {
 	authState: IAuthState
 	dataFile: IDriveFile
+	isBusyLoad: boolean
 }
 
 export default function TabHome(props: Props) {
 	const [showModal, setShowModal] = useState(false)
-	const [isBusyLoad, setIsBusyLoad] = useState(false)
 	//const [errorMessage, setErrorMessage] = useState('')
 	//const [isRenaming, setIsRenaming] = useState(false)
 	//const [fileBeingRenamed, setFileBeingRenamed] = useState<IDriveFile>(null)
 	//const [newFileName, setNewFileName] = useState('')
-
-	const isMounted = useIsMounted()
-	useEffect(() => GDrive.busyLoadCallback((res: boolean) => isMounted && setIsBusyLoad(res)), [isMounted])
 
 	function getReadableFileSizeString(fileSizeInBytes: number) {
 		let idx = -1
@@ -116,7 +112,7 @@ export default function TabHome(props: Props) {
 	}
 
 	function renderCardDataFile(): JSX.Element {
-		return props.dataFile && (props.dataFile._isSaving || props.dataFile._isLoading || isBusyLoad) ? (
+		return props.dataFile && (props.dataFile._isSaving || props.dataFile._isLoading || props.isBusyLoad) ? (
 			<div className='text-center'>
 				<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
 					<span className='visually-hidden' />
@@ -152,7 +148,7 @@ export default function TabHome(props: Props) {
 	}
 
 	return (
-		<div className='container-xl my-5'>
+		<div className='container-xl my-auto my-md-5'>
 			<ModalEntry currEntry={null} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
 
 			<div className='jumbotron p-4 p-md-5'>
