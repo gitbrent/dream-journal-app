@@ -268,7 +268,7 @@ export default function TabAdmin(props: Props) {
 			<section>
 				<div className='row mb-3'>
 					<div className='col'>
-						<h5 className='text-primary'>Search DreamSigns/Tags</h5>
+						<h5 className='text-primary'>Search Tags</h5>
 					</div>
 					<div className='col-auto'>
 						<h5 className='text-primary'>Unique Tags: {dreamTagGroups.length}</h5>
@@ -277,20 +277,20 @@ export default function TabAdmin(props: Props) {
 
 				<div className='row align-items-center border-top border-secondary py-3 mb-3' data-desc='commandbar'>
 					<div className='col-auto d-none d-md-block'>
-						<Search size={48} className='text-secondary' />
+						<Search size={40} className='text-secondary' />
 					</div>
 					<div className='col-12 col-md mb-3 mb-md-0'>
 						<div className='form-floating'>
 							<input
 								id='floatingDreamtag'
 								type='text'
-								placeholder='search dream tags'
+								placeholder='search tags'
 								value={searchTerm}
 								className='form-control'
 								onChange={(event) => setSearchTerm(event.target.value)}
 								disabled={!props.dataFile ? true : false}
 							/>
-							<label htmlFor='floatingDreamtag'>Search Dream Tags</label>
+							<label htmlFor='floatingDreamtag'>Search Tags</label>
 						</div>
 					</div>
 					<div className='col-auto'>

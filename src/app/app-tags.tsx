@@ -4,6 +4,7 @@ import { InfoCircle, Search } from 'react-bootstrap-icons'
 import DreamTagCard from './components/dreamtag-card'
 import * as GDrive from './google-oauth'
 import AlertGdriveStatus from './components/alert-gstat'
+import HeaderMetrics from './components/header-metrics'
 import ModalEntry from './modal-entry'
 
 interface IAppTagsProps {
@@ -13,6 +14,11 @@ interface IAppTagsProps {
 	tagsState: IAppTagsState
 }
 export interface IAppTagsState {}
+
+enum FilterEntry {
+	all = '(Show All)',
+	lucid = 'Lucid Dream',
+}
 
 enum FilterSortOrder {
 	title = 'Title',
@@ -24,52 +30,17 @@ export default function TabAdmin(props: IAppTagsProps) {
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
 	//
-	const [totalMonths, setTotalMonths] = useState(0)
-	const [totalYears, setTotalYears] = useState(0)
-	const [totalEntries, setTotalEntries] = useState(0)
-	const [totalDreams, setTotalDreams] = useState(0)
-	const [totalStars, setTotalStars] = useState(0)
-	const [totalLucid, setTotalLucid] = useState(0)
-	const [totalUntagged, setTotalUntagged] = useState(0)
-	const [totalDreamSigns, setTotalDreamSigns] = useState(0)
-	//
 	const [dreamTagGroups, setDreamTagGroups] = useState<IDreamSignTagGroup[]>([])
 	const [tagsByCat, setTagsByCat] = useState<IDreamTagByCat[]>([])
 	//
+	const [filterText, setFilterText] = useState('')
+	const [filterEntry, setFilterEntry] = useState<FilterEntry>(FilterEntry.all)
 	const [searchTerm, setSearchTerm] = useState('')
 	const [filterViewType, setFilterViewType] = useState<CardDreamSignGrpViewType>(CardDreamSignGrpViewType.sm)
 	const [filterSortOrder, setFilterSortOrder] = useState<FilterSortOrder>(FilterSortOrder.title)
 
 	useEffect(() => {
 		if (!props.dataFile || !props.dataFile.entries) return
-
-		// Total: Months
-		{
-			let d1 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
-			let d2 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
-			let months: number
-			months = (d2.getFullYear() - d1.getFullYear()) * 12
-			months -= d1.getMonth() + 1
-			months += d2.getMonth()
-			months += 2 // include both first and last months
-			setTotalMonths(months <= 0 ? 0 : months)
-		}
-
-		// Total: Years
-		{
-			let d1 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
-			let d2 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
-			setTotalYears(d2.getFullYear() - d1.getFullYear() + 1)
-		}
-
-		// Total: all metrics
-		{
-			setTotalEntries(props.dataFile.entries.length)
-			setTotalDreams(props.dataFile.entries.map((entry) => entry.dreams.length).reduce((a, b) => a + b))
-			setTotalStars(props.dataFile.entries.filter((entry) => entry.starred).length)
-			setTotalLucid(props.dataFile.entries.map((entry) => entry.dreams.filter((dream) => dream.isLucidDream).length).reduce((a, b) => a + b))
-			setTotalUntagged(props.dataFile.entries.map((entry) => entry.dreams.filter((dream) => dream.dreamSigns.length === 0).length).reduce((a, b) => a + b))
-		}
 
 		// Tag Groups
 		let tagGroups: IDreamSignTagGroup[] = []
@@ -93,7 +64,6 @@ export default function TabAdmin(props: IAppTagsProps) {
 
 			// tagGroup
 			setDreamTagGroups(tagGroups)
-			setTotalDreamSigns(tagGroups.length)
 		}
 
 		// TODO: WIP:
@@ -136,66 +106,48 @@ export default function TabAdmin(props: IAppTagsProps) {
 
 	// -----------------------------------------------------------------------
 
-	function renderHeader(): JSX.Element {
+	function renderFilters(): JSX.Element {
 		return (
-			<header className='my-5'>
-				<div className='card'>
-					<div className='card-header bg-primary'>
-						<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
-					</div>
-					<div className='card-body bg-light'>
-						<div className='row align-items-start justify-content-around'>
-							<div className='col-auto text-center d-none d-md-block'>
-								<h1 className='text-primary mb-1 x3'>{totalMonths}</h1>
-								<label className='text-primary text-uppercase'>Months</label>
-								<div className='badge rounded-pill bg-primary w-100'>{`${totalYears} years`}</div>
-							</div>
-							<div className='col-auto text-center'>
-								<h1 className='text-primary mb-1 x3'>{totalEntries}</h1>
-								<label className='text-primary text-uppercase'>Days</label>
-								<div className='badge rounded-pill bg-primary w-100'>{totalMonths * 30 > 0 ? (totalEntries / totalMonths).toFixed(2) + ' / mon' : '-'}</div>
-							</div>
-							<div className='col-auto text-center'>
-								<h1 className='text-info mb-1 x3'>{totalDreams}</h1>
-								<label className='text-info'>Dreams</label>
-								<div className='badge rounded-pill bg-info w-100'>{totalMonths * 30 > 0 ? (totalDreams / totalEntries).toFixed(2) + ' / day' : '-'}</div>
-							</div>
-							<div className='w-100 mb-3 d-md-none mb-md-0' />
-							<div className='col-auto text-center'>
-								<h1 className='text-warning mb-1 x3'>{totalStars}</h1>
-								<label className='text-warning'>Starred</label>
-								<div className='badge rounded-pill bg-warning w-100'>
-									{totalDreams && totalStars ? ((totalStars / totalDreams) * 100).toFixed(2) + '%' : '-'}
-								</div>
-							</div>
-							<div className='col-auto text-center'>
-								<h1 className='text-success mb-1 x3'>{totalLucid}</h1>
-								<label className='text-success'>Lucids</label>
-								<div className='badge rounded-pill bg-success w-100'>
-									{totalDreams && totalLucid ? ((totalLucid / totalDreams) * 100).toFixed(2) + '%' : '-'}
-								</div>
-							</div>
-							<div className='col-auto text-center'>
-								<h1 className='text-primary mb-1 x3'>{totalDreamSigns}</h1>
-								<label className='text-primary'>DreamSigns</label>
-								<div className='badge rounded-pill bg-primary w-100'>-</div>
-							</div>
-							<div className='col-auto text-center'>
-								<h1 className='text-info mb-1 x3'>{totalDreams - totalUntagged}</h1>
-								<label className='text-info'>Tagged</label>
-								<div className='badge rounded-pill bg-info w-100'>
-									{totalDreams ? (((totalDreams - totalUntagged) / totalDreams) * 100).toFixed(2) + '%' : '0%'}
-								</div>
-							</div>
-							<div className='col-auto text-center'>
-								<h1 className='text-warning mb-1 x3'>{totalUntagged || '0'}</h1>
-								<label className='text-warning'>Untagged</label>
-								<div className='badge rounded-pill bg-warning w-100'>{totalDreams ? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
-							</div>
-						</div>
+			<div className='row row-cols g-4 align-items-center justify-content-between mb-4' data-desc='commandbar'>
+				<div className='col-auto d-none d-md-block' data-desc='icon'>
+					<Search size={40} className='text-secondary' />
+				</div>
+				<div className='col' data-desc='search tags'>
+					<div className='form-floating'>
+						<input
+							id='floatingDreamtag'
+							type='text'
+							value={filterText}
+							placeholder='search tags'
+							className='form-control'
+							onChange={(event) => setFilterText(event.target.value)}
+							disabled={!props.dataFile ? true : false}
+						/>
+						<label htmlFor='floatingDreamtag'>Search Tags</label>
 					</div>
 				</div>
-			</header>
+				{/*
+				<div className='col-auto' data-desc='entry type'>
+					<div className='form-floating'>
+						<select
+							id='floatingFilterEntry'
+							placeholder='entry type'
+							defaultValue={filterEntry}
+							onChange={(ev) => setFilterEntry(ev.currentTarget.value as FilterEntry)}
+							className='form-control'>
+							{Object.keys(FilterEntry).map((val) => (
+								<option value={FilterEntry[val]} key={'entryType' + val}>
+									{FilterEntry[val]}
+								</option>
+							))}
+						</select>
+						<label htmlFor='floatingFilterEntry' className='text-nowrap'>
+							Entry Type
+						</label>
+					</div>
+				</div>
+				*/}
+			</div>
 		)
 	}
 
@@ -277,10 +229,20 @@ export default function TabAdmin(props: IAppTagsProps) {
 
 	// WIP:
 	function renderTagsByCat(): JSX.Element {
+		let filteredEntries = tagsByCat.filter(
+			(entry) =>
+				!filterText ||
+				entry.dreamTagGroups
+					.map((item) => item.dreamSign)
+					.join()
+					.indexOf(filterText.toLowerCase()) > -1 ||
+				entry.dreamCat.toLowerCase().indexOf(filterText.toLowerCase()) > -1
+			// && (filterEntry === FilterEntry.all ||	(filterEntry === FilterEntry.lucid && entry.dreamTagGroups.map(item => item.dailyEntries).map(items=>items.map(item=>item.dreams)).filter(dream=>dream.)
+			// (filterEntry === FilterEntry.lucid && entry.dreams.filter((dream) => dream.isLucidDream).length > 0)
+		)
+
 		return (
 			<section className='bg-light p-4'>
-				<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
-
 				<div className='row mb-3'>
 					<div className='col'>
 						<h5 className='text-primary'>Search Dream Tags</h5>
@@ -291,9 +253,10 @@ export default function TabAdmin(props: IAppTagsProps) {
 						</h5>
 					</div>
 				</div>
+				{renderFilters()}
 
 				<div className='row row-cols-auto g-3 justify-content-between'>
-					{tagsByCat
+					{filteredEntries
 						.sort((a, b) => (a.dreamCat < b.dreamCat ? -1 : 1))
 						.map((catItem, idx) => (
 							<div key={`keyCatItem${idx}`} className='col'>
@@ -348,8 +311,11 @@ export default function TabAdmin(props: IAppTagsProps) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
-		<main className='container mb-5'>
-			{renderHeader()}
+		<main className='container my-auto my-md-5'>
+			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
+
+			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
+
 			{renderTagsByCat()}
 			{/*renderTagGroups()*/}
 		</main>
