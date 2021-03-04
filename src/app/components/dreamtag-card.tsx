@@ -17,7 +17,7 @@ export default function DreamTagCard(props: Props) {
 
 	function renderShowDreams(): JSX.Element {
 		return (
-			<section>
+			<div className='row row-cols-auto g-3'>
 				{props.tagGrp.dailyEntries.map((entry, idy) => (
 					<div
 						key={`cardTagDate${props.tagGrp.dreamSign}${idy}`}
@@ -26,8 +26,8 @@ export default function DreamTagCard(props: Props) {
 							props.setCurrEntry(entry)
 							props.setShowModal(true)
 						}}
-						className='cursor-link text-center text-sm d-inline-block mb-3 me-3'
-						style={{ userSelect: 'none', minWidth: '65px' }}>
+						className='col cursor-link text-center text-sm user-select-none'
+						style={{ minWidth: '65px' }}>
 						<div className='bg-danger px-2 py-1 text-white align-text-middle rounded-top'>
 							<h6 className='mb-0'>{moment(entry.entryDate).format('YYYY')}</h6>
 						</div>
@@ -36,7 +36,7 @@ export default function DreamTagCard(props: Props) {
 						</div>
 					</div>
 				))}
-			</section>
+			</div>
 		)
 	}
 
@@ -87,13 +87,13 @@ export default function DreamTagCard(props: Props) {
 			)}
 		</div>
 	) : (
-		<div className='d-inline-block m-2'>
-			<div className='text-nowrap bg-info text-white'>
-				<div className='row g-0'>
-					<div className='col px-3 py-2 cursor-link' title='click to view dreams' onClick={() => setShowDreams(!showDreams)}>
-						{props.tagGrp.dreamSign}
-					</div>
-					<div className='col-auto px-3 py-2 text-white-50 bg-trans-25'>{props.tagGrp.totalOccurs}</div>
+		<div className='col text-nowrap bg-info text-white'>
+			<div className='row g-0'>
+				<div className='col px-3 py-2 cursor-link' title='click to view dreams' onClick={() => setShowDreams(!showDreams)}>
+					{props.tagGrp.dreamSign}
+				</div>
+				<div className='col-auto px-3 py-2 text-white-50 text-end bg-trans-25' style={{ minWidth: '60px' }}>
+					{props.tagGrp.totalOccurs}
 				</div>
 			</div>
 			{showDreams && <div className='bg-black-70 p-3'>{renderShowDreams()}</div>}

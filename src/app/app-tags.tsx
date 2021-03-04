@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveFile, IJournalEntry } from './app.types'
-import { InfoCircle, Search } from 'react-bootstrap-icons'
+import moment from 'moment'
+import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveFile, IJournalDream, IJournalEntry, MONTHS } from './app.types'
+import { Search, Tag, Tags } from 'react-bootstrap-icons'
 import DreamTagCard from './components/dreamtag-card'
 import * as GDrive from './google-oauth'
 import AlertGdriveStatus from './components/alert-gstat'
@@ -15,11 +16,24 @@ interface IAppTagsProps {
 }
 export interface IAppTagsState {}
 
-enum FilterEntry {
-	all = '(Show All)',
-	lucid = 'Lucid Dream',
+interface IOnlyDream {
+	entryDate: string
+	dream: IJournalDream
 }
 
+enum FilterDate {
+	all = '(All)',
+	last10 = 'Last 10 Days',
+	last30 = 'Last 30 Days',
+	last90 = 'Last 90 Days',
+	last180 = 'Last 180 Days',
+	last360 = 'Last 360 Days',
+}
+enum FilterView {
+	group = 'Grouped',
+	ungrp = 'Un-Grouped',
+	dates = 'Timeline',
+}
 enum FilterSortOrder {
 	title = 'Title',
 	highlow = 'High → Low',
@@ -32,9 +46,12 @@ export default function TabAdmin(props: IAppTagsProps) {
 	//
 	const [dreamTagGroups, setDreamTagGroups] = useState<IDreamSignTagGroup[]>([])
 	const [tagsByCat, setTagsByCat] = useState<IDreamTagByCat[]>([])
+	const [onlyDreams, setOnlyDreams] = useState<IOnlyDream[]>([])
 	//
 	const [filterText, setFilterText] = useState('')
-	const [filterEntry, setFilterEntry] = useState<FilterEntry>(FilterEntry.all)
+	const [filterView, setFilterView] = useState(FilterView.group)
+	const [filterDate, setFilterDate] = useState(FilterDate.last30)
+	//
 	const [searchTerm, setSearchTerm] = useState('')
 	const [filterViewType, setFilterViewType] = useState<CardDreamSignGrpViewType>(CardDreamSignGrpViewType.sm)
 	const [filterSortOrder, setFilterSortOrder] = useState<FilterSortOrder>(FilterSortOrder.title)
@@ -42,13 +59,38 @@ export default function TabAdmin(props: IAppTagsProps) {
 	useEffect(() => {
 		if (!props.dataFile || !props.dataFile.entries) return
 
+		let onlyDreams: IOnlyDream[] = []
+
+		let filterDays =
+			filterDate === FilterDate.last10
+				? 10
+				: filterDate === FilterDate.last30
+				? 30
+				: filterDate === FilterDate.last90
+				? 90
+				: filterDate === FilterDate.last180
+				? 180
+				: filterDate === FilterDate.last360
+				? 360
+				: 0
+
 		// Tag Groups
 		let tagGroups: IDreamSignTagGroup[] = []
 		{
 			props.dataFile.entries
+				.filter((entry) => filterDate === FilterDate.all || moment(entry.entryDate).isAfter(moment().subtract(filterDays, 'days')))
+				.filter(
+					(entry) =>
+						!filterText ||
+						entry.dreams
+							.map((dream) => dream.dreamSigns)
+							.join(',')
+							.toLowerCase()
+							.indexOf(filterText.toLowerCase()) > -1
+				)
 				.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 				.forEach((entry) => {
-					entry.dreams.forEach((dream) =>
+					entry.dreams.forEach((dream) => {
 						dream.dreamSigns.forEach((sign) => {
 							let tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
 							if (tag) {
@@ -59,14 +101,15 @@ export default function TabAdmin(props: IAppTagsProps) {
 								tagGroups.push({ dreamSign: sign, dailyEntries: [entry], totalOccurs: 1 })
 							}
 						})
-					)
+						onlyDreams.push({ entryDate: entry.entryDate, dream: dream })
+					})
 				})
 
 			// tagGroup
 			setDreamTagGroups(tagGroups)
 		}
+		setOnlyDreams(onlyDreams)
 
-		// TODO: WIP:
 		let tagByCats: IDreamTagByCat[] = []
 		tagGroups.forEach((tagGrp) => {
 			let tagTag = tagGrp.dreamSign
@@ -77,7 +120,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 			else tagByCats.push({ dreamCat: tagCat, dreamTagGroups: [tagGrp] })
 		})
 		setTagsByCat(tagByCats)
-	}, [props.dataFile])
+	}, [props.dataFile, filterText, filterDate])
 
 	// -----------------------------------------------------------------------
 
@@ -123,86 +166,57 @@ export default function TabAdmin(props: IAppTagsProps) {
 							onChange={(event) => setFilterText(event.target.value)}
 							disabled={!props.dataFile ? true : false}
 						/>
-						<label htmlFor='floatingDreamtag'>Search Tags</label>
-					</div>
-				</div>
-				{/*
-				<div className='col-auto' data-desc='entry type'>
-					<div className='form-floating'>
-						<select
-							id='floatingFilterEntry'
-							placeholder='entry type'
-							defaultValue={filterEntry}
-							onChange={(ev) => setFilterEntry(ev.currentTarget.value as FilterEntry)}
-							className='form-control'>
-							{Object.keys(FilterEntry).map((val) => (
-								<option value={FilterEntry[val]} key={'entryType' + val}>
-									{FilterEntry[val]}
-								</option>
-							))}
-						</select>
-						<label htmlFor='floatingFilterEntry' className='text-nowrap'>
-							Entry Type
+						<label htmlFor='floatingDreamtag'>
+							search <Tags /> {tagsByCat.length} cats of <Tag /> {dreamTagGroups.length} tags
 						</label>
 					</div>
 				</div>
-				*/}
+				<div className='col-auto' data-desc='date range'>
+					<div className='form-floating'>
+						<select
+							id='floatingFilterDates'
+							placeholder='date range'
+							defaultValue={filterDate}
+							onChange={(ev) => setFilterDate(ev.currentTarget.value as FilterDate)}
+							className='form-control'>
+							{Object.keys(FilterDate).map((val) => (
+								<option value={FilterDate[val]} key={'entryType' + val}>
+									{FilterDate[val]}
+								</option>
+							))}
+						</select>
+						<label htmlFor='floatingFilterDates' className='text-nowrap'>
+							Date Range
+						</label>
+					</div>
+				</div>
+				<div className='col-auto' data-desc='view type'>
+					<div className='form-floating'>
+						<select
+							id='floatingFilterView'
+							placeholder='view type'
+							defaultValue={filterView}
+							onChange={(ev) => setFilterView(ev.currentTarget.value as FilterView)}
+							className='form-control'>
+							{Object.keys(FilterView).map((val) => (
+								<option value={FilterView[val]} key={'filterView' + val}>
+									{FilterView[val]}
+								</option>
+							))}
+						</select>
+						<label htmlFor='floatingFilterView' className='text-nowrap'>
+							View Type
+						</label>
+					</div>
+				</div>
 			</div>
 		)
 	}
 
 	function renderTagGroups(): JSX.Element {
 		return (
-			<section className='bg-light p-4'>
-				<div className='row mb-3'>
-					<div className='col'>
-						<h5 className='text-primary'>Search Dream Tags</h5>
-					</div>
-					<div className='col-auto'>
-						<h5 className='text-primary'>Unique Tags: {dreamTagGroups.length}</h5>
-					</div>
-				</div>
-
-				<div className='row align-items-center border-top border-secondary py-3 mb-3' data-desc='commandbar'>
-					<div className='col-auto d-none d-md-block'>
-						<Search size={48} className='text-secondary' />
-					</div>
-					<div className='col-12 col-md mb-3 mb-md-0'>
-						<label className='text-uppercase text-muted'>DreamSign/Tag</label>
-						<input
-							type='text'
-							value={searchTerm}
-							className='form-control'
-							onChange={(event) => setSearchTerm(event.target.value)}
-							disabled={!props.dataFile ? true : false}
-						/>
-					</div>
-					<div className='col-auto'>
-						<label className='text-uppercase text-muted'>Display</label>
-						<select
-							defaultValue={filterViewType}
-							onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
-							className='form-control'>
-							{Object.keys(CardDreamSignGrpViewType).map((val) => (
-								<option value={CardDreamSignGrpViewType[val]} key={'viewType' + val}>
-									{CardDreamSignGrpViewType[val]}
-								</option>
-							))}
-						</select>
-					</div>
-					<div className='col-auto'>
-						<label className='text-uppercase text-muted'>Sort Order</label>
-						<select defaultValue={filterSortOrder} onChange={(ev) => setFilterSortOrder(ev.currentTarget.value as FilterSortOrder)} className='form-control'>
-							{Object.keys(FilterSortOrder).map((val) => (
-								<option value={FilterSortOrder[val]} key={'sortOrder' + val}>
-									{FilterSortOrder[val]}
-								</option>
-							))}
-						</select>
-					</div>
-				</div>
-
-				<div className='card-deck'>
+			<section className='bg-black p-4'>
+				<div className='row row-cols-auto g-4 justify-content-between'>
 					{dreamTagGroups
 						.filter((tagGrp) => !searchTerm || tagGrp.dreamSign.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || searchTerm.indexOf(tagGrp.dreamSign) > -1)
 						.sort((a, b) => {
@@ -227,42 +241,17 @@ export default function TabAdmin(props: IAppTagsProps) {
 		)
 	}
 
-	// WIP:
 	function renderTagsByCat(): JSX.Element {
-		let filteredEntries = tagsByCat.filter(
-			(entry) =>
-				!filterText ||
-				entry.dreamTagGroups
-					.map((item) => item.dreamSign)
-					.join()
-					.indexOf(filterText.toLowerCase()) > -1 ||
-				entry.dreamCat.toLowerCase().indexOf(filterText.toLowerCase()) > -1
-			// && (filterEntry === FilterEntry.all ||	(filterEntry === FilterEntry.lucid && entry.dreamTagGroups.map(item => item.dailyEntries).map(items=>items.map(item=>item.dreams)).filter(dream=>dream.)
-			// (filterEntry === FilterEntry.lucid && entry.dreams.filter((dream) => dream.isLucidDream).length > 0)
-		)
-
 		return (
-			<section className='bg-light p-4'>
-				<div className='row mb-3'>
-					<div className='col'>
-						<h5 className='text-primary'>Search Dream Tags</h5>
-					</div>
-					<div className='col-auto'>
-						<h5 className='text-primary'>
-							{tagsByCat.length} Categories ({dreamTagGroups.length} Tags)
-						</h5>
-					</div>
-				</div>
-				{renderFilters()}
-
-				<div className='row row-cols-auto g-3 justify-content-between'>
-					{filteredEntries
+			<section className='bg-black p-4'>
+				<div className='row row-cols-auto g-4 justify-content-between'>
+					{tagsByCat
 						.sort((a, b) => (a.dreamCat < b.dreamCat ? -1 : 1))
 						.map((catItem, idx) => (
 							<div key={`keyCatItem${idx}`} className='col'>
 								<div className='card'>
 									<div className='card-header bg-black-70 h6'>{catItem.dreamCat}</div>
-									<div className='card-body bg-black-90 p-2'>
+									<div className='card-body bg-black-90 p-3'>
 										{catItem.dreamTagGroups
 											.filter(
 												(tagGrp) =>
@@ -308,16 +297,59 @@ export default function TabAdmin(props: IAppTagsProps) {
 		)
 	}
 
+	function renderByDate(): JSX.Element {
+		return (
+			<section className='bg-black p-4'>
+				<div className='row row-cols-auto row-cols-md-4 g-4 justify-content-between'>
+					{onlyDreams
+						.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
+						.map((item, idx) => (
+							<div
+								key={`byDateKey${idx}`}
+								title={Math.abs(Math.round(moment(item.entryDate).diff(moment(new Date()), 'months', true))) + ' months ago'}
+								onClick={(_ev) => {
+									setCurrEntry(props.dataFile.entries.filter((entry) => entry.entryDate == item.entryDate)[0])
+									setShowModal(true)
+								}}
+								className='col cursor-link text-center user-select-none'
+								style={{ minWidth: '65px' }}>
+								<div className='bg-danger px-2 py-1 text-white align-text-middle rounded-top'>
+									<h6 className='mb-0'>
+										{MONTHS[Number(moment(item.entryDate).format('M')) - 1]} {moment(item.entryDate).format('DD')}
+									</h6>
+								</div>
+								<div className='bg-white px-2 py-3 rounded-bottom'>
+									<div className='row row-cols-auto g-3'>
+										{item.dream.dreamSigns.map((tag, idy) => (
+											<div key={`tagKey${idy}`} className='col'>
+												<Tag /> {tag}
+											</div>
+										))}
+										{item.dream.dreamSigns.length === 0 && <Tag />}
+									</div>
+								</div>
+							</div>
+						))}
+				</div>
+			</section>
+		)
+	}
+
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
-		<main className='container my-auto my-md-5'>
-			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
+		<div className='container my-auto my-md-5'>
+			<header>
+				<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
+				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
+			</header>
 
-			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
-
-			{renderTagsByCat()}
-			{/*renderTagGroups()*/}
-		</main>
+			<main className='bg-light p-4'>
+				{renderFilters()}
+				{filterView === FilterView.group && renderTagsByCat()}
+				{filterView === FilterView.ungrp && renderTagGroups()}
+				{filterView === FilterView.dates && renderByDate()}
+			</main>
+		</div>
 	)
 }
