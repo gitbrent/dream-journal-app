@@ -7,4 +7,5 @@ export enum NightlyAffirmations {
 	'MILD 1' = `I resolve to become aware in my dreams tonight and have a Lucid Dream.` +
 		`Tonight, I will recognize my Dream-Signs and become aware I am dreaming.` +
 		`I can see myself becoming aware in my dreams and I can see myself surrounded by Dream-Signs.`,
+	'MILD 2' = `I WILL LUCID DREAM SOON` + `I EXPECT TO LD MUCH MORE OFTEN` + `I love myself and my abilities.` + `I am NOT SCARED of any dream situations.`,
 }
