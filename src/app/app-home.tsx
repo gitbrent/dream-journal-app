@@ -187,20 +187,20 @@ export default function TabHome(props: Props) {
 				<div className='mb-5'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</div>
 
 				<div className='row g-5 row-cols-1 row-cols-md-2 mb-5'>
-					<div className='col d-flex'>
-						<div className='card flex-fill'>
+					<div className='col'>
+						<div className='card h-100'>
 							<div className={'card-header' + (props.authState && props.authState.status === AuthState.Authenticated ? ' bg-success' : ' bg-warning')}>
 								<h5 className='card-title text-white mb-0'>{props.authState ? props.authState.status : '???'}</h5>
 							</div>
-							<div className='card-body bg-light text-dark'>{renderCardAuthUser()}</div>
+							<div className='card-body bg-black'>{renderCardAuthUser()}</div>
 						</div>
 					</div>
-					<div className='col d-flex'>
-						<div className='card flex-fill'>
+					<div className='col'>
+						<div className='card h-100'>
 							<div className='card-header bg-info'>
 								<h5 className='card-title text-white mb-0'>Dream Journal</h5>
 							</div>
-							<div className='card-body bg-light text-dark'>{renderCardDataFile()}</div>
+							<div className='card-body bg-black'>{renderCardDataFile()}</div>
 						</div>
 					</div>
 				</div>
