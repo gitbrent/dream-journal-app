@@ -46,6 +46,7 @@
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^4.5.2",
     "image-webpack-loader": "^7.0.1",
+    "purgecss": "^4.0.2",
     "style-loader": "^2.0.0",
     "svg-inline-loader": "^0.8.2",
     "ts-loader": "^8.0.17",

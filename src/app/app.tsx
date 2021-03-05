@@ -40,6 +40,7 @@ import TabAdmin, { IAppAdminState } from '../app/app-admin'
 import TabTags, { IAppTagsState } from '../app/app-tags'
 import LogoBase64 from '../img/logo_base64'
 import '../css/bootstrap.cyborg.v5.0.0-beta1.css'
+//import '../css/purged.css' // missing react-bootstrap (maybe others)
 import '../css/react-tags.css'
 import '../css/style.css'
 
