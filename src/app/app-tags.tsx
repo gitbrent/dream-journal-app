@@ -152,23 +152,27 @@ export default function TabAdmin(props: IAppTagsProps) {
 	function renderFilters(): JSX.Element {
 		return (
 			<div className='row row-cols g-4 align-items-center justify-content-between mb-4' data-desc='commandbar'>
-				<div className='col-auto d-none d-md-block' data-desc='icon'>
-					<Search size={40} className='text-secondary' />
-				</div>
-				<div className='col' data-desc='search tags'>
-					<div className='form-floating'>
-						<input
-							id='floatingDreamtag'
-							type='text'
-							value={filterText}
-							placeholder='search tags'
-							className='form-control'
-							onChange={(event) => setFilterText(event.target.value)}
-							disabled={!props.dataFile ? true : false}
-						/>
-						<label htmlFor='floatingDreamtag'>
-							search <Tags /> {tagsByCat.length} cats of <Tag /> {dreamTagGroups.length} tags
-						</label>
+				<div className='col-12 col-md' data-desc='search tags'>
+					<div className='row flex-nowrap align-items-center g-0 bg-black'>
+						<div className='col-auto px-2'>
+							<Search size={40} className='text-secondary' />
+						</div>
+						<div className='col'>
+							<div className='form-floating'>
+								<input
+									id='floatingDreamtag'
+									type='text'
+									value={filterText}
+									placeholder='search tags'
+									className='form-control'
+									onChange={(event) => setFilterText(event.target.value)}
+									disabled={!props.dataFile ? true : false}
+								/>
+								<label htmlFor='floatingDreamtag'>
+									<Tags /> {tagsByCat.length} cats / <Tag /> {dreamTagGroups.length} tags
+								</label>
+							</div>
+						</div>
 					</div>
 				</div>
 				<div className='col-auto' data-desc='date range'>
@@ -213,7 +217,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 		)
 	}
 
-	function renderTagGroups(): JSX.Element {
+	function renderTagUnGrp(): JSX.Element {
 		return (
 			<section className='bg-black p-4'>
 				<div className='row row-cols-auto g-4 justify-content-between'>
@@ -241,7 +245,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 		)
 	}
 
-	function renderTagsByCat(): JSX.Element {
+	function renderGroupByCat(): JSX.Element {
 		return (
 			<section className='bg-black p-4'>
 				<div className='row row-cols-auto g-4 justify-content-between'>
@@ -346,8 +350,8 @@ export default function TabAdmin(props: IAppTagsProps) {
 
 			<main className='bg-light p-4'>
 				{renderFilters()}
-				{filterView === FilterView.group && renderTagsByCat()}
-				{filterView === FilterView.ungrp && renderTagGroups()}
+				{filterView === FilterView.group && renderGroupByCat()}
+				{filterView === FilterView.ungrp && renderTagUnGrp()}
 				{filterView === FilterView.dates && renderByDate()}
 			</main>
 		</div>
