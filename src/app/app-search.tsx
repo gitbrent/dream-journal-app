@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { IDriveFile, IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
 import { Search } from 'react-bootstrap-icons'
-import Alert from 'react-bootstrap/Alert'
 import SearchResults from './components/search-results'
 import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
@@ -211,8 +210,8 @@ export default function TabSearch(props: Props) {
 
 			<header className='container my-5'>
 				{showAlert && (
-					<Alert variant='secondary'>
-						<Alert.Heading>Make good use of your Dream Journal</Alert.Heading>
+					<div className='alert alert-secondary' role='alert'>
+						<h4 className='alert-heading'>Make good use of your Dream Journal</h4>
 						<p>Analyze your journal to learn more about yourself, spot common themes/dreamsigns and improve your lucid dreaming ability.</p>
 						<ul>
 							<li>How many lucid dreams have you had?</li>
@@ -226,7 +225,7 @@ export default function TabSearch(props: Props) {
 								Dismiss
 							</button>
 						</div>
-					</Alert>
+					</div>
 				)}
 				<div className='card my-5'>
 					<div className='card-header bg-primary'>
