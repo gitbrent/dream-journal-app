@@ -58,6 +58,7 @@ interface IAppState {
 	isBusyLoad: boolean
 	editEntry: IJournalEntry
 }
+
 class App extends React.Component<IAppProps, IAppState> {
 	constructor(props: Readonly<IAppProps>) {
 		super(props)
@@ -231,6 +232,6 @@ class App extends React.Component<IAppProps, IAppState> {
 }
 
 // App Container
-const AppMain: React.SFC<{ compiler: string; framework: string }> = (_props) => <App />
+const AppMain: React.FunctionComponent<{ compiler: string; framework: string }> = (_props) => <App />
 
 ReactDOM.render(<AppMain compiler='TypeScript' framework='React' />, document.getElementById('root'))
