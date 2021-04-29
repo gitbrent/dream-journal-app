@@ -18,7 +18,9 @@
     "3-build+deploy": "webpack --config webpack.prod.js && firebase deploy"
   },
   "dependencies": {
+    "@types/bootstrap": "^5.0.13",
     "@types/react-router-dom": "^5.1.7",
+    "bootstrap": "^5.0.0-beta3",
     "bootstrap-switch-button-react": "^1.2.0",
     "moment": "^2.29.1",
     "react": "^17.0.1",

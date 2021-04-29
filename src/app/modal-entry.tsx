@@ -6,8 +6,12 @@ import * as GDrive from './google-oauth'
 import { IDreamSignTag, IJournalDream, IJournalEntry, InductionTypes } from './app.types'
 import ReactTags from 'react-tag-autocomplete'
 import Button from 'react-bootstrap/Button'
-import Modal from 'react-bootstrap/Modal'
+//import Modal from 'react-bootstrap/Modal'
 import { Calendar3, Clock, PlusCircle, Save, Star, StarFill, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
+
+//import { Modal } from 'bootstrap';
+import Modal from 'bootstrap/js/dist/modal'
+const modal = new Modal(document.getElementById('myModal'))
 
 export interface IModalEntryProps {
 	currEntry: IJournalEntry
