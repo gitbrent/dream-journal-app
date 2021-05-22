@@ -345,8 +345,11 @@ export default function TabSearch(props: Props) {
 							</div>
 						</div>
 					</div>
-					<div className='card-body bg-light' data-desc='tag cards'>
-						<div className='card-columns'>
+					<div className='card-body bg-light p-4' data-desc='search cards'>
+						<div
+							className={`row ${
+								searchOptScope === SearchScopes.all || searchOptScope === SearchScopes.notes ? 'row-cols-1 row-cols-md-2' : 'row-cols-2 row-cols-md-4'
+							} g-4 justify-content-between`}>
 							{searchMatches ? (
 								searchMatches.map((match) => (
 									<SearchResults
