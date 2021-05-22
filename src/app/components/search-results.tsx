@@ -42,7 +42,7 @@ export default function SearchResults(props: Props) {
 	return (
 		<div key={`searchResultCard${props.searchMatch.entry.entryDate}`} className='col'>
 			<div className='card'>
-				<div className={props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'card-header bg-success' : 'card-header bg-black-70'}>
+				<div className={`card-header p-3 ${props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'bg-success' : 'bg-black-70'}`}>
 					<div className='row g-0 align-items-center'>
 						<div className='col-auto'>
 							<div
@@ -81,22 +81,22 @@ export default function SearchResults(props: Props) {
 						</p>
 					</div>
 				)}
-				<div className='card-footer bg-black'>
-					{(props.searchOptScope === SearchScopes.all || props.searchOptScope === SearchScopes.signs) && (
-						<div>
+				{(props.searchOptScope === SearchScopes.all || props.searchOptScope === SearchScopes.signs) && (
+					<div className='card-footer bg-black p-3'>
+						<div className='row row-cols-auto g-2'>
 							{props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns &&
 							Array.isArray(props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns)
 								? props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns.map((sign, idx) => {
 										return (
-											<div className='badge bg-info text-lowercase p-2 me-2 mb-2' key={'sign' + idx}>
-												{sign}
+											<div className='col' key={`sign${idx}`}>
+												<div className='badge bg-info text-lowercase p-2'>{sign}</div>
 											</div>
 										)
 								  })
 								: ''}
 						</div>
-					)}
-				</div>
+					</div>
+				)}
 			</div>
 		</div>
 	)
