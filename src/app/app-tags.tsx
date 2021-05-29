@@ -112,6 +112,10 @@ export default function TabAdmin(props: IAppTagsProps) {
 		}
 		setOnlyDreams(tmpOnlyDreams)
 
+		// WIP: FIXME: figure how to map-> map, so we can sort in Timeline results
+		//let brent = tmpOnlyDreams.map(entry => entry.dreams.map(dream => dream.dreamSigns.map(sign => sign).sort()))
+		//console.log(brent);
+
 		let tagByCats: IDreamTagByCat[] = []
 		tagGroups.forEach((tagGrp) => {
 			let tagTag = tagGrp.dreamSign
