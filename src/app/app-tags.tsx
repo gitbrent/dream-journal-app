@@ -19,6 +19,7 @@ export interface IAppTagsState {}
 interface IOnlyDream {
 	entryDate: string
 	dreams: IJournalDream[]
+	tags: string[]
 }
 
 enum FilterDate {
@@ -102,8 +103,12 @@ export default function TabAdmin(props: IAppTagsProps) {
 							}
 						})
 						let currEntry = tmpOnlyDreams.filter((item) => item.entryDate === entry.entryDate)[0]
-						if (currEntry) currEntry.dreams.push(dream)
-						else tmpOnlyDreams.push({ entryDate: entry.entryDate, dreams: [dream] })
+						if (currEntry) {
+							currEntry.dreams.push(dream)
+							currEntry.tags = [...currEntry.tags, ...dream.dreamSigns]
+						} else {
+							tmpOnlyDreams.push({ entryDate: entry.entryDate, dreams: [dream], tags: dream.dreamSigns })
+						}
 					})
 				})
 
@@ -111,10 +116,6 @@ export default function TabAdmin(props: IAppTagsProps) {
 			setDreamTagGroups(tagGroups)
 		}
 		setOnlyDreams(tmpOnlyDreams)
-
-		// WIP: FIXME: figure how to map-> map, so we can sort in Timeline results
-		//let brent = tmpOnlyDreams.map(entry => entry.dreams.map(dream => dream.dreamSigns.map(sign => sign).sort()))
-		//console.log(brent);
 
 		let tagByCats: IDreamTagByCat[] = []
 		tagGroups.forEach((tagGrp) => {
@@ -330,13 +331,11 @@ export default function TabAdmin(props: IAppTagsProps) {
 								</div>
 								<div className='bg-black-90 px-2 py-3 rounded-bottom'>
 									<div className='row row-cols-1 g-2'>
-										{item.dreams.map((dream) =>
-											dream.dreamSigns.map((tag, idy) => (
-												<div key={`tagKey${idy}`} className='col'>
-													<Tag /> {tag}
-												</div>
-											))
-										)}
+										{item.tags.sort().map((tag, idy) => (
+											<div key={`tagKey${idy}`} className='col'>
+												<Tag /> {tag}
+											</div>
+										))}
 										{item.dreams.length === 0 && <Tag />}
 									</div>
 								</div>
