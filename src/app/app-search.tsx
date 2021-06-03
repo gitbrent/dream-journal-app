@@ -351,8 +351,9 @@ export default function TabSearch(props: Props) {
 								searchOptScope === SearchScopes.all || searchOptScope === SearchScopes.notes ? 'row-cols-1 row-cols-md-2' : 'row-cols-2 row-cols-md-4'
 							} g-4 justify-content-between`}>
 							{searchMatches ? (
-								searchMatches.map((match) => (
+								searchMatches.map((match,idx) => (
 									<SearchResults
+										key={`match${idx}`}
 										setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
 										setShowModal={(show: boolean) => setShowModal(show)}
 										searchMatch={match}
