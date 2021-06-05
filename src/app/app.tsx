@@ -195,20 +195,22 @@ class App extends React.Component<IAppProps, IAppState> {
 									</NavLink>
 								</li>
 								<li className='nav-item'>
+									<NavLink to='/tags' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+										View Tags
+									</NavLink>
+								</li>
+								<li className='nav-item'>
 									<NavLink to='/search' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
 										Search Journal
 									</NavLink>
 								</li>
-								<li className='nav-item'>
-									<NavLink to='/tags' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-										Dream Tags
-									</NavLink>
-								</li>
+								{/*
 								<li className='nav-item'>
 									<NavLink to='/import' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
 										Import Dreams
 									</NavLink>
 								</li>
+								*/}
 								<li className='nav-item'>
 									<NavLink to='/admin' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
 										Data Maint
@@ -221,8 +223,8 @@ class App extends React.Component<IAppProps, IAppState> {
 
 				<Route path='/' exact render={this.Home} />
 				<Route path='/view' render={this.View} />
-				<Route path='/search' render={this.Search} />
 				<Route path='/tags' render={this.Tags} />
+				<Route path='/search' render={this.Search} />
 				<Route path='/import' render={this.Import} />
 				<Route path='/admin' render={this.Admin} />
 			</Router>
