@@ -28,10 +28,10 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { IDreamSignTagGroup, IDriveFile } from '../app.types'
+import { IDreamSignTagGroup, IDriveDataFile } from '../app.types'
 
 interface Props {
-	dataFile: IDriveFile
+	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 	showStats: boolean
 }

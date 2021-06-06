@@ -28,7 +28,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { APP_VER, AuthState, IAuthState, IDriveFile } from './app.types'
+import { APP_VER, AuthState, IAuthState, IDriveDataFile } from './app.types'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
 import ModalEntry from './modal-entry'
@@ -36,7 +36,7 @@ import * as GDrive from './google-oauth'
 
 interface Props {
 	authState: IAuthState
-	dataFile: IDriveFile
+	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 }
 
@@ -44,7 +44,7 @@ export default function TabHome(props: Props) {
 	const [showModal, setShowModal] = useState(false)
 	//const [errorMessage, setErrorMessage] = useState('')
 	//const [isRenaming, setIsRenaming] = useState(false)
-	//const [fileBeingRenamed, setFileBeingRenamed] = useState<IDriveFile>(null)
+	//const [fileBeingRenamed, setFileBeingRenamed] = useState<IDriveDataFile>(null)
 	//const [newFileName, setNewFileName] = useState('')
 
 	function getReadableFileSizeString(fileSizeInBytes: number) {

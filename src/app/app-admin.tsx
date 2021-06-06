@@ -28,7 +28,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDriveFile, IJournalEntry } from './app.types'
+import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDriveDataFile, IJournalEntry } from './app.types'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
 import * as GDrive from './google-oauth'
 import DreamTagCard from './components/dreamtag-card'
@@ -37,7 +37,7 @@ import ModalEntry from './modal-entry'
 import HeaderMetrics from './components/header-metrics'
 
 interface Props {
-	dataFile: IDriveFile
+	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 	doSaveAdminState: Function
 	adminState: IAppAdminState
@@ -138,7 +138,7 @@ export default function TabAdmin(props: Props) {
 			)
 		})
 
-		GDrive.doSaveFile()
+		GDrive.doSaveDataFile()
 			.then(() => {
 				alert(`Updated ${numUpdated} dreams`)
 			})
@@ -151,7 +151,7 @@ export default function TabAdmin(props: Props) {
 			GDrive.doEntryEdit(entry, entry.entryDate)
 		})
 
-		GDrive.doSaveFile()
+		GDrive.doSaveDataFile()
 			.then(() => {
 				alert(`Updated ${badBedTimes.length} items`)
 			})

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { IDriveFile, IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
+import { IDriveDataFile, IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
 import { Search } from 'react-bootstrap-icons'
 import Alert from 'react-bootstrap/Alert'
 import SearchResults from './components/search-results'
@@ -8,7 +8,7 @@ import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
 
 export interface Props {
-	dataFile: IDriveFile
+	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 	doSaveSearchState: Function
 	searchState: IAppSearchState

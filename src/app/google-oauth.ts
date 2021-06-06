@@ -5,7 +5,7 @@
  * @see https://developers.google.com/drive/api/v3/search-parameters#file_fields
  * FUTURE: [Auth redirect](https://reacttraining.com/react-router/web/example/auth-workflow)
  */
-import { AuthState, IAuthState, IDriveFile, IJournalEntry } from './app.types'
+import { AuthState, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry } from './app.types'
 
 const GITBRENT_CLIENT_ID = '300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com'
 const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
@@ -18,7 +18,8 @@ const JOURNAL_HEADER = {
 }
 
 let gAuthState: IAuthState = { status: AuthState.Unauthenticated, userName: '', userPhoto: '' }
-let gDataFile: IDriveFile = null
+let gConfFile: IDriveConfFile = null
+let gDataFile: IDriveDataFile = null
 let gAuthCallback: Function = null
 let gDataCallback: Function = null
 let gBusyLoadCallback: Function = null
@@ -145,6 +146,7 @@ export function doAuthSignOut() {
 				userPhoto: '',
 			}
 			if (gAuthCallback) gAuthCallback({ ...gAuthState })
+			gConfFile = null
 			gDataFile = null
 			if (gDataCallback) gDataCallback(null)
 
@@ -191,7 +193,7 @@ export function doEntryDelete(entryDate: IJournalEntry['entryDate']) {
 /**
  * @see: https://developers.google.com/drive/api/v3/reference/files/update
  */
-export function doSaveFile(): Promise<any> {
+export function doSaveDataFile(): Promise<any> {
 	return new Promise((resolve, reject) => {
 		let params = JSON.parse(localStorage.getItem('oauth2-params'))
 
@@ -330,10 +332,10 @@ function doGetDataFile() {
 					if (data && data.error && data.error.code) throw data.error
 
 					// B: Grab datafile (id, name, size, etc) (not the contents!)
-					gDataFile = data.files.filter((file) => file.name === JOURNAL_HEADER.name)[0] || null
+					gDataFile = data.files.filter((file: any) => file.name === JOURNAL_HEADER.name)[0] || null
 
 					// C: Create datafile if needed, otherwise, load file contents
-					gDataFile ? doSelectFile() : doCreateFile()
+					gDataFile ? doSelectDataFile() : doCreateDataFile()
 				})
 				.catch((error) => {
 					throw new Error(error)
@@ -352,7 +354,7 @@ function doGetDataFile() {
 /**
  * @see: https://developers.google.com/drive/api/v3/multipart-upload
  */
-function doCreateFile() {
+function doCreateDataFile() {
 	let params = JSON.parse(localStorage.getItem('oauth2-params'))
 	let reqBody =
 		'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
@@ -397,7 +399,7 @@ function doCreateFile() {
 /**
  * @see: https://developers.google.com/drive/api/v3/manage-downloads
  */
-function doSelectFile() {
+function doSelectDataFile() {
 	// A
 	let params = JSON.parse(localStorage.getItem('oauth2-params'))
 
@@ -432,7 +434,7 @@ function doSelectFile() {
 					gDataFile.entries = entries || []
 
 					// C:
-					if (gDataCallback) gDataCallback(JSON.parse(JSON.stringify(gDataFile)) as IDriveFile)
+					if (gDataCallback) gDataCallback(JSON.parse(JSON.stringify(gDataFile)) as IDriveDataFile)
 					if (gBusyLoadCallback) gBusyLoadCallback(false)
 				})
 				.catch((error) => {

@@ -1,5 +1,5 @@
 // APP
-export const APP_BLD = '20210605-1335'
+export const APP_BLD = '20210606-1545'
 export const APP_VER = `1.1.0-WIP ${APP_BLD}`
 
 // CONST
@@ -46,6 +46,15 @@ export enum CardDreamSignGrpViewType {
 	sm = 'Small',
 }
 
+// TODO: allow grouping of TAGS by overall types
+//export type SIGN_INVENTORY_TYPE = 'AWARENESS' | 'CONTEXT' | 'FORM' | 'ACTION'
+export enum SignInventoryType {
+	aw = 'AWARENESS',
+	co = 'CONTEXT',
+	fo = 'FORM',
+	ac = 'ACTION',
+}
+
 // INTERFACES
 export interface IAuthState {
 	status: AuthState
@@ -53,9 +62,23 @@ export interface IAuthState {
 	userPhoto: ''
 }
 /**
- * Google Drive file in JSON format
+ * Google Drive Conf file in JSON format
  */
-export interface IDriveFile {
+export interface IDriveConfFile {
+	_isLoading: boolean
+	_isSaving: boolean
+	id: string
+	name: string
+	goals: string[]
+	tagTypeAW: string[]
+	tagTypeCO: string[]
+	tagTypeFO: string[]
+	tagTypeAC: string[]
+}
+/**
+ * Google Drive Data file in JSON format
+ */
+export interface IDriveDataFile {
 	_isLoading: boolean
 	_isSaving: boolean
 	id: string

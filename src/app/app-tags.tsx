@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import moment from 'moment'
-import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveFile, IJournalDream, IJournalEntry, MONTHS } from './app.types'
+import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveDataFile, IJournalDream, IJournalEntry, MONTHS } from './app.types'
 import { Search, Tag, Tags } from 'react-bootstrap-icons'
 import DreamTagCard from './components/dreamtag-card'
 import * as GDrive from './google-oauth'
@@ -9,7 +9,7 @@ import HeaderMetrics from './components/header-metrics'
 import ModalEntry from './modal-entry'
 
 interface IAppTagsProps {
-	dataFile: IDriveFile
+	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 	doSaveTagsState: Function
 	tagsState: IAppTagsState
@@ -147,7 +147,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 			)
 		})
 
-		GDrive.doSaveFile()
+		GDrive.doSaveDataFile()
 			.then(() => {
 				alert(`Updated ${numUpdated} dreams`)
 			})
