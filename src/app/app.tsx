@@ -30,7 +30,7 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom'
-import { IAuthState, IDriveDataFile, IJournalEntry, AuthState, APP_VER } from './app.types'
+import { IAuthState, IDriveDataFile, IJournalEntry, AuthState, APP_VER, IDriveConfFile } from './app.types'
 import * as GDrive from './google-oauth'
 import TabHome from '../app/app-home'
 import TabExplore, { ITabStateExplore } from '../app/app-explore'
@@ -56,6 +56,7 @@ interface IAppState {
 	childTagsState: IAppTagsState
 	childViewState: IAppViewState
 	childAdminState: IAppAdminState
+	confFile: IDriveConfFile
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 	editEntry: IJournalEntry
@@ -77,6 +78,7 @@ class App extends React.Component<IAppProps, IAppState> {
 			childTagsState: null,
 			childViewState: null,
 			childAdminState: null,
+			confFile: null,
 			dataFile: null,
 			isBusyLoad: false,
 			editEntry: null,
@@ -97,6 +99,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		// Set 2 necessary callbacks to capture auth/file state changes
 		GDrive.authStateCallback((result: IAuthState) => this.setState({ auth: result }))
 		GDrive.busyLoadCallback((result: boolean) => this.setState({ isBusyLoad: result }))
+		GDrive.confFileCallback((result: IDriveConfFile) => this.setState({ confFile: result }))
 		GDrive.dataFileCallback((result: IDriveDataFile) => this.setState({ dataFile: result }))
 
 		// Make initial call at startup, if we're logged in, the datafile will be loaded and auth state set, otherwise, wait for user to click "Login"
@@ -156,6 +159,7 @@ class App extends React.Component<IAppProps, IAppState> {
 	Home = () => <TabHome dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} authState={this.state.auth} />
 	Explore = () => (
 		<TabExplore
+			confFile={this.state.confFile || null}
 			dataFile={this.state.dataFile || null}
 			isBusyLoad={this.state.isBusyLoad}
 			setTabState={this.doSaveTabState_Explore}

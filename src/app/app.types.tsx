@@ -68,7 +68,6 @@ export interface IDriveConfFile {
 	_isLoading: boolean
 	_isSaving: boolean
 	id: string
-	name: string
 	goals: string[]
 	tagTypeAW: string[]
 	tagTypeCO: string[]
