@@ -1,10 +1,61 @@
+/*
+ *  :: Brain Cloud Dream Journal ::
+ *
+ *  Dream Journal App - Record and Search Daily Dream Entries
+ *  https://github.com/gitbrent/dream-journal-app
+ *
+ *  This library is released under the MIT Public License (MIT)
+ *
+ *  Dream Journal App (C) 2019-present Brent Ely (https://github.com/gitbrent)
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
+
 import React, { useState, useEffect } from 'react'
 import moment from 'moment'
-import { IDriveDataFile, IJournalDream, IJournalEntry, ISearchMatch, MONTHS, SearchMatchTypes, SearchScopes } from './app.types'
+import { IDriveConfFile, IDriveDataFile, IJournalDream, IJournalEntry, ISearchMatch, MONTHS, SearchMatchTypes, SearchScopes } from './app.types'
+import {
+	ArrowDown,
+	ArrowUp,
+	Box,
+	BrightnessHighFill,
+	ChatText,
+	ExclamationCircle,
+	Eye,
+	Globe,
+	Heart,
+	HeartFill,
+	Image,
+	Lightning,
+	PersonCircle,
+	PlusSquare,
+	Translate,
+	Save,
+	ShieldFillCheck,
+	Smartwatch,
+	StarFill,
+	Trash,
+} from 'react-bootstrap-icons'
 import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
-import { Box, ChatText, CheckCircle, ExclamationCircle, Eye, Globe, Heart, Image, Lightning, PersonCircle, Smartwatch } from 'react-bootstrap-icons'
+import * as GDrive from './google-oauth'
 
 /**
  * TODO:
@@ -27,6 +78,7 @@ export interface ITabStateExplore {
 	showAlert: boolean
 }
 export interface Props {
+	confFile: IDriveConfFile
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 	setTabState: Function
@@ -39,10 +91,29 @@ interface LucidDream {
 }
 
 export default function TabExplore(props: Props) {
+	const [isBusySave, setIsBusySave] = useState(false)
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
 	const [allLucids, setAllLucids] = useState<LucidDream[]>([])
 	const [randLucids, setRandLucids] = useState<LucidDream[]>([])
+	const [myGoals, setMyGoals] = useState<string[]>([])
+
+	useEffect(() => {
+		if (props.confFile) {
+			setMyGoals(props.confFile.goals)
+			/*
+				setMyGoals([
+					'I will continue to practice and refine my ADA (All Day Awareness) technique',
+					'Return to my training construct (giant parking lot and UNIT HQ bldg) for more skill training!!!',
+					'Have more LDs',
+					'Find my dream guide: Stabilize an LD, then ask, "Can I See My Dream Guide?"',
+					'Try to connect with others',
+					'Nail Sasha Grey',
+					'Have an LD for more than 5 minutes',
+				])
+			*/
+		}
+	}, [props.confFile])
 
 	useEffect(() => {
 		let allLucids: LucidDream[] = []
@@ -88,39 +159,108 @@ export default function TabExplore(props: Props) {
 						</div>
 					</div>
 				*/}
-				<div className='row row-cols-12 row-cols-md-3 g-4'>
-					<div className='col'>
-						<div className='card h-100'>
-							<div className='card-header bg-primary text-white'>
-								<h5 className='card-title mb-0'>MILD Affirmations</h5>
-							</div>
-							<div className='card-body bg-black'>
-								<ul>
-									<li>Tonight I will recognize that I am dreaming</li>
-									<li>I want to Lucid Dream. I will find what works for me. You cant stop me!</li>
-									<li>Ok, i'm ready, willing and able to have an LD tonight.</li>
-									<li>I WILL LUCID DREAM TONIGHT!!!</li>
-									<li>If i am outside, then i am dreaming.</li>
-									<li>I see clues every single night in my dreams. I will get better at recognizing them as dream symbols.</li>
-									<li>My only impediment to success is my brain and my attitude.</li>
-									<li>I will continue to practice and refine my ADA (All Day Awareness) technique</li>
-									<li>GO BRENT!!! WE CAN DO THIS!!!</li>
-								</ul>
-							</div>
-						</div>
-					</div>
+				<div className='row row-cols-1 g-4 mb-4'>
 					<div className='col'>
 						<div className='card h-100'>
 							<div className='card-header bg-success text-white'>
 								<h5 className='card-title mb-0'>Visualize Success</h5>
 							</div>
 							<div className='card-body bg-black'>
+								<div className='row row-cols-1 row-cols-md-3 g-4'>
+									<section className='col'>
+										<h6 className='card-subtitle mb-2 text-success'>
+											<Lightning size={20} className='me-2' />
+											Be Extraordinary
+										</h6>
+										<ul>
+											<li>Imagine flying through the sky</li>
+											<li>Imagine jumping off a building</li>
+											<li>Fight an Agent in The Matrix</li>
+										</ul>
+									</section>
+									<section className='col'>
+										<h6 className='card-subtitle mb-2 text-success'>
+											<ShieldFillCheck size={20} className='me-2' />
+											Be Tough
+										</h6>
+										<ul>
+											<li>I am the captain of a naval war ship</li>
+											<li>Go an away mission with Star Trek</li>
+											<li>I am Doctor Who fighting enemies</li>
+										</ul>
+									</section>
+									<section className='col'>
+										<h6 className='card-subtitle mb-2 text-primary'>
+											<StarFill size={20} className='me-2' />
+											Be Confident
+										</h6>
+										<ul>
+											<li>Be Steve Jobs' assistant at Apple</li>
+											<li>Be on stage as the leading expert</li>
+											<li>Imagine talking to George Carlin</li>
+										</ul>
+									</section>
+									<section className='col'>
+										<h6 className='card-subtitle mb-2 text-warning'>
+											<BrightnessHighFill size={20} className='me-2' />
+											Be Famous
+										</h6>
+										<ul>
+											<li>Perform a concert for screaming fans</li>
+											<li>Be a contestent on a game show</li>
+											<li>Be in an MTV music video</li>
+										</ul>
+									</section>
+									<section className='col'>
+										<h6 className='card-subtitle mb-2 text-danger'>
+											<HeartFill size={20} className='me-2' />
+											Be Emotional
+										</h6>
+										<ul>
+											<li>Beat the crap out of fascists</li>
+											<li>Sit and talk to my dearest Ev</li>
+											<li>Find Joanna and talk to her</li>
+										</ul>
+									</section>
+									<section className='col'>
+										<h6 className='card-subtitle mb-2 text-info'>
+											<Translate size={20} className='me-2' />
+											Be Different
+										</h6>
+										<ul>
+											<li>Become a Transformer</li>
+											<li>Become a cartoon</li>
+											<li>Change into a woman</li>
+										</ul>
+									</section>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div className='row row-cols-1 row-cols-md-2 g-4'>
+					<div className='col'>
+						<div className='card h-100'>
+							<div className='card-header bg-primary text-white'>
+								<h5 className='card-title mb-0'>MILD Affirmations</h5>
+							</div>
+							<div className='card-body bg-black'>
+								<h6 className='card-subtitle text-primary text-uppercase mb-3'>Expect To Succeed</h6>
 								<ul>
-									<li>Imagine flying through the sky</li>
-									<li>Imagine talking to George Carlin</li>
-									<li>Try to connect with others</li>
-									<li>Nail Sasha Grey</li>
-									<li>Have an LD for more than 5 minutes</li>
+									<li>GO BRENT!!! WE CAN DO THIS!!!</li>
+									<li>I WILL LUCID DREAM TONIGHT!!!</li>
+								</ul>
+								<h6 className='card-subtitle text-primary text-uppercase my-3'>We Have The Skills</h6>
+								<ul>
+									<li>Tonight I will recognize that I am dreaming.</li>
+									<li>I have had hundreds of lucid dreams.</li>
+									<li>I want to Lucid Dream. I will find what works for me.</li>
+								</ul>
+								<h6 className='card-subtitle text-primary text-uppercase my-3'>It Will Happen</h6>
+								<ul>
+									<li>I will get better at recognizing clues and dreamsigns.</li>
+									<li>I am ready, willing and able to have an LD tonight.</li>
+									<li>My only impediment to success is my brain and my attitude.</li>
 								</ul>
 							</div>
 						</div>
@@ -130,7 +270,7 @@ export default function TabExplore(props: Props) {
 							<div className='card-header bg-info text-white'>
 								<h5 className='card-title mb-0'>Random Lucid Dreams</h5>
 							</div>
-							<div className='card-body bg-black'>
+							<div className='card-body bg-black p-4'>
 								{randLucids.map((rand, idx) => (
 									<div
 										key={`rand${idx}`}
@@ -161,6 +301,69 @@ export default function TabExplore(props: Props) {
 								))}
 							</div>
 						</div>
+					</div>
+				</div>
+			</section>
+		)
+	}
+
+	function renderTabGoals(): JSX.Element {
+		return (
+			<section>
+				{myGoals.map((goal, idx) => (
+					<div key={`goal${idx}`} className='row align-items-center mb-3'>
+						<div className='col-auto'>
+							<div className='btn-group border' role='group'>
+								<button type='button' className='btn btn-light py-1' disabled={isBusySave} title='move up' aria-label='move up'>
+									<ArrowUp />
+								</button>
+								<button type='button' className='btn btn-light py-1' disabled={isBusySave} title='move down' aria-label='move down'>
+									<ArrowDown />
+								</button>
+							</div>
+						</div>
+						<div className='col'>
+							<input
+								type='text'
+								disabled={isBusySave}
+								value={goal}
+								onChange={(ev) => {
+									let chgItems = [...myGoals]
+									chgItems[idx] = ev.currentTarget.value
+									setMyGoals(chgItems)
+								}}
+								className='form-control'
+							/>
+						</div>
+						<div className='col-auto'>
+							<div className='btn-group border' role='group'>
+								<button type='button' className='btn btn-light py-1' disabled={isBusySave} title='delete goal' aria-label='delete goal'>
+									<Trash />
+								</button>
+							</div>
+						</div>
+					</div>
+				))}
+				<div className='row justify-content-center mb-0'>
+					<div className='col-auto text-center'>
+						<button className='btn btn-primary' title='Save Updates' onClick={() => GDrive.doSaveConfFile()}>
+							<PlusSquare size='16' className='me-2' />
+							Add
+						</button>
+					</div>
+					<div className='col-auto text-center'>
+						<button
+							className='btn btn-success'
+							title='Save Updates'
+							onClick={async () => {
+								setIsBusySave(true)
+								GDrive.doEditConfGoals(myGoals)
+								await GDrive.doSaveConfFile()
+								setIsBusySave(false)
+							}}>
+							<Save size='16' className='me-2' />
+							Save
+						</button>
 					</div>
 				</div>
 			</section>
@@ -465,35 +668,6 @@ export default function TabExplore(props: Props) {
 						Stephen LaBerge in <cite title='Source Title'>Exploring the World of Lucid Dreaming</cite>
 					</figcaption>
 				*/}
-			</section>
-		)
-	}
-
-	function renderTabGoals(): JSX.Element {
-		return (
-			<section>
-				<h5 className='text-primary'>TODO:WIP:</h5>
-
-				<div className='mt-4'>
-					<div className='row row-cols-12 row-cols-md-2 g-4'>
-						<div className='card h-100'>
-							<div className='card-header bg-success text-white'>
-								<h5 className='card-title mb-0'>GOALS</h5>
-							</div>
-							<div className='card-body bg-black'>
-								<ul>
-									<li>I will continue to practice and refine my ADA (All Day Awareness) technique</li>
-									<li>Return to my training construct (giant parking lot and UNIT HQ bldg) for more skill training!!!</li>
-									<li>Have more LD's</li>
-									<li>Find my dream guide: Stabilize an LD, then ask, "Can I See My Dream Guide?"</li>
-									<li>Try to connect with others</li>
-									<li>Nail Sasha Grey</li>
-									<li>Have an LD for more than 5 minutes</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-				</div>
 			</section>
 		)
 	}
