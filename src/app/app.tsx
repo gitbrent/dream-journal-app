@@ -89,7 +89,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		console.log(APP_VER)
 	}
 
-	componentDidCatch = (error:any, errorInfo:any) => {
+	componentDidCatch = (error: any, errorInfo: any) => {
 		this.setState({ appErrMsg: error.toString() })
 		console.error(error)
 		console.error(errorInfo)
