@@ -5,7 +5,7 @@
  * @see https://developers.google.com/drive/api/v3/search-parameters#file_fields
  * FUTURE: [Auth redirect](https://reacttraining.com/react-router/web/example/auth-workflow)
  */
-import { AuthState, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry, SignInventoryType } from './app.types'
+import { AuthState, ConfMetaCats, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry, SignInventoryType } from './app.types'
 
 const GITBRENT_CLIENT_ID = '300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com'
 const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
@@ -169,11 +169,25 @@ export function doAuthSignOut() {
 // PUBLIC METHODS: CONF FILE -------------------------------------------------
 
 /**
- * @param goals new goals
+ * @param dreamIdeas new ideas
  */
-export function doEditConfGoals(goals: string[]) {
+export function doEditConf_DreamIdeas(dreamIdeas: ConfMetaCats[]) {
 	if (!gConfFile || !gConfFile.id) throw new Error('No conffile!')
-	gConfFile.goals = goals
+	gConfFile.dreamIdeas = dreamIdeas
+}
+/**
+ * @param lucidGoals new goals
+ */
+export function doEditConf_LucidGoals(lucidGoals: ConfMetaCats) {
+	if (!gConfFile || !gConfFile.id) throw new Error('No conffile!')
+	gConfFile.lucidGoals = lucidGoals
+}
+/**
+ * @param mildAffirs new mild affirmations
+ */
+export function doEditConf_MildAffirs(mildAffirs: ConfMetaCats[]) {
+	if (!gConfFile || !gConfFile.id) throw new Error('No conffile!')
+	gConfFile.mildAffirs = mildAffirs
 }
 /**
  * @param type dreamsign inventory type
@@ -563,7 +577,9 @@ function doSelectConfFile() {
 					}
 
 					// B:
-					gConfFile.goals = json['goals'] || []
+					gConfFile.dreamIdeas = json['dreamIdeas'] || []
+					gConfFile.lucidGoals = json['lucidGoals'] || []
+					gConfFile.mildAffirs = json['mildAffirs'] || []
 					gConfFile.tagTypeAW = json['tagTypeAW'] || []
 					gConfFile.tagTypeCO = json['tagTypeCO'] || []
 					gConfFile.tagTypeFO = json['tagTypeFO'] || []

@@ -29,7 +29,7 @@
 
 import React, { useState, useEffect } from 'react'
 import moment from 'moment'
-import { ConfMetaCats, IDriveConfFile, IDriveDataFile, IJournalDream, IJournalEntry, ISearchMatch, MONTHS, SearchMatchTypes, SearchScopes } from './app.types'
+import { IDriveConfFile, IDriveDataFile, IJournalDream, IJournalEntry, ISearchMatch, MONTHS, SearchMatchTypes, SearchScopes } from './app.types'
 import {
 	ArrowDown,
 	ArrowUp,
@@ -43,15 +43,15 @@ import {
 	HeartFill,
 	Image,
 	Lightning,
+	LightningFill,
 	PersonCircle,
 	PlusSquare,
-	Translate,
 	Save,
 	ShieldFillCheck,
 	Smartwatch,
 	StarFill,
+	Translate,
 	Trash,
-	LightningFill,
 } from 'react-bootstrap-icons'
 import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
