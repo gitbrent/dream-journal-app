@@ -12,3 +12,4 @@ bower_components/
 
 # Data
 src/data/*.json
+z.admin.local.tsx
