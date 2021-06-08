@@ -28,7 +28,7 @@
  */
 
 import React from 'react'
-import { IDriveFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './app.types'
+import { IDriveDataFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './app.types'
 import BootstrapSwitchButton from 'bootstrap-switch-button-react' // TODO: BS5: Swap for new toggle
 import ContentEditable from 'react-contenteditable'
 import { Upload } from 'react-bootstrap-icons'
@@ -38,7 +38,7 @@ const ENTRY_DATE_BREAK = 'SECTIONBREAK'
 const VERBOSE = false
 
 export interface IAppTabProps {
-	dataFile: IDriveFile
+	dataFile: IDriveDataFile
 	doSaveImportState: Function
 	importState: object
 }
@@ -656,7 +656,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		} else {
 			this.state._parsedSections.forEach((sect) => GDrive.doEntryAdd(sect))
 
-			GDrive.doSaveFile()
+			GDrive.doSaveDataFile()
 				.catch((err) => {
 					// TODO: show onscreen
 					alert('ERROR: ' + err)

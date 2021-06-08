@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import moment from 'moment'
-import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveFile, IJournalDream, IJournalEntry, MONTHS } from './app.types'
+import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveDataFile, IJournalDream, IJournalEntry, MONTHS } from './app.types'
 import { Search, Tag, Tags } from 'react-bootstrap-icons'
 import DreamTagCard from './components/dreamtag-card'
 import * as GDrive from './google-oauth'
@@ -9,7 +9,7 @@ import HeaderMetrics from './components/header-metrics'
 import ModalEntry from './modal-entry'
 
 interface IAppTagsProps {
-	dataFile: IDriveFile
+	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 	doSaveTagsState: Function
 	tagsState: IAppTagsState
@@ -18,7 +18,8 @@ export interface IAppTagsState {}
 
 interface IOnlyDream {
 	entryDate: string
-	dream: IJournalDream
+	dreams: IJournalDream[]
+	tags: string[]
 }
 
 enum FilterDate {
@@ -59,7 +60,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 	useEffect(() => {
 		if (!props.dataFile || !props.dataFile.entries) return
 
-		let onlyDreams: IOnlyDream[] = []
+		let tmpOnlyDreams: IOnlyDream[] = []
 
 		let filterDays =
 			filterDate === FilterDate.last10
@@ -101,14 +102,20 @@ export default function TabAdmin(props: IAppTagsProps) {
 								tagGroups.push({ dreamSign: sign, dailyEntries: [entry], totalOccurs: 1 })
 							}
 						})
-						onlyDreams.push({ entryDate: entry.entryDate, dream: dream })
+						let currEntry = tmpOnlyDreams.filter((item) => item.entryDate === entry.entryDate)[0]
+						if (currEntry) {
+							currEntry.dreams.push(dream)
+							currEntry.tags = [...currEntry.tags, ...dream.dreamSigns]
+						} else {
+							tmpOnlyDreams.push({ entryDate: entry.entryDate, dreams: [dream], tags: dream.dreamSigns })
+						}
 					})
 				})
 
 			// tagGroup
 			setDreamTagGroups(tagGroups)
 		}
-		setOnlyDreams(onlyDreams)
+		setOnlyDreams(tmpOnlyDreams)
 
 		let tagByCats: IDreamTagByCat[] = []
 		tagGroups.forEach((tagGrp) => {
@@ -140,7 +147,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 			)
 		})
 
-		GDrive.doSaveFile()
+		GDrive.doSaveDataFile()
 			.then(() => {
 				alert(`Updated ${numUpdated} dreams`)
 			})
@@ -315,21 +322,21 @@ export default function TabAdmin(props: IAppTagsProps) {
 									setCurrEntry(props.dataFile.entries.filter((entry) => entry.entryDate == item.entryDate)[0])
 									setShowModal(true)
 								}}
-								className='col cursor-link text-center user-select-none'
+								className='col cursor-link user-select-none'
 								style={{ minWidth: '65px' }}>
-								<div className='bg-danger px-2 py-1 text-white align-text-middle rounded-top'>
+								<div className='bg-danger p-2 text-white align-text-middle rounded-top'>
 									<h6 className='mb-0'>
 										{MONTHS[Number(moment(item.entryDate).format('M')) - 1]} {moment(item.entryDate).format('DD')}
 									</h6>
 								</div>
-								<div className='bg-white px-2 py-3 rounded-bottom'>
-									<div className='row row-cols-auto g-3'>
-										{item.dream.dreamSigns.map((tag, idy) => (
+								<div className='bg-black-90 px-2 py-3 rounded-bottom'>
+									<div className='row row-cols-1 g-2'>
+										{item.tags.sort().map((tag, idy) => (
 											<div key={`tagKey${idy}`} className='col'>
 												<Tag /> {tag}
 											</div>
 										))}
-										{item.dream.dreamSigns.length === 0 && <Tag />}
+										{item.dreams.length === 0 && <Tag />}
 									</div>
 								</div>
 							</div>

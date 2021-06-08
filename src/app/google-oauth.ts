@@ -5,21 +5,28 @@
  * @see https://developers.google.com/drive/api/v3/search-parameters#file_fields
  * FUTURE: [Auth redirect](https://reacttraining.com/react-router/web/example/auth-workflow)
  */
-import { AuthState, IAuthState, IDriveFile, IJournalEntry } from './app.types'
+import { AuthState, ConfMetaCats, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry, SignInventoryType } from './app.types'
 
 const GITBRENT_CLIENT_ID = '300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com'
 const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
 const FIREBASE_URL = 'https://brain-cloud-dream-journal.firebaseapp.com'
 const LOCALHOST_URL = 'http://localhost:8080'
-const JOURNAL_HEADER = {
+const CONF_FILE_HEADER = {
+	name: 'dream-journal-conf.json',
+	description: 'Brain Cloud Dream Journal configuration file',
+	mimeType: 'application/json',
+}
+const DATA_FILE_HEADER = {
 	name: 'dream-journal.json',
 	description: 'Brain Cloud Dream Journal data file',
 	mimeType: 'application/json',
 }
 
 let gAuthState: IAuthState = { status: AuthState.Unauthenticated, userName: '', userPhoto: '' }
-let gDataFile: IDriveFile = null
+let gConfFile: IDriveConfFile = null
+let gDataFile: IDriveDataFile = null
 let gAuthCallback: Function = null
+let gConfCallback: Function = null
 let gDataCallback: Function = null
 let gBusyLoadCallback: Function = null
 
@@ -27,6 +34,9 @@ let gBusyLoadCallback: Function = null
 
 export function authStateCallback(callback: Function) {
 	gAuthCallback = callback
+}
+export function confFileCallback(callback: Function) {
+	gConfCallback = callback
 }
 export function dataFileCallback(callback: Function) {
 	gDataCallback = callback
@@ -75,7 +85,7 @@ export function doAuthUpdate() {
 						if (gAuthCallback) gAuthCallback(gAuthState)
 
 						// C: Go ahead and load data file since we need it
-						doGetDataFile()
+						doGetAppFiles()
 					}
 				})
 				.catch((error) => {
@@ -134,7 +144,7 @@ export function doAuthSignOut() {
 
 	// FUTURE: Prompt for Save!!!
 
-	fetch('https://accounts.google.com/o/oauth2/revoke?token=' + params['access_token'], {
+	fetch(`https://accounts.google.com/o/oauth2/revoke?token=${params['access_token']}`, {
 		method: 'GET',
 		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	})
@@ -145,6 +155,7 @@ export function doAuthSignOut() {
 				userPhoto: '',
 			}
 			if (gAuthCallback) gAuthCallback({ ...gAuthState })
+			gConfFile = null
 			gDataFile = null
 			if (gDataCallback) gDataCallback(null)
 
@@ -155,8 +166,99 @@ export function doAuthSignOut() {
 		})
 }
 
+// PUBLIC METHODS: CONF FILE -------------------------------------------------
+
+/**
+ * @param dreamIdeas new ideas
+ */
+export function doEditConf_DreamIdeas(dreamIdeas: ConfMetaCats[]) {
+	if (!gConfFile || !gConfFile.id) throw new Error('No conffile!')
+	gConfFile.dreamIdeas = dreamIdeas
+}
+/**
+ * @param lucidGoals new goals
+ */
+export function doEditConf_LucidGoals(lucidGoals: ConfMetaCats) {
+	if (!gConfFile || !gConfFile.id) throw new Error('No conffile!')
+	gConfFile.lucidGoals = lucidGoals
+}
+/**
+ * @param mildAffirs new mild affirmations
+ */
+export function doEditConf_MildAffirs(mildAffirs: ConfMetaCats[]) {
+	if (!gConfFile || !gConfFile.id) throw new Error('No conffile!')
+	gConfFile.mildAffirs = mildAffirs
+}
+/**
+ * @param type dreamsign inventory type
+ * @param tags updated tags
+ */
+export function doEditTagTypes(type: SignInventoryType, tags: string[]) {
+	if (!gConfFile || !gConfFile.id) throw new Error('No conffile!')
+	gConfFile[`tagType${type}`] = tags
+}
+
+export function doSaveConfFile(): Promise<any> {
+	return new Promise((resolve, reject) => {
+		let params = JSON.parse(localStorage.getItem('oauth2-params'))
+
+		let reqBody: string =
+			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
+			JSON.stringify(CONF_FILE_HEADER) +
+			'\n' +
+			'--foo_bar_baz\nContent-Type: application/json\n\n' +
+			JSON.stringify(gConfFile, null, 2) +
+			'\n' +
+			'--foo_bar_baz--'
+		let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
+
+		let requestHeaders: any = {
+			Authorization: `Bearer ${params['access_token']}`,
+			'Content-Type': 'multipart/related; boundary=foo_bar_baz',
+			'Content-Length': reqBody.length + reqEnd.length,
+		}
+
+		fetch(`https://www.googleapis.com/upload/drive/v3/files/${gConfFile.id}?uploadType=multipart`, {
+			method: 'PATCH',
+			headers: requestHeaders,
+			body: reqBody,
+		})
+			.then((response) => {
+				response
+					.json()
+					.then((json) => {
+						let data = json
+
+						// A: Check for errors
+						if (data && data.error && data.error.code) throw new Error(data.error.message) // Google error: `{error:{errors:[], code:401, message:"..."}}`
+
+						// B: refresh file list (to update "size", "modified")
+						doGetAppFiles()
+
+						// Done
+						resolve(true)
+					})
+					.catch((error) => {
+						console.error ? console.error(error) : console.log(error)
+						reject(error || 'UNABLE TO SAVE CONF')
+					})
+			})
+			.catch((error) => {
+				if (error.code === '401') {
+					doAuthSignIn()
+				} else {
+					console.error ? console.error(error) : console.log(error)
+					reject(error || 'UNABLE TO SAVE CONF')
+				}
+			})
+	})
+}
+
+// PUBLIC METHODS: DATA FILE -------------------------------------------------
+
 /**
  * Add new `IJournalEntry` into selected `IDriveFile`
+ * @param entry new juornal entry
  */
 export function doEntryAdd(entry: IJournalEntry) {
 	if (!gDataFile || !gDataFile.entries) throw new Error('No datafile!')
@@ -191,7 +293,7 @@ export function doEntryDelete(entryDate: IJournalEntry['entryDate']) {
 /**
  * @see: https://developers.google.com/drive/api/v3/reference/files/update
  */
-export function doSaveFile(): Promise<any> {
+export function doSaveDataFile(): Promise<any> {
 	return new Promise((resolve, reject) => {
 		let params = JSON.parse(localStorage.getItem('oauth2-params'))
 
@@ -218,7 +320,7 @@ export function doSaveFile(): Promise<any> {
 		// C: Write file
 		let reqBody: string =
 			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
-			JSON.stringify(JOURNAL_HEADER) +
+			JSON.stringify(DATA_FILE_HEADER) +
 			'\n' +
 			'--foo_bar_baz\nContent-Type: application/json\n\n' +
 			JSON.stringify(jsonBody, null, 2) +
@@ -247,7 +349,7 @@ export function doSaveFile(): Promise<any> {
 						if (data && data.error && data.error.code) throw new Error(data.error.message) // Google error: `{error:{errors:[], code:401, message:"..."}}`
 
 						// B: refresh file list (to update "size", "modified")
-						doGetDataFile()
+						doGetAppFiles()
 
 						// Done
 						resolve(true)
@@ -298,7 +400,7 @@ export function getUniqueDreamTags(): string[] {
 
 // INTERNAL METHODS ----------------------------------------------------------
 
-function doGetDataFile() {
+function doGetAppFiles() {
 	let params = JSON.parse(localStorage.getItem('oauth2-params'))
 	if (!params || !params['access_token']) {
 		doAuthSignIn()
@@ -316,7 +418,7 @@ function doGetDataFile() {
 		method: 'GET',
 		headers: {
 			Accept: 'application/json',
-			Authorization: 'Bearer ' + params['access_token'],
+			Authorization: `Bearer ${params['access_token']}`,
 		},
 	})
 		.then((response) => {
@@ -327,13 +429,19 @@ function doGetDataFile() {
 
 					// A: Check for errors
 					// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
-					if (data && data.error && data.error.code) throw data.error
+					if (data && data.error && data.error.code) throw new Error(data.error)
 
-					// B: Grab datafile (id, name, size, etc) (not the contents!)
-					gDataFile = data.files.filter((file) => file.name === JOURNAL_HEADER.name)[0] || null
+					// DATA FILE
+					// Grab datafile (id, name, size, etc) (not the contents!)
+					gDataFile = data.files.filter((file: any) => file.name === DATA_FILE_HEADER.name)[0] || null
+					// Create datafile if needed, otherwise, load file contents
+					if (gDataFile) doSelectDataFile()
+					else doCreateDataFile()
 
-					// C: Create datafile if needed, otherwise, load file contents
-					gDataFile ? doSelectFile() : doCreateFile()
+					// CONF FILE
+					gConfFile = data.files.filter((file: any) => file.name === CONF_FILE_HEADER.name)[0] || null
+					if (gConfFile) doSelectConfFile()
+					else doCreateConfFile()
 				})
 				.catch((error) => {
 					throw new Error(error)
@@ -352,23 +460,20 @@ function doGetDataFile() {
 /**
  * @see: https://developers.google.com/drive/api/v3/multipart-upload
  */
-function doCreateFile() {
+function doCreateConfFile() {
 	let params = JSON.parse(localStorage.getItem('oauth2-params'))
-	let reqBody =
-		'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
-		JSON.stringify(JOURNAL_HEADER) +
-		'\n' +
-		'--foo_bar_baz\nContent-Type: application/json\n\n' +
-		'' +
-		'\n' +
-		'--foo_bar_baz--'
+	let reqBody = `--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n${JSON.stringify(
+		CONF_FILE_HEADER
+	)}\n--foo_bar_baz\nContent-Type: application/json\n\n\n--foo_bar_baz--`
 	let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
 
 	let requestHeaders: any = {
-		Authorization: 'Bearer ' + params['access_token'],
+		Authorization: `Bearer ${params['access_token']}`,
 		'Content-Type': 'multipart/related; boundary=foo_bar_baz',
 		'Content-Length': reqBody.length + reqEnd.length,
 	}
+
+	if (!confirm('Create conf file?')) return
 
 	fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
 		method: 'POST',
@@ -379,7 +484,54 @@ function doCreateFile() {
 			response
 				.json()
 				.then((_json) => {
-					doGetDataFile()
+					doGetAppFiles()
+				})
+				.catch((error) => {
+					throw new Error(error)
+				})
+		})
+		.catch((error) => {
+			if (error.code === '401') {
+				doAuthSignIn()
+			} else {
+				console.error ? console.error(error) : console.log(error)
+			}
+		})
+}
+
+/**
+ * @see: https://developers.google.com/drive/api/v3/multipart-upload
+ */
+function doCreateDataFile() {
+	let params = JSON.parse(localStorage.getItem('oauth2-params'))
+	let reqBody =
+		'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
+		JSON.stringify(DATA_FILE_HEADER) +
+		'\n' +
+		'--foo_bar_baz\nContent-Type: application/json\n\n' +
+		'' +
+		'\n' +
+		'--foo_bar_baz--'
+	let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
+
+	let requestHeaders: any = {
+		Authorization: `Bearer ${params['access_token']}`,
+		'Content-Type': 'multipart/related; boundary=foo_bar_baz',
+		'Content-Length': reqBody.length + reqEnd.length,
+	}
+
+	if (!confirm('Create data file?')) return
+
+	fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+		method: 'POST',
+		headers: requestHeaders,
+		body: reqBody,
+	})
+		.then((response) => {
+			response
+				.json()
+				.then((_json) => {
+					doGetAppFiles()
 				})
 				.catch((error) => {
 					throw new Error(error)
@@ -397,16 +549,14 @@ function doCreateFile() {
 /**
  * @see: https://developers.google.com/drive/api/v3/manage-downloads
  */
-function doSelectFile() {
+function doSelectConfFile() {
 	// A
 	let params = JSON.parse(localStorage.getItem('oauth2-params'))
 
 	// B
-	fetch(`https://www.googleapis.com/drive/v3/files/${gDataFile.id}?alt=media`, {
+	fetch(`https://www.googleapis.com/drive/v3/files/${gConfFile.id}?alt=media`, {
 		method: 'GET',
-		headers: {
-			Authorization: 'Bearer ' + params['access_token'],
-		},
+		headers: { Authorization: `Bearer ${params['access_token']}` },
 	})
 		.then((response) => {
 			response
@@ -414,7 +564,66 @@ function doSelectFile() {
 				.then((buffer) => {
 					let decoded: string = new TextDecoder('utf-8').decode(buffer)
 					let json: Object = {}
-					let entries: Array<IJournalEntry>
+
+					// A:
+					if (decoded && decoded.length > 0) {
+						try {
+							// NOTE: Initial dream-journal file is empty!
+							json = JSON.parse(decoded)
+						} catch (ex) {
+							alert(ex)
+							console.error ? console.error(ex) : console.log(ex)
+						}
+					}
+
+					// B:
+					gConfFile.dreamIdeas = json['dreamIdeas'] || []
+					gConfFile.lucidGoals = json['lucidGoals'] || []
+					gConfFile.mildAffirs = json['mildAffirs'] || []
+					gConfFile.tagTypeAW = json['tagTypeAW'] || []
+					gConfFile.tagTypeCO = json['tagTypeCO'] || []
+					gConfFile.tagTypeFO = json['tagTypeFO'] || []
+					gConfFile.tagTypeAC = json['tagTypeAC'] || []
+
+					// C:
+					if (gConfCallback) gConfCallback(JSON.parse(JSON.stringify(gConfFile)) as IDriveConfFile)
+					if (gBusyLoadCallback) gBusyLoadCallback(false)
+				})
+				.catch((error) => {
+					throw new Error(error)
+				})
+		})
+		.catch((error) => {
+			if (error.code === '401') {
+				doAuthSignIn()
+			} else if (error.code === '503') {
+				//let newState = this.state.dataFile
+				// TODO: new field like `hasError` to hold "Service Unavailable" etc
+			} else {
+				console.error ? console.error(error) : console.log(error)
+			}
+		})
+}
+
+/**
+ * @see: https://developers.google.com/drive/api/v3/manage-downloads
+ */
+function doSelectDataFile() {
+	// A
+	let params = JSON.parse(localStorage.getItem('oauth2-params'))
+
+	// B
+	fetch(`https://www.googleapis.com/drive/v3/files/${gDataFile.id}?alt=media`, {
+		method: 'GET',
+		headers: { Authorization: `Bearer ${params['access_token']}` },
+	})
+		.then((response) => {
+			response
+				.arrayBuffer()
+				.then((buffer) => {
+					let decoded: string = new TextDecoder('utf-8').decode(buffer)
+					let json: Object = {}
+					let entries: IJournalEntry[]
 
 					// A:
 					if (decoded && decoded.length > 0) {
@@ -423,7 +632,7 @@ function doSelectFile() {
 							json = JSON.parse(decoded)
 							entries = json['entries']
 						} catch (ex) {
-							// TODO: Show message onscreen
+							alert(ex)
 							console.error ? console.error(ex) : console.log(ex)
 						}
 					}
@@ -432,7 +641,7 @@ function doSelectFile() {
 					gDataFile.entries = entries || []
 
 					// C:
-					if (gDataCallback) gDataCallback(JSON.parse(JSON.stringify(gDataFile)) as IDriveFile)
+					if (gDataCallback) gDataCallback(JSON.parse(JSON.stringify(gDataFile)) as IDriveDataFile)
 					if (gBusyLoadCallback) gBusyLoadCallback(false)
 				})
 				.catch((error) => {

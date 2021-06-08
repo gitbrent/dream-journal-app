@@ -30,16 +30,17 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom'
-import { IAuthState, IDriveFile, IJournalEntry, AuthState, APP_VER } from './app.types'
+import { IAuthState, IDriveDataFile, IJournalEntry, AuthState, APP_VER, IDriveConfFile } from './app.types'
 import * as GDrive from './google-oauth'
 import TabHome from '../app/app-home'
+import TabExplore, { ITabStateExplore } from '../app/app-explore'
 import TabView, { IAppViewState } from '../app/app-view'
-import TabImport from '../app/app-import'
+import TabTags, { IAppTagsState } from '../app/app-tags'
 import TabSearch, { IAppSearchState } from '../app/app-search'
 import TabAdmin, { IAppAdminState } from '../app/app-admin'
-import TabTags, { IAppTagsState } from '../app/app-tags'
+import TabImport from '../app/app-import'
 import LogoBase64 from '../img/logo_base64'
-import '../css/bootstrap.cyborg.v5.0.0-beta3.css'
+import '../css/bootstrap.cyborg.v501.css'
 //import '../css/purged.css' // missing react-bootstrap (maybe others)
 import '../css/react-tags.css'
 import '../css/style.css'
@@ -49,12 +50,14 @@ interface IAppProps {}
 interface IAppState {
 	appErrMsg: string
 	auth: IAuthState
+	tabStateExplore: ITabStateExplore
 	childImportState: object
 	childSearchState: IAppSearchState
 	childTagsState: IAppTagsState
 	childViewState: IAppViewState
 	childAdminState: IAppAdminState
-	dataFile: IDriveFile
+	confFile: IDriveConfFile
+	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 	editEntry: IJournalEntry
 }
@@ -69,11 +72,13 @@ class App extends React.Component<IAppProps, IAppState> {
 				userName: '',
 				userPhoto: '',
 			},
+			tabStateExplore: null,
 			childImportState: null,
 			childSearchState: null,
 			childTagsState: null,
 			childViewState: null,
 			childAdminState: null,
+			confFile: null,
 			dataFile: null,
 			isBusyLoad: false,
 			editEntry: null,
@@ -84,7 +89,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		console.log(APP_VER)
 	}
 
-	componentDidCatch = (error, errorInfo) => {
+	componentDidCatch = (error: any, errorInfo: any) => {
 		this.setState({ appErrMsg: error.toString() })
 		console.error(error)
 		console.error(errorInfo)
@@ -94,14 +99,22 @@ class App extends React.Component<IAppProps, IAppState> {
 		// Set 2 necessary callbacks to capture auth/file state changes
 		GDrive.authStateCallback((result: IAuthState) => this.setState({ auth: result }))
 		GDrive.busyLoadCallback((result: boolean) => this.setState({ isBusyLoad: result }))
-		GDrive.dataFileCallback((result: IDriveFile) => this.setState({ dataFile: result }))
+		GDrive.confFileCallback((result: IDriveConfFile) => this.setState({ confFile: result }))
+		GDrive.dataFileCallback((result: IDriveDataFile) => this.setState({ dataFile: result }))
 
 		// Make initial call at startup, if we're logged in, the datafile will be loaded and auth state set, otherwise, wait for user to click "Login"
 		GDrive.doAuthUpdate()
 	}
 
 	/**
-	 * the `app-import` constructor is called every damn time its shown, so we have t save state here
+	 * Retain state between tab changes
+	 */
+	doSaveTabState_Explore = (newState: ITabStateExplore) => {
+		this.setState({ tabStateExplore: newState })
+	}
+
+	/**
+	 * the `app-import` constructor is called every damn time its shown, so we have to save state here
 	 * FUTURE: use hooks instead?
 	 */
 	doSaveImportState = (newState: object) => {
@@ -144,7 +157,16 @@ class App extends React.Component<IAppProps, IAppState> {
 
 	// App Pages
 	Home = () => <TabHome dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} authState={this.state.auth} />
-	View = () => (
+	Explore = () => (
+		<TabExplore
+			confFile={this.state.confFile || null}
+			dataFile={this.state.dataFile || null}
+			isBusyLoad={this.state.isBusyLoad}
+			setTabState={this.doSaveTabState_Explore}
+			tabState={this.state.tabStateExplore}
+		/>
+	)
+	Journal = () => (
 		<TabView dataFile={this.state.dataFile || null} doSaveViewState={this.doSaveViewState} viewState={this.state.childViewState} isBusyLoad={this.state.isBusyLoad} />
 	)
 	Search = () => (
@@ -190,28 +212,35 @@ class App extends React.Component<IAppProps, IAppState> {
 									</NavLink>
 								</li>
 								<li className='nav-item'>
-									<NavLink to='/view' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-										View Journal
+									<NavLink to='/explore' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+										Explore
 									</NavLink>
 								</li>
 								<li className='nav-item'>
-									<NavLink to='/search' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-										Search Journal
+									<NavLink to='/journal' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+										Journal
 									</NavLink>
 								</li>
 								<li className='nav-item'>
 									<NavLink to='/tags' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-										Dream Tags
+										Tags
 									</NavLink>
 								</li>
+								<li className='nav-item'>
+									<NavLink to='/search' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+										Search
+									</NavLink>
+								</li>
+								{/*
 								<li className='nav-item'>
 									<NavLink to='/import' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
 										Import Dreams
 									</NavLink>
 								</li>
+								*/}
 								<li className='nav-item'>
 									<NavLink to='/admin' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-										Data Maint
+										Admin
 									</NavLink>
 								</li>
 							</ul>
@@ -220,10 +249,11 @@ class App extends React.Component<IAppProps, IAppState> {
 				</nav>
 
 				<Route path='/' exact render={this.Home} />
-				<Route path='/view' render={this.View} />
-				<Route path='/search' render={this.Search} />
+				<Route path='/explore' render={this.Explore} />
+				<Route path='/journal' render={this.Journal} />
 				<Route path='/tags' render={this.Tags} />
-				<Route path='/import' render={this.Import} />
+				<Route path='/search' render={this.Search} />
+				{/*<Route path='/import' render={this.Import} />*/}
 				<Route path='/admin' render={this.Admin} />
 			</Router>
 		)

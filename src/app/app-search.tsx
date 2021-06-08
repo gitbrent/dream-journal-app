@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { IDriveFile, IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
+import { IDriveDataFile, IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
 import { Search } from 'react-bootstrap-icons'
 import Alert from 'react-bootstrap/Alert'
 import SearchResults from './components/search-results'
+import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
 
 export interface Props {
-	dataFile: IDriveFile
+	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 	doSaveSearchState: Function
 	searchState: IAppSearchState
@@ -206,78 +207,32 @@ export default function TabSearch(props: Props) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
-		<div>
-			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
-
-			<header className='container my-5'>
-				{showAlert && (
-					<Alert variant='secondary'>
-						<Alert.Heading>Make good use of your Dream Journal</Alert.Heading>
-						<p>Analyze your journal to learn more about yourself, spot common themes/dreamsigns and improve your lucid dreaming ability.</p>
-						<ul>
-							<li>How many lucid dreams have you had?</li>
-							<li>What are your common dream signs?</li>
-							<li>How many times have you dreamed about school?</li>
-						</ul>
-						<p>Let's find out!</p>
-						<hr />
-						<div className='d-flex justify-content-end'>
-							<button className='btn btn-light' onClick={handleHideAlert}>
-								Dismiss
-							</button>
-						</div>
-					</Alert>
-				)}
-				<div className='card my-5'>
-					<div className='card-header bg-primary'>
-						<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
-					</div>
-					<div className='card-body bg-light'>
-						<div className='row align-items-start justify-content-around'>
-							<div className='col-auto text-center d-none d-md-block'>
-								<h1 className='text-primary mb-1 x3'>{totalMonths || '-'}</h1>
-								<label className='text-primary text-uppercase'>Months</label>
-								<div className='badge rounded-pill bg-primary w-100'>{totalYears + ' years'}</div>
-							</div>
-							<div className='col-auto text-center'>
-								<h1 className='text-primary mb-1 x3'>{props.dataFile && props.dataFile.entries ? props.dataFile.entries.length : '-'}</h1>
-								<label className='text-primary text-uppercase'>Days</label>
-								<div className='badge rounded-pill bg-primary w-100'>
-									{totalMonths * 30 > 0 && props.dataFile && props.dataFile.entries
-										? (props.dataFile.entries.length / totalMonths).toFixed(2) + ' / mon'
-										: '-'}
-								</div>
-							</div>
-							<div className='col-auto text-center'>
-								<h1 className='text-info mb-1 x3'>{totalDreams || '-'}</h1>
-								<label className='text-info text-uppercase d-block'>Dreams</label>
-								<div className='badge rounded-pill bg-info w-100'>
-									{totalMonths * 30 > 0 && props.dataFile && props.dataFile.entries
-										? (totalDreams / props.dataFile.entries.length).toFixed(2) + ' / day'
-										: '-'}
-								</div>
-							</div>
-							<div className='w-100 mb-3 d-md-none mb-md-0' />
-							<div className='col-auto text-center' onClick={() => doShowByType(SearchScopes._starred)}>
-								<h1 className='text-warning mb-1 x3'>{totalStarred || '-'}</h1>
-								<label className='text-warning text-uppercase d-block'>Starred</label>
-								<div className='badge rounded-pill bg-warning w-100'>
-									{totalDreams && totalStarred ? ((totalStarred / totalDreams) * 100).toFixed(2) + '%' : '-'}
-								</div>
-							</div>
-							<div className='col-auto text-center' onClick={() => doShowByType(SearchScopes._isLucid)}>
-								<h1 className='text-success mb-1 x3'>{totalLucids || '-'}</h1>
-								<label className='text-success text-uppercase d-block'>Lucids</label>
-								<div className='badge rounded-pill bg-success w-100'>
-									{totalDreams && totalLucids ? ((totalLucids / totalDreams) * 100).toFixed(2) + '%' : '-'}
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+		<div className='container my-auto my-md-5'>
+			<header>
+				<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
+				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			</header>
 
-			<section className='container my-5'>
+			{showAlert && (
+				<Alert variant='secondary'>
+					<Alert.Heading>Make good use of your Dream Journal</Alert.Heading>
+					<p>Analyze your journal to learn more about yourself, spot common themes/dreamsigns and improve your lucid dreaming ability.</p>
+					<ul>
+						<li>How many lucid dreams have you had?</li>
+						<li>What are your common dream signs?</li>
+						<li>How many times have you dreamed about school?</li>
+					</ul>
+					<p>Let's find out!</p>
+					<hr />
+					<div className='d-flex justify-content-end'>
+						<button className='btn btn-light' onClick={handleHideAlert}>
+							Dismiss
+						</button>
+					</div>
+				</Alert>
+			)}
+
+			<section className='my-5'>
 				<div className='card'>
 					<div className='card-header bg-secondary text-white'>
 						<div className='row'>
@@ -345,11 +300,15 @@ export default function TabSearch(props: Props) {
 							</div>
 						</div>
 					</div>
-					<div className='card-body bg-light' data-desc='tag cards'>
-						<div className='card-columns'>
+					<div className='card-body bg-light p-4' data-desc='search cards'>
+						<div
+							className={`row ${
+								searchOptScope === SearchScopes.all || searchOptScope === SearchScopes.notes ? 'row-cols-1 row-cols-md-2' : 'row-cols-2 row-cols-md-4'
+							} g-4 justify-content-between`}>
 							{searchMatches ? (
-								searchMatches.map((match) => (
+								searchMatches.map((match, idx) => (
 									<SearchResults
+										key={`match${idx}`}
 										setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
 										setShowModal={(show: boolean) => setShowModal(show)}
 										searchMatch={match}

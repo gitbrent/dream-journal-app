@@ -87,8 +87,8 @@ export default function DreamTagCard(props: Props) {
 			)}
 		</div>
 	) : (
-		<div className='col text-nowrap bg-info text-white'>
-			<div className='row g-0'>
+		<div className='col text-nowrap text-white user-select-none'>
+			<div className='row g-0 bg-info'>
 				<div className='col px-3 py-2 cursor-link' title='click to view dreams' onClick={() => setShowDreams(!showDreams)}>
 					{props.tagGrp.dreamSign}
 				</div>

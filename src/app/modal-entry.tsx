@@ -80,7 +80,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 	function doSaveDataFile() {
 		setIsBusySave(true)
 
-		GDrive.doSaveFile()
+		GDrive.doSaveDataFile()
 			.then(() => {
 				setShowModal(false)
 				setIsBusySave(false)

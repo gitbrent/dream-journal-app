@@ -28,7 +28,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { IJournalEntry, IDriveFile } from './app.types'
+import { IJournalEntry, IDriveDataFile } from './app.types'
 import { CheckCircleFill, Diagram3Fill, Search, StarFill, SortDownAlt } from 'react-bootstrap-icons'
 import ReactPaginate from 'react-paginate'
 import AlertGdriveStatus from './components/alert-gstat'
@@ -37,7 +37,7 @@ import HeaderMetrics from './components/header-metrics'
 // FUTURE: https://github.com/hypeserver/react-date-range
 
 export interface Props {
-	dataFile: IDriveFile
+	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 	doSaveViewState: Function
 	viewState: IAppViewState
