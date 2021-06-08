@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { IDriveDataFile, IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
 import { Search } from 'react-bootstrap-icons'
-import Alert from 'react-bootstrap/Alert'
 import SearchResults from './components/search-results'
 import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
@@ -214,8 +213,8 @@ export default function TabSearch(props: Props) {
 			</header>
 
 			{showAlert && (
-				<Alert variant='secondary'>
-					<Alert.Heading>Make good use of your Dream Journal</Alert.Heading>
+				<div className='alert alert-secondary'>
+					<h5>Make good use of your Dream Journal</h5>
 					<p>Analyze your journal to learn more about yourself, spot common themes/dreamsigns and improve your lucid dreaming ability.</p>
 					<ul>
 						<li>How many lucid dreams have you had?</li>
@@ -229,7 +228,7 @@ export default function TabSearch(props: Props) {
 							Dismiss
 						</button>
 					</div>
-				</Alert>
+				</div>
 			)}
 
 			<section className='my-5'>

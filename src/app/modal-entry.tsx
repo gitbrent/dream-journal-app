@@ -1,12 +1,7 @@
-/**
- * 2.0 form
- */
 import React, { useState, useEffect } from 'react'
 import * as GDrive from './google-oauth'
 import { IDreamSignTag, IJournalDream, IJournalEntry, InductionTypes } from './app.types'
 import ReactTags from 'react-tag-autocomplete'
-import Button from 'react-bootstrap/Button'
-//import Modal from 'react-bootstrap/Modal'
 import { Calendar3, Clock, PlusCircle, Save, Star, StarFill, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
 
 //import { Modal } from 'bootstrap';
@@ -19,7 +14,7 @@ export interface IModalEntryProps {
 	setShowModal: Function
 }
 
-export default function TabAdmin(props: IModalEntryProps) {
+export default function ModalEntry(props: IModalEntryProps) {
 	const NEW_DREAM = {
 		title: '',
 		notes: '',
@@ -371,6 +366,8 @@ export default function TabAdmin(props: IModalEntryProps) {
 		)
 	}
 
+	return (<div>TODO:</div>)
+	/*
 	return (
 		<section>
 			<Modal
@@ -427,5 +424,5 @@ export default function TabAdmin(props: IModalEntryProps) {
 				</Modal.Footer>
 			</Modal>
 		</section>
-	)
+	)*/
 }
