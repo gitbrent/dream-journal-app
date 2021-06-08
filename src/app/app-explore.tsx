@@ -29,7 +29,7 @@
 
 import React, { useState, useEffect } from 'react'
 import moment from 'moment'
-import { IDriveConfFile, IDriveDataFile, IJournalDream, IJournalEntry, ISearchMatch, MONTHS, SearchMatchTypes, SearchScopes } from './app.types'
+import { ConfMetaCats, IDriveConfFile, IDriveDataFile, IJournalDream, IJournalEntry, ISearchMatch, MONTHS, SearchMatchTypes, SearchScopes } from './app.types'
 import {
 	ArrowDown,
 	ArrowUp,
@@ -51,11 +51,13 @@ import {
 	Smartwatch,
 	StarFill,
 	Trash,
+	LightningFill,
 } from 'react-bootstrap-icons'
 import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
 import * as GDrive from './google-oauth'
+//import LocalAdminBrent from './z.admin.local'
 
 /**
  * TODO:
@@ -96,24 +98,6 @@ export default function TabExplore(props: Props) {
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
 	const [allLucids, setAllLucids] = useState<LucidDream[]>([])
 	const [randLucids, setRandLucids] = useState<LucidDream[]>([])
-	const [myGoals, setMyGoals] = useState<string[]>([])
-
-	useEffect(() => {
-		if (props.confFile) {
-			setMyGoals(props.confFile.goals)
-			/*
-				setMyGoals([
-					'I will continue to practice and refine my ADA (All Day Awareness) technique',
-					'Return to my training construct (giant parking lot and UNIT HQ bldg) for more skill training!!!',
-					'Have more LDs',
-					'Find my dream guide: Stabilize an LD, then ask, "Can I See My Dream Guide?"',
-					'Try to connect with others',
-					'Nail Sasha Grey',
-					'Have an LD for more than 5 minutes',
-				])
-			*/
-		}
-	}, [props.confFile])
 
 	useEffect(() => {
 		let allLucids: LucidDream[] = []
@@ -143,22 +127,16 @@ export default function TabExplore(props: Props) {
 	// -----------------------------------------------------------------------
 
 	function renderTabPrep(): JSX.Element {
+		let arrIcons: JSX.Element[] = [
+			<LightningFill size={20} className='me-2' />,
+			<ShieldFillCheck size={20} className='me-2' />,
+			<StarFill size={20} className='me-2' />,
+			<BrightnessHighFill size={20} className='me-2' />,
+			<HeartFill size={20} className='me-2' />,
+			<Translate size={20} className='me-2' />,
+		]
 		return (
 			<section>
-				{/*
-					<div className='alert alert-secondary mb-4' role='alert'>
-						<div className='row align-items-center'>
-							<div className='col-auto'>
-								<h4 className='mb-0' >
-									<CheckCircle size={32} />
-								</h4>
-							</div>
-							<div className='col'>
-								<h5 className='mb-0'>GO BRENT! We can do this!</h5>
-							</div>
-						</div>
-					</div>
-				*/}
 				<div className='row row-cols-1 g-4 mb-4'>
 					<div className='col'>
 						<div className='card h-100'>
@@ -167,72 +145,19 @@ export default function TabExplore(props: Props) {
 							</div>
 							<div className='card-body bg-black'>
 								<div className='row row-cols-1 row-cols-md-3 g-4'>
-									<section className='col'>
-										<h6 className='card-subtitle mb-2 text-success'>
-											<Lightning size={20} className='me-2' />
-											Be Extraordinary
-										</h6>
-										<ul>
-											<li>Imagine flying through the sky</li>
-											<li>Imagine jumping off a building</li>
-											<li>Fight an Agent in The Matrix</li>
-										</ul>
-									</section>
-									<section className='col'>
-										<h6 className='card-subtitle mb-2 text-success'>
-											<ShieldFillCheck size={20} className='me-2' />
-											Be Tough
-										</h6>
-										<ul>
-											<li>I am the captain of a naval war ship</li>
-											<li>Go an away mission with Star Trek</li>
-											<li>I am Doctor Who fighting enemies</li>
-										</ul>
-									</section>
-									<section className='col'>
-										<h6 className='card-subtitle mb-2 text-primary'>
-											<StarFill size={20} className='me-2' />
-											Be Confident
-										</h6>
-										<ul>
-											<li>Be Steve Jobs' assistant at Apple</li>
-											<li>Be on stage as the leading expert</li>
-											<li>Imagine talking to George Carlin</li>
-										</ul>
-									</section>
-									<section className='col'>
-										<h6 className='card-subtitle mb-2 text-warning'>
-											<BrightnessHighFill size={20} className='me-2' />
-											Be Famous
-										</h6>
-										<ul>
-											<li>Perform a concert for screaming fans</li>
-											<li>Be a contestent on a game show</li>
-											<li>Be in an MTV music video</li>
-										</ul>
-									</section>
-									<section className='col'>
-										<h6 className='card-subtitle mb-2 text-danger'>
-											<HeartFill size={20} className='me-2' />
-											Be Emotional
-										</h6>
-										<ul>
-											<li>Beat the crap out of fascists</li>
-											<li>Sit and talk to my dearest Ev</li>
-											<li>Find Joanna and talk to her</li>
-										</ul>
-									</section>
-									<section className='col'>
-										<h6 className='card-subtitle mb-2 text-info'>
-											<Translate size={20} className='me-2' />
-											Be Different
-										</h6>
-										<ul>
-											<li>Become a Transformer</li>
-											<li>Become a cartoon</li>
-											<li>Change into a woman</li>
-										</ul>
-									</section>
+									{props.confFile.dreamIdeas.map((item, idx) => (
+										<section key={`ideaTitle${idx}`} className='col'>
+											<h6 className={`card-subtitle mb-2 ${item.headClass}`}>
+												{arrIcons[idx]}
+												{item.title}
+											</h6>
+											<ul>
+												{item.bullets.map((bull, idy) => (
+													<li key={`ideaBullet${idx}${idy}`}>{bull}</li>
+												))}
+											</ul>
+										</section>
+									))}
 								</div>
 							</div>
 						</div>
@@ -245,23 +170,18 @@ export default function TabExplore(props: Props) {
 								<h5 className='card-title mb-0'>MILD Affirmations</h5>
 							</div>
 							<div className='card-body bg-black'>
-								<h6 className='card-subtitle text-primary text-uppercase mb-3'>Expect To Succeed</h6>
-								<ul>
-									<li>GO BRENT!!! WE CAN DO THIS!!!</li>
-									<li>I WILL LUCID DREAM TONIGHT!!!</li>
-								</ul>
-								<h6 className='card-subtitle text-primary text-uppercase my-3'>We Have The Skills</h6>
-								<ul>
-									<li>Tonight I will recognize that I am dreaming.</li>
-									<li>I have had hundreds of lucid dreams.</li>
-									<li>I want to Lucid Dream. I will find what works for me.</li>
-								</ul>
-								<h6 className='card-subtitle text-primary text-uppercase my-3'>It Will Happen</h6>
-								<ul>
-									<li>I will get better at recognizing clues and dreamsigns.</li>
-									<li>I am ready, willing and able to have an LD tonight.</li>
-									<li>My only impediment to success is my brain and my attitude.</li>
-								</ul>
+								{props.confFile.mildAffirs.map((item, idx) => (
+									<section>
+										<h6 key={`goalTitle${idx}`} className='card-subtitle text-primary text-uppercase mb-3'>
+											{item.title}
+										</h6>
+										<ul>
+											{item.bullets.map((item, idy) => (
+												<li key={`goalBullet${idx}${idy}`}>{item}</li>
+											))}
+										</ul>
+									</section>
+								))}
 							</div>
 						</div>
 					</div>
@@ -310,40 +230,43 @@ export default function TabExplore(props: Props) {
 	function renderTabGoals(): JSX.Element {
 		return (
 			<section>
-				{myGoals.map((goal, idx) => (
-					<div key={`goal${idx}`} className='row align-items-center mb-3'>
-						<div className='col-auto'>
-							<div className='btn-group border' role='group'>
-								<button type='button' className='btn btn-light py-1' disabled={isBusySave} title='move up' aria-label='move up'>
-									<ArrowUp />
-								</button>
-								<button type='button' className='btn btn-light py-1' disabled={isBusySave} title='move down' aria-label='move down'>
-									<ArrowDown />
-								</button>
+				{props.confFile &&
+					props.confFile.lucidGoals &&
+					props.confFile.lucidGoals.bullets &&
+					props.confFile.lucidGoals.bullets.map((item, idx) => (
+						<div key={`goal${idx}`} className='row align-items-center mb-3'>
+							<div className='col-auto'>
+								<div className='btn-group border' role='group'>
+									<button type='button' className='btn btn-light py-1' disabled={isBusySave} title='move up' aria-label='move up'>
+										<ArrowUp />
+									</button>
+									<button type='button' className='btn btn-light py-1' disabled={isBusySave} title='move down' aria-label='move down'>
+										<ArrowDown />
+									</button>
+								</div>
+							</div>
+							<div className='col'>
+								<input
+									type='text'
+									disabled={isBusySave}
+									value={item}
+									onChange={(ev) => {
+										let chgItem = { ...props.confFile.lucidGoals }
+										chgItem.bullets[idx] = ev.currentTarget.value
+										GDrive.doEditConf_LucidGoals(chgItem)
+									}}
+									className='form-control'
+								/>
+							</div>
+							<div className='col-auto'>
+								<div className='btn-group border' role='group'>
+									<button type='button' className='btn btn-light py-1' disabled={isBusySave} title='delete goal' aria-label='delete goal'>
+										<Trash />
+									</button>
+								</div>
 							</div>
 						</div>
-						<div className='col'>
-							<input
-								type='text'
-								disabled={isBusySave}
-								value={goal}
-								onChange={(ev) => {
-									let chgItems = [...myGoals]
-									chgItems[idx] = ev.currentTarget.value
-									setMyGoals(chgItems)
-								}}
-								className='form-control'
-							/>
-						</div>
-						<div className='col-auto'>
-							<div className='btn-group border' role='group'>
-								<button type='button' className='btn btn-light py-1' disabled={isBusySave} title='delete goal' aria-label='delete goal'>
-									<Trash />
-								</button>
-							</div>
-						</div>
-					</div>
-				))}
+					))}
 				<div className='row justify-content-center mb-0'>
 					<div className='col-auto text-center'>
 						<button className='btn btn-primary' title='Save Updates' onClick={() => GDrive.doSaveConfFile()}>
@@ -357,7 +280,6 @@ export default function TabExplore(props: Props) {
 							title='Save Updates'
 							onClick={async () => {
 								setIsBusySave(true)
-								GDrive.doEditConfGoals(myGoals)
 								await GDrive.doSaveConfFile()
 								setIsBusySave(false)
 							}}>
@@ -680,7 +602,7 @@ export default function TabExplore(props: Props) {
 				<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
 				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			</header>
-
+			{/*<LocalAdminBrent confFile={props.confFile} />*/}
 			<ul className='nav nav-tabs nav-fill' id='exploreTab' role='tablist'>
 				<li className='nav-item' role='presentation'>
 					<a className='nav-link active' id='1-tab' data-toggle='tab' href='#tab1' role='tab' aria-controls='tab1' aria-selected='true'>
