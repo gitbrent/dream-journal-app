@@ -1,13 +1,9 @@
-/**
- * 2.0 form
- */
 import React, { useState, useEffect } from 'react'
-import * as GDrive from './google-oauth'
 import { IDreamSignTag, IJournalDream, IJournalEntry, InductionTypes } from './app.types'
-import ReactTags from 'react-tag-autocomplete'
-import Button from 'react-bootstrap/Button'
-import Modal from 'react-bootstrap/Modal'
 import { Calendar3, Clock, PlusCircle, Save, Star, StarFill, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
+import ReactTags from 'react-tag-autocomplete'
+import Modal from 'bootstrap/js/dist/modal'
+import * as GDrive from './google-oauth'
 
 export interface IModalEntryProps {
 	currEntry: IJournalEntry
@@ -15,7 +11,7 @@ export interface IModalEntryProps {
 	setShowModal: Function
 }
 
-export default function TabAdmin(props: IModalEntryProps) {
+export default function ModalEntry(props: IModalEntryProps) {
 	const NEW_DREAM = {
 		title: '',
 		notes: '',
@@ -32,20 +28,29 @@ export default function TabAdmin(props: IModalEntryProps) {
 		starred: false,
 		dreams: [{ ...NEW_DREAM }],
 	}
-	const [showModal, setShowModal] = useState(false)
 	const [isBusySave, setIsBusySave] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>({ ...NEW_ENTRY })
 	const [uniqueTags, setUniqueTags] = useState([])
 	const [isDateDupe, setIsDateDupe] = useState(false)
 	const [selectedTab, setSelectedTab] = useState(-1)
+	const [modal, setModal] = useState<Modal>(null)
+
+	useEffect(() => {
+		if (!modal) setModal(new Modal(document.getElementById('myModal')))
+	}, [])
 
 	/** Set/Clear Entry */
 	useEffect(() => {
 		setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry]
 
-		setShowModal(props.showModal)
 		setUniqueTags(GDrive.getUniqueDreamTags)
-		if (props.showModal) setSelectedTab(-1)
+
+		if (props.showModal) {
+			setSelectedTab(-1)
+			if (modal) modal.show()
+		} else {
+			if (modal) modal.hide()
+		}
 	}, [props.showModal])
 
 	useEffect(() => setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry])
@@ -78,7 +83,6 @@ export default function TabAdmin(props: IModalEntryProps) {
 
 		GDrive.doSaveDataFile()
 			.then(() => {
-				setShowModal(false)
 				setIsBusySave(false)
 				props.setShowModal(false)
 			})
@@ -95,7 +99,7 @@ export default function TabAdmin(props: IModalEntryProps) {
 	function renderTopToolbar(): JSX.Element {
 		return (
 			<nav>
-				<div className='row align-items-center pt-4'>
+				<div className='row align-items-center'>
 					<div className='col-6 col-lg-3 mb-4'>
 						<div className='input-group match-btn-group-sm'>
 							<div className='input-group-prepend' title='Entry Date'>
@@ -368,60 +372,46 @@ export default function TabAdmin(props: IModalEntryProps) {
 	}
 
 	return (
-		<section>
-			<Modal
-				size='lg'
-				show={showModal}
-				onHide={() => {
-					setShowModal(false)
-					props.setShowModal(false)
-				}}
-				backdrop='static'>
-				<Modal.Header className='bg-primary' closeButton>
-					<Modal.Title className='text-white h6'>Journal Entry</Modal.Title>
-				</Modal.Header>
-
-				<Modal.Body className='container bg-light py-0 px-4'>
-					{renderTopToolbar()}
-
-					<ul className='nav nav-tabs' role='tablist'>
-						<li className='nav-item' key='tabDream00'>
-							<a href='#' onClick={() => setSelectedTab(-1)} className={'nav-link' + (selectedTab === -1 ? ' active' : '')} data-toggle='tab' role='tab'>
-								Notes
-							</a>
-						</li>
-						{currEntry.dreams.map((_dream, idx) => (
-							<li className='nav-item' key={`tabDream${idx}`}>
-								<a href='#' onClick={() => setSelectedTab(idx)} className={`nav-link ${idx === selectedTab ? 'active' : ''}`} data-toggle='tab' role='tab'>
-									{`Dream ${idx + 1}`}
+		<div id='myModal' className='modal' data-bs-backdrop='static' tabIndex={-1}>
+			<div className='modal-dialog modal-lg'>
+				<div className='modal-content'>
+					<div className='modal-header bg-primary'>
+						<h5 className='modal-title'>Journal Entry</h5>
+						<button type='button' className='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+					</div>
+					<div className='modal-body p-4'>
+						{renderTopToolbar()}
+						<ul className='nav nav-tabs mb-3' role='tablist'>
+							<li className='nav-item' key='tabDream00'>
+								<a href='#' onClick={() => setSelectedTab(-1)} className={'nav-link' + (selectedTab === -1 ? ' active' : '')} data-toggle='tab' role='tab'>
+									Notes
 								</a>
 							</li>
-						))}
-					</ul>
-					<div className='tab-content py-3'>{selectedTab === -1 ? renderTabNotes() : <div className='tab-content'>{renderTabDream(selectedTab)}</div>}</div>
-				</Modal.Body>
-
-				<Modal.Footer className='px-4'>
-					<Button
-						type='button'
-						variant='outline-secondary'
-						className='me-2'
-						onClick={() => {
-							setShowModal(false)
-							props.setShowModal(false)
-						}}>
-						Cancel
-					</Button>
-					<button type='submit' onClick={() => handleSave()} className='btn btn-primary px-5' disabled={isDateDupe}>
-						{isBusySave ? (
-							<span className='spinner-border spinner-border-sm me-2' role='status' aria-hidden='true'></span>
-						) : (
-							<Save size='16' className='mt-n1 me-2' />
-						)}
-						Save
-					</button>
-				</Modal.Footer>
-			</Modal>
-		</section>
+							{currEntry.dreams.map((_dream, idx) => (
+								<li className='nav-item' key={`tabDream${idx}`}>
+									<a href='#' onClick={() => setSelectedTab(idx)} className={`nav-link ${idx === selectedTab ? 'active' : ''}`} data-toggle='tab' role='tab'>
+										{`Dream ${idx + 1}`}
+									</a>
+								</li>
+							))}
+						</ul>
+						<div className='tab-content'>{selectedTab === -1 ? renderTabNotes() : <div className='tab-content'>{renderTabDream(selectedTab)}</div>}</div>
+					</div>
+					<div className='modal-footer'>
+						<button type='button' className='btn btn-secondary' onClick={() => props.setShowModal(false)}>
+							Close
+						</button>
+						<button type='submit' onClick={() => handleSave()} className='btn btn-primary px-5' disabled={isDateDupe}>
+							{isBusySave ? (
+								<span className='spinner-border spinner-border-sm me-2' role='status' aria-hidden='true'></span>
+							) : (
+								<Save size='16' className='mt-n1 me-2' />
+							)}
+							Save
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	)
 }
