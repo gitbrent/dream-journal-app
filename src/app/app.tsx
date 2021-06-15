@@ -40,10 +40,9 @@ import TabSearch, { IAppSearchState } from '../app/app-search'
 import TabAdmin, { IAppAdminState } from '../app/app-admin'
 import TabImport from '../app/app-import'
 import LogoBase64 from '../img/logo_base64'
-import '../css/bootstrap.cyborg.v501.css'
-//import '../css/purged.css' // missing react-bootstrap (maybe others)
+//import '../css/purged.css' // FIXME: how do we purge scss??
 import '../css/react-tags.css'
-import '../css/style.css'
+import '../css/style.scss'
 
 // App Logic
 interface IAppProps {}
