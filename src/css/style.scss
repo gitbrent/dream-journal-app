@@ -9,15 +9,46 @@
 @import "~bootstrap/scss/bootstrap";
 @import "~bootswatch/dist/cyborg/bootswatch";
 
-//@import "../node_modules/bootstrap/scss/bootstrap";
-
 :root {
+	--bgBlack90: #131313;
+	--bgBlack80: #282828;
+	--bgBlack70: #3c3c3c;
 	--bgBlack50: #5c5c5c;
-	--bs-font-sans-serif: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: system-ui, -apple-system, Roboto, "Segoe UI", "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+		"Segoe UI Symbol", "Noto Color Emoji";
+	font-weight: 300;
+}
+
+thead,
+tbody,
+tfoot,
+tr,
+td,
+th {
+	border-bottom-color: var(--bs-gray-dark);
+}
+th {
+	color: rgba(255, 255, 255, 0.5);
+	font-size: 0.8rem;
+	font-weight: 300;
+	text-transform: uppercase;
+}
+.table > :not(:last-child) > :last-child > * {
+	border-bottom-color: var(--bs-gray-dark);
 }
 
 .form-control {
 	color: #f1f1f1;
+	background-color: #000;
 	border: 0 solid var(--bgBlack50);
 }
 
@@ -26,21 +57,111 @@
 	background-color: #000;
 }
 
-h1,
-.h1,
-h2,
-.h2,
-h3,
-.h3,
-h4,
-.h4,
-h5,
-.h5,
-h6,
-.h6 {
-	font-weight: 300;
+.form-output {
+	min-height: calc(1.5em + 0.75rem + 2px);
+	border-left: 1px solid var(--primary);
+	background-color: var(--bgBlack70);
+	color: var(--bs-white);
 }
 
-.table > :not(:last-child) > :last-child > * {
-	border-bottom-color: --bs-gray;
+.card label,
+.row label {
+	display: block;
+	color: var(--bgBlack50);
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	margin-bottom: 0.5rem; /* cyborg-bs5-default = 0 */
+}
+.form-floating label {
+	color: inherit;
+	font-size: inherit; /* override above */
+	text-transform: uppercase;
+	margin-bottom: inherit;
+}
+
+/* Brent BS upgrades */
+/* Set `.form-control-sm` elements and their input-group to 31px high instead of 29 to match `btn-group-sm` */
+.input-group.match-btn-group-sm .input-group-text {
+	padding: 8px 6px 7px 6px;
+}
+
+.form-check {
+	min-height: 2.25rem; /* 32px - matches button height (24+6+6) in BS5 */
+}
+.form-switch .form-check-input {
+	width: 4.5rem;
+	height: 2.25rem;
+}
+
+/* Brent BS addons */
+
+.x3 {
+	font-size: 3rem;
+}
+.x4 {
+	font-size: 4rem;
+}
+
+.text-sm {
+	font-size: 0.75rem;
+}
+
+.bg-black {
+	background-color: #000;
+}
+.bg-black-90 {
+	background-color: var(--bgBlack90);
+}
+.bg-black-80 {
+	background-color: var(--bgBlack80);
+}
+.bg-black-70 {
+	background-color: var(--bgBlack70);
+}
+
+.bg-indigo {
+	background-color: var(--indigo) !important;
+}
+.bg-info-800 {
+	background-color: #6a1b9a !important;
+}
+
+.cursor-help {
+	cursor: help;
+}
+.cursor-link {
+	cursor: pointer;
+}
+
+.bg-trans-25 {
+	background-color: rgba(0, 0, 0, 0.25);
+}
+.text-breakword {
+	word-break: break-word;
+}
+
+/* yetiborg adjustments */
+.nav-tabs {
+	border-bottom: 1px solid var(--bgBlack70);
+}
+.modal-footer {
+	border-top: 1px solid var(--bgBlack70);
+}
+
+/*
+.modal-dialog .nav-tabs .nav-link,
+.modal-dialog .nav-pills .nav-link {
+	background-color: #555;
+}
+.modal-dialog .nav-tabs .nav-link.active,
+.modal-dialog .nav-pills .nav-link.active {
+	background-color: #2a9fd6;
+	border-bottom-color: #2a9fd6;
+}
+*/
+
+/* Need for Bootstrap 5 */
+.jumbotron {
+	background-color: var(--bgBlack80);
+	border-radius: 0.3rem;
 }
