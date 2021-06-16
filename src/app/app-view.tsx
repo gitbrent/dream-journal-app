@@ -97,10 +97,9 @@ export default function TabView(props: Props) {
 					<div className='form-floating'>
 						<select
 							id='floatingFilterEntry'
-							placeholder='entry type'
 							defaultValue={filterEntry}
 							onChange={(ev) => setFilterEntry(ev.currentTarget.value as FilterEntry)}
-							className='form-control'>
+							className='form-select'>
 							{Object.keys(FilterEntry).map((val) => (
 								<option value={FilterEntry[val]} key={'entryType' + val}>
 									{FilterEntry[val]}
