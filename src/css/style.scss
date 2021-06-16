@@ -1,14 +1,34 @@
-/*
- * dream-journal-app custom CSS
- */
+// ----------------------------------------------------------------------------
+// custom color scheme
+// ----------------------------------------------------------------------------
 
-// Your variable overrides go here, e.g.:
-// $h1-font-size: 3rem;
+$bg-black-50: #5c5c5c;
+
+$font-family-sans-serif: system-ui, -apple-system, Roboto, "Segoe UI", "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+	"Segoe UI Symbol", "Noto Color Emoji";
+$headings-font-weight: 300;
+
+$input-color: #f1f1f1;
+$input-bg: #010101;
+$input-border-color: $bg-black-50;
+
+$border-color: var(--bs-gray-dark);
+
+$table-group-separator-color: var(--bs-gray-dark);
+
+// ----------------------------------------------------------------------------
+// import after any vars are set
+// ----------------------------------------------------------------------------
 
 @import "~bootswatch/dist/cyborg/variables";
 @import "~bootstrap/scss/bootstrap";
 @import "~bootswatch/dist/cyborg/bootswatch";
 
+// ----------------------------------------------------------------------------
+// override/add new classes
+// ----------------------------------------------------------------------------
+
+// TODO: these dont need to be ":root" if they're only used here and not in .tsx code (conv to vars)
 :root {
 	--bgBlack90: #131313;
 	--bgBlack80: #282828;
@@ -16,47 +36,15 @@
 	--bgBlack50: #5c5c5c;
 }
 
-body,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-	font-family: system-ui, -apple-system, Roboto, "Segoe UI", "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-		"Segoe UI Symbol", "Noto Color Emoji";
-	font-weight: 300;
-}
-
-thead,
-tbody,
-tfoot,
-tr,
-td,
-th {
-	border-bottom-color: var(--bs-gray-dark);
-}
+// custom th style (no bs-variables exist for th elements other than fw)
 th {
 	color: rgba(255, 255, 255, 0.5);
 	font-size: 0.8rem;
 	font-weight: 300;
 	text-transform: uppercase;
 }
-.table > :not(:last-child) > :last-child > * {
-	border-bottom-color: var(--bs-gray-dark);
-}
 
-.form-control {
-	color: #f1f1f1;
-	background-color: #000;
-	border: 0 solid var(--bgBlack50);
-}
-
-.form-control:focus {
-	color: #f1f1f1;
-	background-color: #000;
-}
-
+// Custom class used on import.tab
 .form-output {
 	min-height: calc(1.5em + 0.75rem + 2px);
 	border-left: 1px solid var(--primary);
@@ -146,6 +134,7 @@ th {
 /* yetiborg adjustments */
 .nav-tabs {
 	border-bottom: 1px solid var(--bgBlack70);
+	// TODO: $nav-tabs-border-color:             $gray-300;
 }
 .modal-footer {
 	border-top: 1px solid var(--bgBlack70);
