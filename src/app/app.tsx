@@ -34,7 +34,7 @@ import { IAuthState, IDriveDataFile, IJournalEntry, AuthState, APP_VER, IDriveCo
 import * as GDrive from './google-oauth'
 import TabHome from '../app/app-home'
 import TabExplore, { ITabStateExplore } from '../app/app-explore'
-import TabView, { IAppViewState } from '../app/app-view'
+import TabJournal, { IAppViewState } from './app-journal'
 import TabTags, { IAppTagsState } from '../app/app-tags'
 import TabSearch, { IAppSearchState } from '../app/app-search'
 import TabAdmin, { IAppAdminState } from '../app/app-admin'
@@ -166,7 +166,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		/>
 	)
 	Journal = () => (
-		<TabView dataFile={this.state.dataFile || null} doSaveViewState={this.doSaveViewState} viewState={this.state.childViewState} isBusyLoad={this.state.isBusyLoad} />
+		<TabJournal dataFile={this.state.dataFile || null} doSaveViewState={this.doSaveViewState} viewState={this.state.childViewState} isBusyLoad={this.state.isBusyLoad} />
 	)
 	Search = () => (
 		<TabSearch

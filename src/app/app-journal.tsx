@@ -55,7 +55,7 @@ enum FilterEntry {
 	star = 'Starred',
 }
 
-export default function TabView(props: Props) {
+export default function TabJournal(props: Props) {
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
 	//
