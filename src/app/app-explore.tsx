@@ -140,10 +140,8 @@ export default function TabExplore(props: Props) {
 				<div className='row row-cols-1 g-4 mb-4'>
 					<div className='col'>
 						<div className='card h-100'>
-							<div className='card-header bg-success text-white'>
-								<h5 className='card-title mb-0'>Visualize Success</h5>
-							</div>
-							<div className='card-body bg-black'>
+							<div className='card-header bg-success h5 text-white'>Visualize Success</div>
+							<div className='card-body bg-black p-4'>
 								<div className='row row-cols-1 row-cols-md-3 g-4'>
 									{props.confFile.dreamIdeas.map((item, idx) => (
 										<section key={`ideaTitle${idx}`} className='col'>
@@ -166,10 +164,8 @@ export default function TabExplore(props: Props) {
 				<div className='row row-cols-1 row-cols-md-2 g-4'>
 					<div className='col'>
 						<div className='card h-100'>
-							<div className='card-header bg-primary text-white'>
-								<h5 className='card-title mb-0'>MILD Affirmations</h5>
-							</div>
-							<div className='card-body bg-black'>
+							<div className='card-header bg-primary h5 text-white'>MILD Affirmations</div>
+							<div className='card-body bg-black p-4'>
 								{props.confFile.mildAffirs.map((item, idx) => (
 									<section>
 										<h6 key={`goalTitle${idx}`} className='card-subtitle text-primary text-uppercase mb-3'>
@@ -187,9 +183,7 @@ export default function TabExplore(props: Props) {
 					</div>
 					<div className='col'>
 						<div className='card h-100'>
-							<div className='card-header bg-info text-white'>
-								<h5 className='card-title mb-0'>Random Lucid Dreams</h5>
-							</div>
+							<div className='card-header bg-info h5 text-white'>Random Lucid Dreams</div>
 							<div className='card-body bg-black p-4'>
 								{randLucids.map((rand, idx) => (
 									<div
