@@ -228,7 +228,7 @@ export default function TabExplore(props: Props) {
 					props.confFile.lucidGoals &&
 					props.confFile.lucidGoals.bullets &&
 					props.confFile.lucidGoals.bullets.map((item, idx) => (
-						<div key={`goal${idx}`} className='row align-items-center mb-3'>
+						<div key={`goal${idx}`} className='row g-2 align-items-center mb-3'>
 							<div className='col-auto'>
 								<div className='btn-group border' role='group'>
 									<button type='button' className='btn btn-light py-1' disabled={isBusySave} title='move up' aria-label='move up'>
@@ -261,6 +261,7 @@ export default function TabExplore(props: Props) {
 							</div>
 						</div>
 					))}
+
 				<div className='row justify-content-center mb-0'>
 					<div className='col-auto text-center'>
 						<button className='btn btn-primary' title='Save Updates' onClick={() => GDrive.doSaveConfFile()}>
