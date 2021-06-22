@@ -57,7 +57,6 @@ import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
 import * as GDrive from './google-oauth'
-//import LocalAdminBrent from './z.admin.local'
 
 /**
  * TODO:
@@ -71,14 +70,7 @@ import * as GDrive from './google-oauth'
  * | Drm1 |      |      |
  */
 
-export interface ITabStateExplore {
-	searchMatches: ISearchMatch[]
-	searchOptMatchType: SearchMatchTypes
-	searchOptScope: SearchScopes
-	searchTerm: string
-	searchTermInvalidMsg: string
-	showAlert: boolean
-}
+export interface ITabStateExplore {}
 export interface Props {
 	confFile: IDriveConfFile
 	dataFile: IDriveDataFile
@@ -597,7 +589,9 @@ export default function TabExplore(props: Props) {
 				<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
 				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			</header>
-			{/*<LocalAdminBrent confFile={props.confFile} />*/}
+
+			<div className='alert alert-warning'>NEW TAB</div>
+
 			<ul className='nav nav-tabs nav-fill' id='exploreTab' role='tablist'>
 				<li className='nav-item' role='presentation'>
 					<a className='nav-link active' id='1-tab' data-toggle='tab' href='#tab1' role='tab' aria-controls='tab1' aria-selected='true'>
