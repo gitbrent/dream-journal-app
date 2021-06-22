@@ -28,13 +28,11 @@
  */
 
 import React, { useState, useEffect } from 'react'
-//import moment from 'moment'
 import { IDriveConfFile, IDriveDataFile, IJournalDream, IJournalEntry } from './app.types'
 import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
-//import * as GDrive from './google-oauth'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PolarGrid } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 /**
  * TODO:
@@ -123,9 +121,9 @@ export default function TabExplore(props: Props) {
 				<ResponsiveContainer width='100%' height='96%'>
 					<BarChart data={data}>
 						<XAxis dataKey='name' />
-						<YAxis />
-						{/*<CartesianGrid stroke='#eee' strokeDasharray='5 5' />*/}
-						<Tooltip cursor={{ fill: 'var(--bs-gray)' }} />
+						<YAxis type='number' domain={[0, (dataMax: number) => Math.round(dataMax * 1.1)]} />
+						<CartesianGrid stroke='#555555' strokeDasharray='6 2' vertical={false} />
+						<Tooltip cursor={false} />
 						<Legend layout='horizontal' verticalAlign='bottom' align='center' wrapperStyle={{ position: 'relative' }} />
 						<Bar dataKey='nonLd' stackId='a' fill='var(--bs-primary)' />
 						<Bar dataKey='yesLd' stackId='a' fill='var(--bs-success)' />
