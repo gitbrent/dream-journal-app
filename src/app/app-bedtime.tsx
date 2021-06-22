@@ -59,8 +59,7 @@ import ModalEntry from './modal-entry'
 import * as GDrive from './google-oauth'
 //import LocalAdminBrent from './z.admin.local'
 
-export interface ITabStateBedtime {
-}
+export interface ITabStateBedtime {}
 export interface Props {
 	confFile: IDriveConfFile
 	dataFile: IDriveDataFile
@@ -149,10 +148,8 @@ export default function TabBedtime(props: Props) {
 							<div className='card-header bg-primary h5 text-white'>MILD Affirmations</div>
 							<div className='card-body bg-black p-4'>
 								{props.confFile.mildAffirs.map((item, idx) => (
-									<section>
-										<h6 key={`goalTitle${idx}`} className='card-subtitle text-primary text-uppercase mb-3'>
-											{item.title}
-										</h6>
+									<section key={`goalTitle${idx}`}>
+										<h6 className='card-subtitle text-primary text-uppercase mb-3'>{item.title}</h6>
 										<ul>
 											{item.bullets.map((item, idy) => (
 												<li key={`goalBullet${idx}${idy}`}>{item}</li>
