@@ -1,5 +1,5 @@
 // APP
-export const APP_BLD = '20210621-2104'
+export const APP_BLD = '20210624-2210'
 export const APP_VER = `1.1.0-WIP ${APP_BLD}`
 
 // CONST
@@ -44,6 +44,11 @@ export enum CardDreamSignGrpViewType {
 	lg = 'Large',
 	md = 'Medium',
 	sm = 'Small',
+}
+
+export enum MetaType {
+	first = 'meta:first',
+	star = 'meta:star',
 }
 
 // TODO: allow grouping of TAGS by overall types
@@ -103,6 +108,11 @@ export interface IDriveDataFile {
 export interface IJournalDream {
 	title: string
 	notes?: string
+	/**
+	 * @deprecated
+	 * - TODO: remove in v1.1.0
+	 * - rename to `dreamTags`
+	 */
 	dreamSigns?: Array<string>
 	dreamImages?: Array<string>
 	isLucidDream: boolean
@@ -113,10 +123,23 @@ export interface IJournalDream {
  * A daily journal entry containing 1+ dreams
  */
 export interface IJournalEntry {
+	/**
+	 * Date in `yyyy-MM-dd` format
+	 * @example '2021-06-20'
+	 */
 	entryDate: string
+	/**
+	 * Bed time in hh24 format
+	 * @example '23:30'
+	 */
 	bedTime?: string
 	notesPrep?: string
 	notesWake?: string
+	/**
+	 * @deprecated
+	 * will be removed in v1.1.0
+	 * TODO: convert all existing extries to tag of `meta:star`
+	 */
 	starred?: boolean
 	dreams?: IJournalDream[]
 }
