@@ -377,7 +377,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 				<div className='modal-content'>
 					<div className='modal-header bg-primary'>
 						<h5 className='modal-title'>Journal Entry</h5>
-						<button type='button' className='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+						<button type='button' className='btn-close' data-bs-dismiss='modal' aria-label='Close' onClick={() => props.setShowModal(false)}></button>
 					</div>
 					<div className='modal-body p-4'>
 						{renderTopToolbar()}

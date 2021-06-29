@@ -33,7 +33,8 @@ import { DateTime } from 'luxon'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
-import ModalEntry from './modal-entry'
+import TableEntries from './components/table-entries'
+//import ModalEntry from './modal-entry'
 
 /**
  * TODO:
@@ -83,14 +84,15 @@ interface IChartData {
 export default function TabExplore(props: Props) {
 	const [isBusySave, setIsBusySave] = useState(false)
 	const [showModal, setShowModal] = useState(false)
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
+	//const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
 	const [chartData, setChartData] = useState<IChartData[]>([])
 	//
 	const [filterDrmChtMonths, setFilterDrmChtMonths] = useState(12)
 	const [filterDrmChtShowNotag, setFilterDrmChtShowNotag] = useState(true)
 	const [filterDrmChtShowTaged, setFilterDrmChtShowTaged] = useState(true)
 	//
-	const [drmChartClickedIdx, setDrmChartClickedIdx] = useState(null)
+	const [drmChartClickedIdx, setDrmChartClickedIdx] = useState<number>(null)
+	const [drmChartClkEntries, setDrmChartClkEntries] = useState<IJournalEntry[]>([])
 
 	/** Gather dream chart data */
 	useEffect(() => {
@@ -132,11 +134,19 @@ export default function TabExplore(props: Props) {
 		setChartData(tmpChartData)
 	}, [props.dataFile, filterDrmChtMonths])
 
+	/** Handle click on dreams barchart */
 	useEffect(() => {
-		// activeLabel: "Jul-20"
-		console.log(drmChartClickedIdx)
-		if (drmChartClickedIdx) console.log(chartData[drmChartClickedIdx])
-	}, [drmChartClickedIdx])
+		if (typeof drmChartClickedIdx !== null && chartData && chartData[drmChartClickedIdx]) {
+			let dateEntry = chartData[drmChartClickedIdx].dateTime
+			setDrmChartClkEntries(
+				props.dataFile.entries.filter(
+					(entry) => DateTime.fromISO(entry.entryDate).hasSame(dateEntry, 'month') && DateTime.fromISO(entry.entryDate).hasSame(dateEntry, 'year')
+				)
+			)
+		} else {
+			setDrmChartClkEntries([])
+		}
+	}, [props.dataFile, drmChartClickedIdx])
 
 	// -----------------------------------------------------------------------
 
@@ -216,24 +226,11 @@ export default function TabExplore(props: Props) {
 					</ResponsiveContainer>
 				</div>
 
-				{typeof drmChartClickedIdx !== null && renderTabClickedData()}
-			</section>
-		)
-	}
-
-	// TODO: create new tbale component and use it here
-	function renderTabClickedData(): JSX.Element {
-		if (!drmChartClickedIdx) return <div />
-
-		let dateEntry = chartData[drmChartClickedIdx].dateTime
-
-		return (
-			<section className='bg-black p-4'>
-				{props.dataFile.entries
-					.filter((entry) => DateTime.fromISO(entry.entryDate).hasSame(dateEntry, 'month') && DateTime.fromISO(entry.entryDate).hasSame(dateEntry, 'year'))
-					.map((entry, idx) => (
-						<div>{entry.entryDate}</div>
-					))}
+				{typeof drmChartClickedIdx !== null && (
+					<section className='bg-black p-4'>
+						<TableEntries entries={drmChartClkEntries} isBusyLoad={props.isBusyLoad} />
+					</section>
+				)}
 			</section>
 		)
 	}
@@ -244,7 +241,7 @@ export default function TabExplore(props: Props) {
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<div className='container my-auto my-md-5'>
-			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
+			{/* We have one in table-entires!! <ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />*/}
 			<header>
 				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			</header>
