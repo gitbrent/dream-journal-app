@@ -172,21 +172,21 @@ export function doAuthSignOut() {
  * @param dreamIdeas new ideas
  */
 export function doEditConf_DreamIdeas(dreamIdeas: ConfMetaCats[]) {
-	if (!gConfFile || !gConfFile.id) throw new Error('No conffile!')
+	if (!gConfFile || !gConfFile.id) throw new Error('No ConfFile!')
 	gConfFile.dreamIdeas = dreamIdeas
 }
 /**
  * @param lucidGoals new goals
  */
 export function doEditConf_LucidGoals(lucidGoals: ConfMetaCats) {
-	if (!gConfFile || !gConfFile.id) throw new Error('No conffile!')
+	if (!gConfFile || !gConfFile.id) throw new Error('No ConfFile!')
 	gConfFile.lucidGoals = lucidGoals
 }
 /**
  * @param mildAffirs new mild affirmations
  */
 export function doEditConf_MildAffirs(mildAffirs: ConfMetaCats[]) {
-	if (!gConfFile || !gConfFile.id) throw new Error('No conffile!')
+	if (!gConfFile || !gConfFile.id) throw new Error('No ConfFile!')
 	gConfFile.mildAffirs = mildAffirs
 }
 /**
@@ -194,7 +194,7 @@ export function doEditConf_MildAffirs(mildAffirs: ConfMetaCats[]) {
  * @param tags updated tags
  */
 export function doEditTagTypes(type: SignInventoryType, tags: string[]) {
-	if (!gConfFile || !gConfFile.id) throw new Error('No conffile!')
+	if (!gConfFile || !gConfFile.id) throw new Error('No ConfFile!')
 	gConfFile[`tagType${type}`] = tags
 }
 
