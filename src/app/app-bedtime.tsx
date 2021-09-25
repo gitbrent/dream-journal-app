@@ -29,7 +29,7 @@
 
 import React, { useState, useEffect } from 'react'
 import moment from 'moment'
-import { IDriveConfFile, IDriveDataFile, IJournalDream, IJournalEntry, MONTHS } from './app.types'
+import { ConfMetaCats, IDriveConfFile, IDriveDataFile, IJournalDream, IJournalEntry, MONTHS } from './app.types'
 import {
 	ArrowDown,
 	ArrowUp,
@@ -79,6 +79,11 @@ export default function TabBedtime(props: Props) {
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
 	const [allLucids, setAllLucids] = useState<LucidDream[]>([])
 	const [randLucids, setRandLucids] = useState<LucidDream[]>([])
+	const [lucidGoals, setLucidGoals] = useState<ConfMetaCats>(null)
+
+	useEffect(() => {
+		if (props.confFile && props.confFile.lucidGoals) setLucidGoals(props.confFile.lucidGoals)
+	}, [props.confFile])
 
 	useEffect(() => {
 		let allLucids: LucidDream[] = []
@@ -203,17 +208,36 @@ export default function TabBedtime(props: Props) {
 	function renderTabGoals(): JSX.Element {
 		return (
 			<section>
-				{props.confFile &&
-					props.confFile.lucidGoals &&
-					props.confFile.lucidGoals.bullets &&
-					props.confFile.lucidGoals.bullets.map((item, idx) => (
+				{lucidGoals &&
+					lucidGoals.bullets &&
+					lucidGoals.bullets.map((item, idx) => (
 						<div key={`goal${idx}`} className='row g-2 align-items-center mb-3'>
 							<div className='col-auto'>
 								<div className='btn-group border' role='group'>
-									<button type='button' className='btn btn-light py-1' disabled={isBusySave} title='move up' aria-label='move up'>
+									<button
+										type='button'
+										className='btn btn-light py-1'
+										disabled={isBusySave || idx === 0}
+										title='move up'
+										aria-label='move up'
+										onClick={() => {
+											let chgItem = { ...lucidGoals }
+											chgItem.bullets.splice(idx - 1, 0, chgItem.bullets.splice(idx, 1)[0])
+											setLucidGoals(chgItem)
+										}}>
 										<ArrowUp />
 									</button>
-									<button type='button' className='btn btn-light py-1' disabled={isBusySave} title='move down' aria-label='move down'>
+									<button
+										type='button'
+										className='btn btn-light py-1'
+										disabled={isBusySave || idx === lucidGoals.bullets.length - 1}
+										title='move down'
+										aria-label='move down'
+										onClick={() => {
+											let chgItem = { ...lucidGoals }
+											chgItem.bullets.splice(idx + 1, 0, chgItem.bullets.splice(idx, 1)[0])
+											setLucidGoals(chgItem)
+										}}>
 										<ArrowDown />
 									</button>
 								</div>
@@ -224,16 +248,28 @@ export default function TabBedtime(props: Props) {
 									disabled={isBusySave}
 									value={item}
 									onChange={(ev) => {
-										let chgItem = { ...props.confFile.lucidGoals }
+										let chgItem = { ...lucidGoals }
 										chgItem.bullets[idx] = ev.currentTarget.value
-										GDrive.doEditConf_LucidGoals(chgItem)
+										setLucidGoals(chgItem)
 									}}
 									className='form-control'
 								/>
 							</div>
 							<div className='col-auto'>
 								<div className='btn-group border' role='group'>
-									<button type='button' className='btn btn-light py-1' disabled={isBusySave} title='delete goal' aria-label='delete goal'>
+									<button
+										type='button'
+										className='btn btn-light py-1'
+										disabled={isBusySave}
+										title='delete goal'
+										aria-label='delete goal'
+										onClick={() => {
+											if (confirm(`Delete Goal ${idx + 1}?`)) {
+												let chgItem = { ...lucidGoals }
+												chgItem.bullets.splice(idx, 1)
+												setLucidGoals(chgItem)
+											}
+										}}>
 										<Trash />
 									</button>
 								</div>
@@ -246,10 +282,10 @@ export default function TabBedtime(props: Props) {
 						<button
 							className='btn btn-primary'
 							title='Add Goal'
-							onClick={async () => {
-								setIsBusySave(true)
-								await GDrive.doSaveConfFile()
-								setIsBusySave(false)
+							onClick={() => {
+								let chgItem = { ...lucidGoals }
+								chgItem.bullets.push('')
+								setLucidGoals(chgItem)
 							}}>
 							<PlusSquare size='16' className='me-2' />
 							Add
@@ -261,6 +297,7 @@ export default function TabBedtime(props: Props) {
 							title='Save Goals'
 							onClick={async () => {
 								setIsBusySave(true)
+								GDrive.doEditConf_LucidGoals(lucidGoals)
 								await GDrive.doSaveConfFile()
 								setIsBusySave(false)
 							}}>
