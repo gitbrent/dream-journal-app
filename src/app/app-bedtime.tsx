@@ -243,7 +243,14 @@ export default function TabBedtime(props: Props) {
 
 				<div className='row justify-content-center mb-0'>
 					<div className='col-auto text-center'>
-						<button className='btn btn-primary' title='Save Updates' onClick={() => GDrive.doSaveConfFile()}>
+						<button
+							className='btn btn-primary'
+							title='Add Goal'
+							onClick={async () => {
+								setIsBusySave(true)
+								await GDrive.doSaveConfFile()
+								setIsBusySave(false)
+							}}>
 							<PlusSquare size='16' className='me-2' />
 							Add
 						</button>
@@ -251,7 +258,7 @@ export default function TabBedtime(props: Props) {
 					<div className='col-auto text-center'>
 						<button
 							className='btn btn-success'
-							title='Save Updates'
+							title='Save Goals'
 							onClick={async () => {
 								setIsBusySave(true)
 								await GDrive.doSaveConfFile()
