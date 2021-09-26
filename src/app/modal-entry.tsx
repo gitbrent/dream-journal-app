@@ -234,7 +234,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 
 	function renderTabDream(dreamIdx: number): JSX.Element {
 		let dream: IJournalDream = currEntry.dreams[dreamIdx]
-		let isLucid = currEntry.dreams[dreamIdx].isLucidDream
+		let isLucid = dream ? currEntry.dreams[dreamIdx].isLucidDream : false
 
 		return (
 			<div data-desc='dream-tab-pane'>
