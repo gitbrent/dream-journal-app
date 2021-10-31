@@ -1,5 +1,5 @@
 import React from 'react'
-import moment from 'moment'
+import { DateTime } from 'luxon'
 import { ISearchMatch, SearchScopes, SearchMatchTypes, MONTHS } from '../app.types'
 
 interface Props {
@@ -13,6 +13,8 @@ interface Props {
 export interface ISearchResultsState {}
 
 export default function SearchResults(props: Props) {
+	const dateEntry = DateTime.fromISO(props.searchMatch.entry.entryDate)
+
 	/**
 	 * @see: https://stackoverflow.com/questions/29652862/highlight-text-using-reactjs
 	 */
@@ -48,10 +50,10 @@ export default function SearchResults(props: Props) {
 							<div
 								className='text-center'
 								style={{ cursor: 'help', userSelect: 'none' }}
-								title={Math.abs(Math.round(moment(props.searchMatch.entry.entryDate).diff(moment(new Date()), 'months', true))) + ' months ago'}>
-								<div className='bg-danger px-2 pb-1 text-white rounded-top'>{moment(props.searchMatch.entry.entryDate).format('YYYY')}</div>
+								title={Math.abs(Math.round(dateEntry.diff(DateTime.now(), 'months').months)) + ' months ago'}>
+								<div className='bg-danger px-2 pb-1 text-white rounded-top'>{dateEntry.toFormat('yyyy')}</div>
 								<div className='bg-white px-2 py-1 rounded-bottom'>
-									<h6 className='text-muted mb-0'>{MONTHS[Number(moment(props.searchMatch.entry.entryDate).format('M')) - 1]}</h6>
+									<h6 className='text-muted mb-0'>{dateEntry.toFormat('LLL dd')}</h6>
 								</div>
 							</div>
 						</div>

@@ -28,8 +28,8 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import moment from 'moment'
-import { ConfMetaCats, IDriveConfFile, IDriveDataFile, IJournalDream, IJournalEntry, MONTHS } from './app.types'
+import { DateTime } from 'luxon'
+import { ConfMetaCats, IDriveConfFile, IDriveDataFile, IJournalDream, IJournalEntry } from './app.types'
 import {
 	ArrowDown,
 	ArrowUp,
@@ -121,6 +121,7 @@ export default function TabBedtime(props: Props) {
 			<HeartFill size={20} className='me-2' />,
 			<Translate size={20} className='me-2' />,
 		]
+
 		return (
 			<section>
 				<div className='row row-cols-1 g-4 mb-4'>
@@ -169,34 +170,35 @@ export default function TabBedtime(props: Props) {
 						<div className='card h-100'>
 							<div className='card-header bg-info h5 text-white'>Random Lucid Dreams</div>
 							<div className='card-body bg-black p-4'>
-								{randLucids.map((rand, idx) => (
-									<div
-										key={`rand${idx}`}
-										onClick={(_ev) => {
-											setCurrEntry(rand.entry)
-											setShowModal(true)
-										}}
-										className='bg-light p-2 mb-4'>
-										<div className='row g-0 align-items-center bg-light'>
-											<div className='col-auto px-0'>
-												<div
-													title={Math.abs(Math.round(moment(rand.entry.entryDate).diff(moment(new Date()), 'months', true))) + ' months ago'}
-													className='col cursor-link text-center text-sm user-select-none'
-													style={{ minWidth: '65px' }}>
-													<div className='bg-danger px-2 py-1 text-white align-text-middle rounded-top'>
-														<h6 className='mb-0'>{moment(rand.entry.entryDate).format('YYYY')}</h6>
-													</div>
-													<div className='bg-white px-2 py-3 rounded-bottom'>
-														{MONTHS[Number(moment(rand.entry.entryDate).format('M')) - 1]} {moment(rand.entry.entryDate).format('DD')}
+								{randLucids.map((rand, idx) => {
+									const dateEntry = DateTime.fromISO(rand.entry.entryDate)
+									return (
+										<div
+											key={`rand${idx}`}
+											onClick={(_ev) => {
+												setCurrEntry(rand.entry)
+												setShowModal(true)
+											}}
+											className='bg-light p-2 mb-4'>
+											<div className='row g-0 align-items-center bg-light'>
+												<div className='col-auto px-0'>
+													<div
+														title={Math.abs(Math.round(dateEntry.diff(DateTime.now(), 'months').months)) + ' months ago'}
+														className='col cursor-link text-center text-sm user-select-none'
+														style={{ minWidth: '65px' }}>
+														<div className='bg-danger px-2 py-1 text-white align-text-middle rounded-top'>
+															<h6 className='mb-0'>{dateEntry.toFormat('yyyy')}</h6>
+														</div>
+														<div className='bg-white px-2 py-3 rounded-bottom'>{dateEntry.toFormat('LLL dd')}</div>
 													</div>
 												</div>
-											</div>
-											<div className='col ps-2'>
-												<h6 className='mb-0'>{rand.lucidDream.title}</h6>
+												<div className='col ps-2'>
+													<h6 className='mb-0'>{rand.lucidDream.title}</h6>
+												</div>
 											</div>
 										</div>
-									</div>
-								))}
+									)
+								})}
 							</div>
 						</div>
 					</div>

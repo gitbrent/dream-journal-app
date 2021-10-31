@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import moment from 'moment'
+import { DateTime } from 'luxon'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, MONTHS } from '../app.types'
 
 export interface Props {
@@ -18,24 +18,25 @@ export default function DreamTagCard(props: Props) {
 	function renderShowDreams(): JSX.Element {
 		return (
 			<div className='row row-cols-auto g-3'>
-				{props.tagGrp.dailyEntries.map((entry, idy) => (
-					<div
-						key={`cardTagDate${props.tagGrp.dreamSign}${idy}`}
-						title={Math.abs(Math.round(moment(entry.entryDate).diff(moment(new Date()), 'months', true))) + ' months ago'}
-						onClick={(_ev) => {
-							props.setCurrEntry(entry)
-							props.setShowModal(true)
-						}}
-						className='col cursor-link text-center text-sm user-select-none'
-						style={{ minWidth: '65px' }}>
-						<div className='bg-danger px-2 py-1 text-white align-text-middle rounded-top'>
-							<h6 className='mb-0'>{moment(entry.entryDate).format('YYYY')}</h6>
+				{props.tagGrp.dailyEntries.map((entry, idy) => {
+					const dateEntry = DateTime.fromISO(entry.entryDate)
+					return (
+						<div
+							key={`cardTagDate${props.tagGrp.dreamSign}${idy}`}
+							title={Math.abs(Math.round(dateEntry.diff(DateTime.now(), 'months').months)) + ' months ago'}
+							onClick={(_ev) => {
+								props.setCurrEntry(entry)
+								props.setShowModal(true)
+							}}
+							className='col cursor-link text-center text-sm user-select-none'
+							style={{ minWidth: '65px' }}>
+							<div className='bg-danger px-2 py-1 text-white align-text-middle rounded-top'>
+								<h6 className='mb-0'>{dateEntry.toFormat('yyyy')}</h6>
+							</div>
+							<div className='bg-white px-2 py-3 rounded-bottom'>{dateEntry.toFormat('LLL dd')}</div>
 						</div>
-						<div className='bg-white px-2 py-3 rounded-bottom'>
-							{MONTHS[Number(moment(entry.entryDate).format('M')) - 1]} {moment(entry.entryDate).format('DD')}
-						</div>
-					</div>
-				))}
+					)
+				})}
 			</div>
 		)
 	}

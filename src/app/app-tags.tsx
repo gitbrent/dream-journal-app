@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import moment from 'moment'
+import { DateTime } from 'luxon'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveDataFile, IJournalDream, IJournalEntry, MONTHS } from './app.types'
 import { Search, Tag, Tags } from 'react-bootstrap-icons'
 import DreamTagCard from './components/dreamtag-card'
@@ -79,7 +79,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 		let tagGroups: IDreamSignTagGroup[] = []
 		{
 			props.dataFile.entries
-				.filter((entry) => filterDate === FilterDate.all || moment(entry.entryDate).isAfter(moment().subtract(filterDays, 'days')))
+				.filter((entry) => filterDate === FilterDate.all || DateTime.fromISO(entry.entryDate).startOf('day') >= DateTime.now().minus({ days: filterDays }))
 				.filter(
 					(entry) =>
 						!filterText ||
@@ -314,33 +314,34 @@ export default function TabAdmin(props: IAppTagsProps) {
 				<div className='row row-cols-auto row-cols-md-4 g-4 justify-content-between'>
 					{onlyDreams
 						.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
-						.map((item, idx) => (
-							<div
-								key={`byDateKey${idx}`}
-								title={Math.abs(Math.round(moment(item.entryDate).diff(moment(new Date()), 'months', true))) + ' months ago'}
-								onClick={(_ev) => {
-									setCurrEntry(props.dataFile.entries.filter((entry) => entry.entryDate == item.entryDate)[0])
-									setShowModal(true)
-								}}
-								className='col cursor-link user-select-none'
-								style={{ minWidth: '65px' }}>
-								<div className='bg-danger p-2 text-white align-text-middle rounded-top'>
-									<h6 className='mb-0'>
-										{MONTHS[Number(moment(item.entryDate).format('M')) - 1]} {moment(item.entryDate).format('DD')}
-									</h6>
-								</div>
-								<div className='bg-black-90 px-2 py-3 rounded-bottom'>
-									<div className='row row-cols-1 g-2'>
-										{item.tags.sort().map((tag, idy) => (
-											<div key={`tagKey${idy}`} className='col'>
-												<Tag /> {tag}
-											</div>
-										))}
-										{item.dreams.length === 0 && <Tag />}
+						.map((item, idx) => {
+							const dateEntry = DateTime.fromISO(item.entryDate)
+							return (
+								<div
+									key={`byDateKey${idx}`}
+									title={Math.abs(Math.round(dateEntry.diff(DateTime.now(), 'months').months)) + ' months ago'}
+									onClick={(_ev) => {
+										setCurrEntry(props.dataFile.entries.filter((entry) => entry.entryDate == item.entryDate)[0])
+										setShowModal(true)
+									}}
+									className='col cursor-link user-select-none'
+									style={{ minWidth: '65px' }}>
+									<div className='bg-danger p-2 text-white align-text-middle rounded-top'>
+										<h6 className='mb-0'>{dateEntry.toFormat('LLL dd')}</h6>
+									</div>
+									<div className='bg-black-90 px-2 py-3 rounded-bottom'>
+										<div className='row row-cols-1 g-2'>
+											{item.tags.sort().map((tag, idy) => (
+												<div key={`tagKey${idy}`} className='col'>
+													<Tag /> {tag}
+												</div>
+											))}
+											{item.dreams.length === 0 && <Tag />}
+										</div>
 									</div>
 								</div>
-							</div>
-						))}
+							)
+						})}
 				</div>
 			</section>
 		)
