@@ -44,21 +44,19 @@ export default function SearchResults(props: Props) {
 	return (
 		<div key={`searchResultCard${props.searchMatch.entry.entryDate}`} className='col'>
 			<div className='card'>
-				<div className={`card-header p-3 ${props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'bg-success' : 'bg-black-70'}`}>
+				<div className={`card-header p-3 ${props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'bg-success' : 'bg-black-90'}`}>
 					<div className='row g-0 align-items-center'>
 						<div className='col-auto'>
 							<div
 								className='text-center'
 								style={{ cursor: 'help', userSelect: 'none' }}
 								title={Math.abs(Math.round(dateEntry.diff(DateTime.now(), 'months').months)) + ' months ago'}>
-								<div className='bg-danger px-2 pb-1 text-white rounded-top'>{dateEntry.toFormat('yyyy')}</div>
-								<div className='bg-white px-2 py-1 rounded-bottom'>
-									<h6 className='text-muted mb-0'>{dateEntry.toFormat('LLL dd')}</h6>
-								</div>
+								<div className='bg-danger p-2 rounded-top text-white h5 mb-0'>{dateEntry.toFormat('yyyy')}</div>
+								<div className='bg-white px-2 py-1 rounded-bottom text-sm text-muted mb-0'>{dateEntry.toFormat('LLL dd')}</div>
 							</div>
 						</div>
 						<div className='col mx-3'>
-							<h6 className='mb-0'>
+							<h5 className='mb-0'>
 								<a
 									href='#!'
 									title='View Entry'
@@ -69,20 +67,11 @@ export default function SearchResults(props: Props) {
 									}}>
 									{props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].title}
 								</a>
-							</h6>
+							</h5>
 						</div>
 						<div className='col-auto'>{props.searchMatch.entry.starred && <div className='iconSvg size24 star-on' />}</div>
 					</div>
 				</div>
-				{(props.searchOptScope === SearchScopes.all || props.searchOptScope === SearchScopes.notes) && (
-					<div className='card-body bg-black-90'>
-						<p className='card-text' style={{ whiteSpace: 'pre-line' }}>
-							{props.searchTerm
-								? getHighlightedText(props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].notes, props.searchTerm)
-								: props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].notes}
-						</p>
-					</div>
-				)}
 				{(props.searchOptScope === SearchScopes.all || props.searchOptScope === SearchScopes.signs) && (
 					<div className='card-footer bg-black p-3'>
 						<div className='row row-cols-auto g-2'>
@@ -97,6 +86,15 @@ export default function SearchResults(props: Props) {
 								  })
 								: ''}
 						</div>
+					</div>
+				)}
+				{(props.searchOptScope === SearchScopes.all || props.searchOptScope === SearchScopes.notes) && (
+					<div className='card-body bg-black'>
+						<p className='card-text' style={{ whiteSpace: 'pre-line' }}>
+							{props.searchTerm
+								? getHighlightedText(props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].notes, props.searchTerm)
+								: props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].notes}
+						</p>
 					</div>
 				)}
 			</div>
