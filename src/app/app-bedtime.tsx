@@ -28,8 +28,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { DateTime } from 'luxon'
-import { ConfMetaCats, IDriveConfFile, IDriveDataFile, IJournalDream, IJournalEntry } from './app.types'
+import { ConfMetaCats, IDriveConfFile, IDriveDataFile, IJournalEntry, ISearchMatch, SearchScopes } from './app.types'
 import {
 	ArrowDown,
 	ArrowUp,
@@ -55,6 +54,7 @@ import {
 } from 'react-bootstrap-icons'
 import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
+import SearchResults from './components/search-results'
 import ModalEntry from './modal-entry'
 import * as GDrive from './google-oauth'
 //import LocalAdminBrent from './z.admin.local'
@@ -68,17 +68,12 @@ export interface Props {
 	tabState: ITabStateBedtime
 }
 
-interface LucidDream {
-	entry: IJournalEntry
-	lucidDream: IJournalDream
-}
-
 export default function TabBedtime(props: Props) {
 	const [isBusySave, setIsBusySave] = useState(false)
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
-	const [allLucids, setAllLucids] = useState<LucidDream[]>([])
-	const [randLucids, setRandLucids] = useState<LucidDream[]>([])
+	const [allLucids, setAllLucids] = useState<ISearchMatch[]>([])
+	const [randLucids, setRandLucids] = useState<ISearchMatch[]>([])
 	const [lucidGoals, setLucidGoals] = useState<ConfMetaCats>(null)
 
 	useEffect(() => {
@@ -86,12 +81,12 @@ export default function TabBedtime(props: Props) {
 	}, [props.confFile])
 
 	useEffect(() => {
-		let allLucids: LucidDream[] = []
+		let allLucids: ISearchMatch[] = []
 
 		if (props.dataFile && props.dataFile.entries && props.dataFile.entries.length > 0) {
 			props.dataFile.entries.forEach((entry) => {
 				let succDreams = [...entry.dreams.filter((dream) => dream.isLucidDream)]
-				succDreams.forEach((dream) => allLucids.push({ entry: entry, lucidDream: dream }))
+				succDreams.forEach((_dream, idx) => allLucids.push({ entry: entry, dreamIdx: idx }))
 			})
 		}
 
@@ -100,7 +95,7 @@ export default function TabBedtime(props: Props) {
 
 	useEffect(() => {
 		if (allLucids && allLucids.length > 0) {
-			let randLucids: LucidDream[] = []
+			let randLucids: ISearchMatch[] = []
 
 			for (let idx = 0; idx < 3; idx++) {
 				randLucids.push(allLucids[Math.round(Math.random() * allLucids.length)])
@@ -170,35 +165,15 @@ export default function TabBedtime(props: Props) {
 						<div className='card h-100'>
 							<div className='card-header bg-info h5 text-white'>Random Lucid Dreams</div>
 							<div className='card-body bg-black p-4'>
-								{randLucids.map((rand, idx) => {
-									const dateEntry = DateTime.fromISO(rand.entry.entryDate)
-									return (
-										<div
-											key={`rand${idx}`}
-											onClick={(_ev) => {
-												setCurrEntry(rand.entry)
-												setShowModal(true)
-											}}
-											className='bg-light p-2 mb-4'>
-											<div className='row g-0 align-items-center bg-light'>
-												<div className='col-auto px-0'>
-													<div
-														title={Math.abs(Math.round(dateEntry.diff(DateTime.now(), 'months').months)) + ' months ago'}
-														className='col cursor-link text-center text-sm user-select-none'
-														style={{ minWidth: '65px' }}>
-														<div className='bg-danger px-2 py-1 text-white align-text-middle rounded-top'>
-															<h6 className='mb-0'>{dateEntry.toFormat('yyyy')}</h6>
-														</div>
-														<div className='bg-white px-2 py-3 rounded-bottom'>{dateEntry.toFormat('LLL dd')}</div>
-													</div>
-												</div>
-												<div className='col ps-2'>
-													<h6 className='mb-0'>{rand.lucidDream.title}</h6>
-												</div>
-											</div>
-										</div>
-									)
-								})}
+								{randLucids.map((match, idx) => (
+									<SearchResults
+										key={`match${idx}`}
+										setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
+										setShowModal={(show: boolean) => setShowModal(show)}
+										searchMatch={match}
+										searchOptScope={SearchScopes.title}
+									/>
+								))}
 							</div>
 						</div>
 					</div>
