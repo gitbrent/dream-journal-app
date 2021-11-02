@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { DateTime } from 'luxon'
-import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveDataFile, IJournalDream, IJournalEntry, MONTHS } from './app.types'
+import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveDataFile, IJournalDream, IJournalEntry } from './app.types'
 import { Search, Tag, Tags } from 'react-bootstrap-icons'
 import DreamTagCard from './components/dreamtag-card'
 import * as GDrive from './google-oauth'

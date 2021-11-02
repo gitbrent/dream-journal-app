@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { DateTime } from 'luxon'
-import { CardDreamSignGrpViewType, IDreamSignTagGroup, MONTHS } from '../app.types'
+import { CardDreamSignGrpViewType, IDreamSignTagGroup } from '../app.types'
 
 export interface Props {
 	setCurrEntry: Function

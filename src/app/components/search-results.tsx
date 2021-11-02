@@ -1,6 +1,6 @@
 import React from 'react'
 import { DateTime } from 'luxon'
-import { ISearchMatch, SearchScopes, SearchMatchTypes, MONTHS } from '../app.types'
+import { ISearchMatch, SearchScopes, SearchMatchTypes } from '../app.types'
 
 interface Props {
 	setCurrEntry: Function

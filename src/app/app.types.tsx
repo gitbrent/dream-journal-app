@@ -1,9 +1,6 @@
 // APP
-export const APP_BLD = '20211031-1231'
+export const APP_BLD = '20211101-2001'
 export const APP_VER = `1.1.0-WIP ${APP_BLD}`
-
-// CONST
-export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 // ENUMS
 export enum AuthState {
