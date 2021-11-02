@@ -247,8 +247,8 @@ export default function TabSearch(props: Props) {
 					</div>
 					<div className='card-body bg-light border-bottom border-secondary' data-desc='commandbar'>
 						<div className='row align-items-center'>
-							<div className='col-6 col-md-8'>
-								<div className='row align-items-center g-0'>
+							<div className='col-12 col-md-8'>
+								<div className='row align-items-center g-0 mb-3 mb-md-0'>
 									<div className='col-auto d-none d-md-block pe-3'>
 										<Search size={48} className='text-secondary' />
 									</div>
@@ -275,7 +275,7 @@ export default function TabSearch(props: Props) {
 									</div>
 								</div>
 							</div>
-							<div className='col-3 col-md-2'>
+							<div className='col-6 col-md'>
 								<label className='text-uppercase text-muted'>Fields</label>
 								<select className='form-control' defaultValue={searchOptScope} onChange={handleScopeChange}>
 									{Object.keys(SearchScopes)
@@ -287,7 +287,7 @@ export default function TabSearch(props: Props) {
 										))}
 								</select>
 							</div>
-							<div className='col-3 col-md-2'>
+							<div className='col-6 col-md'>
 								<label className='text-uppercase text-muted'>Type</label>
 								<select className='form-control' defaultValue={searchOptMatchType} onChange={handleTypeChange}>
 									{Object.keys(SearchMatchTypes).map((val) => (
