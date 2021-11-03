@@ -86,8 +86,9 @@ export default function TabBedtime(props: Props) {
 
 		if (props.dataFile && props.dataFile.entries && props.dataFile.entries.length > 0) {
 			props.dataFile.entries.forEach((entry) => {
-				let succDreams = [...entry.dreams.filter((dream) => dream.isLucidDream)]
-				succDreams.forEach((_dream, idx) => allLucids.push({ entry: entry, dreamIdx: idx }))
+				entry.dreams.forEach((dream, idx) => {
+					if (dream.isLucidDream) allLucids.push({ entry: entry, dreamIdx: idx })
+				})
 			})
 		}
 
@@ -101,6 +102,8 @@ export default function TabBedtime(props: Props) {
 			for (let idx = 0; idx < 3; idx++) {
 				randLucids.push(allLucids[Math.round(Math.random() * allLucids.length)])
 			}
+			console.log(randLucids);
+
 
 			setRandLucids(randLucids)
 		}
