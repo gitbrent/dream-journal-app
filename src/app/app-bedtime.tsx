@@ -72,7 +72,7 @@ export default function TabBedtime(props: Props) {
 	const [isBusySave, setIsBusySave] = useState(false)
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
-	const [currDreamIdx, setDreamIdx] = useState(0)
+	const [currDreamIdx, setCurrDreamIdx] = useState(0)
 	const [allLucids, setAllLucids] = useState<ISearchMatch[]>([])
 	const [randLucids, setRandLucids] = useState<ISearchMatch[]>([])
 	const [lucidGoals, setLucidGoals] = useState<ConfMetaCats>(null)
@@ -102,8 +102,6 @@ export default function TabBedtime(props: Props) {
 			for (let idx = 0; idx < 3; idx++) {
 				randLucids.push(allLucids[Math.round(Math.random() * allLucids.length)])
 			}
-			console.log(randLucids);
-
 
 			setRandLucids(randLucids)
 		}
@@ -173,7 +171,7 @@ export default function TabBedtime(props: Props) {
 									<SearchResults
 										key={`match${idx}`}
 										setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
-										setDreamIdx={(index: number) => setDreamIdx(index)}
+										setDreamIdx={(index: number) => setCurrDreamIdx(index)}
 										setShowModal={(show: boolean) => setShowModal(show)}
 										searchMatch={match}
 										searchOptScope={SearchScopes.title}

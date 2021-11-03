@@ -64,7 +64,7 @@ export default function SearchResults(props: Props) {
 									className={props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'card-link text-white' : 'card-link'}
 									onClick={() => {
 										props.setCurrEntry(props.searchMatch.entry)
-										props.setDreamIdx(props.setDreamIdx)
+										props.setDreamIdx(props.searchMatch.dreamIdx)
 										props.setShowModal(true)
 									}}>
 									{props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].title}
