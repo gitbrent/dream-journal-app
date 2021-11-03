@@ -72,6 +72,7 @@ export default function TabBedtime(props: Props) {
 	const [isBusySave, setIsBusySave] = useState(false)
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
+	const [currDreamIdx, setDreamIdx] = useState(0)
 	const [allLucids, setAllLucids] = useState<ISearchMatch[]>([])
 	const [randLucids, setRandLucids] = useState<ISearchMatch[]>([])
 	const [lucidGoals, setLucidGoals] = useState<ConfMetaCats>(null)
@@ -169,6 +170,7 @@ export default function TabBedtime(props: Props) {
 									<SearchResults
 										key={`match${idx}`}
 										setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
+										setDreamIdx={(index: number) => setDreamIdx(index)}
 										setShowModal={(show: boolean) => setShowModal(show)}
 										searchMatch={match}
 										searchOptScope={SearchScopes.title}
@@ -594,7 +596,7 @@ export default function TabBedtime(props: Props) {
 	) : (
 		<main className='container my-auto my-md-5'>
 			<header>
-				<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
+				<ModalEntry currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={setShowModal} />
 				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			</header>
 			{/*<LocalAdminBrent confFile={props.confFile} />*/}

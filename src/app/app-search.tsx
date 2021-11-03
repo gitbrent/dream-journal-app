@@ -26,6 +26,7 @@ export default function TabSearch(props: Props) {
 	//
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
+	const [currDreamIdx, setDreamIdx] = useState(0)
 	//
 	const [showAlert, setShowAlert] = useState(typeof localShowAlert === 'boolean' ? localShowAlert : true)
 	const [totalDreams, setTotalDreams] = useState(0)
@@ -208,7 +209,7 @@ export default function TabSearch(props: Props) {
 	) : (
 		<div className='container my-auto my-md-5'>
 			<header>
-				<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
+				<ModalEntry currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={setShowModal} />
 				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			</header>
 
@@ -309,6 +310,7 @@ export default function TabSearch(props: Props) {
 									<SearchResults
 										key={`match${idx}`}
 										setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
+										setDreamIdx={(index: number) => setDreamIdx(index)}
 										setShowModal={(show: boolean) => setShowModal(show)}
 										searchMatch={match}
 										searchTerm={searchTerm}

@@ -1,5 +1,5 @@
 // APP
-export const APP_BLD = '20211101-2001'
+export const APP_BLD = '20211103-1640'
 export const APP_VER = `1.1.0-WIP ${APP_BLD}`
 
 // ENUMS

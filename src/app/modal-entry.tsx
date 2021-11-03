@@ -7,6 +7,7 @@ import * as GDrive from './google-oauth'
 
 export interface IModalEntryProps {
 	currEntry: IJournalEntry
+	currDreamIdx?: number
 	showModal: boolean
 	setShowModal: Function
 }
@@ -54,6 +55,10 @@ export default function ModalEntry(props: IModalEntryProps) {
 	}, [props.showModal])
 
 	useEffect(() => setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry])
+
+	useEffect(() => {
+		if (currEntry && !isNaN(props.currDreamIdx)) setSelectedTab(props.currDreamIdx)
+	}, [currEntry, props.currDreamIdx])
 
 	// -----------------------------------------------------------------------
 
@@ -236,7 +241,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 		let dream: IJournalDream = currEntry.dreams[dreamIdx]
 		let isLucid = dream ? currEntry.dreams[dreamIdx].isLucidDream : false
 
-		return (
+		return dream ? (
 			<div data-desc='dream-tab-pane'>
 				<div className='row align-items-center' data-desc='title/btnGrp'>
 					<div className='col'>
@@ -368,6 +373,8 @@ export default function ModalEntry(props: IModalEntryProps) {
 					</div>
 				</div>
 			</div>
+		) : (
+			<div />
 		)
 	}
 

@@ -4,6 +4,7 @@ import { ISearchMatch, SearchScopes, SearchMatchTypes } from '../app.types'
 
 interface Props {
 	setCurrEntry: Function
+	setDreamIdx?: Function
 	setShowModal: Function
 	searchMatch: ISearchMatch
 	searchTerm?: string
@@ -63,6 +64,7 @@ export default function SearchResults(props: Props) {
 									className={props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'card-link text-white' : 'card-link'}
 									onClick={() => {
 										props.setCurrEntry(props.searchMatch.entry)
+										props.setDreamIdx(props.setDreamIdx)
 										props.setShowModal(true)
 									}}>
 									{props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].title}
@@ -79,7 +81,7 @@ export default function SearchResults(props: Props) {
 							Array.isArray(props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns)
 								? props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns.map((sign, idx) => {
 										return (
-											<div className='col' key={`sign${idx}`}>
+											<div className='col' key={`${sign}${idx}`}>
 												<div className='badge bg-info text-lowercase p-2'>{sign}</div>
 											</div>
 										)
