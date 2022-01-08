@@ -29,7 +29,7 @@
 
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom'
+import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom' // NOTE: upgrade to v6 is major!
 import { IAuthState, IDriveDataFile, IJournalEntry, AuthState, APP_VER, IDriveConfFile } from './app.types'
 import * as GDrive from './google-oauth'
 import TabHome from '../app/app-home'
@@ -202,6 +202,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		<TabAdmin dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} doSaveAdminState={this.doSaveAdminState} adminState={this.state.childAdminState} />
 	)
 
+	// NOTE: update to react-router v6 is *MAJOR* (https://reactrouter.com/docs/en/v6/upgrading/v5)
 	render() {
 		return (
 			<Router>
@@ -284,6 +285,6 @@ class App extends React.Component<IAppProps, IAppState> {
 }
 
 // App Container
-const AppMain: React.SFC<{ compiler: string; framework: string }> = (_props) => <App />
+const AppMain: React.FunctionComponent<{ compiler: string; framework: string }> = (_props) => <App />
 
 ReactDOM.render(<AppMain compiler='TypeScript' framework='React' />, document.getElementById('root'))
