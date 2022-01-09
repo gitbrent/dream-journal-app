@@ -1,6 +1,7 @@
 // APP
-export const APP_BLD = '20220108-1230'
-export const APP_VER = `1.1.0-WIP ${APP_BLD}`
+export const APP_BLD = '20220109-1030'
+export const APP_VER = `1.2.0-WIP ${APP_BLD}`
+//export const APP_VER = `1.2.0`
 
 // ENUMS
 export enum AuthState {
@@ -107,8 +108,7 @@ export interface IJournalDream {
 	notes?: string
 	/**
 	 * @deprecated
-	 * - TODO: remove in v1.1.0
-	 * - rename to `dreamTags`
+	 * - TODO: rename to `dreamTags`
 	 */
 	dreamSigns?: Array<string>
 	dreamImages?: Array<string>

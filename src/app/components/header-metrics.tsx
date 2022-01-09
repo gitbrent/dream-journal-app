@@ -51,19 +51,20 @@ export default function HeaderMetrics(props: Props) {
 
 		// Total: dreams, stars, lucids
 		{
-			let tmpTotalStarred = 0
 			let tmpTotalDreams = 0
 			let tmpTotalLucids = 0
+			let tmpTotalStarred = 0
 
 			props.dataFile.entries.forEach((entry) => {
-				if (entry.starred) tmpTotalStarred++
 				tmpTotalDreams += entry.dreams.length
 				tmpTotalLucids += entry.dreams.filter((dream) => dream.isLucidDream).length
+				tmpTotalStarred += entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === 'meta:star')).length
+				if (entry.starred) tmpTotalStarred++ // TODO: remove this and only use above once all entries have been converted
 			})
 
-			setTotalStarred(tmpTotalStarred)
 			setTotalDreams(tmpTotalDreams)
 			setTotalLucids(tmpTotalLucids)
+			setTotalStarred(tmpTotalStarred)
 		}
 
 		// Total: Months
@@ -89,8 +90,9 @@ export default function HeaderMetrics(props: Props) {
 		{
 			setTotalEntries(props.dataFile.entries.length)
 			setTotalDreams(props.dataFile.entries.map((entry) => entry.dreams.length).reduce((a, b) => a + b))
-			setTotalStarred(props.dataFile.entries.filter((entry) => entry.starred).length)
 			setTotalLucids(props.dataFile.entries.map((entry) => entry.dreams.filter((dream) => dream.isLucidDream).length).reduce((a, b) => a + b))
+			//setTotalStarred(props.dataFile.entries.filter((entry) => entry.starred).length)
+			//setTotalStarred(props.dataFile.entries.map((entry) => entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === 'meta:star')).length).reduce((a, b) => a + b))
 			setTotalUntagged(props.dataFile.entries.map((entry) => entry.dreams.filter((dream) => dream.dreamSigns.length === 0).length).reduce((a, b) => a + b))
 		}
 
