@@ -1,6 +1,6 @@
 import React from 'react'
 import { DateTime } from 'luxon'
-import { ISearchMatch, SearchScopes, SearchMatchTypes } from '../app.types'
+import { ISearchMatch, SearchScopes, SearchMatchTypes, MetaType } from '../app.types'
 
 interface Props {
 	setCurrEntry: Function
@@ -71,7 +71,11 @@ export default function SearchResults(props: Props) {
 								</a>
 							</h5>
 						</div>
-						<div className='col-auto'>{props.searchMatch.entry.starred && <div className='iconSvg size24 star-on' />}</div>
+						<div className='col-auto'>
+							{props.searchMatch.entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === MetaType.star)).length > 0 && (
+								<div className='iconSvg size24 star-on' />
+							)}
+						</div>
 					</div>
 				</div>
 				{(props.searchOptScope === SearchScopes.all || props.searchOptScope === SearchScopes.signs) && (

@@ -28,7 +28,7 @@
  */
 
 import React, { useState } from 'react'
-import { IJournalEntry } from '../app.types'
+import { IJournalEntry, MetaType } from '../app.types'
 import ReactPaginate from 'react-paginate'
 import { CheckCircleFill, Diagram3Fill, StarFill, SortDownAlt } from 'react-bootstrap-icons'
 import ModalEntry from '../modal-entry'
@@ -112,7 +112,11 @@ export default function HeaderMetrics(props: Props) {
 											))}
 										</div>
 									</td>
-									<td className='align-middle text-center'>{entry.starred && <StarFill size='24' className='text-warning' />}</td>
+									<td className='align-middle text-center'>
+										{entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === MetaType.star)).length > 0 && (
+											<StarFill size='24' className='text-warning' />
+										)}
+									</td>
 									<td className='align-middle text-center'>
 										{entry.dreams.filter((dream) => dream.isLucidDream === true).length > 0 && <CheckCircleFill size='24' className='text-success' />}
 									</td>

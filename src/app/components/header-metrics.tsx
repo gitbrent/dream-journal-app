@@ -28,7 +28,7 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { IDreamSignTagGroup, IDriveDataFile } from '../app.types'
+import { IDreamSignTagGroup, IDriveDataFile, MetaType } from '../app.types'
 
 interface Props {
 	dataFile: IDriveDataFile
@@ -48,24 +48,6 @@ export default function HeaderMetrics(props: Props) {
 
 	useEffect(() => {
 		if (!props.dataFile || !props.dataFile.entries) return
-
-		// Total: dreams, stars, lucids
-		{
-			let tmpTotalDreams = 0
-			let tmpTotalLucids = 0
-			let tmpTotalStarred = 0
-
-			props.dataFile.entries.forEach((entry) => {
-				tmpTotalDreams += entry.dreams.length
-				tmpTotalLucids += entry.dreams.filter((dream) => dream.isLucidDream).length
-				tmpTotalStarred += entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === 'meta:star')).length
-				if (entry.starred) tmpTotalStarred++ // TODO: remove this and only use above once all entries have been converted
-			})
-
-			setTotalDreams(tmpTotalDreams)
-			setTotalLucids(tmpTotalLucids)
-			setTotalStarred(tmpTotalStarred)
-		}
 
 		// Total: Months
 		{
@@ -91,8 +73,9 @@ export default function HeaderMetrics(props: Props) {
 			setTotalEntries(props.dataFile.entries.length)
 			setTotalDreams(props.dataFile.entries.map((entry) => entry.dreams.length).reduce((a, b) => a + b))
 			setTotalLucids(props.dataFile.entries.map((entry) => entry.dreams.filter((dream) => dream.isLucidDream).length).reduce((a, b) => a + b))
-			//setTotalStarred(props.dataFile.entries.filter((entry) => entry.starred).length)
-			//setTotalStarred(props.dataFile.entries.map((entry) => entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === 'meta:star')).length).reduce((a, b) => a + b))
+			setTotalStarred(
+				props.dataFile.entries.map((entry) => entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === MetaType.star)).length).reduce((a, b) => a + b)
+			)
 			setTotalUntagged(props.dataFile.entries.map((entry) => entry.dreams.filter((dream) => dream.dreamSigns.length === 0).length).reduce((a, b) => a + b))
 		}
 

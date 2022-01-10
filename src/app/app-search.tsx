@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { IDriveDataFile, IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
+import { IDriveDataFile, IJournalEntry, ISearchMatch, MetaType, SearchMatchTypes, SearchScopes } from './app.types'
 import { Search } from 'react-bootstrap-icons'
 import SearchResults from './components/search-results'
 import HeaderMetrics from './components/header-metrics'
@@ -30,10 +30,6 @@ export default function TabSearch(props: Props) {
 	//
 	const [showAlert, setShowAlert] = useState(typeof localShowAlert === 'boolean' ? localShowAlert : true)
 	const [totalDreams, setTotalDreams] = useState(0)
-	const [totalLucids, setTotalLucids] = useState(0)
-	const [totalStarred, setTotalStarred] = useState(0)
-	const [totalMonths, setTotalMonths] = useState(0)
-	const [totalYears, setTotalYears] = useState(0)
 	const [searchMatches, setSearchMatches] = useState(props.searchState && props.searchState['searchMatches'] ? props.searchState['searchMatches'] : [])
 	const [searchOptScope, setSearchOptScope] = useState(props.searchState && props.searchState['searchOptScope'] ? props.searchState['searchOptScope'] : SearchScopes.all)
 	const [searchTerm, setSearchTerm] = useState(props.searchState && props.searchState['searchTerm'] ? props.searchState['searchTerm'] : '')
@@ -43,49 +39,6 @@ export default function TabSearch(props: Props) {
 	const [searchOptMatchType, setSearchOptMatchType] = useState(
 		props.searchState && props.searchState['searchOptMatchType'] ? props.searchState['searchOptMatchType'] : SearchMatchTypes.whole
 	)
-
-	/** Gather all metrics */
-	useEffect(() => {
-		if (props.dataFile && props.dataFile.entries) {
-			// Total: dreams, stars, lucids
-			{
-				let tmpTotalStarred = 0
-				let tmpTotalDreams = 0
-				let tmpTotalLucids = 0
-
-				props.dataFile.entries.forEach((entry) => {
-					if (entry.starred) tmpTotalStarred++
-					tmpTotalDreams += entry.dreams.length
-					tmpTotalLucids += entry.dreams.filter((dream) => dream.isLucidDream).length
-				})
-
-				setTotalStarred(tmpTotalStarred)
-				setTotalDreams(tmpTotalDreams)
-				setTotalLucids(tmpTotalLucids)
-			}
-
-			// Total Months
-			{
-				let d1 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
-				let d2 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
-				let months: number
-				months = (d2.getFullYear() - d1.getFullYear()) * 12
-				months -= d1.getMonth() + 1
-				months += d2.getMonth()
-				months += 2 // include both first and last months
-
-				setTotalMonths(months <= 0 ? 0 : months)
-			}
-
-			// Total Years
-			{
-				let d1 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
-				let d2 = new Date(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
-
-				setTotalYears(d2.getFullYear() - d1.getFullYear() + 1)
-			}
-		}
-	}, [props.dataFile])
 
 	/** Push state up whenever it changes */
 	useEffect(() => {
@@ -177,28 +130,28 @@ export default function TabSearch(props: Props) {
 
 		if (type === SearchScopes._starred) {
 			props.dataFile.entries
-				.filter((entry) => entry.starred)
-				.forEach((entry) => {
-					;(entry.dreams || []).forEach((dream) => {
+				.filter((entry) => entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === MetaType.star)).length > 0)
+				.forEach((entry) =>
+					entry.dreams.forEach((dream) => {
 						arrFound.push({
 							entryDate: entry.entryDate,
-							starred: entry.starred,
+							starred: true,
 							dream: dream,
 						})
 					})
-				})
+				)
 		} else {
-			props.dataFile.entries.forEach((entry) => {
-				;(entry.dreams || []).forEach((dream) => {
+			props.dataFile.entries.forEach((entry) =>
+				entry.dreams.forEach((dream) => {
 					if (dream.isLucidDream) {
 						arrFound.push({
 							entryDate: entry.entryDate,
-							starred: entry.starred,
+							starred: entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === MetaType.star)).length > 0,
 							dream: dream,
 						})
 					}
 				})
-			})
+			)
 		}
 
 		setSearchMatches(arrFound)

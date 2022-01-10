@@ -26,7 +26,6 @@ export default function ModalEntry(props: IModalEntryProps) {
 		bedTime: '01:30',
 		notesPrep: '',
 		notesWake: '',
-		starred: false,
 		dreams: [{ ...NEW_DREAM }],
 	}
 	const [isBusySave, setIsBusySave] = useState(false)
@@ -165,21 +164,6 @@ export default function ModalEntry(props: IModalEntryProps) {
 										<PlusCircle style={{ marginTop: '-2px' }} />
 									</div>
 									<div className='col'>Add Dream</div>
-								</div>
-							</button>
-							<button
-								type='button'
-								onClick={(_ev) => {
-									let updEntry = { ...currEntry }
-									updEntry.starred = !updEntry.starred
-									setCurrEntry(updEntry)
-								}}
-								className='btn btn-warning w-100'>
-								<div className='row g-0 align-items-center'>
-									<div className='col-auto'>
-										{currEntry.starred ? <StarFill size='1rem' style={{ marginTop: '-2px' }} /> : <Star size='1rem' style={{ marginTop: '-2px' }} />}
-									</div>
-									<div className='col'>{currEntry.starred ? 'Starred' : 'Un-Starred'}</div>
 								</div>
 							</button>
 							<button type='button' onClick={() => handleDelete()} className='btn btn-danger w-25'>

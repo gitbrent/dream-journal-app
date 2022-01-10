@@ -80,8 +80,7 @@ export default function TabJournal(props: Props) {
 							.join()
 							.indexOf(filterText.toLowerCase()) > -1) &&
 					(filterEntry === FilterEntry.all ||
-						(filterEntry === FilterEntry.star &&
-							(entry.starred || entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === 'meta:star')).length > 0)) ||
+						(filterEntry === FilterEntry.star && entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === 'meta:star')).length > 0) ||
 						(filterEntry === FilterEntry.lucid && entry.dreams.filter((dream) => dream.isLucidDream).length > 0))
 			)
 		)

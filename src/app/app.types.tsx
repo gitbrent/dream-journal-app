@@ -1,5 +1,5 @@
 // APP
-export const APP_BLD = '20220109-1030'
+export const APP_BLD = '20220109-2240'
 export const APP_VER = `1.2.0-WIP ${APP_BLD}`
 //export const APP_VER = `1.2.0`
 
@@ -106,10 +106,7 @@ export interface IDriveDataFile {
 export interface IJournalDream {
 	title: string
 	notes?: string
-	/**
-	 * @deprecated
-	 * - TODO: rename to `dreamTags`
-	 */
+	/** TODO: rename to `dreamTags` */
 	dreamSigns?: Array<string>
 	dreamImages?: Array<string>
 	isLucidDream: boolean
@@ -132,12 +129,6 @@ export interface IJournalEntry {
 	bedTime?: string
 	notesPrep?: string
 	notesWake?: string
-	/**
-	 * @deprecated
-	 * will be removed in v1.1.0
-	 * TODO: convert all existing extries to tag of `meta:star`
-	 */
-	starred?: boolean
 	dreams?: IJournalDream[]
 }
 
