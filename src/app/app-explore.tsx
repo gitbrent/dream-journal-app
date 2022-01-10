@@ -28,13 +28,12 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { IDriveConfFile, IDriveDataFile, IJournalDream, IJournalEntry, MetaType } from './app.types'
+import { IDriveConfFile, IDriveDataFile, IJournalEntry, MetaType } from './app.types'
 import { DateTime } from 'luxon'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
+import HeaderMetrics from './components/header-metrics'
 import TableEntries from './components/table-entries'
-//import ModalEntry from './modal-entry'
 
 /**
  * TODO:
@@ -57,11 +56,6 @@ export interface Props {
 	tabState: ITabStateExplore
 }
 
-interface LucidDream {
-	entry: IJournalEntry
-	lucidDream: IJournalDream
-}
-
 interface IChartData {
 	/**
 	 * Rechart data name
@@ -82,9 +76,6 @@ interface IChartData {
 }
 
 export default function TabExplore(props: Props) {
-	const [isBusySave, setIsBusySave] = useState(false)
-	const [showModal, setShowModal] = useState(false)
-	//const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
 	const [chartData, setChartData] = useState<IChartData[]>([])
 	//
 	const [filterDrmChtMonths, setFilterDrmChtMonths] = useState(12)
@@ -98,7 +89,7 @@ export default function TabExplore(props: Props) {
 	useEffect(() => {
 		let dateMaxAge = DateTime.now()
 			.minus({ months: filterDrmChtMonths - 1 })
-			.set({ day: 1 })
+			.set({ day: 0, hour: 0, minute: 0, second: 0 })
 		let tmpChartData: IChartData[] = []
 
 		if (props.dataFile && props.dataFile.entries && props.dataFile.entries.length > 0) {
@@ -119,14 +110,12 @@ export default function TabExplore(props: Props) {
 						tmpChartData.push(currChartData)
 					}
 
-					let dreamMap = entry.dreams.map((dream) => dream.dreamSigns.length)
-					let isDreamTagged = dreamMap.length > 0 ? dreamMap.reduce((prev, next) => prev + next) > 0 : false
-
-					currChartData.totLucid += entry.dreams.filter((dream) => dream.isLucidDream).length
-					currChartData.totStard += entry.starred ? 1 : 0
-					//currChartData.totStard += entry.dreams.filter((dream) => dream.dreamSigns.filter((tag) => tag === MetaType.star)).length // FIXME:
-					currChartData.totTaged += isDreamTagged ? entry.dreams.length : 0
-					currChartData.totNotag += !isDreamTagged ? entry.dreams.length : 0
+					entry.dreams.forEach((dream) => {
+						currChartData.totTaged += dream.dreamSigns.length > 0 ? 1 : 0
+						currChartData.totNotag += dream.dreamSigns.length > 0 ? 0 : 1
+						currChartData.totLucid += dream.isLucidDream ? 1 : 0
+						currChartData.totStard += dream.dreamSigns.filter((tag) => tag === MetaType.star).length > 0 ? 1 : 0
+					})
 				}
 			})
 		}
@@ -211,7 +200,7 @@ export default function TabExplore(props: Props) {
 
 				<div className='bg-black p-4 mb-4' style={{ width: '100%', height: 400 }}>
 					<ResponsiveContainer width='100%' height='100%'>
-						<BarChart data={chartData} onClick={(data) => setDrmChartClickedIdx(data && data.activeTooltipIndex ? data.activeTooltipIndex : null)}>
+						<BarChart data={chartData} onClick={(data) => setDrmChartClickedIdx(data && data.activeTooltipIndex !== null ? data.activeTooltipIndex : null)}>
 							<XAxis dataKey='name' fontSize={'0.75rem'} />
 							<YAxis type='number' fontSize={'0.75rem'} /*domain={[0, (dataMax: number) => Math.round(dataMax * 1.1)]}*/ />
 							<CartesianGrid stroke='#555555' strokeDasharray='6 2' vertical={false} />
