@@ -1,7 +1,7 @@
 // APP
 export const APP_BLD = '20220109-2240'
-export const APP_VER = `1.2.0-WIP ${APP_BLD}`
-//export const APP_VER = `1.2.0`
+//export const APP_VER = `1.2.0-WIP ${APP_BLD}`
+export const APP_VER = `1.2.0-RC1`
 
 // ENUMS
 export enum AuthState {
