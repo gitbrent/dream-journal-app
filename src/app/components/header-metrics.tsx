@@ -114,6 +114,13 @@ export default function HeaderMetrics(props: Props) {
 			</div>
 			<div className='card-body bg-light'>
 				<div className='row align-items-end justify-content-around row-cols-auto row-cols-md-4 row-cols-lg-auto g-4'>
+					<div className='col text-center'>
+						<h6 className='text-teal text-uppercase mb-0'>Dreams</h6>
+						<h1 className='text-teal display-5 mb-0'>{totalDreams || '-'}</h1>
+						{props.showStats && (
+							<div className='badge rounded-pill bg-teal w-100'>{totalMonths * 30 > 0 ? (totalDreams / totalEntries).toFixed(2) + ' / day' : '-'}</div>
+						)}
+					</div>
 					<div className='col text-center d-none d-md-block'>
 						<h6 className='text-primary text-uppercase mb-0 mb-0'>Months</h6>
 						<h1 className='text-primary display-5 mb-0'>{totalMonths || '-'}</h1>
@@ -127,16 +134,9 @@ export default function HeaderMetrics(props: Props) {
 						)}
 					</div>
 					<div className='col text-center'>
-						<h6 className='text-primary text-uppercase mb-0'>Dreams</h6>
-						<h1 className='text-primary display-5 mb-0'>{totalDreams || '-'}</h1>
-						{props.showStats && (
-							<div className='badge rounded-pill bg-primary w-100'>{totalMonths * 30 > 0 ? (totalDreams / totalEntries).toFixed(2) + ' / day' : '-'}</div>
-						)}
-					</div>
-					<div className='col text-center'>
-						<h6 className='text-info text-uppercase mb-0'>Tags</h6>
-						<h1 className='text-info display-5 mb-0'>{totalDreamSigns || '-'}</h1>
-						{props.showStats && <div className='badge rounded-pill bg-info w-100'>-</div>}
+						<h6 className='text-pink text-uppercase mb-0'>Tags</h6>
+						<h1 className='text-pink display-5 mb-0'>{totalDreamSigns || '-'}</h1>
+						{props.showStats && <div className='badge rounded-pill bg-pink w-100'>-</div>}
 					</div>
 					<div className='col text-center d-none d-md-block'>
 						<h6 className='text-info text-uppercase mb-0'>Tagged</h6>
