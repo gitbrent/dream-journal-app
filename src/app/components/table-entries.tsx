@@ -38,7 +38,7 @@ interface Props {
 	isBusyLoad: boolean
 }
 
-export default function HeaderMetrics(props: Props) {
+export default function TableEntries(props: Props) {
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
 	//
@@ -138,7 +138,7 @@ export default function HeaderMetrics(props: Props) {
 					{(!props.entries || props.entries.length === 0) && (
 						<tr>
 							<td colSpan={7} className='text-center text-muted p-3'>
-								<h5>(No Dream Journal entries found - select "Add Journal Entry" on home page create a new one)</h5>
+								<div>(no dream journal entries found)</div>
 							</td>
 						</tr>
 					)}
