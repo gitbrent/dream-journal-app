@@ -28,9 +28,10 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { IDriveConfFile, IDriveDataFile, IJournalEntry, MetaType } from './app.types'
+import { IDreamSignTagGroup, IDreamTagByCat, IDriveConfFile, IDriveDataFile, IJournalEntry, MetaType } from './app.types'
 import { DateTime } from 'luxon'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { Search, Tag, Tags } from 'react-bootstrap-icons'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
 import TableEntries from './components/table-entries'
@@ -72,20 +73,26 @@ interface IChartData {
 	totLucid: number
 	totStard: number
 	totTaged: number
-	totNotag: number
+	totNotag?: number
 }
 
 export default function TabExplore(props: Props) {
-	const [chartData, setChartData] = useState<IChartData[]>([])
-	//
+	// TAB: Dream Timeline
+	const [chartDataDreams, setChartDataDreams] = useState<IChartData[]>([])
 	const [filterDrmChtMonths, setFilterDrmChtMonths] = useState(12)
 	const [filterDrmChtShowNotag, setFilterDrmChtShowNotag] = useState(true)
 	const [filterDrmChtShowTaged, setFilterDrmChtShowTaged] = useState(true)
-	//
 	const [drmChartClickedIdx, setDrmChartClickedIdx] = useState<number>(null)
 	const [drmChartClkEntries, setDrmChartClkEntries] = useState<IJournalEntry[]>([])
+	// TAB: Tag Timeline
+	const [dreamTagGroups, setDreamTagGroups] = useState<IDreamSignTagGroup[]>([])
+	const [tagsByCat, setTagsByCat] = useState<IDreamTagByCat[]>([])
+	const [chartDataTags, setChartDataTags] = useState<IChartData[]>([])
+	const [filterTextTags, setFilterTextTags] = useState('')
+	const [tagChartClickedIdx, setTagChartClickedIdx] = useState<number>(null)
+	const [tagChartClkEntries, setTagChartClkEntries] = useState<IJournalEntry[]>([])
 
-	/** Gather dream chart data */
+	/** Gather chart data: dreams */
 	useEffect(() => {
 		let dateMaxAge = DateTime.now()
 			.minus({ months: filterDrmChtMonths - 1 })
@@ -120,13 +127,13 @@ export default function TabExplore(props: Props) {
 			})
 		}
 
-		setChartData(tmpChartData)
+		setChartDataDreams(tmpChartData)
 	}, [props.dataFile, filterDrmChtMonths])
 
-	/** Handle click on dreams barchart */
+	/** Handle barchart click: dreams  */
 	useEffect(() => {
-		if (typeof drmChartClickedIdx !== null && chartData && chartData[drmChartClickedIdx]) {
-			let dateEntry = chartData[drmChartClickedIdx].dateTime
+		if (typeof drmChartClickedIdx !== null && chartDataDreams && chartDataDreams[drmChartClickedIdx]) {
+			let dateEntry = chartDataDreams[drmChartClickedIdx].dateTime
 			setDrmChartClkEntries(
 				props.dataFile.entries.filter(
 					(entry) => DateTime.fromISO(entry.entryDate).hasSame(dateEntry, 'month') && DateTime.fromISO(entry.entryDate).hasSame(dateEntry, 'year')
@@ -137,49 +144,159 @@ export default function TabExplore(props: Props) {
 		}
 	}, [props.dataFile, drmChartClickedIdx])
 
+	/** Gather tag groups */
+	useEffect(() => {
+		if (!props.dataFile || !props.dataFile.entries) return
+
+		// Tag Groups
+		let tagGroups: IDreamSignTagGroup[] = []
+		{
+			props.dataFile.entries
+				.filter(
+					(entry) =>
+						!filterTextTags ||
+						entry.dreams
+							.map((dream) => dream.dreamSigns)
+							.join(',')
+							.toLowerCase()
+							.indexOf(filterTextTags.toLowerCase()) > -1
+				)
+				.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
+				.forEach((entry) => {
+					entry.dreams.forEach((dream) => {
+						dream.dreamSigns.forEach((sign) => {
+							let tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
+							if (tag) {
+								let existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
+								if (!existingEntry) tag.dailyEntries.push(entry)
+								tag.totalOccurs++
+							} else {
+								tagGroups.push({ dreamSign: sign, dailyEntries: [entry], totalOccurs: 1 })
+							}
+						})
+					})
+				})
+
+			// tagGroup
+			setDreamTagGroups(tagGroups)
+		}
+
+		let tagByCats: IDreamTagByCat[] = []
+		tagGroups.forEach((tagGrp) => {
+			let tagTag = tagGrp.dreamSign
+			let tagCat = tagTag.indexOf(':') ? tagTag.split(':')[0] : tagTag
+
+			let cat = tagByCats.filter((item) => item.dreamCat === tagCat)[0]
+			if (cat) cat.dreamTagGroups.push(tagGrp)
+			else tagByCats.push({ dreamCat: tagCat, dreamTagGroups: [tagGrp] })
+		})
+		setTagsByCat(tagByCats)
+	}, [props.dataFile, filterTextTags])
+
+	/** Gather chart data: tags */
+	useEffect(() => {
+		if (!props.dataFile || !props.dataFile.entries) return
+
+		// Tag Groups
+		let tmpChartData: IChartData[] = []
+		{
+			props.dataFile.entries
+				.filter(
+					(entry) =>
+						!filterTextTags ||
+						entry.dreams
+							.map((dream) => dream.dreamSigns)
+							.join(',')
+							.toLowerCase()
+							.indexOf(filterTextTags.toLowerCase()) > -1
+				)
+				.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
+				.forEach((entry) => {
+					let dateEntry = DateTime.fromISO(entry.entryDate)
+					let currChartData = tmpChartData.filter((data) => data.dateTime.hasSame(dateEntry, 'month') && data.dateTime.hasSame(dateEntry, 'year'))[0]
+					if (!currChartData) {
+						currChartData = {
+							name: dateEntry.toFormat('LLL-yy'),
+							dateTime: dateEntry,
+							totLucid: 0,
+							totStard: 0,
+							totTaged: 0,
+						}
+						tmpChartData.push(currChartData)
+					}
+
+					currChartData.totTaged += 1
+				})
+		}
+
+		setChartDataTags(tmpChartData)
+	}, [props.dataFile, filterTextTags])
+
+	/** Handle barchart click: tags  */
+	useEffect(() => {
+		if (typeof tagChartClickedIdx !== null && chartDataTags && chartDataTags[tagChartClickedIdx]) {
+			let dateEntry = chartDataTags[tagChartClickedIdx].dateTime
+			setTagChartClkEntries(
+				props.dataFile.entries
+					.filter(
+						(entry) =>
+							!filterTextTags ||
+							entry.dreams
+								.map((dream) => dream.dreamSigns)
+								.join(',')
+								.toLowerCase()
+								.indexOf(filterTextTags.toLowerCase()) > -1
+					)
+					.filter((entry) => DateTime.fromISO(entry.entryDate).hasSame(dateEntry, 'month') && DateTime.fromISO(entry.entryDate).hasSame(dateEntry, 'year'))
+			)
+		} else {
+			setTagChartClkEntries([])
+		}
+	}, [props.dataFile, tagChartClickedIdx])
+
 	// -----------------------------------------------------------------------
 
-	// TODO: get fancier fills, not just plain bs-colors (use strips and transparency like sample on desktop shows)
-	function renderTabChart(): JSX.Element {
+	// FUTURE: get fancier fills, not just plain bs-colors (use strips and transparency like sample on desktop shows)
+	function renderTabDreams(): JSX.Element {
 		return (
 			<section>
 				<div className='row row-cols g-4 align-items-center justify-content-between mb-4' data-desc='commandbar'>
 					<div className='col'>
-						<div className='form-control' style={{ height: '3.5rem', paddingTop: '1.625rem', paddingBottom: '0.625rem' }}>
-							<div className='form-check'>
-								<input
-									className='form-check-input'
-									id='flexCheckDefault'
-									type='checkbox'
-									checked={filterDrmChtShowNotag}
-									onChange={(ev) => setFilterDrmChtShowNotag(ev.currentTarget.checked)}
-								/>
-								<label className='form-check-label' htmlFor='flexCheckDefault'>
-									Untagged Dreams
-								</label>
-							</div>
-						</div>
-					</div>
-					<div className='col'>
-						<div className='form-control' style={{ height: '3.5rem', paddingTop: '1.625rem', paddingBottom: '0.625rem' }}>
-							<div className='form-check'>
-								<input
-									className='form-check-input'
-									id='flexCheckTaged'
-									type='checkbox'
-									checked={filterDrmChtShowTaged}
-									onChange={(ev) => setFilterDrmChtShowTaged(ev.currentTarget.checked)}
-								/>
-								<label className='form-check-label' htmlFor='flexCheckTaged'>
-									Tagged Dreams
-								</label>
-							</div>
+						<div className='form-floating'>
+							<select
+								id='floatingShowUntag'
+								placeholder='show untagged dreams'
+								defaultValue={filterDrmChtShowNotag ? 'Yes' : 'No'}
+								onChange={(ev) => setFilterDrmChtShowNotag(ev.currentTarget.value == 'Yes')}
+								className='form-control'>
+								<option value={'Yes'}>Yes</option>
+								<option value={'No'}>No</option>
+							</select>
+							<label htmlFor='floatingShowUntag' className='text-nowrap'>
+								Show Un-Tagged Dreams?
+							</label>
 						</div>
 					</div>
 					<div className='col'>
 						<div className='form-floating'>
 							<select
-								id='floatingSortOrder'
+								id='floatingShowTaged'
+								placeholder='show untagged dreams'
+								defaultValue={filterDrmChtShowNotag ? 'Yes' : 'No'}
+								onChange={(ev) => setFilterDrmChtShowTaged(ev.currentTarget.value == 'Yes')}
+								className='form-control'>
+								<option value={'Yes'}>Yes</option>
+								<option value={'No'}>No</option>
+							</select>
+							<label htmlFor='floatingShowTaged' className='text-nowrap'>
+								Show Tagged Dreams?
+							</label>
+						</div>
+					</div>
+					<div className='col'>
+						<div className='form-floating'>
+							<select
+								id='floatingMonthsShown'
 								placeholder='months shown'
 								defaultValue={filterDrmChtMonths}
 								onChange={(ev) => setFilterDrmChtMonths(Number(ev.currentTarget.value))}
@@ -191,16 +308,15 @@ export default function TabExplore(props: Props) {
 								<option value={36}>36</option>
 								<option value={48}>48</option>
 							</select>
-							<label htmlFor='floatingSortOrder' className='text-nowrap'>
-								Months Shown
+							<label htmlFor='floatingMonthsShown' className='text-nowrap'>
+								Month Range
 							</label>
 						</div>
 					</div>
 				</div>
-
 				<div className='bg-black p-4 mb-4' style={{ width: '100%', height: 400 }}>
 					<ResponsiveContainer width='100%' height='100%'>
-						<BarChart data={chartData} onClick={(data) => setDrmChartClickedIdx(data && data.activeTooltipIndex !== null ? data.activeTooltipIndex : null)}>
+						<BarChart data={chartDataDreams} onClick={(data) => setDrmChartClickedIdx(data && data.activeTooltipIndex !== null ? data.activeTooltipIndex : null)}>
 							<XAxis dataKey='name' fontSize={'0.75rem'} />
 							<YAxis type='number' fontSize={'0.75rem'} /*domain={[0, (dataMax: number) => Math.round(dataMax * 1.1)]}*/ />
 							<CartesianGrid stroke='#555555' strokeDasharray='6 2' vertical={false} />
@@ -214,10 +330,59 @@ export default function TabExplore(props: Props) {
 						</BarChart>
 					</ResponsiveContainer>
 				</div>
-
 				{typeof drmChartClickedIdx !== null && (
 					<section className='bg-black p-4'>
 						<TableEntries entries={drmChartClkEntries} isBusyLoad={props.isBusyLoad} />
+					</section>
+				)}
+			</section>
+		)
+	}
+
+	// WIP:
+	function renderTabTags(): JSX.Element {
+		return (
+			<section>
+				<div className='row row-cols g-4 align-items-center justify-content-between mb-4' data-desc='commandbar'>
+					<div className='col-12 col-md' data-desc='search tags'>
+						<div className='row flex-nowrap align-items-center g-0 bg-black'>
+							<div className='col-auto px-2'>
+								<Search size={40} className='text-secondary' />
+							</div>
+							<div className='col'>
+								<div className='form-floating'>
+									<input
+										id='floatingDreamtag'
+										type='text'
+										value={filterTextTags}
+										placeholder='search tags'
+										className='form-control'
+										onChange={(event) => setFilterTextTags(event.target.value)}
+										disabled={!props.dataFile ? true : false}
+									/>
+									<label htmlFor='floatingDreamtag'>
+										<Tags /> {tagsByCat.length} cats / <Tag /> {dreamTagGroups.length} tags
+									</label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div className='bg-black p-4 mb-4' style={{ width: '100%', height: 400 }}>
+					<ResponsiveContainer width='100%' height='100%'>
+						<BarChart data={chartDataTags} onClick={(data) => setTagChartClickedIdx(data && data.activeTooltipIndex !== null ? data.activeTooltipIndex : null)}>
+							<XAxis dataKey='name' fontSize={'0.75rem'} />
+							<YAxis type='number' fontSize={'0.75rem'} /*domain={[0, (dataMax: number) => Math.round(dataMax * 1.1)]}*/ />
+							<CartesianGrid stroke='#555555' strokeDasharray='6 2' vertical={false} />
+							<Tooltip cursor={false} />
+							<Legend verticalAlign='bottom' align='center' iconSize={20} />
+							<Bar dataKey='totTaged' name='Journal Entries' stackId='a' fill='var(--bs-teal)' />
+						</BarChart>
+					</ResponsiveContainer>
+				</div>
+				{typeof tagChartClickedIdx !== null && (
+					<section className='bg-black p-4'>
+						<TableEntries entries={tagChartClkEntries} isBusyLoad={props.isBusyLoad} />
 					</section>
 				)}
 			</section>
@@ -229,7 +394,7 @@ export default function TabExplore(props: Props) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
-		<div className='container my-auto my-md-5'>
+		<section className='container my-auto my-md-5'>
 			{/* We have one in table-entires!! <ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />*/}
 			<header>
 				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
@@ -243,26 +408,30 @@ export default function TabExplore(props: Props) {
 				</li>
 				<li className='nav-item' role='presentation'>
 					<a className='nav-link' id='2-tab' data-toggle='tab' href='#tab2' role='tab' aria-controls='tab2' aria-selected='false'>
-						Tag Timeine
+						Tag Timeline
 					</a>
 				</li>
-				<li className='nav-item' role='presentation'>
-					<a className='nav-link' id='3-tab' data-toggle='tab' href='#tab3' role='tab' aria-controls='tab3' aria-selected='false'>
-						???
-					</a>
-				</li>
+				{/*
+					<li className='nav-item' role='presentation'>
+						<a className='nav-link' id='3-tab' data-toggle='tab' href='#tab3' role='tab' aria-controls='tab3' aria-selected='false'>
+							???
+						</a>
+					</li>
+				*/}
 			</ul>
 			<div className='tab-content' id='bsTabContent'>
 				<div className='tab-pane bg-light p-4 show active' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
-					{renderTabChart()}
+					{renderTabDreams()}
 				</div>
 				<div className='tab-pane bg-light p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
-					{renderTabChart()}
+					{renderTabTags()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='tab3' role='tabpanel' aria-labelledby='3-tab'>
-					{renderTabChart()}
-				</div>
+				{/*
+					<div className='tab-pane bg-light p-4' id='tab3' role='tabpanel' aria-labelledby='3-tab'>
+						{renderTabChart()}
+					</div>
+				*/}
 			</div>
-		</div>
+		</section>
 	)
 }
