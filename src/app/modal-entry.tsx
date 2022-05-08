@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { IDreamSignTag, IJournalDream, IJournalEntry, InductionTypes } from './app.types'
-import { Calendar3, Clock, PlusCircle, Save, Star, StarFill, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
+import { Calendar3, Clock, PlusCircle, Save, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
 import ReactTags from 'react-tag-autocomplete'
 import Modal from 'bootstrap/js/dist/modal'
 import * as GDrive from './google-oauth'
@@ -10,9 +10,11 @@ export interface IModalEntryProps {
 	currDreamIdx?: number
 	showModal: boolean
 	setShowModal: Function
+	modalId?: string
 }
 
 export default function ModalEntry(props: IModalEntryProps) {
+	const DEF_MODAL_ID = 'myModal'
 	const NEW_DREAM = {
 		title: '',
 		notes: '',
@@ -34,6 +36,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 	const [isDateDupe, setIsDateDupe] = useState(false)
 	const [selectedTab, setSelectedTab] = useState(-1)
 	const [modal, setModal] = useState<Modal>(null)
+	const [modalId, setModalId] = useState(DEF_MODAL_ID)
 
 	useEffect(() => {
 		if (!modal) setModal(new Modal(document.getElementById('myModal')))
@@ -58,6 +61,8 @@ export default function ModalEntry(props: IModalEntryProps) {
 	useEffect(() => {
 		if (currEntry && !isNaN(props.currDreamIdx)) setSelectedTab(props.currDreamIdx)
 	}, [currEntry, props.currDreamIdx])
+
+	useEffect(() => setModalId(props.modalId ? props.modalId : DEF_MODAL_ID), [props.modalId])
 
 	// -----------------------------------------------------------------------
 
@@ -363,7 +368,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 	}
 
 	return (
-		<div id='myModal' className='modal' data-bs-backdrop='static' tabIndex={-1}>
+		<div id={modalId} className='modal' data-bs-backdrop='static' tabIndex={-1}>
 			<div className='modal-dialog modal-lg'>
 				<div className='modal-content'>
 					<div className='modal-header bg-primary'>
