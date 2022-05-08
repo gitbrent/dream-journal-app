@@ -30,7 +30,7 @@
 import React, { useState } from 'react'
 import { IJournalEntry, MetaType } from '../app.types'
 import ReactPaginate from 'react-paginate'
-import { CheckCircleFill, Diagram3Fill, StarFill, SortDownAlt } from 'react-bootstrap-icons'
+import { CheckCircleFill, Diagram3Fill, StarFill, SortUpAlt } from 'react-bootstrap-icons'
 import ModalEntry from '../modal-entry'
 
 interface Props {
@@ -58,7 +58,7 @@ export default function TableEntries(props: Props) {
 					<tr>
 						<th style={{ width: '1%' }}>
 							Date
-							<SortDownAlt size='16' className='ms-1' />
+							<SortUpAlt size='16' className='ms-1' />
 						</th>
 						<th className='text-center d-none d-lg-table-cell'>Bed</th>
 						<th className='text-center'>
@@ -85,7 +85,7 @@ export default function TableEntries(props: Props) {
 				</thead>
 				<tbody>
 					{props.entries
-						.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
+						.sort((a, b) => (a.entryDate > b.entryDate ? -1 : 1))
 						.filter((_entry, idx) => idx >= pagingPageSize * pagingCurrIdx && idx < pagingPageSize * (pagingCurrIdx + 1))
 						.map((entry, idx) => {
 							// This is a harsh thing to compile inline below, so do it here
