@@ -30,7 +30,7 @@
 import React, { useState, useEffect } from 'react'
 import { IDreamSignTagGroup, IDreamTagByCat, IDriveConfFile, IDriveDataFile, IJournalEntry, MetaType } from './app.types'
 import { DateTime } from 'luxon'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Search, Tag, Tags } from 'react-bootstrap-icons'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
@@ -89,6 +89,7 @@ export default function TabExplore(props: Props) {
 	const [tagsByCat, setTagsByCat] = useState<IDreamTagByCat[]>([])
 	const [chartDataTags, setChartDataTags] = useState<IChartData[]>([])
 	const [filterTextTags, setFilterTextTags] = useState('')
+	const [filterShowAllMons, setFilterShowAllMons] = useState(true)
 	const [tagChartClickedIdx, setTagChartClickedIdx] = useState<number>(null)
 	const [tagChartClkEntries, setTagChartClkEntries] = useState<IJournalEntry[]>([])
 
@@ -195,42 +196,48 @@ export default function TabExplore(props: Props) {
 
 	/** Gather chart data: tags */
 	useEffect(() => {
-		if (!props.dataFile || !props.dataFile.entries) return
+		const delayDebounceFn = setTimeout(() => {
+			let tmpChartData: IChartData[] = []
 
-		// Tag Groups
-		let tmpChartData: IChartData[] = []
-		{
-			props.dataFile.entries
-				.filter(
-					(entry) =>
-						!filterTextTags ||
-						entry.dreams
-							.map((dream) => dream.dreamSigns)
-							.join(',')
-							.toLowerCase()
-							.indexOf(filterTextTags.toLowerCase()) > -1
-				)
-				.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
-				.forEach((entry) => {
-					let dateEntry = DateTime.fromISO(entry.entryDate)
-					let currChartData = tmpChartData.filter((data) => data.dateTime.hasSame(dateEntry, 'month') && data.dateTime.hasSame(dateEntry, 'year'))[0]
-					if (!currChartData) {
-						currChartData = {
-							name: dateEntry.toFormat('LLL-yy'),
-							dateTime: dateEntry,
-							totLucid: 0,
-							totStard: 0,
-							totTaged: 0,
-						}
-						tmpChartData.push(currChartData)
+			if (!props.dataFile || !props.dataFile.entries) return
+
+			// PERF: dont chart every dream, it causes super-slow page render
+			if (!filterTextTags || filterTextTags.length < 3) {
+				setChartDataTags([])
+				return
+			}
+
+			// Tag Groups
+			props.dataFile.entries.forEach((entry) => {
+				let dateEntry = DateTime.fromISO(entry.entryDate)
+				let currChartData = tmpChartData.filter((data) => data.dateTime.hasSame(dateEntry, 'month') && data.dateTime.hasSame(dateEntry, 'year'))[0]
+				if (!currChartData) {
+					currChartData = {
+						name: dateEntry.toFormat('LLL-yy'),
+						dateTime: dateEntry,
+						totLucid: 0,
+						totStard: 0,
+						totTaged: 0,
 					}
+					tmpChartData.push(currChartData)
+				}
 
+				if (
+					entry.dreams
+						.map((dream) => dream.dreamSigns)
+						.join(',')
+						.toLowerCase()
+						.indexOf(filterTextTags.toLowerCase()) > -1
+				) {
 					currChartData.totTaged += 1
-				})
-		}
+				}
+			})
 
-		setChartDataTags(tmpChartData)
-	}, [props.dataFile, filterTextTags])
+			setChartDataTags(filterShowAllMons ? tmpChartData : tmpChartData.filter((item) => item.totTaged > 0))
+		}, 1000)
+
+		return () => clearTimeout(delayDebounceFn)
+	}, [filterTextTags, filterShowAllMons])
 
 	/** Handle barchart click: tags  */
 	useEffect(() => {
@@ -339,7 +346,6 @@ export default function TabExplore(props: Props) {
 		)
 	}
 
-	// WIP:
 	function renderTabTags(): JSX.Element {
 		return (
 			<section>
@@ -367,20 +373,46 @@ export default function TabExplore(props: Props) {
 							</div>
 						</div>
 					</div>
+					<div className='col-auto' style={{ minWidth: '185px' }} data-desc='show all months'>
+						<div className='form-floating'>
+							<select
+								id='floatingFilterView'
+								placeholder='view type'
+								defaultValue={filterShowAllMons ? '1' : '0'}
+								onChange={(ev) => setFilterShowAllMons(ev.currentTarget.value === '1')}
+								className='form-control'>
+								<option value='0' key={'showAllMonN'}>
+									No
+								</option>
+								<option value='1' key={'showAllMonY'}>
+									Yes
+								</option>
+							</select>
+							<label htmlFor='floatingFilterView' className='text-nowrap'>
+								Show All Months
+							</label>
+						</div>
+					</div>
 				</div>
-				<div className='bg-black p-4 mb-4' style={{ width: '100%', height: 400 }}>
-					<ResponsiveContainer width='100%' height='100%'>
-						<BarChart data={chartDataTags} onClick={(data) => setTagChartClickedIdx(data && data.activeTooltipIndex !== null ? data.activeTooltipIndex : null)}>
-							<XAxis dataKey='name' fontSize={'0.75rem'} />
-							<YAxis type='number' fontSize={'0.75rem'} /*domain={[0, (dataMax: number) => Math.round(dataMax * 1.1)]}*/ />
-							<CartesianGrid stroke='#555555' strokeDasharray='6 2' vertical={false} />
-							<Tooltip cursor={false} />
-							<Legend verticalAlign='bottom' align='center' iconSize={20} />
-							<Bar dataKey='totTaged' name='Journal Entries' stackId='a' fill='var(--bs-teal)' />
-						</BarChart>
-					</ResponsiveContainer>
-				</div>
-				{typeof tagChartClickedIdx !== null && (
+				{!chartDataTags || chartDataTags.length === 0 ? (
+					<div className='alert alert-secondary'>(no data - enter at least 3 characters above to view chart)</div>
+				) : (
+					<div className='bg-black p-4 mb-4' style={{ width: '100%', height: 400 }}>
+						<ResponsiveContainer width='100%' height='100%'>
+							<BarChart
+								data={chartDataTags}
+								onClick={(data) => setTagChartClickedIdx(data && data.activeTooltipIndex !== null ? data.activeTooltipIndex : null)}>
+								<XAxis dataKey='name' fontSize={'0.75rem'} interval='preserveStartEnd' />
+								<YAxis type='number' fontSize={'0.75rem'} />
+								<CartesianGrid stroke='#5c5c5c' strokeDasharray='6 2' vertical={false} />
+								<Tooltip cursor={false} />
+								<Legend verticalAlign='bottom' align='center' iconSize={20} />
+								<Bar dataKey='totTaged' name='Journal Entries' stackId='a' fill='var(--bs-teal)' />
+							</BarChart>
+						</ResponsiveContainer>
+					</div>
+				)}
+				{chartDataTags && chartDataTags.length > 0 && typeof tagChartClickedIdx !== null && (
 					<section className='bg-black p-4'>
 						<TableEntries entries={tagChartClkEntries} isBusyLoad={props.isBusyLoad} />
 					</section>
@@ -395,7 +427,6 @@ export default function TabExplore(props: Props) {
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<section className='container my-auto my-md-5'>
-			{/* We have one in table-entires!! <ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />*/}
 			<header>
 				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			</header>
