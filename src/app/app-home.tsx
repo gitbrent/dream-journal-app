@@ -69,7 +69,7 @@ export default function TabHome(props: Props) {
 							<label>User Name</label>
 							{props.authState.userName}
 						</div>
-						<div className='col-auto text-right'>
+						<div className='col-auto text-end'>
 							<label>App Version</label>
 							{APP_VER}
 						</div>
@@ -126,7 +126,7 @@ export default function TabHome(props: Props) {
 						<label>File Name</label>
 						{props.dataFile.name}
 					</div>
-					<div className='col-auto text-right'>
+					<div className='col-auto text-end'>
 						<label>Entries</label>
 						{props.dataFile.entries ? props.dataFile.entries.length : '?'}
 					</div>
@@ -136,7 +136,7 @@ export default function TabHome(props: Props) {
 						<label>Last Saved</label>
 						{props.dataFile ? new Date(props.dataFile.modifiedTime).toLocaleString() : '-'}
 					</div>
-					<div className='col-auto text-right'>
+					<div className='col-auto text-end'>
 						<label>File Size</label>
 						{getReadableFileSizeString(Number(props.dataFile.size))}
 					</div>
