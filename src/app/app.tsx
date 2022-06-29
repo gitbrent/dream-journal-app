@@ -204,7 +204,6 @@ class App extends React.Component<IAppProps, IAppState> {
 
 	render() {
 		const NavLinkBaseClass = !this.state.dataFile ? 'nav-link disabled' : 'nav-link'
-
 		return (
 			<BrowserRouter>
 				<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
