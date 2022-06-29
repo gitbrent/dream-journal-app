@@ -2,15 +2,14 @@
 .env
 ### MacOS
 .DS_Store
-### Node
-node_modules/
-npm-debug.log
-bower_components/
 .icloud
 *.icloud
+### Node
+node_modules
+bower_components
+npm-debug.log
 /.idea
-
-# Data
+### Data
 src/data/*.json
 z.admin.local.tsx
 firebase-debug.log
