@@ -29,7 +29,7 @@
 
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { BrowserRouter as Router, Route, NavLink } from 'react-router-dom' // NOTE: upgrade to v6 is major!
+import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
 import { IAuthState, IDriveDataFile, IJournalEntry, AuthState, APP_VER, IDriveConfFile } from './app.types'
 import * as GDrive from './google-oauth'
 import TabHome from '../app/app-home'
@@ -202,10 +202,10 @@ class App extends React.Component<IAppProps, IAppState> {
 		<TabAdmin dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} doSaveAdminState={this.doSaveAdminState} adminState={this.state.childAdminState} />
 	)
 
-	// NOTE: update to react-router v6 is *MAJOR* (https://reactrouter.com/docs/en/v6/upgrading/v5)
 	render() {
+		const NavLinkBaseClass = !this.state.dataFile ? 'nav-link disabled' : 'nav-link'
 		return (
-			<Router>
+			<BrowserRouter>
 				<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
 					<div className='container-fluid'>
 						<a className='navbar-brand' href='/'>
@@ -225,44 +225,44 @@ class App extends React.Component<IAppProps, IAppState> {
 						<div className='collapse navbar-collapse' id='navbarNav'>
 							<ul className='navbar-nav me-auto mb-2 mb-lg-0'>
 								<li className='nav-item'>
-									<NavLink to='/' exact={true} activeClassName='active' className='nav-link'>
+									<NavLink to='/' className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
 										Home
 									</NavLink>
 								</li>
 								<li className='nav-item'>
-									<NavLink to='/bedtime' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+									<NavLink to='/bedtime' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
 										Bedtime
 									</NavLink>
 								</li>
 								<li className='nav-item'>
-									<NavLink to='/explore' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+									<NavLink to='/explore' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
 										Explore
 									</NavLink>
 								</li>
 								<li className='nav-item'>
-									<NavLink to='/journal' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+									<NavLink to='/journal' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
 										Journal
 									</NavLink>
 								</li>
 								<li className='nav-item'>
-									<NavLink to='/tags' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+									<NavLink to='/tags' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
 										Tags
 									</NavLink>
 								</li>
 								<li className='nav-item'>
-									<NavLink to='/search' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+									<NavLink to='/search' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
 										Search
 									</NavLink>
 								</li>
 								{/*
+										<li className='nav-item'>
+											<NavLink to='/import' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+												Import Dreams
+											</NavLink>
+										</li>
+									*/}
 								<li className='nav-item'>
-									<NavLink to='/import' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
-										Import Dreams
-									</NavLink>
-								</li>
-								*/}
-								<li className='nav-item'>
-									<NavLink to='/admin' activeClassName='active' className={!this.state.dataFile ? 'nav-link disabled' : 'nav-link'}>
+									<NavLink to='/admin' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
 										Admin
 									</NavLink>
 								</li>
@@ -270,16 +270,17 @@ class App extends React.Component<IAppProps, IAppState> {
 						</div>
 					</div>
 				</nav>
-
-				<Route path='/' exact render={this.Home} />
-				<Route path='/bedtime' render={this.Bedtime} />
-				<Route path='/explore' render={this.Explore} />
-				<Route path='/journal' render={this.Journal} />
-				<Route path='/tags' render={this.Tags} />
-				<Route path='/search' render={this.Search} />
-				{/*<Route path='/import' render={this.Import} />*/}
-				<Route path='/admin' render={this.Admin} />
-			</Router>
+				<Routes>
+					<Route path='/' element={this.Home()} />
+					<Route path='/bedtime' element={this.Bedtime()} />
+					<Route path='/explore' element={this.Explore()} />
+					<Route path='/journal' element={this.Journal()} />
+					<Route path='/tags' element={this.Tags()} />
+					<Route path='/search' element={this.Search()} />
+					{/*<Route path='/import' element={this.Import()} />*/}
+					<Route path='/admin' element={this.Admin()} />
+				</Routes>
+			</BrowserRouter>
 		)
 	}
 }

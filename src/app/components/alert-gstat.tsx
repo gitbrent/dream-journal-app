@@ -27,7 +27,7 @@ export default function AlertGdriveStatus(props: Props) {
 							<CloudSlash size='36' />
 						</div>
 						<div className='col'>Your session has expired.</div>
-						<div className='col text-right'>
+						<div className='col text-end'>
 							<button type='button' onClick={() => GDrive.doAuthSignIn()} className='btn btn-secondary'>
 								Renew
 							</button>

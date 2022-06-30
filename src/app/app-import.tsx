@@ -113,16 +113,16 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			_showImporter: ImportTypes.docx,
 
 			_bedTime: config._bedTime || 'BED:',
-			_dreamBreak: config._dreamBreak || 'DREAM \d+:',
+			_dreamBreak: config._dreamBreak || `DREAM \d+:`,
 			_dreamSigns: config._dreamSigns || 'DREAMSIGNS:',
-			_entryDate: config._entryDate || '\d\d/\d\d:',
+			_entryDate: config._entryDate || `\d\d/\d\d:`,
 			_isLucidDream: config._isLucidDream || 'SUCCESS',
 			_notes: config._notes || [],
 			_notesPrep: config._notesPrep || 'PREP:',
 			_notesPrepEnd: config._notesPrepEnd || 'WAKES:',
 			_notesWake: config._notesWake || 'WAKES:',
 			_notesWakeEnd: config._notesWakeEnd || 'WAKES:',
-			_title: config._title || 'DREAM \d+:',
+			_title: config._title || `DREAM \d+:`,
 
 			bedTime: null,
 			dreamBreak: [],
@@ -425,9 +425,9 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		// D: parse text
 		if (VERBOSE) {
 			console.log('-------------------------------------------')
-			console.log(`this.state._selBreakType = ${this.state._selBreakType}`);
-			console.log('this.state._importText');
-			console.log(this.state._importText);
+			console.log(`this.state._selBreakType = ${this.state._selBreakType}`)
+			console.log('this.state._importText')
+			console.log(this.state._importText)
 			console.log('strImportText split into sections:')
 			console.log(strImportText.split(strSecBreak))
 			console.log('-------------------------------------------')
@@ -532,7 +532,11 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						} else if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
 							// DESIGN: Some people (*ahem*) choose to put DREAMSIGNS at the top-level (not as a Dream section field)
 							let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
-							if (keyVal[1].trim()) tmpDreamSigns = keyVal[1].trim().toLowerCase().split(this.state._dreamSignsDelim || strDreamSignDelim)
+							if (keyVal[1].trim())
+								tmpDreamSigns = keyVal[1]
+									.trim()
+									.toLowerCase()
+									.split(this.state._dreamSignsDelim || strDreamSignDelim)
 						}
 					} else if (line) {
 						// DESIGN: the last `else if` above created an item in `objEntry.dreams`
@@ -553,7 +557,13 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
 							let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
 							if (!keyVal[1].trim()) console.log(line) // FIXME:
-							if (keyVal[1].trim()) objDream.dreamSigns = tmpDreamSigns || keyVal[1].trim().toLowerCase().split(this.state._dreamSignsDelim || strDreamSignDelim)
+							if (keyVal[1].trim())
+								objDream.dreamSigns =
+									tmpDreamSigns ||
+									keyVal[1]
+										.trim()
+										.toLowerCase()
+										.split(this.state._dreamSignsDelim || strDreamSignDelim)
 						} else if (line.trim().match(new RegExp(this.state._isLucidDream, 'g'))) {
 							let keyVal = line.trim().split(new RegExp(this.state._isLucidDream, 'g'))
 							if (keyVal[1].trim()) objDream.isLucidDream = keyVal[1].trim() ? true : false
@@ -1197,7 +1207,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							{sect.dreams.map((dream, idy) => (
 								<div key={'parsedsectdream' + idx + idy}>
 									<div className='row mb-4'>
-										<div className='col-auto border-info border-right'>
+										<div className='col-auto border-info border-end'>
 											<h2 className='text-info'>{idy + 1}</h2>
 										</div>
 										<div className='col'>
