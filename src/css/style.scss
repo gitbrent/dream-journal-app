@@ -178,4 +178,5 @@ th {
 .nav-tabs .nav-link.active,
 .nav-pills .nav-link.active {
 	background-color: var(--bgBlack90);
+	border-top: 3px solid var(--bs-primary);
 }
