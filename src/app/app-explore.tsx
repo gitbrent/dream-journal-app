@@ -158,7 +158,7 @@ export default function TabExplore(props: Props) {
 	function renderFilters(): JSX.Element {
 		return (
 			<section>
-				<div className='row row-cols g-4 align-items-center justify-content-between mb-4' data-desc='commandbar'>
+				<div className='row row-cols-1 row-cols-sm-2 row-cols-md-5 g-4 align-items-center justify-content-between mb-4' data-desc='commandbar'>
 					<div className='col' data-desc='search tags'>
 						<div className='form-floating'>
 							<input
