@@ -29,12 +29,11 @@
 
 import React, { useState, useEffect } from 'react'
 import { IDriveConfFile, IDriveDataFile, IJournalEntry, MetaType } from './app.types'
-import { DateTime } from 'luxon'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { DateTime } from 'luxon'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
 import TableEntries from './components/table-entries'
-import { Search } from 'react-bootstrap-icons'
 
 /**
  * TODO:
@@ -77,7 +76,6 @@ interface IChartData {
 }
 
 export default function TabExplore(props: Props) {
-	const [filterText, setFilterText] = useState('')
 	// TAB: Dream Timeline
 	const [chartDataDreams, setChartDataDreams] = useState<IChartData[]>([])
 	const [filterDrmChtMonths, setFilterDrmChtMonths] = useState(12)
@@ -86,6 +84,14 @@ export default function TabExplore(props: Props) {
 	const [filterDrmChtShowTaged, setFilterDrmChtShowTaged] = useState(true)
 	const [drmChartClickedIdx, setDrmChartClickedIdx] = useState<number>(null)
 	const [drmChartClkEntries, setDrmChartClkEntries] = useState<IJournalEntry[]>([])
+	//
+	const [filterText, setFilterText] = useState('')
+	const [debouncedValue, setDebouncedValue] = useState('')
+
+	useEffect(() => {
+		const handler = setTimeout(() => setDebouncedValue(filterText), 500)
+		return () => clearTimeout(handler)
+	}, [filterText, 500])
 
 	/** Gather chart data: dreams */
 	useEffect(() => {
@@ -98,14 +104,7 @@ export default function TabExplore(props: Props) {
 			props.dataFile.entries.forEach((entry) => {
 				let dateEntry = DateTime.fromISO(entry.entryDate)
 
-				if (
-					dateEntry > dateMaxAge &&
-					(!filterText ||
-						entry.dreams
-							.map((item) => item.dreamSigns)
-							.join()
-							.indexOf(filterText.toLowerCase()) > -1)
-				) {
+				if (dateEntry > dateMaxAge) {
 					let currChartData = tmpChartData.filter((data) => data.dateTime.hasSame(dateEntry, 'month') && data.dateTime.hasSame(dateEntry, 'year'))[0]
 					if (!currChartData) {
 						currChartData = {
@@ -119,18 +118,26 @@ export default function TabExplore(props: Props) {
 						tmpChartData.push(currChartData)
 					}
 
-					entry.dreams.forEach((dream) => {
-						currChartData.totTaged += dream.dreamSigns.length > 0 ? 1 : 0
-						currChartData.totNotag += dream.dreamSigns.length > 0 ? 0 : 1
-						currChartData.totLucid += dream.isLucidDream ? 1 : 0
-						currChartData.totStard += dream.dreamSigns.filter((tag) => tag === MetaType.star).length > 0 ? 1 : 0
-					})
+					if (
+						!debouncedValue ||
+						entry.dreams
+							.map((item) => item.dreamSigns)
+							.join()
+							.indexOf(debouncedValue.toLowerCase()) > -1
+					) {
+						entry.dreams.forEach((dream) => {
+							currChartData.totTaged += dream.dreamSigns.length > 0 ? 1 : 0
+							currChartData.totNotag += dream.dreamSigns.length > 0 ? 0 : 1
+							currChartData.totLucid += dream.isLucidDream ? 1 : 0
+							currChartData.totStard += dream.dreamSigns.filter((tag) => tag === MetaType.star).length > 0 ? 1 : 0
+						})
+					}
 				}
 			})
 		}
 
 		setChartDataDreams(tmpChartData)
-	}, [props.dataFile, filterDrmChtMonths, filterText])
+	}, [props.dataFile, filterDrmChtMonths, debouncedValue])
 
 	/** Handle barchart click: dreams  */
 	useEffect(() => {
@@ -242,12 +249,13 @@ export default function TabExplore(props: Props) {
 
 	function renderChart(): JSX.Element {
 		// FUTURE: get fancier fills, not just plain bs-colors (use strips and transparency like sample on desktop shows)
+		// CODE: https://codepen.io/LeanyLabs/pen/jOWYpJx
 		return (
 			<div className='bg-black p-4 mb-4' style={{ width: '100%', height: 400 }}>
 				<ResponsiveContainer width='100%' height='100%'>
 					<BarChart data={chartDataDreams} onClick={(data) => setDrmChartClickedIdx(data && data.activeTooltipIndex !== null ? data.activeTooltipIndex : null)}>
 						<XAxis dataKey='name' fontSize={'0.75rem'} />
-						<YAxis type='number' fontSize={'0.75rem'} /*domain={[0, (dataMax: number) => Math.round(dataMax * 1.1)]}*/ />
+						<YAxis type='number' fontSize={'0.75rem'} width={60 - 20} /*domain={[0, (dataMax: number) => Math.round(dataMax * 1.1)]}*/ />
 						<CartesianGrid stroke='#555555' strokeDasharray='6 2' vertical={false} />
 						<Tooltip cursor={false} />
 						<Legend verticalAlign='bottom' align='center' iconSize={20} />
