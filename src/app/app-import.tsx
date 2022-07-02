@@ -1311,19 +1311,43 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 				<ul className='nav nav-tabs nav-fill' role='tablist'>
 					<li className='nav-item'>
-						<a className='nav-link active' id='setup-tab' data-toggle='tab' href='#setup' role='tab' aria-controls='setup' aria-selected='true'>
+						<button
+							className='nav-link active'
+							id='setup-tab'
+							data-bs-toggle='tab'
+							data-bs-target='#setup'
+							type='button'
+							role='tab'
+							aria-controls='setup'
+							aria-selected='true'>
 							Set Import Options
-						</a>
+						</button>
 					</li>
 					<li className='nav-item'>
-						<a className='nav-link' id='parse-tab' data-toggle='tab' href='#parse' role='tab' aria-controls='parse' aria-selected='false'>
+						<button
+							className='nav-link'
+							id='parse-tab'
+							data-bs-toggle='tab'
+							data-bs-target='#parse'
+							type='button'
+							role='tab'
+							aria-controls='parse'
+							aria-selected='false'>
 							Parse Journal Entries
-						</a>
+						</button>
 					</li>
 					<li className='nav-item'>
-						<a className='nav-link' id='results-tab' data-toggle='tab' href='#results' role='tab' aria-controls='results' aria-selected='false'>
+						<button
+							className='nav-link'
+							id='results-tab'
+							data-bs-toggle='tab'
+							data-bs-target='#results'
+							type='button'
+							role='tab'
+							aria-controls='results'
+							aria-selected='false'>
 							Import Journal Entries
-						</a>
+						</button>
 					</li>
 				</ul>
 				<div className='tab-content mb-5'>
