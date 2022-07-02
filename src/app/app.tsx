@@ -28,7 +28,7 @@
  */
 
 import * as React from 'react'
-import * as ReactDOM from 'react-dom'
+import * as ReactDOM from 'react-dom/client'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
 import { IAuthState, IDriveDataFile, IJournalEntry, AuthState, APP_VER, IDriveConfFile } from './app.types'
 import * as GDrive from './google-oauth'
@@ -286,5 +286,8 @@ class App extends React.Component<IAppProps, IAppState> {
 }
 
 // App Container
-const AppMain: React.FunctionComponent<{ compiler: string; framework: string }> = (_props) => <App />
-ReactDOM.render(<AppMain compiler='TypeScript' framework='React' />, document.getElementById('root'))
+ReactDOM.createRoot(document.getElementById('root')).render(
+	<React.StrictMode>
+		<App />
+	</React.StrictMode>
+)
