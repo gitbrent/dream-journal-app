@@ -605,35 +605,51 @@ export default function TabBedtime(props: Props) {
 				<li className='nav-item' role='presentation'>
 					<button
 						className='nav-link active'
-						id='1-tab'
+						id='bedNav1'
 						data-bs-toggle='tab'
-						data-bs-target='#tab1'
+						data-bs-target='#bedTab1'
 						type='button'
 						role='tab'
-						aria-controls='tab1'
+						aria-controls='bedTab1'
 						aria-selected='true'>
 						Bedtime Prep
 					</button>
 				</li>
 				<li className='nav-item' role='presentation'>
-					<button className='nav-link' id='2-tab' data-bs-toggle='tab' data-bs-target='#tab2' type='button' role='tab' aria-controls='tab2' aria-selected='false'>
+					<button
+						className='nav-link'
+						id='bedNav2'
+						data-bs-toggle='tab'
+						data-bs-target='#bedTab2'
+						type='button'
+						role='tab'
+						aria-controls='bedTab2'
+						aria-selected='false'>
 						My Goals
 					</button>
 				</li>
 				<li className='nav-item' role='presentation'>
-					<button className='nav-link' id='3-tab' data-bs-toggle='tab' data-bs-target='#tab3' type='button' role='tab' aria-controls='tab3' aria-selected='false'>
+					<button
+						className='nav-link'
+						id='bedNav3'
+						data-bs-toggle='tab'
+						data-bs-target='#bedTab3'
+						type='button'
+						role='tab'
+						aria-controls='bedTab3'
+						aria-selected='false'>
 						Dreamsign Inventory
 					</button>
 				</li>
 			</ul>
 			<div className='tab-content'>
-				<div className='tab-pane bg-light p-4 active' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
+				<div className='tab-pane bg-light p-4 active' id='bedTab1' role='tabpanel' aria-labelledby='bedNav1'>
 					{renderTabPrep()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
+				<div className='tab-pane bg-light p-4' id='bedTab2' role='tabpanel' aria-labelledby='bedNav2'>
 					{renderTabGoals()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='tab3' role='tabpanel' aria-labelledby='3-tab'>
+				<div className='tab-pane bg-light p-4' id='bedTab3' role='tabpanel' aria-labelledby='bedNav3'>
 					{renderTabInv()}
 				</div>
 			</div>
