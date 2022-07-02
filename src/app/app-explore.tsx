@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useDeferredValue, useMemo } from 'react'
 import { IDriveConfFile, IDriveDataFile, IJournalEntry, MetaType } from './app.types'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { DateTime } from 'luxon'
@@ -76,8 +76,6 @@ interface IChartData {
 }
 
 export default function TabExplore(props: Props) {
-	// TAB: Dream Timeline
-	const [chartDataDreams, setChartDataDreams] = useState<IChartData[]>([])
 	const [filterDrmChtMonths, setFilterDrmChtMonths] = useState(12)
 	const [filterDrmChtShowStard, setFilterDrmChtShowStard] = useState(true)
 	const [filterDrmChtShowNotag, setFilterDrmChtShowNotag] = useState(true)
@@ -86,15 +84,10 @@ export default function TabExplore(props: Props) {
 	const [drmChartClkEntries, setDrmChartClkEntries] = useState<IJournalEntry[]>([])
 	//
 	const [filterText, setFilterText] = useState('')
-	const [debouncedValue, setDebouncedValue] = useState('')
-
-	useEffect(() => {
-		const handler = setTimeout(() => setDebouncedValue(filterText), 500)
-		return () => clearTimeout(handler)
-	}, [filterText, 500])
+	const deferredText = useDeferredValue(filterText)
 
 	/** Gather chart data: dreams */
-	useEffect(() => {
+	const chartDataDreams = useMemo(() => {
 		let dateMaxAge = DateTime.now()
 			.minus({ months: filterDrmChtMonths - 1 })
 			.set({ day: 0, hour: 0, minute: 0, second: 0 })
@@ -119,11 +112,11 @@ export default function TabExplore(props: Props) {
 					}
 
 					if (
-						!debouncedValue ||
+						!deferredText ||
 						entry.dreams
 							.map((item) => item.dreamSigns)
 							.join()
-							.indexOf(debouncedValue.toLowerCase()) > -1
+							.indexOf(deferredText.toLowerCase()) > -1
 					) {
 						entry.dreams.forEach((dream) => {
 							currChartData.totTaged += dream.dreamSigns.length > 0 ? 1 : 0
@@ -136,8 +129,8 @@ export default function TabExplore(props: Props) {
 			})
 		}
 
-		setChartDataDreams(tmpChartData)
-	}, [props.dataFile, filterDrmChtMonths, debouncedValue])
+		return tmpChartData
+	}, [props.dataFile, filterDrmChtMonths, deferredText])
 
 	/** Handle barchart click: dreams  */
 	useEffect(() => {
