@@ -181,7 +181,7 @@ export default function TabAdmin(props: Props) {
 							<label htmlFor='floatingDreamtag'>search {dreamTagGroups.length} unique tags</label>
 						</div>
 					</div>
-					<div className='col-auto'>
+					<div className='col-auto' style={{ minWidth: '130px' }}>
 						<div className='form-floating'>
 							<select
 								id='floatingDisplay'
@@ -189,7 +189,7 @@ export default function TabAdmin(props: Props) {
 								defaultValue={filterViewType}
 								disabled={!props.dataFile ? true : false}
 								onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
-								className='form-control'>
+								className='form-select'>
 								{Object.keys(CardDreamSignGrpViewType).map((val) => (
 									<option value={CardDreamSignGrpViewType[val]} key={'viewType' + val}>
 										{CardDreamSignGrpViewType[val]}
@@ -201,14 +201,14 @@ export default function TabAdmin(props: Props) {
 							</label>
 						</div>
 					</div>
-					<div className='col-auto'>
+					<div className='col-auto' style={{ minWidth: '150px' }}>
 						<div className='form-floating'>
 							<select
 								id='floatingSortOrder'
 								placeholder='sort order'
 								defaultValue={filterSortOrder}
 								onChange={(ev) => setFilterSortOrder(ev.currentTarget.value as FilterSortOrder)}
-								className='form-control'>
+								className='form-select'>
 								{Object.keys(FilterSortOrder).map((val) => (
 									<option value={FilterSortOrder[val]} key={'sortOrder' + val}>
 										{FilterSortOrder[val]}

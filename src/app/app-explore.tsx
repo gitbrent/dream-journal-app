@@ -173,7 +173,7 @@ export default function TabExplore(props: Props) {
 								placeholder='months shown'
 								defaultValue={filterDrmChtMonths}
 								onChange={(ev) => setFilterDrmChtMonths(Number(ev.currentTarget.value))}
-								className='form-control'>
+								className='form-select'>
 								<option value={9999}>(All)</option>
 								<option value={6}>6</option>
 								<option value={12}>12</option>
@@ -194,7 +194,7 @@ export default function TabExplore(props: Props) {
 								placeholder='show starred dreams'
 								defaultValue={filterDrmChtShowStard ? 'Yes' : 'No'}
 								onChange={(ev) => setFilterDrmChtShowStard(ev.currentTarget.value == 'Yes')}
-								className='form-control'>
+								className='form-select'>
 								<option value={'Yes'}>Yes</option>
 								<option value={'No'}>No</option>
 							</select>
@@ -210,7 +210,7 @@ export default function TabExplore(props: Props) {
 								placeholder='show untagged dreams'
 								defaultValue={filterDrmChtShowNotag ? 'Yes' : 'No'}
 								onChange={(ev) => setFilterDrmChtShowNotag(ev.currentTarget.value == 'Yes')}
-								className='form-control'>
+								className='form-select'>
 								<option value={'Yes'}>Yes</option>
 								<option value={'No'}>No</option>
 							</select>
@@ -226,7 +226,7 @@ export default function TabExplore(props: Props) {
 								placeholder='show untagged dreams'
 								defaultValue={filterDrmChtShowTaged ? 'Yes' : 'No'}
 								onChange={(ev) => setFilterDrmChtShowTaged(ev.currentTarget.value == 'Yes')}
-								className='form-control'>
+								className='form-select'>
 								<option value={'Yes'}>Yes</option>
 								<option value={'No'}>No</option>
 							</select>

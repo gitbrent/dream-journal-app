@@ -118,7 +118,7 @@ export default function TabJournal(props: Props) {
 							onChange={(ev) => setFilterEntry(ev.currentTarget.value as FilterEntry)}
 							className='form-select'>
 							{Object.keys(FilterEntry).map((val) => (
-								<option value={FilterEntry[val]} key={'entryType' + val}>
+								<option value={FilterEntry[val]} key={`entryType ${val}`}>
 									{FilterEntry[val]}
 								</option>
 							))}

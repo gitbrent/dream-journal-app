@@ -192,14 +192,14 @@ export default function TabAdmin(props: IAppTagsProps) {
 							</div>
 						</div>
 					</div>
-					<div className='col-auto' style={{ minWidth: '185px' }} data-desc='show all months'>
+					<div className='col-auto' style={{ minWidth: '200px' }} data-desc='show all months'>
 						<div className='form-floating'>
 							<select
 								id='floatingFilterView'
 								placeholder='view type'
 								defaultValue={filterShowAllMons ? '1' : '0'}
 								onChange={(ev) => setFilterShowAllMons(ev.currentTarget.value === '1')}
-								className='form-control'>
+								className='form-select'>
 								<option value='0' key={'showAllMonN'}>
 									No
 								</option>

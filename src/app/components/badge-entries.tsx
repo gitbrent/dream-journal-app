@@ -156,7 +156,7 @@ export default function BadgeEntries(props: Props) {
 							placeholder='date range'
 							defaultValue={filterDate}
 							onChange={(ev) => setFilterDate(ev.currentTarget.value as FilterDate)}
-							className='form-control'>
+							className='form-select'>
 							{Object.keys(FilterDate).map((val) => (
 								<option value={FilterDate[val]} key={'entryType' + val}>
 									{FilterDate[val]}
@@ -175,7 +175,7 @@ export default function BadgeEntries(props: Props) {
 							placeholder='view type'
 							defaultValue={filterView}
 							onChange={(ev) => setFilterView(ev.currentTarget.value as FilterView)}
-							className='form-control'>
+							className='form-select'>
 							{Object.keys(FilterView).map((val) => (
 								<option value={FilterView[val]} key={'filterView' + val}>
 									{FilterView[val]}
