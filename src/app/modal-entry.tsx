@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { IDreamSignTag, IJournalDream, IJournalEntry, InductionTypes } from './app.types'
 import { Calendar3, Clock, PlusCircle, Save, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
 import ReactTags from 'react-tag-autocomplete'
 import Modal from 'bootstrap/js/dist/modal'
 import * as GDrive from './google-oauth'
+import * as bootstrap from 'bootstrap'
 
 export interface IModalEntryProps {
 	currEntry: IJournalEntry
@@ -34,7 +35,6 @@ export default function ModalEntry(props: IModalEntryProps) {
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>({ ...NEW_ENTRY })
 	const [uniqueTags, setUniqueTags] = useState([])
 	const [isDateDupe, setIsDateDupe] = useState(false)
-	const [selectedTab, setSelectedTab] = useState(-1)
 	const [modal, setModal] = useState<Modal>(null)
 	const [modalId, setModalId] = useState(DEF_MODAL_ID)
 
@@ -45,24 +45,25 @@ export default function ModalEntry(props: IModalEntryProps) {
 	/** Set/Clear Entry */
 	useEffect(() => {
 		setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry]
-
 		setUniqueTags(GDrive.getUniqueDreamTags)
 
-		if (props.showModal) {
-			setSelectedTab(-1)
-			if (modal) modal.show()
-		} else {
-			if (modal) modal.hide()
+		if (modal) {
+			if (props.showModal) modal.show()
+			else modal.hide()
 		}
 	}, [props.showModal])
 
 	useEffect(() => setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry])
 
-	useEffect(() => {
-		if (currEntry && !isNaN(props.currDreamIdx)) setSelectedTab(props.currDreamIdx)
-	}, [currEntry, props.currDreamIdx])
-
 	useEffect(() => setModalId(props.modalId ? props.modalId : DEF_MODAL_ID), [props.modalId])
+
+	useEffect(() => {
+		const someTabTriggerEl = document.getElementById(typeof props.currDreamIdx === 'number' ? `modalNav${props.currDreamIdx}` : 'modalNavNotes')
+		if (someTabTriggerEl) {
+			const tab = new bootstrap.Tab(someTabTriggerEl)
+			tab.show()
+		}
+	}, [props.currDreamIdx, props.currEntry, props.showModal])
 
 	// -----------------------------------------------------------------------
 
@@ -161,7 +162,6 @@ export default function ModalEntry(props: IModalEntryProps) {
 									let updEntry = { ...currEntry }
 									updEntry.dreams.push({ ...NEW_DREAM })
 									setCurrEntry(updEntry)
-									setSelectedTab(updEntry.dreams.length - 1)
 								}}
 								className='btn btn-success w-100'>
 								<div className='row g-0 align-items-center'>
@@ -183,7 +183,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 
 	function renderTabNotes(): JSX.Element {
 		return (
-			<div role='tabpanel' aria-labelledby='drmtabNOTES-tab' key='dreamrowNOTES'>
+			<div>
 				<div className='mb-3'>
 					<div className='form-floating'>
 						<textarea
@@ -298,7 +298,6 @@ export default function ModalEntry(props: IModalEntryProps) {
 										newState.dreams.splice(dreamIdx, 1)
 										if (newState.dreams.length === 0) newState.dreams.push({ ...NEW_DREAM })
 										setCurrEntry(newState)
-										setSelectedTab(0)
 									}
 								}}
 								className='btn btn-danger px-2'>
@@ -377,21 +376,46 @@ export default function ModalEntry(props: IModalEntryProps) {
 					</div>
 					<div className='modal-body p-4'>
 						{renderTopToolbar()}
-						<ul className='nav nav-tabs mb-3' role='tablist'>
-							<li className='nav-item' key='tabDream00'>
-								<a href='#' onClick={() => setSelectedTab(-1)} className={'nav-link' + (selectedTab === -1 ? ' active' : '')} data-toggle='tab' role='tab'>
+						<ul className='nav nav-tabs mb-3' id='entryTab' role='tablist'>
+							<li className='nav-item' role='presentation'>
+								<button
+									className='nav-link active'
+									id='modalNavNotes'
+									data-bs-target='#modalTabNotes'
+									aria-controls='modalTabNotes'
+									data-bs-toggle='tab'
+									type='button'
+									role='tab'
+									aria-selected='true'>
 									Notes
-								</a>
+								</button>
 							</li>
 							{currEntry.dreams.map((_dream, idx) => (
-								<li className='nav-item' key={`tabDream${idx}`}>
-									<a href='#' onClick={() => setSelectedTab(idx)} className={`nav-link ${idx === selectedTab ? 'active' : ''}`} data-toggle='tab' role='tab'>
+								<li className='nav-item' role='presentation' key={`tabDream${idx}`}>
+									<button
+										className='nav-link'
+										id={`modalNav${idx}`}
+										data-bs-target={`#modalTab${idx}`}
+										aria-controls={`modalTab${idx}`}
+										data-bs-toggle='tab'
+										type='button'
+										role='tab'
+										aria-selected='false'>
 										{`Dream ${idx + 1}`}
-									</a>
+									</button>
 								</li>
 							))}
 						</ul>
-						<div className='tab-content'>{selectedTab === -1 ? renderTabNotes() : <div className='tab-content'>{renderTabDream(selectedTab)}</div>}</div>
+						<div className='tab-content'>
+							<div className='tab-pane active' id='modalTabNotes' role='tabpanel' aria-labelledby='modalNavNotes'>
+								{renderTabNotes()}
+							</div>
+							{currEntry.dreams.map((_dream, idx) => (
+								<div className='tab-pane' id={`modalTab${idx}`} role='tabpanel' aria-labelledby={`modalTab${idx}`} key={`tab${idx + 1}`}>
+									{renderTabDream(idx)}
+								</div>
+							))}
+						</div>
 					</div>
 					<div className='modal-footer'>
 						<button type='button' className='btn btn-secondary' onClick={() => props.setShowModal(false)}>
