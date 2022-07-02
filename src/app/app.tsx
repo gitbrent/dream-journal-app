@@ -287,5 +287,4 @@ class App extends React.Component<IAppProps, IAppState> {
 
 // App Container
 const AppMain: React.FunctionComponent<{ compiler: string; framework: string }> = (_props) => <App />
-
 ReactDOM.render(<AppMain compiler='TypeScript' framework='React' />, document.getElementById('root'))
