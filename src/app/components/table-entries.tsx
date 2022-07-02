@@ -29,9 +29,9 @@
 
 import React, { useState } from 'react'
 import { IJournalEntry, MetaType } from '../app.types'
-import ReactPaginate from 'react-paginate'
-import { CheckCircleFill, Diagram3Fill, SortDownAlt, StarFill } from 'react-bootstrap-icons'
+import { CheckCircleFill, Diagram3Fill, SortDownAlt, SortUpAlt, StarFill } from 'react-bootstrap-icons'
 import ModalEntry from '../modal-entry'
+import ReactPaginate from 'react-paginate'
 
 interface Props {
 	entries: IJournalEntry[]
@@ -44,6 +44,7 @@ export default function TableEntries(props: Props) {
 	//
 	const [pagingCurrIdx, setPagingCurrIdx] = useState(0)
 	const [pagingPageSize, setPagingPageSize] = useState(10)
+	const [sortAsc, setSortAsc] = useState(false)
 	//const [dateRangeFrom, setDateRangeFrom] = useState(null)
 	//const [dateRangeTo, setDateRangeTo] = useState(null)
 
@@ -56,9 +57,9 @@ export default function TableEntries(props: Props) {
 			<table className='table table-sm mb-4'>
 				<thead className='thead'>
 					<tr>
-						<th style={{ width: '1%' }}>
+						<th style={{ width: '1%', userSelect: 'none' }} title='Sort Asc/Desc' onClick={() => setSortAsc(!sortAsc)} className='text-nowrap cursor-link'>
 							Date
-							<SortDownAlt size='16' className='ms-1' />
+							{sortAsc ? <SortUpAlt size='16' className='ms-1' /> : <SortDownAlt size='16' className='ms-1' />}
 						</th>
 						<th className='text-center d-none d-lg-table-cell'>Bed</th>
 						<th className='text-center'>
@@ -85,7 +86,7 @@ export default function TableEntries(props: Props) {
 				</thead>
 				<tbody>
 					{props.entries
-						.sort((a, b) => (a.entryDate > b.entryDate ? -1 : 1))
+						.sort((a, b) => (a.entryDate > b.entryDate ? (sortAsc ? 1 : -1) : sortAsc ? -1 : 1))
 						.filter((_entry, idx) => idx >= pagingPageSize * pagingCurrIdx && idx < pagingPageSize * (pagingCurrIdx + 1))
 						.map((entry, idx) => {
 							// This is a harsh thing to compile inline below, so do it here
