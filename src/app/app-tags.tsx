@@ -248,20 +248,28 @@ export default function TabAdmin(props: IAppTagsProps) {
 				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			</header>
 
-			<ul className='nav nav-tabs nav-fill' role='tablist'>
+			<ul className='nav nav-tabs nav-fill' id='tagsTab' role='tablist'>
 				<li className='nav-item' role='presentation'>
-					<a className='nav-link active' id='1-tab' data-toggle='tab' href='#tab1' role='tab' aria-controls='tab1' aria-selected='true'>
+					<button
+						className='nav-link active'
+						id='1-tab'
+						data-bs-toggle='tab'
+						data-bs-target='#tab1'
+						type='button'
+						role='tab'
+						aria-controls='tab1'
+						aria-selected='true'>
 						Overview
-					</a>
+					</button>
 				</li>
 				<li className='nav-item' role='presentation'>
-					<a className='nav-link' id='2-tab' data-toggle='tab' href='#tab2' role='tab' aria-controls='tab2' aria-selected='false'>
+					<button className='nav-link' id='2-tab' data-bs-toggle='tab' data-bs-target='#tab2' type='button' role='tab' aria-controls='tab2' aria-selected='false'>
 						Timeline
-					</a>
+					</button>
 				</li>
 			</ul>
-			<div className='tab-content' id='bsTabContent'>
-				<div className='tab-pane bg-light p-4 show active' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
+			<div className='tab-content'>
+				<div className='tab-pane bg-light p-4 active' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
 					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} />
 				</div>
 				<div className='tab-pane bg-light p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>

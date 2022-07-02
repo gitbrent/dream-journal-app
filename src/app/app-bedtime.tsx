@@ -601,25 +601,33 @@ export default function TabBedtime(props: Props) {
 				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			</header>
 			{/*<LocalAdminBrent confFile={props.confFile} />*/}
-			<ul className='nav nav-tabs nav-fill' id='exploreTab' role='tablist'>
+			<ul className='nav nav-tabs nav-fill' id='bedtimeTab' role='tablist'>
 				<li className='nav-item' role='presentation'>
-					<a className='nav-link active' id='1-tab' data-toggle='tab' href='#tab1' role='tab' aria-controls='tab1' aria-selected='true'>
+					<button
+						className='nav-link active'
+						id='1-tab'
+						data-bs-toggle='tab'
+						data-bs-target='#tab1'
+						type='button'
+						role='tab'
+						aria-controls='tab1'
+						aria-selected='true'>
 						Bedtime Prep
-					</a>
+					</button>
 				</li>
 				<li className='nav-item' role='presentation'>
-					<a className='nav-link' id='2-tab' data-toggle='tab' href='#tab2' role='tab' aria-controls='tab2' aria-selected='false'>
+					<button className='nav-link' id='2-tab' data-bs-toggle='tab' data-bs-target='#tab2' type='button' role='tab' aria-controls='tab2' aria-selected='false'>
 						My Goals
-					</a>
+					</button>
 				</li>
 				<li className='nav-item' role='presentation'>
-					<a className='nav-link' id='3-tab' data-toggle='tab' href='#tab3' role='tab' aria-controls='tab3' aria-selected='false'>
+					<button className='nav-link' id='3-tab' data-bs-toggle='tab' data-bs-target='#tab3' type='button' role='tab' aria-controls='tab3' aria-selected='false'>
 						Dreamsign Inventory
-					</a>
+					</button>
 				</li>
 			</ul>
-			<div className='tab-content' id='bsTabContent'>
-				<div className='tab-pane bg-light p-4 show active' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
+			<div className='tab-content'>
+				<div className='tab-pane bg-light p-4 active' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
 					{renderTabPrep()}
 				</div>
 				<div className='tab-pane bg-light p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
