@@ -333,23 +333,39 @@ export default function TabAdmin(props: Props) {
 
 			<ul className='nav nav-tabs nav-fill' id='adminTab' role='tablist'>
 				<li className='nav-item' role='presentation'>
-					<a className='nav-link active' id='search-tab' data-toggle='tab' href='#search' role='tab' aria-controls='search' aria-selected='true'>
+					<button
+						className='nav-link active'
+						id='search-tab'
+						data-bs-toggle='tab'
+						data-bs-target='#search'
+						type='button'
+						role='tab'
+						aria-controls='search'
+						aria-selected='true'>
 						Rename DreamSign/Tags
-					</a>
+					</button>
 				</li>
 				<li className='nav-item' role='presentation'>
-					<a className='nav-link' id='dupe-tab' data-toggle='tab' href='#dupe' role='tab' aria-controls='dupe' aria-selected='false'>
+					<button className='nav-link' id='dupe-tab' data-bs-toggle='tab' data-bs-target='#dupe' type='button' role='tab' aria-controls='dupe' aria-selected='false'>
 						Fix Dupe Tags
-					</a>
+					</button>
 				</li>
 				<li className='nav-item' role='presentation'>
-					<a className='nav-link' id='bedtime-tab' data-toggle='tab' href='#bedtime' role='tab' aria-controls='bedtime' aria-selected='false'>
+					<button
+						className='nav-link'
+						id='bedtime-tab'
+						data-bs-toggle='tab'
+						data-bs-target='#bedtime'
+						type='button'
+						role='tab'
+						aria-controls='bedtime'
+						aria-selected='false'>
 						Fix Bed Time
-					</a>
+					</button>
 				</li>
 			</ul>
-			<div className='tab-content' id='adminTabContent'>
-				<div className='tab-pane show active bg-light p-4' id='search' role='tabpanel' aria-labelledby='search-tab'>
+			<div className='tab-content'>
+				<div className='tab-pane bg-light p-4 active' id='search' role='tabpanel' aria-labelledby='search-tab'>
 					{renderTagGroups()}
 				</div>
 				<div className='tab-pane bg-light p-4' id='dupe' role='tabpanel' aria-labelledby='dupe-tab'>
