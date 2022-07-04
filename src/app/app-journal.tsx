@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { IJournalEntry, IDriveDataFile } from './app.types'
 import { Search } from 'react-bootstrap-icons'
 import AlertGdriveStatus from './components/alert-gstat'
@@ -51,15 +51,16 @@ export interface IAppViewState {
 enum FilterEntry {
 	all = '(Show All)',
 	lucid = 'Lucid Dreams',
-	star = 'Starred',
+	star = 'Starred Dreams',
 }
 
 export default function TabJournal(props: Props) {
 	const [filterText, setFilterText] = useState('')
 	const [filterEntry, setFilterEntry] = useState<FilterEntry>(FilterEntry.all)
-	const [filteredEntries, setFilteredEntries] = useState<IJournalEntry[]>([])
+	//const [filteredEntries, setFilteredEntries] = useState<IJournalEntry[]>([])
 
-	useEffect(() => {
+	const filteredEntries = useMemo(() => {
+		//useEffect(() => {
 		// A: filter entries
 		/*
 			let arrEntries = (props.dataFile && props.dataFile.entries ? props.dataFile.entries : []).filter((entry) => {
@@ -71,18 +72,16 @@ export default function TabJournal(props: Props) {
 				else return false
 			})
 		*/
-		setFilteredEntries(
-			(props.dataFile && props.dataFile.entries ? props.dataFile.entries : []).filter(
-				(entry) =>
-					(!filterText ||
-						entry.dreams
-							.map((item) => item.dreamSigns)
-							.join()
-							.indexOf(filterText.toLowerCase()) > -1) &&
-					(filterEntry === FilterEntry.all ||
-						(filterEntry === FilterEntry.star && entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === 'meta:star')).length > 0) ||
-						(filterEntry === FilterEntry.lucid && entry.dreams.filter((dream) => dream.isLucidDream).length > 0))
-			)
+		return (props.dataFile && props.dataFile.entries ? props.dataFile.entries : []).filter(
+			(entry) =>
+				(!filterText ||
+					entry.dreams
+						.map((item) => item.dreamSigns)
+						.join()
+						.indexOf(filterText.toLowerCase()) > -1) &&
+				(filterEntry === FilterEntry.all ||
+					(filterEntry === FilterEntry.star && entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === 'meta:star')).length > 0) ||
+					(filterEntry === FilterEntry.lucid && entry.dreams.filter((dream) => dream.isLucidDream).length > 0))
 		)
 	}, [props.dataFile, filterText, filterEntry])
 
