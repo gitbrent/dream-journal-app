@@ -80,71 +80,62 @@ export default function TabExplore(props: Props) {
 	const [filterDrmChtShowStard, setFilterDrmChtShowStard] = useState(true)
 	const [filterDrmChtShowNotag, setFilterDrmChtShowNotag] = useState(true)
 	const [filterDrmChtShowTaged, setFilterDrmChtShowTaged] = useState(true)
-	const [drmChartClickedIdx, setDrmChartClickedIdx] = useState<number>(null)
-	const [drmChartClkEntries, setDrmChartClkEntries] = useState<IJournalEntry[]>([])
 	//
 	const [filterText, setFilterText] = useState('')
 	const deferredText = useDeferredValue(filterText)
 
-	/** Gather chart data: dreams */
-	const chartDataDreams = useMemo(() => {
+	const filteredEntries = useMemo(() => {
+		let tmpEntries: IJournalEntry[] = []
 		let dateMaxAge = DateTime.now()
 			.minus({ months: filterDrmChtMonths - 1 })
 			.set({ day: 0, hour: 0, minute: 0, second: 0 })
-		let tmpChartData: IChartData[] = []
 
 		if (props.dataFile && props.dataFile.entries && props.dataFile.entries.length > 0) {
-			props.dataFile.entries.forEach((entry) => {
-				let dateEntry = DateTime.fromISO(entry.entryDate)
-
-				if (dateEntry > dateMaxAge) {
-					let currChartData = tmpChartData.filter((data) => data.dateTime.hasSame(dateEntry, 'month') && data.dateTime.hasSame(dateEntry, 'year'))[0]
-					if (!currChartData) {
-						currChartData = {
-							name: dateEntry.toFormat('LLL-yy'),
-							dateTime: dateEntry,
-							totLucid: 0,
-							totStard: 0,
-							totTaged: 0,
-							totNotag: 0,
-						}
-						tmpChartData.push(currChartData)
-					}
-
-					if (
-						!deferredText ||
+			tmpEntries = props.dataFile.entries.filter(
+				(entry) =>
+					DateTime.fromISO(entry.entryDate) > dateMaxAge &&
+					(!deferredText ||
 						entry.dreams
 							.map((item) => item.dreamSigns)
 							.join()
-							.indexOf(deferredText.toLowerCase()) > -1
-					) {
-						entry.dreams.forEach((dream) => {
-							currChartData.totTaged += dream.dreamSigns.length > 0 ? 1 : 0
-							currChartData.totNotag += dream.dreamSigns.length > 0 ? 0 : 1
-							currChartData.totLucid += dream.isLucidDream ? 1 : 0
-							currChartData.totStard += dream.dreamSigns.filter((tag) => tag === MetaType.star).length > 0 ? 1 : 0
-						})
-					}
-				}
+							.indexOf(deferredText.toLowerCase()) > -1)
+			)
+		}
+
+		return tmpEntries
+	}, [props.dataFile, filterDrmChtMonths, deferredText])
+
+	const chartDataDreams = useMemo(() => {
+		const tmpChartData: IChartData[] = []
+		const dateMaxAge = DateTime.now().minus({ months: filterDrmChtMonths - 1 })
+		const diffMonths = DateTime.now().diff(dateMaxAge, 'months')
+
+		// Pre-populate all months so empty months are always shown (eg: user search for term with 1 hit, we still show all months)
+		for (let idx = 0; idx <= diffMonths.months; idx++) {
+			const dateLoop = dateMaxAge.plus({ months: idx })
+			tmpChartData.push({
+				name: dateLoop.toFormat('LLL-yy'),
+				dateTime: dateLoop,
+				totLucid: 0,
+				totStard: 0,
+				totTaged: 0,
+				totNotag: 0,
 			})
 		}
 
-		return tmpChartData
-	}, [props.dataFile, filterDrmChtMonths, deferredText])
+		filteredEntries.forEach((entry) => {
+			let dateEntry = DateTime.fromISO(entry.entryDate)
+			let currEntry = tmpChartData.filter((data) => data.dateTime.hasSame(dateEntry, 'month') && data.dateTime.hasSame(dateEntry, 'year'))[0]
+			entry.dreams.forEach((dream) => {
+				currEntry.totTaged += dream.dreamSigns.length > 0 ? 1 : 0
+				currEntry.totNotag += dream.dreamSigns.length > 0 ? 0 : 1
+				currEntry.totLucid += dream.isLucidDream ? 1 : 0
+				currEntry.totStard += dream.dreamSigns.filter((tag) => tag === MetaType.star).length > 0 ? 1 : 0
+			})
+		})
 
-	/** Handle barchart click: dreams  */
-	useEffect(() => {
-		if (typeof drmChartClickedIdx !== null && chartDataDreams && chartDataDreams[drmChartClickedIdx]) {
-			let dateEntry = chartDataDreams[drmChartClickedIdx].dateTime
-			setDrmChartClkEntries(
-				props.dataFile.entries.filter(
-					(entry) => DateTime.fromISO(entry.entryDate).hasSame(dateEntry, 'month') && DateTime.fromISO(entry.entryDate).hasSame(dateEntry, 'year')
-				)
-			)
-		} else {
-			setDrmChartClkEntries([])
-		}
-	}, [props.dataFile, drmChartClickedIdx])
+		return tmpChartData
+	}, [filteredEntries])
 
 	// -----------------------------------------------------------------------
 
@@ -246,7 +237,7 @@ export default function TabExplore(props: Props) {
 		return (
 			<div className='bg-black p-4 mb-4' style={{ width: '100%', height: 400 }}>
 				<ResponsiveContainer width='100%' height='100%'>
-					<BarChart data={chartDataDreams} onClick={(data) => setDrmChartClickedIdx(data && data.activeTooltipIndex !== null ? data.activeTooltipIndex : null)}>
+					<BarChart data={chartDataDreams}>
 						<XAxis dataKey='name' fontSize={'0.75rem'} />
 						<YAxis type='number' fontSize={'0.75rem'} width={60 - 20} /*domain={[0, (dataMax: number) => Math.round(dataMax * 1.1)]}*/ />
 						<CartesianGrid stroke='#555555' strokeDasharray='6 2' vertical={false} />
@@ -264,12 +255,10 @@ export default function TabExplore(props: Props) {
 	}
 
 	function renderChartTable(): JSX.Element {
-		return typeof drmChartClickedIdx !== null ? (
+		return (
 			<section className='bg-black p-4'>
-				<TableEntries entries={drmChartClkEntries} isBusyLoad={props.isBusyLoad} />
+				<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} />
 			</section>
-		) : (
-			<div />
 		)
 	}
 
@@ -279,9 +268,7 @@ export default function TabExplore(props: Props) {
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<section className='container my-auto my-md-5'>
-			<header>
-				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
-			</header>
+			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			<section className='bg-light p-4'>
 				{renderFilters()}
 				{renderChart()}
