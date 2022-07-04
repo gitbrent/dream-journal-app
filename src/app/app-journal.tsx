@@ -27,8 +27,8 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect, useMemo } from 'react'
-import { IJournalEntry, IDriveDataFile } from './app.types'
+import React, { useState, useMemo } from 'react'
+import { IDriveDataFile } from './app.types'
 import { Search } from 'react-bootstrap-icons'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
@@ -48,19 +48,19 @@ export interface IAppViewState {
 	pagingPageSize: number
 }
 
-enum FilterEntry {
+enum EntryType {
 	all = '(Show All)',
 	lucid = 'Lucid Dreams',
 	star = 'Starred Dreams',
 }
 
 export default function TabJournal(props: Props) {
+	const [filterEntryType, setFilterEntryType] = useState<EntryType>(EntryType.all)
 	const [filterText, setFilterText] = useState('')
-	const [filterEntry, setFilterEntry] = useState<FilterEntry>(FilterEntry.all)
-	//const [filteredEntries, setFilteredEntries] = useState<IJournalEntry[]>([])
+	const [filterYear, setFilterYear] = useState('')
+	const [filterMon, setFilterMon] = useState('')
 
 	const filteredEntries = useMemo(() => {
-		//useEffect(() => {
 		// A: filter entries
 		/*
 			let arrEntries = (props.dataFile && props.dataFile.entries ? props.dataFile.entries : []).filter((entry) => {
@@ -79,19 +79,19 @@ export default function TabJournal(props: Props) {
 						.map((item) => item.dreamSigns)
 						.join()
 						.indexOf(filterText.toLowerCase()) > -1) &&
-				(filterEntry === FilterEntry.all ||
-					(filterEntry === FilterEntry.star && entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === 'meta:star')).length > 0) ||
-					(filterEntry === FilterEntry.lucid && entry.dreams.filter((dream) => dream.isLucidDream).length > 0))
+				(filterEntryType === EntryType.all ||
+					(filterEntryType === EntryType.star && entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === 'meta:star')).length > 0) ||
+					(filterEntryType === EntryType.lucid && entry.dreams.filter((dream) => dream.isLucidDream).length > 0)) &&
+				(!filterYear || entry.entryDate.substring(0, 4) === filterYear) &&
+				(!filterMon || Number(entry.entryDate.substring(5, 7)) === Number(filterMon))
 		)
-	}, [props.dataFile, filterText, filterEntry])
-
-	// TODO: useEffect: return props.doSaveViewState(this.state)
+	}, [props.dataFile, filterEntryType, filterText, filterYear, filterMon])
 
 	// ------------------------------------------------------------------------
 
 	function renderFilters(): JSX.Element {
 		return (
-			<div className='row row-cols g-4 align-items-center justify-content-between mb-4' data-desc='commandbar'>
+			<div className='row g-4 align-items-center mb-4' data-desc='commandbar'>
 				<div className='col-auto d-none d-md-block' data-desc='icon'>
 					<Search size={40} className='text-secondary' />
 				</div>
@@ -102,6 +102,7 @@ export default function TabJournal(props: Props) {
 							type='text'
 							value={filterText}
 							placeholder='search tags'
+							title='search tags'
 							className='form-control'
 							onChange={(event) => setFilterText(event.target.value)}
 							disabled={!props.dataFile ? true : false}
@@ -109,16 +110,48 @@ export default function TabJournal(props: Props) {
 						<label htmlFor='floatingDreamtag'>Search Tags</label>
 					</div>
 				</div>
+				<div className='col-auto' data-desc='year' style={{ minWidth: 160 }}>
+					<div className='form-floating'>
+						<input
+							id='floatingEntryYear'
+							type='text'
+							maxLength={4}
+							value={filterYear}
+							placeholder='entry year'
+							title='entry year (ex: "2022")'
+							className='form-control'
+							onChange={(event) => setFilterYear(event.target.value)}
+							disabled={!props.dataFile ? true : false}
+						/>
+						<label htmlFor='floatingEntryYear'>Entry Year</label>
+					</div>
+				</div>
+				<div className='col-auto' data-desc='month' style={{ minWidth: 170 }}>
+					<div className='form-floating'>
+						<input
+							id='floatingEntryMon'
+							type='text'
+							maxLength={2}
+							value={filterMon}
+							placeholder='entry month'
+							title='entry month (0-11)'
+							className='form-control'
+							onChange={(event) => setFilterMon(event.target.value)}
+							disabled={!props.dataFile ? true : false}
+						/>
+						<label htmlFor='floatingEntryMon'>Entry Month</label>
+					</div>
+				</div>
 				<div className='col-auto' data-desc='entry type'>
 					<div className='form-floating'>
 						<select
 							id='floatingFilterEntry'
-							defaultValue={filterEntry}
-							onChange={(ev) => setFilterEntry(ev.currentTarget.value as FilterEntry)}
+							defaultValue={filterEntryType}
+							onChange={(ev) => setFilterEntryType(ev.currentTarget.value as EntryType)}
 							className='form-select'>
-							{Object.keys(FilterEntry).map((val) => (
-								<option value={FilterEntry[val]} key={`entryType ${val}`}>
-									{FilterEntry[val]}
+							{Object.keys(EntryType).map((val) => (
+								<option value={EntryType[val]} key={`entryType ${val}`}>
+									{EntryType[val]}
 								</option>
 							))}
 						</select>
