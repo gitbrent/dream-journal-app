@@ -29,7 +29,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { IDriveConfFile, IDriveDataFile, IJournalEntry, MetaType } from './app.types'
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { DateTime } from 'luxon'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
@@ -73,6 +73,10 @@ interface IChartData {
 	totStard: number
 	totTaged: number
 	totNotag?: number
+	avgTotal: number
+}
+type DreamTotalByYears = {
+	[key: string]: number
 }
 
 export default function TabExplore(props: Props) {
@@ -83,6 +87,30 @@ export default function TabExplore(props: Props) {
 	//
 	const [filterText, setFilterText] = useState('')
 	const [debouncedValue, setDebouncedValue] = useState('')
+
+	const allTimeMonths = useMemo(() => {
+		let months = 1
+		if (props.dataFile) {
+			let ad1 = DateTime.fromISO(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
+			let ad2 = DateTime.fromISO(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
+			months = Math.round(ad2.diff(ad1, 'months').months) + 1
+		}
+		return months
+	}, [props.dataFile])
+
+	const totDreamsPerYear = useMemo(() => {
+		let objData: DreamTotalByYears = {}
+		if (props.dataFile) {
+			props.dataFile.entries
+				.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))
+				.forEach((entry) => {
+					let ad1 = DateTime.fromISO(entry.entryDate)
+					if (!objData[ad1.toFormat('yyyy')]) objData[ad1.toFormat('yyyy')] = 0
+					objData[ad1.toFormat('yyyy')] += 1
+				})
+		}
+		return objData
+	}, [props.dataFile])
 
 	useEffect(() => {
 		const handler = setTimeout(() => setDebouncedValue(filterText), 500)
@@ -125,6 +153,7 @@ export default function TabExplore(props: Props) {
 				totStard: 0,
 				totTaged: 0,
 				totNotag: 0,
+				avgTotal: 0,
 			})
 		}
 
@@ -136,21 +165,12 @@ export default function TabExplore(props: Props) {
 				currEntry.totNotag += dream.dreamSigns.length > 0 ? 0 : 1
 				currEntry.totLucid += dream.isLucidDream ? 1 : 0
 				currEntry.totStard += dream.dreamSigns.filter((tag) => tag === MetaType.star).length > 0 ? 1 : 0
+				currEntry.avgTotal = Math.round(totDreamsPerYear[currEntry.dateTime.toFormat('yyyy')] / 12)
 			})
 		})
 
 		return tmpChartData
 	}, [filteredEntries])
-
-	const allTimeMonths = useMemo(() => {
-		let months = 1
-		if (props.dataFile) {
-			let ad1 = DateTime.fromISO(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
-			let ad2 = DateTime.fromISO(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
-			months = Math.round(ad2.diff(ad1, 'months').months) + 1
-		}
-		return months
-	}, [props.dataFile])
 
 	// -----------------------------------------------------------------------
 
@@ -250,26 +270,28 @@ export default function TabExplore(props: Props) {
 		// FUTURE: get fancier fills, not just plain bs-colors (use strips and transparency like sample on desktop shows)
 		// CODE: https://codepen.io/LeanyLabs/pen/jOWYpJx
 		return (
-			<div className='bg-black p-4 mb-4' style={{ width: '100%', height: 400 }}>
+			<section className='bg-black p-4 mb-4' style={{ width: '100%', height: 400 }}>
 				<ResponsiveContainer width='100%' height='100%'>
-					<BarChart data={chartDataDreams}>
+					<ComposedChart data={chartDataDreams}>
 						<XAxis dataKey='name' fontSize={'0.75rem'} />
-						<YAxis type='number' fontSize={'0.75rem'} width={60 - 20} /*domain={[0, (dataMax: number) => Math.round(dataMax * 1.1)]}*/ />
+						<YAxis yAxisId={0} fontSize={'0.75rem'} width={60 - 30} /*domain={[0, (dataMax: number) => Math.round(dataMax * 1.1)]}*/ />
+						<YAxis yAxisId={1} fontSize={'0.75rem'} width={60 - 20} orientation={'right'} />
 						<CartesianGrid stroke='#555555' strokeDasharray='6 2' vertical={false} />
+						<Legend verticalAlign={'bottom'} align={'center'} iconSize={20} />
 						<Tooltip cursor={false} />
-						<Legend verticalAlign='bottom' align='center' iconSize={20} />
-						{/*<Legend layout='horizontal' verticalAlign='bottom' align='center' wrapperStyle={{ position: 'relative' }} />*/}
 						{filterDrmChtShowNotag && <Bar dataKey='totNotag' name='Untagged' stackId='a' fill='var(--bs-primary)' />}
 						{filterDrmChtShowTaged && <Bar dataKey='totTaged' name='Tagged' stackId='a' fill='var(--bs-info)' />}
 						{filterDrmChtShowStard && <Bar dataKey='totStard' name='Starred' stackId='a' fill='var(--bs-warning)' />}
-						<Bar dataKey='totLucid' name='Lucid Dream' stackId='a' fill='var(--bs-success)' />
-					</BarChart>
+						<Bar yAxisId={0} dataKey='totLucid' name='Lucid Dream' stackId='a' fill='var(--bs-success)' />
+						<Line yAxisId={1} dataKey='avgTotal' name='Avg Drm/Mon' type='monotone' dot={false} stroke='#55ccff' strokeWidth={2} />
+						{/*<Legend layout='horizontal' verticalAlign='bottom' align='center' wrapperStyle={{ position: 'relative' }} />*/}
+					</ComposedChart>
 				</ResponsiveContainer>
-			</div>
+			</section>
 		)
 	}
 
-	function renderChartTable(): JSX.Element {
+	function renderTable(): JSX.Element {
 		return (
 			<section className='bg-black p-4'>
 				<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} />
@@ -287,7 +309,7 @@ export default function TabExplore(props: Props) {
 			<section className='bg-light p-4'>
 				{renderFilters()}
 				{renderChart()}
-				{renderChartTable()}
+				{renderTable()}
 			</section>
 		</section>
 	)
