@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect, useDeferredValue, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { IDriveConfFile, IDriveDataFile, IJournalEntry, MetaType } from './app.types'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { DateTime } from 'luxon'
@@ -82,7 +82,12 @@ export default function TabExplore(props: Props) {
 	const [filterDrmChtShowTaged, setFilterDrmChtShowTaged] = useState(true)
 	//
 	const [filterText, setFilterText] = useState('')
-	const deferredText = useDeferredValue(filterText)
+	const [debouncedValue, setDebouncedValue] = useState('')
+
+	useEffect(() => {
+		const handler = setTimeout(() => setDebouncedValue(filterText), 500)
+		return () => clearTimeout(handler)
+	}, [filterText, 500])
 
 	const filteredEntries = useMemo(() => {
 		let tmpEntries: IJournalEntry[] = []
@@ -94,16 +99,16 @@ export default function TabExplore(props: Props) {
 			tmpEntries = props.dataFile.entries.filter(
 				(entry) =>
 					DateTime.fromISO(entry.entryDate) > dateMaxAge &&
-					(!deferredText ||
+					(!debouncedValue ||
 						entry.dreams
 							.map((item) => item.dreamSigns)
 							.join()
-							.indexOf(deferredText.toLowerCase()) > -1)
+							.indexOf(debouncedValue.toLowerCase()) > -1)
 			)
 		}
 
 		return tmpEntries
-	}, [props.dataFile, filterDrmChtMonths, deferredText])
+	}, [props.dataFile, filterDrmChtMonths, debouncedValue])
 
 	const chartDataDreams = useMemo(() => {
 		const tmpChartData: IChartData[] = []
@@ -137,6 +142,16 @@ export default function TabExplore(props: Props) {
 		return tmpChartData
 	}, [filteredEntries])
 
+	const allTimeMonths = useMemo(() => {
+		let months = 1
+		if (props.dataFile) {
+			let ad1 = DateTime.fromISO(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
+			let ad2 = DateTime.fromISO(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
+			months = Math.round(ad2.diff(ad1, 'months').months) + 1
+		}
+		return months
+	}, [props.dataFile])
+
 	// -----------------------------------------------------------------------
 
 	function renderFilters(): JSX.Element {
@@ -165,7 +180,7 @@ export default function TabExplore(props: Props) {
 								defaultValue={filterDrmChtMonths}
 								onChange={(ev) => setFilterDrmChtMonths(Number(ev.currentTarget.value))}
 								className='form-select'>
-								<option value={9999}>(All)</option>
+								<option value={allTimeMonths}>(All)</option>
 								<option value={6}>6</option>
 								<option value={12}>12</option>
 								<option value={18}>18</option>
