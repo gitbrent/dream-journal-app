@@ -160,12 +160,14 @@ export default function TabExplore(props: Props) {
 		filteredEntries.forEach((entry) => {
 			let dateEntry = DateTime.fromISO(entry.entryDate)
 			let currEntry = tmpChartData.filter((data) => data.dateTime.hasSame(dateEntry, 'month') && data.dateTime.hasSame(dateEntry, 'year'))[0]
+			let divByMonths = dateEntry.hasSame(DateTime.now(), 'year') ? DateTime.now().month + 1 : 12
+
 			entry.dreams.forEach((dream) => {
 				currEntry.totTaged += dream.dreamSigns.length > 0 ? 1 : 0
 				currEntry.totNotag += dream.dreamSigns.length > 0 ? 0 : 1
 				currEntry.totLucid += dream.isLucidDream ? 1 : 0
 				currEntry.totStard += dream.dreamSigns.filter((tag) => tag === MetaType.star).length > 0 ? 1 : 0
-				currEntry.avgTotal = Math.round(totDreamsPerYear[currEntry.dateTime.toFormat('yyyy')] / 12)
+				currEntry.avgTotal = Math.round(totDreamsPerYear[currEntry.dateTime.toFormat('yyyy')] / divByMonths)
 			})
 		})
 
@@ -201,12 +203,12 @@ export default function TabExplore(props: Props) {
 								onChange={(ev) => setFilterDrmChtMonths(Number(ev.currentTarget.value))}
 								className='form-select'>
 								<option value={allTimeMonths}>(All)</option>
-								<option value={6}>6</option>
-								<option value={12}>12</option>
-								<option value={18}>18</option>
-								<option value={24}>24</option>
-								<option value={36}>36</option>
-								<option value={48}>48</option>
+								<option value={6 * 1}>{6 * 1}</option>
+								<option value={6 * 2}>{6 * 2}</option>
+								<option value={6 * 3}>{6 * 3}</option>
+								<option value={6 * 4}>{6 * 4}</option>
+								<option value={6 * 8}>{6 * 8}</option>
+								<option value={6 * 10}>{6 * 10}</option>
 							</select>
 							<label htmlFor='floatingMonthsShown' className='text-nowrap'>
 								Month Range
@@ -283,7 +285,7 @@ export default function TabExplore(props: Props) {
 						{filterDrmChtShowTaged && <Bar dataKey='totTaged' name='Tagged' stackId='a' fill='var(--bs-info)' />}
 						{filterDrmChtShowStard && <Bar dataKey='totStard' name='Starred' stackId='a' fill='var(--bs-warning)' />}
 						<Bar yAxisId={0} dataKey='totLucid' name='Lucid Dream' stackId='a' fill='var(--bs-success)' />
-						<Line yAxisId={1} dataKey='avgTotal' name='Avg Drm/Mon' type='monotone' dot={false} stroke='#55ccff' strokeWidth={2} />
+						<Line yAxisId={1} dataKey='avgTotal' name='Avg Drm/Mon' dot={false} stroke='#faeb00' strokeWidth={2} />
 						{/*<Legend layout='horizontal' verticalAlign='bottom' align='center' wrapperStyle={{ position: 'relative' }} />*/}
 					</ComposedChart>
 				</ResponsiveContainer>
