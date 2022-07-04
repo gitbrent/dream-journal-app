@@ -202,74 +202,79 @@ class App extends React.Component<IAppProps, IAppState> {
 		<TabAdmin dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} doSaveAdminState={this.doSaveAdminState} adminState={this.state.childAdminState} />
 	)
 
-	render() {
+	Nav = (): JSX.Element => {
 		const NavLinkBaseClass = !this.state.dataFile ? 'nav-link disabled' : 'nav-link'
+
+		return (
+			<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
+				<div className='container-fluid'>
+					<a className='navbar-brand' href='/'>
+						<img src={LogoBase64} width='30' height='30' className='d-inline-block align-top me-3' alt='logo' />
+						Brain Cloud
+					</a>
+					<button
+						type='button'
+						className='navbar-toggler'
+						data-bs-toggle='collapse'
+						data-bs-target='#navbarNav'
+						aria-controls='navbarNav'
+						aria-expanded='false'
+						aria-label='Toggle navigation'>
+						<span className='navbar-toggler-icon' />
+					</button>
+					<div className='collapse navbar-collapse' id='navbarNav'>
+						<ul className='navbar-nav me-auto mb-2 mb-lg-0'>
+							<li className='nav-item'>
+								<NavLink to='/' className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+									Home
+								</NavLink>
+							</li>
+							<li className='nav-item'>
+								<NavLink to='/bedtime' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+									Bedtime
+								</NavLink>
+							</li>
+							<li className='nav-item'>
+								<NavLink to='/explore' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+									Explore
+								</NavLink>
+							</li>
+							<li className='nav-item'>
+								<NavLink to='/journal' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+									Journal
+								</NavLink>
+							</li>
+							<li className='nav-item'>
+								<NavLink to='/tags' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+									Tags
+								</NavLink>
+							</li>
+							<li className='nav-item'>
+								<NavLink to='/search' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+									Search
+								</NavLink>
+							</li>
+							<li className='nav-item'>
+								<NavLink to='/import' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+									Import
+								</NavLink>
+							</li>
+							<li className='nav-item'>
+								<NavLink to='/admin' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+									Admin
+								</NavLink>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+		)
+	}
+
+	render() {
 		return (
 			<BrowserRouter>
-				<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
-					<div className='container-fluid'>
-						<a className='navbar-brand' href='/'>
-							<img src={LogoBase64} width='30' height='30' className='d-inline-block align-top me-3' alt='logo' />
-							Brain Cloud
-						</a>
-						<button
-							type='button'
-							className='navbar-toggler'
-							data-bs-toggle='collapse'
-							data-bs-target='#navbarNav'
-							aria-controls='navbarNav'
-							aria-expanded='false'
-							aria-label='Toggle navigation'>
-							<span className='navbar-toggler-icon' />
-						</button>
-						<div className='collapse navbar-collapse' id='navbarNav'>
-							<ul className='navbar-nav me-auto mb-2 mb-lg-0'>
-								<li className='nav-item'>
-									<NavLink to='/' className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-										Home
-									</NavLink>
-								</li>
-								<li className='nav-item'>
-									<NavLink to='/bedtime' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
-										Bedtime
-									</NavLink>
-								</li>
-								<li className='nav-item'>
-									<NavLink to='/explore' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
-										Explore
-									</NavLink>
-								</li>
-								<li className='nav-item'>
-									<NavLink to='/journal' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
-										Journal
-									</NavLink>
-								</li>
-								<li className='nav-item'>
-									<NavLink to='/tags' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
-										Tags
-									</NavLink>
-								</li>
-								<li className='nav-item'>
-									<NavLink to='/search' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
-										Search
-									</NavLink>
-								</li>
-								{/*
-										<li className='nav-item'>
-											<NavLink to='/import' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
-												Import Dreams
-											</NavLink>
-										</li>
-									*/}
-								<li className='nav-item'>
-									<NavLink to='/admin' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
-										Admin
-									</NavLink>
-								</li>
-							</ul>
-						</div>
-					</div>
-				</nav>
+				{this.Nav()}
 				<Routes>
 					<Route path='/' element={this.Home()} />
 					<Route path='/bedtime' element={this.Bedtime()} />
@@ -277,7 +282,7 @@ class App extends React.Component<IAppProps, IAppState> {
 					<Route path='/journal' element={this.Journal()} />
 					<Route path='/tags' element={this.Tags()} />
 					<Route path='/search' element={this.Search()} />
-					{/*<Route path='/import' element={this.Import()} />*/}
+					<Route path='/import' element={this.Import()} />
 					<Route path='/admin' element={this.Admin()} />
 				</Routes>
 			</BrowserRouter>
