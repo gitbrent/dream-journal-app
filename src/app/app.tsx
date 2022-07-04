@@ -209,14 +209,14 @@ class App extends React.Component<IAppProps, IAppState> {
 				<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
 					<div className='container-fluid'>
 						<a className='navbar-brand' href='/'>
-							<img src={LogoBase64} width='30' height='30' className='d-inline-block align-top me-3' alt='' />
+							<img src={LogoBase64} width='30' height='30' className='d-inline-block align-top me-3' alt='logo' />
 							Brain Cloud
 						</a>
 						<button
-							className='navbar-toggler'
 							type='button'
-							data-toggle='collapse'
-							data-target='#navbarNav'
+							className='navbar-toggler'
+							data-bs-toggle='collapse'
+							data-bs-target='#navbarNav'
 							aria-controls='navbarNav'
 							aria-expanded='false'
 							aria-label='Toggle navigation'>
