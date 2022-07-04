@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { IDreamSignTag, IJournalDream, IJournalEntry, InductionTypes } from './app.types'
 import { Calendar3, Clock, PlusCircle, Save, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
 import ReactTags from 'react-tag-autocomplete'
 import Modal from 'bootstrap/js/dist/modal'
 import * as GDrive from './google-oauth'
-import * as bootstrap from 'bootstrap'
+import * as bootstrap from 'bootstrap' // NOTE: IMPORTANT: This is the sole import of the javascript library (but provides funcionality thruout app)
 
 export interface IModalEntryProps {
 	currEntry: IJournalEntry
