@@ -1309,8 +1309,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					</div>
 				</div>
 
-				<ul className='nav nav-tabs nav-fill' role='tablist'>
-					<li className='nav-item'>
+				<ul className='nav nav-tabs nav-fill' id='importTab' role='tablist'>
+					<li className='nav-item' role='presentation'>
 						<button
 							className='nav-link active'
 							id='setup-tab'
