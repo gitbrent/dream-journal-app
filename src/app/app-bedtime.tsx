@@ -110,7 +110,52 @@ export default function TabBedtime(props: Props) {
 	// -----------------------------------------------------------------------
 
 	function renderTabPrep(): JSX.Element {
-		let arrIcons: JSX.Element[] = [
+		return (
+			<section>
+				<div className='row row-cols-1 row-cols-md-2 g-4'>
+					<div className='col'>
+						<div className='card h-100'>
+							<div className='card-header bg-primary h5 text-white'>MILD Affirmations</div>
+							<div className='card-body bg-black p-4'>
+								{props.confFile.mildAffirs.map((item, idx) => (
+									<section key={`goalTitle${idx}`}>
+										<h5 className='text-primary text-uppercase mb-3'>{item.title}</h5>
+										<ul>
+											{item.bullets.map((item, idy) => (
+												<li key={`goalBullet${idx}${idy}`}>{item}</li>
+											))}
+										</ul>
+									</section>
+								))}
+							</div>
+						</div>
+					</div>
+					<div className='col'>
+						<div className='card h-100'>
+							<div className='card-header bg-success h5 text-white'>Random Lucid Dreams</div>
+							<div className='card-body bg-black p-4'>
+								<div className='row row-cols-1 g-4'>
+									{randLucids.map((match, idx) => (
+										<SearchResults
+											key={`random${idx}`}
+											setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
+											setDreamIdx={(index: number) => setCurrDreamIdx(index)}
+											setShowModal={(show: boolean) => setShowModal(show)}
+											searchMatch={match}
+											searchOptScope={SearchScopes.title}
+										/>
+									))}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		)
+	}
+
+	function renderTabGoals(): JSX.Element {
+		const arrIcons: JSX.Element[] = [
 			<LightningFill size={20} className='me-2' />,
 			<ShieldFillCheck size={20} className='me-2' />,
 			<StarFill size={20} className='me-2' />,
@@ -145,49 +190,7 @@ export default function TabBedtime(props: Props) {
 						</div>
 					</div>
 				</div>
-				<div className='row row-cols-1 row-cols-md-2 g-4'>
-					<div className='col'>
-						<div className='card h-100'>
-							<div className='card-header bg-primary h5 text-white'>MILD Affirmations</div>
-							<div className='card-body bg-black p-4'>
-								{props.confFile.mildAffirs.map((item, idx) => (
-									<section key={`goalTitle${idx}`}>
-										<h6 className='card-subtitle text-primary text-uppercase mb-3'>{item.title}</h6>
-										<ul>
-											{item.bullets.map((item, idy) => (
-												<li key={`goalBullet${idx}${idy}`}>{item}</li>
-											))}
-										</ul>
-									</section>
-								))}
-							</div>
-						</div>
-					</div>
-					<div className='col'>
-						<div className='card h-100'>
-							<div className='card-header bg-info h5 text-white'>Random Lucid Dreams</div>
-							<div className='card-body bg-black p-4'>
-								{randLucids.map((match, idx) => (
-									<SearchResults
-										key={`match${idx}`}
-										setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
-										setDreamIdx={(index: number) => setCurrDreamIdx(index)}
-										setShowModal={(show: boolean) => setShowModal(show)}
-										searchMatch={match}
-										searchOptScope={SearchScopes.title}
-									/>
-								))}
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
-		)
-	}
 
-	function renderTabGoals(): JSX.Element {
-		return (
-			<section>
 				{lucidGoals &&
 					lucidGoals.bullets &&
 					lucidGoals.bullets.map((item, idx) => (
