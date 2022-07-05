@@ -1,11 +1,11 @@
 {
   "name": "dream-journal-app",
-  "version": "1.2.0-beta",
+  "version": "1.2.0",
   "author": {
     "name": "Brent Ely",
     "url": "https://github.com/gitbrent/"
   },
-  "description": "Web-based Dream Journal application using your Google Drive for cloud storage.",
+  "description": "Dream Journal web application using your Google Drive for cloud storage.",
   "homepage": "https://gitbrent.github.io/dream-journal-app/",
   "license": "MIT",
   "repository": {
