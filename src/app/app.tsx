@@ -254,12 +254,12 @@ class App extends React.Component<IAppProps, IAppState> {
 									Search
 								</NavLink>
 							</li>
-							<li className='nav-item'>
+							<li className='nav-item d-none d-md-block'>
 								<NavLink to='/import' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
 									Import
 								</NavLink>
 							</li>
-							<li className='nav-item'>
+							<li className='nav-item d-none d-md-block'>
 								<NavLink to='/admin' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
 									Admin
 								</NavLink>
