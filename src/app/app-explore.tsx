@@ -75,12 +75,13 @@ interface IChartData {
 	totNotag?: number
 	avgTotal: number
 }
-type DreamTotalByYears = {
+type AvgDreamsPerMonth = {
+	/** @example `2010-04`=199 */
 	[key: string]: number
 }
 
 export default function TabExplore(props: Props) {
-	const [filterDrmChtMonths, setFilterDrmChtMonths] = useState(12)
+	const [filterDrmChtMonths, setFilterDrmChtMonths] = useState(18)
 	const [filterDrmChtShowStard, setFilterDrmChtShowStard] = useState(true)
 	const [filterDrmChtShowNotag, setFilterDrmChtShowNotag] = useState(true)
 	const [filterDrmChtShowTaged, setFilterDrmChtShowTaged] = useState(true)
@@ -98,18 +99,41 @@ export default function TabExplore(props: Props) {
 		return months
 	}, [props.dataFile])
 
-	const totDreamsPerYear = useMemo(() => {
-		let objData: DreamTotalByYears = {}
+	const avgDreamsPerMonth = useMemo(() => {
+		interface SumByYear {
+			year: number
+			month: number
+			total: number
+		}
+		let sumByYear: SumByYear[] = []
+		let avgData: AvgDreamsPerMonth = {}
+
 		if (props.dataFile) {
 			props.dataFile.entries
 				.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))
 				.forEach((entry) => {
-					let ad1 = DateTime.fromISO(entry.entryDate)
-					if (!objData[ad1.toFormat('yyyy')]) objData[ad1.toFormat('yyyy')] = 0
-					objData[ad1.toFormat('yyyy')] += 1
+					let entryDate = DateTime.fromISO(entry.entryDate)
+					let currItem = sumByYear.filter((item) => item.year === entryDate.year && item.month === entryDate.month)[0]
+					if (!currItem) {
+						currItem = { year: entryDate.year, month: entryDate.month, total: 0 }
+						sumByYear.push(currItem)
+					}
+					currItem.total += 1
 				})
+
+			sumByYear.forEach((item) => {
+				let entryKey = `${item.year}-${item.month <= 9 ? '0' + item.month : item.month}`
+				let totalMon = sumByYear.filter((sum) => sum.year === item.year).length
+				let divByMon = item.month < totalMon ? item.month : totalMon
+				let totalSoFar = sumByYear
+					.filter((sum) => sum.year === item.year && sum.month <= item.month)
+					.map((sum) => sum.total)
+					.reduce((p, n) => p + n)
+				if (!avgData[entryKey]) avgData[entryKey] = 0
+				avgData[entryKey] = Math.round(totalSoFar / divByMon)
+			})
 		}
-		return objData
+		return avgData
 	}, [props.dataFile])
 
 	useEffect(() => {
@@ -160,14 +184,13 @@ export default function TabExplore(props: Props) {
 		filteredEntries.forEach((entry) => {
 			let dateEntry = DateTime.fromISO(entry.entryDate)
 			let currEntry = tmpChartData.filter((data) => data.dateTime.hasSame(dateEntry, 'month') && data.dateTime.hasSame(dateEntry, 'year'))[0]
-			let divByMonths = dateEntry.hasSame(DateTime.now(), 'year') ? DateTime.now().month + 1 : 12
 
 			entry.dreams.forEach((dream) => {
 				currEntry.totTaged += dream.dreamSigns.length > 0 ? 1 : 0
 				currEntry.totNotag += dream.dreamSigns.length > 0 ? 0 : 1
 				currEntry.totLucid += dream.isLucidDream ? 1 : 0
 				currEntry.totStard += dream.dreamSigns.filter((tag) => tag === MetaType.star).length > 0 ? 1 : 0
-				currEntry.avgTotal = Math.round(totDreamsPerYear[currEntry.dateTime.toFormat('yyyy')] / divByMonths)
+				currEntry.avgTotal = avgDreamsPerMonth[currEntry.dateTime.toFormat('yyyy-MM')]
 			})
 		})
 
@@ -179,7 +202,7 @@ export default function TabExplore(props: Props) {
 	function renderFilters(): JSX.Element {
 		return (
 			<section>
-				<div className='row row-cols-1 row-cols-sm-2 row-cols-md-5 g-4 align-items-center justify-content-between mb-4' data-desc='commandbar'>
+				<div className='row row-cols-2 row-cols-md-5 g-4 align-items-center justify-content-between mb-4' data-desc='commandbar'>
 					<div className='col' data-desc='search tags'>
 						<div className='form-floating'>
 							<input
@@ -215,7 +238,7 @@ export default function TabExplore(props: Props) {
 							</label>
 						</div>
 					</div>
-					<div className='col'>
+					<div className='col d-none d-md-block'>
 						<div className='form-floating'>
 							<select
 								id='floatingShowStard'
@@ -231,7 +254,7 @@ export default function TabExplore(props: Props) {
 							</label>
 						</div>
 					</div>
-					<div className='col'>
+					<div className='col d-none d-md-block'>
 						<div className='form-floating'>
 							<select
 								id='floatingShowUntag'
@@ -247,7 +270,7 @@ export default function TabExplore(props: Props) {
 							</label>
 						</div>
 					</div>
-					<div className='col'>
+					<div className='col d-none d-md-block'>
 						<div className='form-floating'>
 							<select
 								id='floatingShowTaged'
@@ -276,8 +299,8 @@ export default function TabExplore(props: Props) {
 				<ResponsiveContainer width='100%' height='100%'>
 					<ComposedChart data={chartDataDreams}>
 						<XAxis dataKey='name' fontSize={'0.75rem'} />
-						<YAxis yAxisId={0} fontSize={'0.75rem'} width={60 - 30} /*domain={[0, (dataMax: number) => Math.round(dataMax * 1.1)]}*/ />
-						<YAxis yAxisId={1} fontSize={'0.75rem'} width={60 - 20} orientation={'right'} />
+						<YAxis yAxisId={0} fontSize={'0.75rem'} width={60 - 40} /*domain={[0, (dataMax: number) => Math.round(dataMax * 1.1)]}*/ />
+						<YAxis yAxisId={1} fontSize={'0.75rem'} width={60 - 40} orientation={'right'} />
 						<CartesianGrid stroke='#555555' strokeDasharray='6 2' vertical={false} />
 						<Legend verticalAlign={'bottom'} align={'center'} iconSize={20} />
 						<Tooltip cursor={false} />
@@ -285,7 +308,7 @@ export default function TabExplore(props: Props) {
 						{filterDrmChtShowTaged && <Bar dataKey='totTaged' name='Tagged' stackId='a' fill='var(--bs-info)' />}
 						{filterDrmChtShowStard && <Bar dataKey='totStard' name='Starred' stackId='a' fill='var(--bs-warning)' />}
 						<Bar yAxisId={0} dataKey='totLucid' name='Lucid Dream' stackId='a' fill='var(--bs-success)' />
-						{!debouncedValue && <Line yAxisId={1} dataKey='avgTotal' name='Avg Drm/Mon' dot={false} stroke='#faeb00' strokeWidth={2} />}
+						{!debouncedValue && <Line yAxisId={1} dataKey='avgTotal' name='Dreams/Month' dot={false} stroke='var(--bs-danger)' strokeWidth={2} />}
 						{/*<Legend layout='horizontal' verticalAlign='bottom' align='center' wrapperStyle={{ position: 'relative' }} />*/}
 					</ComposedChart>
 				</ResponsiveContainer>
