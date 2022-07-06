@@ -29,7 +29,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { IDriveDataFile } from './app.types'
-import { Search } from 'react-bootstrap-icons'
+import { Braces, CalendarMonth, Calendar3, Tags } from 'react-bootstrap-icons'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
 import TableEntries from './components/table-entries'
@@ -91,73 +91,98 @@ export default function TabJournal(props: Props) {
 
 	function renderFilters(): JSX.Element {
 		return (
-			<div className='row g-4 align-items-center mb-4' data-desc='commandbar'>
-				<div className='col-auto d-none d-md-block' data-desc='icon'>
-					<Search size={40} className='text-secondary' />
-				</div>
+			<div className='row row-cols-2 row-cols-md-4 g-4 align-items-center mb-4' data-desc='commandbar'>
 				<div className='col' data-desc='search tags'>
-					<div className='form-floating'>
-						<input
-							id='floatingDreamtag'
-							type='text'
-							value={filterText}
-							placeholder='search tags'
-							title='search tags'
-							className='form-control'
-							onChange={(event) => setFilterText(event.target.value)}
-							disabled={!props.dataFile ? true : false}
-						/>
-						<label htmlFor='floatingDreamtag'>Search Tags</label>
+					<div className='row flex-nowrap align-items-center g-0 bg-black'>
+						<div className='col-auto px-2 d-none d-lg-block'>
+							<Tags size={32} className='text-secondary' />
+						</div>
+						<div className='col'>
+							<div className='form-floating'>
+								<input
+									id='floatingDreamtag'
+									type='text'
+									value={filterText}
+									//placeholder='search tags'
+									title='search tags'
+									className='form-control'
+									onChange={(event) => setFilterText(event.target.value)}
+									disabled={!props.dataFile ? true : false}
+								/>
+								<label htmlFor='floatingDreamtag'>Search Tags</label>
+							</div>
+						</div>
 					</div>
 				</div>
-				<div className='col-auto' data-desc='year' style={{ minWidth: 160 }}>
-					<div className='form-floating'>
-						<input
-							id='floatingEntryYear'
-							type='text'
-							maxLength={4}
-							value={filterYear}
-							placeholder='entry year'
-							title='entry year (ex: "2022")'
-							className='form-control'
-							onChange={(event) => setFilterYear(event.target.value)}
-							disabled={!props.dataFile ? true : false}
-						/>
-						<label htmlFor='floatingEntryYear'>Entry Year</label>
+				<div className='col d-none d-md-block' data-desc='year'>
+					<div className='row flex-nowrap align-items-center g-0 bg-black'>
+						<div className='col-auto px-2 d-none d-lg-block'>
+							<Calendar3 size={32} className='text-secondary' />
+						</div>
+						<div className='col'>
+							<div className='form-floating'>
+								<input
+									id='floatingEntryYear'
+									type='text'
+									maxLength={4}
+									value={filterYear}
+									//placeholder='entry year'
+									title='entry year (ex: "2022")'
+									className='form-control'
+									onChange={(event) => setFilterYear(event.target.value)}
+									disabled={!props.dataFile ? true : false}
+								/>
+								<label htmlFor='floatingEntryYear'>Entry Year</label>
+							</div>
+						</div>
 					</div>
 				</div>
-				<div className='col-auto' data-desc='month' style={{ minWidth: 170 }}>
-					<div className='form-floating'>
-						<input
-							id='floatingEntryMon'
-							type='text'
-							maxLength={2}
-							value={filterMon}
-							placeholder='entry month'
-							title='entry month (0-11)'
-							className='form-control'
-							onChange={(event) => setFilterMon(event.target.value)}
-							disabled={!props.dataFile ? true : false}
-						/>
-						<label htmlFor='floatingEntryMon'>Entry Month</label>
+				<div className='col d-none d-md-block' data-desc='month'>
+					<div className='row flex-nowrap align-items-center g-0 bg-black'>
+						<div className='col-auto px-2 d-none d-lg-block'>
+							<CalendarMonth size={32} className='text-secondary' />
+						</div>
+						<div className='col'>
+							<div className='form-floating'>
+								<input
+									id='floatingEntryMon'
+									type='text'
+									maxLength={2}
+									value={filterMon}
+									//placeholder='entry month'
+									title='entry month (0-11)'
+									className='form-control'
+									onChange={(event) => setFilterMon(event.target.value)}
+									disabled={!props.dataFile ? true : false}
+								/>
+								<label htmlFor='floatingEntryMon'>Entry Month</label>
+							</div>
+						</div>
 					</div>
 				</div>
-				<div className='col-auto' data-desc='entry type'>
-					<div className='form-floating'>
-						<select
-							id='floatingFilterEntry'
-							defaultValue={filterEntryType}
-							onChange={(ev) => setFilterEntryType(ev.currentTarget.value as EntryType)}
-							className='form-select'>
-							{Object.keys(EntryType).map((val) => (
-								<option value={EntryType[val]} key={`entryType ${val}`}>
-									{EntryType[val]}
-								</option>
-							))}
-						</select>
-						<label htmlFor='floatingFilterEntry' className='text-nowrap'>
-							Entry Type
-						</label>
+				<div className='col' data-desc='types'>
+					<div className='row flex-nowrap align-items-center g-0 bg-black'>
+						<div className='col-auto px-2 d-none d-lg-block'>
+							<Braces size={32} className='text-secondary' />
+						</div>
+						<div className='col'>
+							<div className='form-floating'>
+								<select
+									id='floatingFilterEntry'
+									defaultValue={filterEntryType}
+									onChange={(ev) => setFilterEntryType(ev.currentTarget.value as EntryType)}
+									className='form-select'>
+									{Object.keys(EntryType).map((val) => (
+										<option value={EntryType[val]} key={`entryType ${val}`}>
+											{EntryType[val]}
+										</option>
+									))}
+								</select>
+								<label htmlFor='floatingFilterEntry' className='text-nowrap'>
+									Entry Type
+								</label>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
