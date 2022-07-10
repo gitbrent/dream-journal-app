@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { ConfMetaCats, IDriveConfFile, IDriveDataFile, IJournalEntry, ISearchMatch, SearchScopes } from './app.types'
 import {
 	ArrowDown,
@@ -73,15 +73,13 @@ export default function TabBedtime(props: Props) {
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
 	const [currDreamIdx, setCurrDreamIdx] = useState(0)
-	const [allLucids, setAllLucids] = useState<ISearchMatch[]>([])
-	const [randLucids, setRandLucids] = useState<ISearchMatch[]>([])
 	const [lucidGoals, setLucidGoals] = useState<ConfMetaCats>(null)
 
 	useEffect(() => {
 		if (props.confFile && props.confFile.lucidGoals) setLucidGoals(props.confFile.lucidGoals)
 	}, [props.confFile])
 
-	useEffect(() => {
+	const allLucids = useMemo(() => {
 		let allLucids: ISearchMatch[] = []
 
 		if (props.dataFile && props.dataFile.entries && props.dataFile.entries.length > 0) {
@@ -92,10 +90,10 @@ export default function TabBedtime(props: Props) {
 			})
 		}
 
-		setAllLucids(allLucids)
+		return allLucids
 	}, [props.dataFile])
 
-	useEffect(() => {
+	const randLucids = useMemo(() => {
 		if (allLucids && allLucids.length > 0) {
 			let randLucids: ISearchMatch[] = []
 
@@ -103,30 +101,72 @@ export default function TabBedtime(props: Props) {
 				randLucids.push(allLucids[Math.round(Math.random() * allLucids.length)])
 			}
 
-			setRandLucids(randLucids)
+			return randLucids
 		}
 	}, [allLucids])
 
+	const randDreams = useMemo(() => {
+		let randDreams: ISearchMatch[] = []
+
+		if (props.dataFile && props.dataFile.entries && props.dataFile.entries.length > 0) {
+			props.dataFile.entries.forEach((entry) => {
+				// TODO: WIP:
+				// filter out lucids, same month, year-1, then-2 then -3
+				entry.dreams.forEach((dream, idx) => {
+					//randDreams.push(allLucids[Math.round(Math.random() * allLucids.length)])
+				})
+			})
+		}
+
+		return randDreams
+	}, [props.dataFile])
+
 	// -----------------------------------------------------------------------
 
-	function renderTabPrep(): JSX.Element {
+	function renderTabMild(): JSX.Element {
+		return (
+			<section>
+				<div className='card h-100'>
+					<div className='card-header bg-primary h5 text-white'>Affirmations</div>
+					<div className='card-body bg-black p-4'>
+						<div className='row row-cols-2 g-4'>
+							{props.confFile.mildAffirs.map((item, idx) => (
+								<div className='col' key={`goalTitle${idx}`}>
+									<h5 className='text-primary text-uppercase'>{item.title}</h5>
+									<ul className='mb-0'>
+										{item.bullets.map((item, idy) => (
+											<li key={`goalBullet${idx}${idy}`}>{item}</li>
+										))}
+									</ul>
+								</div>
+							))}
+						</div>
+					</div>
+				</div>
+			</section>
+		)
+	}
+
+	function renderTabRandom(): JSX.Element {
 		return (
 			<section>
 				<div className='row row-cols-1 row-cols-md-2 g-4'>
 					<div className='col'>
 						<div className='card h-100'>
-							<div className='card-header bg-primary h5 text-white'>MILD Affirmations</div>
+							<div className='card-header bg-primary h5 text-white'>Random Dreams</div>
 							<div className='card-body bg-black p-4'>
-								{props.confFile.mildAffirs.map((item, idx) => (
-									<section key={`goalTitle${idx}`}>
-										<h5 className='text-primary text-uppercase mb-3'>{item.title}</h5>
-										<ul>
-											{item.bullets.map((item, idy) => (
-												<li key={`goalBullet${idx}${idy}`}>{item}</li>
-											))}
-										</ul>
-									</section>
-								))}
+								<div className='row row-cols-1 g-4'>
+									{randDreams.map((match, idx) => (
+										<SearchResults
+											key={`dream${idx}`}
+											setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
+											setDreamIdx={(index: number) => setCurrDreamIdx(index)}
+											setShowModal={(show: boolean) => setShowModal(show)}
+											searchMatch={match}
+											searchOptScope={SearchScopes.title}
+										/>
+									))}
+								</div>
 							</div>
 						</div>
 					</div>
@@ -608,25 +648,38 @@ export default function TabBedtime(props: Props) {
 				<li className='nav-item' role='presentation'>
 					<button
 						className='nav-link active'
-						id='bedNav1'
+						id='bedNavMild'
 						data-bs-toggle='tab'
-						data-bs-target='#bedTab1'
+						data-bs-target='#bedTabMild'
 						type='button'
 						role='tab'
-						aria-controls='bedTab1'
+						aria-controls='bedTabMild'
 						aria-selected='true'>
-						Bedtime Prep
+						MILD
 					</button>
 				</li>
 				<li className='nav-item' role='presentation'>
 					<button
 						className='nav-link'
-						id='bedNav2'
+						id='bedNavRandom'
 						data-bs-toggle='tab'
-						data-bs-target='#bedTab2'
+						data-bs-target='#bedTabRandom'
 						type='button'
 						role='tab'
-						aria-controls='bedTab2'
+						aria-controls='bedTabRandom'
+						aria-selected='false'>
+						Random Dreams
+					</button>
+				</li>
+				<li className='nav-item' role='presentation'>
+					<button
+						className='nav-link'
+						id='bedNavGoals'
+						data-bs-toggle='tab'
+						data-bs-target='#bedTabGoals'
+						type='button'
+						role='tab'
+						aria-controls='bedTabGoals'
 						aria-selected='false'>
 						My Goals
 					</button>
@@ -634,25 +687,28 @@ export default function TabBedtime(props: Props) {
 				<li className='nav-item' role='presentation'>
 					<button
 						className='nav-link'
-						id='bedNav3'
+						id='bedNavSigns'
 						data-bs-toggle='tab'
-						data-bs-target='#bedTab3'
+						data-bs-target='#bedTabSigns'
 						type='button'
 						role='tab'
-						aria-controls='bedTab3'
+						aria-controls='bedTabSigns'
 						aria-selected='false'>
 						Dreamsign Inventory
 					</button>
 				</li>
 			</ul>
 			<div className='tab-content'>
-				<div className='tab-pane bg-light p-4 active' id='bedTab1' role='tabpanel' aria-labelledby='bedNav1'>
-					{renderTabPrep()}
+				<div className='tab-pane bg-light p-4 active' id='bedTabMild' role='tabpanel' aria-labelledby='bedNavMild'>
+					{renderTabMild()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='bedTab2' role='tabpanel' aria-labelledby='bedNav2'>
+				<div className='tab-pane bg-light p-4' id='bedTabRandom' role='tabpanel' aria-labelledby='bedNavRandom'>
+					{renderTabRandom()}
+				</div>
+				<div className='tab-pane bg-light p-4' id='bedTabGoals' role='tabpanel' aria-labelledby='bedNavGoals'>
 					{renderTabGoals()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='bedTab3' role='tabpanel' aria-labelledby='bedNav3'>
+				<div className='tab-pane bg-light p-4' id='bedTabSigns' role='tabpanel' aria-labelledby='bedNavSigns'>
 					{renderTabInv()}
 				</div>
 			</div>
