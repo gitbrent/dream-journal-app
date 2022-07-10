@@ -214,7 +214,9 @@ export default function TabExplore(props: Props) {
 								onChange={(event) => setFilterText(event.target.value)}
 								disabled={!props.dataFile ? true : false}
 							/>
-							<label htmlFor='floatingDreamtag'>Search Tags</label>
+							<label htmlFor='floatingDreamtag' className='text-nowrap'>
+								Search Tags
+							</label>
 						</div>
 					</div>
 					<div className='col'>
