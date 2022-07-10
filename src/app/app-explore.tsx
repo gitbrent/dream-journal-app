@@ -201,7 +201,7 @@ export default function TabExplore(props: Props) {
 
 	function renderFilters(): JSX.Element {
 		return (
-			<section>
+			<section className='mb-4'>
 				<div className='row row-cols-2 row-cols-md-5 g-4 align-items-center justify-content-between mb-4' data-desc='commandbar'>
 					<div className='col' data-desc='search tags'>
 						<div className='form-floating'>
@@ -291,6 +291,14 @@ export default function TabExplore(props: Props) {
 		)
 	}
 
+	function renderMetrics(): JSX.Element {
+		return (
+			<section className='bg-black p-4 mb-4'>
+				<HeaderMetrics entries={filteredEntries} isBusyLoad={props.isBusyLoad} showStats={true} onlyMetrics={true} />
+			</section>
+		)
+	}
+
 	function renderChart(): JSX.Element {
 		// FUTURE: get fancier fills, not just plain bs-colors (use strips and transparency like sample on desktop shows)
 		// CODE: https://codepen.io/LeanyLabs/pen/jOWYpJx
@@ -330,12 +338,17 @@ export default function TabExplore(props: Props) {
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<section className='container my-auto my-md-5'>
-			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
-			<section className='bg-light p-4'>
-				{renderFilters()}
-				{renderChart()}
-				{renderTable()}
-			</section>
+			<div className='card mb-2 mb-md-5'>
+				<div className='card-header bg-primary'>
+					<h5 className='card-title text-white mb-0'>Dream Journal Exploration</h5>
+				</div>
+				<section className='bg-light p-4'>
+					{renderFilters()}
+					{renderMetrics()}
+					{renderChart()}
+					{renderTable()}
+				</section>
+			</div>
 		</section>
 	)
 }
