@@ -106,16 +106,19 @@ export default function TabBedtime(props: Props) {
 	}, [allLucids])
 
 	const randDreams = useMemo(() => {
+		let tempDreams: ISearchMatch[] = []
 		let randDreams: ISearchMatch[] = []
 
 		if (props.dataFile && props.dataFile.entries && props.dataFile.entries.length > 0) {
 			props.dataFile.entries.forEach((entry) => {
-				// TODO: WIP:
-				// filter out lucids, same month, year-1, then-2 then -3
 				entry.dreams.forEach((dream, idx) => {
-					//randDreams.push(allLucids[Math.round(Math.random() * allLucids.length)])
+					if (!dream.isLucidDream) tempDreams.push({ entry: entry, dreamIdx: idx })
 				})
 			})
+		}
+
+		for (let idx = 0; idx < 3; idx++) {
+			randDreams.push(tempDreams[Math.round(Math.random() * tempDreams.length)])
 		}
 
 		return randDreams
