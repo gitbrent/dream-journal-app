@@ -231,7 +231,7 @@ export default function TabExplore(props: Props) {
 								<option value={6 * 3}>{6 * 3}</option>
 								<option value={6 * 4}>{6 * 4}</option>
 								<option value={6 * 8}>{6 * 8}</option>
-								<option value={6 * 10}>{6 * 10}</option>
+								<option value={6 * 12}>{6 * 12}</option>
 							</select>
 							<label htmlFor='floatingMonthsShown' className='text-nowrap'>
 								Month Range
