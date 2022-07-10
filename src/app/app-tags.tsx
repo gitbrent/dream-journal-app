@@ -244,9 +244,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<div className='container my-auto my-md-5'>
-			<header>
-				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
-			</header>
+			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 
 			<ul className='nav nav-tabs nav-fill' id='tagsTab' role='tablist'>
 				<li className='nav-item' role='presentation'>
