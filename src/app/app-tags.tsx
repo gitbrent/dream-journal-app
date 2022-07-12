@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { DateTime } from 'luxon'
 import { IDreamSignTagGroup, IDreamTagByCat, IDriveDataFile, IJournalDream, IJournalEntry } from './app.types'
 import { BarChart, Bar, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -42,8 +42,6 @@ interface IOnlyDream {
 }
 
 export default function TabAdmin(props: IAppTagsProps) {
-	const [dreamTagGroups, setDreamTagGroups] = useState<IDreamSignTagGroup[]>([])
-	const [tagsByCat, setTagsByCat] = useState<IDreamTagByCat[]>([])
 	// TAB: Tag Timeline
 	const [chartDataTags, setChartDataTags] = useState<IChartData[]>([])
 	const [filterTextTags, setFilterTextTags] = useState('')
@@ -51,52 +49,34 @@ export default function TabAdmin(props: IAppTagsProps) {
 	const [tagChartClickedIdx, setTagChartClickedIdx] = useState<number>(null)
 	const [tagChartClkEntries, setTagChartClkEntries] = useState<IJournalEntry[]>([])
 
-	useEffect(() => {
-		if (!props.dataFile || !props.dataFile.entries) return
+	const dreamTagGroups = useMemo(() => {
+		if (!props.dataFile || !props.dataFile.entries) return []
+		else return getGroupedTags(props.dataFile.entries)
+	}, [props.dataFile])
 
-		// Tag Groups
-		let tmpOnlyDreams: IOnlyDream[] = []
-		let tagGroups: IDreamSignTagGroup[] = []
-		{
-			props.dataFile.entries
-				.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
-				.forEach((entry) => {
-					entry.dreams.forEach((dream) => {
-						dream.dreamSigns.forEach((sign) => {
-							let tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
-							if (tag) {
-								let existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
-								if (!existingEntry) tag.dailyEntries.push(entry)
-								tag.totalOccurs++
-							} else {
-								tagGroups.push({ dreamSign: sign, dailyEntries: [entry], totalOccurs: 1 })
-							}
-						})
-						let currEntry = tmpOnlyDreams.filter((item) => item.entryDate === entry.entryDate)[0]
-						if (currEntry) {
-							currEntry.dreams.push(dream)
-							currEntry.tags = [...currEntry.tags, ...dream.dreamSigns]
-						} else {
-							tmpOnlyDreams.push({ entryDate: entry.entryDate, dreams: [dream], tags: dream.dreamSigns })
-						}
-					})
-				})
-
-			// tagGroup
-			setDreamTagGroups(tagGroups)
-		}
-
+	const tagsByCat = useMemo(() => {
 		let tagByCats: IDreamTagByCat[] = []
-		tagGroups.forEach((tagGrp) => {
+
+		dreamTagGroups.forEach((tagGrp) => {
 			let tagTag = tagGrp.dreamSign
 			let tagCat = tagTag.indexOf(':') ? tagTag.split(':')[0] : tagTag
-
 			let cat = tagByCats.filter((item) => item.dreamCat === tagCat)[0]
-			if (cat) cat.dreamTagGroups.push(tagGrp)
-			else tagByCats.push({ dreamCat: tagCat, dreamTagGroups: [tagGrp] })
+
+			if (cat) {
+				cat.dreamTagGroups.push(tagGrp)
+			} else {
+				tagByCats.push({ dreamCat: tagCat, dreamTagGroups: [tagGrp] })
+			}
 		})
-		setTagsByCat(tagByCats)
-	}, [props.dataFile])
+
+		return tagByCats
+	}, [dreamTagGroups])
+
+	const tagsByTop = useMemo(() => {
+		console.log(dreamTagGroups)
+
+		return dreamTagGroups
+	}, [dreamTagGroups])
 
 	/** Gather chart data: tags */
 	useEffect(() => {
@@ -164,6 +144,101 @@ export default function TabAdmin(props: IAppTagsProps) {
 			setTagChartClkEntries([])
 		}
 	}, [props.dataFile, tagChartClickedIdx])
+
+	// ------------------------------------------------------------------------
+
+	function getGroupedTags(entries: IJournalEntry[]): IDreamSignTagGroup[] {
+		let tmpOnlyDreams: IOnlyDream[] = []
+		let tagGroups: IDreamSignTagGroup[] = []
+
+		entries
+			.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
+			.forEach((entry) => {
+				entry.dreams.forEach((dream) => {
+					dream.dreamSigns.forEach((sign) => {
+						let tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
+						if (tag) {
+							let existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
+							if (!existingEntry) tag.dailyEntries.push(entry)
+							tag.totalOccurs++
+						} else {
+							tagGroups.push({ dreamSign: sign, dailyEntries: [entry], totalOccurs: 1 })
+						}
+					})
+
+					let currEntry = tmpOnlyDreams.filter((item) => item.entryDate === entry.entryDate)[0]
+
+					if (currEntry) {
+						currEntry.dreams.push(dream)
+						currEntry.tags = [...currEntry.tags, ...dream.dreamSigns]
+					} else {
+						tmpOnlyDreams.push({ entryDate: entry.entryDate, dreams: [dream], tags: dream.dreamSigns })
+					}
+				})
+			})
+
+		return tagGroups
+	}
+
+	function getEntriesForLastMonths(months: number) {
+		let tmpEntries: IJournalEntry[] = []
+		let dateMaxAge = DateTime.now()
+			.minus({ months: months - 1 })
+			.set({ day: 0, hour: 0, minute: 0, second: 0 })
+
+		if (props.dataFile && props.dataFile.entries && props.dataFile.entries.length > 0) {
+			tmpEntries = props.dataFile.entries.filter((entry) => DateTime.fromISO(entry.entryDate) > dateMaxAge)
+		}
+
+		return tmpEntries
+	}
+
+	// ------------------------------------------------------------------------
+
+	function renderTags(tags: IDreamSignTagGroup[], title: string): JSX.Element {
+		return (
+			<div className='card'>
+				<div className='card-header bg-black-70 h6'>{title}</div>
+				<div className='card-body bg-black-90 p-3'>
+					{tags.map((tagGrp, idx) => (
+						<div key={`topTag${idx}`} className='col text-nowrap text-white user-select-none'>
+							<div className='row g-0 bg-info'>
+								<div className='col px-3 py-2'>{tagGrp.dreamSign}</div>
+								<div className='col-auto px-3 py-2 text-white-50 text-end bg-trans-25' style={{ minWidth: '60px' }}>
+									{tagGrp.totalOccurs}
+								</div>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		)
+	}
+
+	function renderTopTags(): JSX.Element {
+		const TOP = 15
+		const TopAllTime = tagsByTop.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1)).filter((_item, idx) => idx < TOP)
+		const TopMonths72 = getGroupedTags(getEntriesForLastMonths(72))
+			.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1))
+			.filter((_item, idx) => idx < TOP)
+		const TopMonths12 = getGroupedTags(getEntriesForLastMonths(12))
+			.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1))
+			.filter((_item, idx) => idx < TOP)
+		const TopMonths03 = getGroupedTags(getEntriesForLastMonths(3))
+			.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1))
+			.filter((_item, idx) => idx < TOP)
+
+		return (
+			<section className='bg-black p-4'>
+				<div className='row row-cols-2 g-4'>
+					<div className='col'>{renderTags(TopAllTime, `Top ${TOP} (All Time)`)}</div>
+					<div className='col'>{renderTags(TopMonths72, `Top ${TOP} (Last 72 Months)`)}</div>
+					<div className='col'>{renderTags(TopMonths12, `Top ${TOP} (Last 12 Months)`)}</div>
+					<div className='col'>{renderTags(TopMonths03, `Top ${TOP} (Last 3 Months)`)}</div>
+				</div>
+			</section>
+		)
+	}
 
 	function renderTabTags(): JSX.Element {
 		return (
@@ -240,6 +315,8 @@ export default function TabAdmin(props: IAppTagsProps) {
 		)
 	}
 
+	// ------------------------------------------------------------------------
+
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
@@ -250,13 +327,18 @@ export default function TabAdmin(props: IAppTagsProps) {
 				<li className='nav-item' role='presentation'>
 					<button
 						className='nav-link active'
-						id='1-tab'
+						id='3-tab'
 						data-bs-toggle='tab'
-						data-bs-target='#tab1'
+						data-bs-target='#tab3'
 						type='button'
 						role='tab'
-						aria-controls='tab1'
-						aria-selected='true'>
+						aria-controls='tab3'
+						aria-selected='false'>
+						Top Tags
+					</button>
+				</li>
+				<li className='nav-item' role='presentation'>
+					<button className='nav-link' id='1-tab' data-bs-toggle='tab' data-bs-target='#tab1' type='button' role='tab' aria-controls='tab1' aria-selected='true'>
 						Overview
 					</button>
 				</li>
@@ -267,7 +349,10 @@ export default function TabAdmin(props: IAppTagsProps) {
 				</li>
 			</ul>
 			<div className='tab-content'>
-				<div className='tab-pane bg-light p-4 active' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
+				<div className='tab-pane bg-light p-4 active' id='tab3' role='tabpanel' aria-labelledby='3-tab'>
+					{renderTopTags()}
+				</div>
+				<div className='tab-pane bg-light p-4' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
 					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} />
 				</div>
 				<div className='tab-pane bg-light p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
