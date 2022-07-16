@@ -42,6 +42,7 @@ interface IOnlyDream {
 }
 
 export default function TabAdmin(props: IAppTagsProps) {
+	const TOP = 15
 	// TAB: Tag Timeline
 	const [chartDataTags, setChartDataTags] = useState<IChartData[]>([])
 	const [filterTextTags, setFilterTextTags] = useState('')
@@ -73,8 +74,6 @@ export default function TabAdmin(props: IAppTagsProps) {
 	}, [dreamTagGroups])
 
 	const tagsByTop = useMemo(() => {
-		console.log(dreamTagGroups)
-
 		return dreamTagGroups
 	}, [dreamTagGroups])
 
@@ -197,14 +196,14 @@ export default function TabAdmin(props: IAppTagsProps) {
 
 	function renderTags(tags: IDreamSignTagGroup[], title: string): JSX.Element {
 		return (
-			<div className='card'>
-				<div className='card-header bg-black-70 h6'>{title}</div>
-				<div className='card-body bg-black-90 p-3'>
+			<div className='card h-100'>
+				<div className='card-header bg-info h6'>{title}</div>
+				<div className='card-body bg-black-90 p-0'>
 					{tags.map((tagGrp, idx) => (
-						<div key={`topTag${idx}`} className='col text-nowrap text-white user-select-none'>
-							<div className='row g-0 bg-info'>
-								<div className='col px-3 py-2'>{tagGrp.dreamSign}</div>
-								<div className='col-auto px-3 py-2 text-white-50 text-end bg-trans-25' style={{ minWidth: '60px' }}>
+						<div key={`topTag${idx}`} className='col text-white user-select-none'>
+							<div className='row g-0 flex-nowrap bg-info border-bottom'>
+								<div className='col py-1 px-3 text-break bg-trans-50'>{tagGrp.dreamSign}</div>
+								<div className='col-auto py-1 px-3 text-white-50 text-monospace text-end bg-trans-75' style={{ minWidth: 55 }}>
 									{tagGrp.totalOccurs}
 								</div>
 							</div>
@@ -216,7 +215,6 @@ export default function TabAdmin(props: IAppTagsProps) {
 	}
 
 	function renderTopTags(): JSX.Element {
-		const TOP = 15
 		const TopAllTime = tagsByTop.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1)).filter((_item, idx) => idx < TOP)
 		const TopMonths72 = getGroupedTags(getEntriesForLastMonths(72))
 			.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1))
@@ -229,12 +227,12 @@ export default function TabAdmin(props: IAppTagsProps) {
 			.filter((_item, idx) => idx < TOP)
 
 		return (
-			<section className='bg-black p-4'>
-				<div className='row row-cols-2 g-4'>
-					<div className='col'>{renderTags(TopAllTime, `Top ${TOP} (All Time)`)}</div>
-					<div className='col'>{renderTags(TopMonths72, `Top ${TOP} (Last 72 Months)`)}</div>
-					<div className='col'>{renderTags(TopMonths12, `Top ${TOP} (Last 12 Months)`)}</div>
-					<div className='col'>{renderTags(TopMonths03, `Top ${TOP} (Last 3 Months)`)}</div>
+			<section className='bg-black p-4 text-sm'>
+				<div className='row row-cols justify-content-between g-4'>
+					<div className='col'>{renderTags(TopAllTime, `All Time`)}</div>
+					<div className='col'>{renderTags(TopMonths72, `Last 72 Months`)}</div>
+					<div className='col'>{renderTags(TopMonths12, `Last 12 Months`)}</div>
+					<div className='col'>{renderTags(TopMonths03, `Last 3 Months`)}</div>
 				</div>
 			</section>
 		)
@@ -334,7 +332,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 						role='tab'
 						aria-controls='tab3'
 						aria-selected='false'>
-						Top Tags
+							{`Top ${TOP} Tags`}
 					</button>
 				</li>
 				<li className='nav-item' role='presentation'>
