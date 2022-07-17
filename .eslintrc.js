@@ -1,5 +1,7 @@
-// [REF](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/naming-convention.md)
-// https://dev.to/knowankit/setup-eslint-and-prettier-in-react-app-357b
+/**
+ * @see https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/naming-convention.md
+ * @see https://dev.to/knowankit/setup-eslint-and-prettier-in-react-app-357b
+ */
 
 module.exports = {
 	env: {
@@ -27,14 +29,32 @@ module.exports = {
 			"warn",
 			{
 				selector: "interface",
+				modifiers: ["exported"],
 				format: ["PascalCase"],
 				prefix: ["I"],
 			},
-			/* TODO:
+			{
+				selector: "enum",
+				format: ["PascalCase"],
+			},
+			{
+				selector: "function",
+				modifiers: ["exported"],
+				format: ["PascalCase"],
+			},
+			{
+				selector: "function",
+				format: ["camelCase"],
+			},
+			{
+				selector: "typeProperty",
+				format: ["camelCase"],
+			},
+			/* NOTE: works, but do we want this?
 			{
 				selector: "variable",
-				modifier: "const",
-				format: ["PascalCase"],
+				modifiers: ["const"],
+				format: ["PascalCase", "UPPER_CASE"],
 			},
 			*/
 			{
@@ -45,7 +65,13 @@ module.exports = {
 				selector: "variable",
 				types: ["boolean"],
 				format: ["camelCase", "UPPER_CASE"],
-				prefix: ["is", "should", "has", "can", "did", "will"],
+				prefix: ["is", "should", "has", "can", "did", "will", "show"],
+			},
+			{
+				selector: "memberLike",
+				modifiers: ["private"],
+				format: ["camelCase"],
+				leadingUnderscore: "require",
 			},
 		],
 	},
