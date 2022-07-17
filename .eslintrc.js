@@ -64,7 +64,7 @@ module.exports = {
 			{
 				selector: "variable",
 				types: ["boolean"],
-				format: ["camelCase", "UPPER_CASE"],
+				format: ["PascalCase"],
 				prefix: ["is", "should", "has", "can", "did", "will", "show"],
 			},
 			{

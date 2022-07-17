@@ -141,14 +141,6 @@ class App extends React.Component<IAppProps, IAppState> {
 	/**
 	 * Retain state between tab changes
 	 */
-	doSaveTagsState = (newState: IAppTagsState) => {
-		this.setState({
-			childTagsState: newState,
-		})
-	}
-	/**
-	 * Retain state between tab changes
-	 */
 	doSaveViewState = (newState: IAppViewState) => {
 		this.setState({
 			childViewState: newState,
@@ -195,7 +187,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		/>
 	)
 	Tags = () => (
-		<TabTags dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} doSaveTagsState={this.doSaveTagsState} tagsState={this.state.childTagsState} />
+		<TabTags dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad}  />
 	)
 	Import = () => <TabImport dataFile={this.state.dataFile || null} doSaveImportState={this.doSaveImportState} importState={this.state.childImportState} />
 	Admin = () => (
@@ -203,7 +195,7 @@ class App extends React.Component<IAppProps, IAppState> {
 	)
 
 	Nav = (): JSX.Element => {
-		const NavLinkBaseClass = !this.state.dataFile ? 'nav-link disabled' : 'nav-link'
+		const navLinkBaseClass = !this.state.dataFile ? 'nav-link disabled' : 'nav-link'
 
 		return (
 			<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
@@ -230,37 +222,37 @@ class App extends React.Component<IAppProps, IAppState> {
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/bedtime' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+								<NavLink to='/bedtime' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
 									Bedtime
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/explore' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+								<NavLink to='/explore' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
 									Explore
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/journal' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+								<NavLink to='/journal' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
 									Journal
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/tags' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+								<NavLink to='/tags' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
 									Tags
 								</NavLink>
 							</li>
 							<li className='nav-item'>
-								<NavLink to='/search' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+								<NavLink to='/search' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
 									Search
 								</NavLink>
 							</li>
 							<li className='nav-item d-none d-lg-block'>
-								<NavLink to='/import' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+								<NavLink to='/import' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
 									Import
 								</NavLink>
 							</li>
 							<li className='nav-item d-none d-lg-block'>
-								<NavLink to='/admin' className={({ isActive }) => (isActive ? `${NavLinkBaseClass} active` : NavLinkBaseClass)}>
+								<NavLink to='/admin' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
 									Admin
 								</NavLink>
 							</li>
