@@ -28,7 +28,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react'
-import { ConfMetaCats, IDriveConfFile, IDriveDataFile, IJournalEntry, ISearchMatch, SearchScopes } from './app.types'
+import { IConfMetaCats, IDriveConfFile, IDriveDataFile, IJournalEntry, ISearchMatch, SearchScopes } from './app.types'
 import {
 	ArrowDown,
 	ArrowUp,
@@ -73,7 +73,7 @@ export default function TabBedtime(props: Props) {
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
 	const [currDreamIdx, setCurrDreamIdx] = useState(0)
-	const [lucidGoals, setLucidGoals] = useState<ConfMetaCats>(null)
+	const [lucidGoals, setLucidGoals] = useState<IConfMetaCats>(null)
 
 	useEffect(() => {
 		if (props.confFile && props.confFile.lucidGoals) setLucidGoals(props.confFile.lucidGoals)

@@ -22,7 +22,7 @@ export interface IAppSearchState {
 }
 
 export default function TabSearch(props: Props) {
-	let localShowAlert = JSON.parse(localStorage.getItem('show-alert-search'))
+	const localShowAlert = JSON.parse(localStorage.getItem('show-alert-search'))
 	//
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)

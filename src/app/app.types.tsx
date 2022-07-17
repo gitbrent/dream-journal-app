@@ -1,5 +1,5 @@
 // APP
-export const APP_BLD = '20220716-1612'
+export const APP_BLD = '20220717-1120'
 //export const APP_VER = `1.3.0-WIP ${APP_BLD}`
 export const APP_VER = '1.3.0-WIP'
 
@@ -58,7 +58,7 @@ export enum SignInventoryType {
 	ac = 'ACTION',
 }
 
-export interface ConfMetaCats {
+export interface IConfMetaCats {
 	iconName?: string
 	headClass?: string
 	bodyClass?: string
@@ -79,9 +79,9 @@ export interface IDriveConfFile {
 	_isLoading: boolean
 	_isSaving: boolean
 	id: string
-	dreamIdeas: ConfMetaCats[]
-	lucidGoals: ConfMetaCats
-	mildAffirs: ConfMetaCats[]
+	dreamIdeas: IConfMetaCats[]
+	lucidGoals: IConfMetaCats
+	mildAffirs: IConfMetaCats[]
 	tagTypeAW: string[]
 	tagTypeCO: string[]
 	tagTypeFO: string[]
