@@ -1,5 +1,5 @@
 // APP
-export const APP_BLD = '20220717-1650'
+export const APP_BLD = '20220717-2310'
 //export const APP_VER = `1.3.0-WIP ${APP_BLD}`
 export const APP_VER = '1.3.0-WIP'
 
@@ -106,9 +106,9 @@ export interface IDriveDataFile {
 export interface IJournalDream {
 	title: string
 	notes?: string
-	/** TODO: rename to `dreamTags` */
-	dreamSigns?: Array<string>
-	dreamImages?: Array<string>
+	/** FUTURE: TODO: rename to `dreamTags` */
+	dreamSigns?: string[]
+	dreamImages?: string[]
 	isLucidDream: boolean
 	lucidMethod: InductionTypes
 }
@@ -155,7 +155,9 @@ export interface IDreamSignTagGroup {
 
 export interface IDreamTagByCat {
 	/** @example 'action' */
+	/** @example 'rude person' */
 	dreamCat: string
-	/** @example ['action:crime', 'action:military'] */
+	/** @example ['action', 'action:crime', 'action:military'] */
+	/** @example ['rude person'] */
 	dreamTagGroups: IDreamSignTagGroup[]
 }
