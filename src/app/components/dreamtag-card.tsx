@@ -48,7 +48,7 @@ export default function DreamTagCard(props: Props) {
 			className='card'
 			key={`cardTag${props.tagGrp.dreamSign}`}
 			style={{ minWidth: props.viewType === CardDreamSignGrpViewType.lg ? (!showDreams ? '200px' : '600px') : !showDreams ? '125px' : '400px' }}>
-			<div className={`card-header bg-info-800 text-white`}>
+			<div className='card-header bg-info-800 text-white'>
 				<div className={`row align-tiems-center mb-0 ${props.viewType === CardDreamSignGrpViewType.lg ? 'h5' : 'h6'}`}>
 					<div className='col text-breakword pe-0'>{props.tagGrp.dreamSign.replace(':', ': ')}</div>
 					<div className='col-auto text-white-50 ps-1'>{props.tagGrp.totalOccurs}</div>
@@ -77,6 +77,7 @@ export default function DreamTagCard(props: Props) {
 					</div>
 					<button
 						className='btn btn-sm btn-warning w-100 mt-2'
+						disabled={!renameValue}
 						onClick={() => {
 							props.doMassUpdateTag(props.tagGrp.dreamSign, renameValue)
 							setRenameValue('')
