@@ -11,10 +11,10 @@ import TableEntries from './components/table-entries'
 interface IAppTagsProps {
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
-	doSaveTagsState: Function
-	tagsState: IAppTagsState
 }
-export interface IAppTagsState {}
+export interface IAppTagsState {
+	thisIsAplaceholder: string
+}
 
 interface IChartData {
 	/**
@@ -34,7 +34,6 @@ interface IChartData {
 	totTaged: number
 	totNotag?: number
 }
-
 interface IOnlyDream {
 	entryDate: string
 	dreams: IJournalDream[]
@@ -42,26 +41,35 @@ interface IOnlyDream {
 }
 
 export default function TabAdmin(props: IAppTagsProps) {
-	const TOP = 15
+	const TOP = 20 //15
 	// TAB: Tag Timeline
 	const [chartDataTags, setChartDataTags] = useState<IChartData[]>([])
-	const [filterTextTags, setFilterTextTags] = useState('')
-	const [filterShowAllMons, setFilterShowAllMons] = useState(true)
 	const [tagChartClickedIdx, setTagChartClickedIdx] = useState<number>(null)
 	const [tagChartClkEntries, setTagChartClkEntries] = useState<IJournalEntry[]>([])
+	// FILTERS
+	const [textFilter, setTextFilter] = useState('')
+	const [showAllMons, setShowAllMons] = useState(true)
+
+	/**
+	 * all entries from datafile, sorted old->new
+	 * @desc only parse datafile once
+	 */
+	const datafileEntries = useMemo(() => {
+		const tempEntries = props.dataFile && props.dataFile.entries ? props.dataFile.entries : []
+		return tempEntries.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
+	}, [props.dataFile])
 
 	const dreamTagGroups = useMemo(() => {
-		if (!props.dataFile || !props.dataFile.entries) return []
-		else return getGroupedTags(props.dataFile.entries)
+		return getGroupedTags(props.dataFile && props.dataFile.entries ? props.dataFile.entries : [])
 	}, [props.dataFile])
 
 	const tagsByCat = useMemo(() => {
-		let tagByCats: IDreamTagByCat[] = []
+		const tagByCats: IDreamTagByCat[] = []
 
 		dreamTagGroups.forEach((tagGrp) => {
-			let tagTag = tagGrp.dreamSign
-			let tagCat = tagTag.indexOf(':') ? tagTag.split(':')[0] : tagTag
-			let cat = tagByCats.filter((item) => item.dreamCat === tagCat)[0]
+			const tagTag = tagGrp.dreamSign
+			const tagCat = tagTag.indexOf(':') ? tagTag.split(':')[0] : tagTag
+			const cat = tagByCats.filter((item) => item.dreamCat === tagCat)[0]
 
 			if (cat) {
 				cat.dreamTagGroups.push(tagGrp)
@@ -80,19 +88,19 @@ export default function TabAdmin(props: IAppTagsProps) {
 	/** Gather chart data: tags */
 	useEffect(() => {
 		const delayDebounceFn = setTimeout(() => {
-			let tmpChartData: IChartData[] = []
+			const tmpChartData: IChartData[] = []
 
 			if (!props.dataFile || !props.dataFile.entries) return
 
 			// PERF: dont chart every dream, it causes super-slow page render
-			if (!filterTextTags || filterTextTags.length < 3) {
+			if (!textFilter || textFilter.length < 3) {
 				setChartDataTags([])
 				return
 			}
 
 			// Tag Groups
 			props.dataFile.entries.forEach((entry) => {
-				let dateEntry = DateTime.fromISO(entry.entryDate)
+				const dateEntry = DateTime.fromISO(entry.entryDate)
 				let currChartData = tmpChartData.filter((data) => data.dateTime.hasSame(dateEntry, 'month') && data.dateTime.hasSame(dateEntry, 'year'))[0]
 				if (!currChartData) {
 					currChartData = {
@@ -110,32 +118,32 @@ export default function TabAdmin(props: IAppTagsProps) {
 						.map((dream) => dream.dreamSigns)
 						.join(',')
 						.toLowerCase()
-						.indexOf(filterTextTags.toLowerCase()) > -1
+						.indexOf(textFilter.toLowerCase()) > -1
 				) {
 					currChartData.totTaged += 1
 				}
 			})
 
-			setChartDataTags(filterShowAllMons ? tmpChartData : tmpChartData.filter((item) => item.totTaged > 0))
+			setChartDataTags(showAllMons ? tmpChartData : tmpChartData.filter((item) => item.totTaged > 0))
 		}, 1000)
 
 		return () => clearTimeout(delayDebounceFn)
-	}, [filterTextTags, filterShowAllMons])
+	}, [textFilter, showAllMons])
 
-	/** Handle barchart click: tags  */
+	/** Handle barchart click: tags */
 	useEffect(() => {
 		if (typeof tagChartClickedIdx !== null && chartDataTags && chartDataTags[tagChartClickedIdx]) {
-			let dateEntry = chartDataTags[tagChartClickedIdx].dateTime
+			const dateEntry = chartDataTags[tagChartClickedIdx].dateTime
 			setTagChartClkEntries(
 				props.dataFile.entries
 					.filter(
 						(entry) =>
-							!filterTextTags ||
+							!textFilter ||
 							entry.dreams
 								.map((dream) => dream.dreamSigns)
 								.join(',')
 								.toLowerCase()
-								.indexOf(filterTextTags.toLowerCase()) > -1
+								.indexOf(textFilter.toLowerCase()) > -1
 					)
 					.filter((entry) => DateTime.fromISO(entry.entryDate).hasSame(dateEntry, 'month') && DateTime.fromISO(entry.entryDate).hasSame(dateEntry, 'year'))
 			)
@@ -147,17 +155,17 @@ export default function TabAdmin(props: IAppTagsProps) {
 	// ------------------------------------------------------------------------
 
 	function getGroupedTags(entries: IJournalEntry[]): IDreamSignTagGroup[] {
-		let tmpOnlyDreams: IOnlyDream[] = []
-		let tagGroups: IDreamSignTagGroup[] = []
+		const tmpOnlyDreams: IOnlyDream[] = []
+		const tagGroups: IDreamSignTagGroup[] = []
 
 		entries
 			.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 			.forEach((entry) => {
 				entry.dreams.forEach((dream) => {
 					dream.dreamSigns.forEach((sign) => {
-						let tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
+						const tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
 						if (tag) {
-							let existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
+							const existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
 							if (!existingEntry) tag.dailyEntries.push(entry)
 							tag.totalOccurs++
 						} else {
@@ -165,7 +173,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 						}
 					})
 
-					let currEntry = tmpOnlyDreams.filter((item) => item.entryDate === entry.entryDate)[0]
+					const currEntry = tmpOnlyDreams.filter((item) => item.entryDate === entry.entryDate)[0]
 
 					if (currEntry) {
 						currEntry.dreams.push(dream)
@@ -180,16 +188,11 @@ export default function TabAdmin(props: IAppTagsProps) {
 	}
 
 	function getEntriesForLastMonths(months: number) {
-		let tmpEntries: IJournalEntry[] = []
-		let dateMaxAge = DateTime.now()
+		const dateMaxAge = DateTime.now()
 			.minus({ months: months - 1 })
 			.set({ day: 0, hour: 0, minute: 0, second: 0 })
 
-		if (props.dataFile && props.dataFile.entries && props.dataFile.entries.length > 0) {
-			tmpEntries = props.dataFile.entries.filter((entry) => DateTime.fromISO(entry.entryDate) > dateMaxAge)
-		}
-
-		return tmpEntries
+		return datafileEntries.filter((entry) => DateTime.fromISO(entry.entryDate) > dateMaxAge)
 	}
 
 	// ------------------------------------------------------------------------
@@ -215,24 +218,62 @@ export default function TabAdmin(props: IAppTagsProps) {
 	}
 
 	function renderTopTags(): JSX.Element {
-		const TopAllTime = tagsByTop.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1)).filter((_item, idx) => idx < TOP)
-		const TopMonths72 = getGroupedTags(getEntriesForLastMonths(72))
+		const topAllTime = tagsByTop.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1)).filter((_item, idx) => idx < TOP)
+		const topMonths72 = getGroupedTags(getEntriesForLastMonths(72))
 			.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1))
 			.filter((_item, idx) => idx < TOP)
-		const TopMonths12 = getGroupedTags(getEntriesForLastMonths(12))
+		const topMonths12 = getGroupedTags(getEntriesForLastMonths(12))
 			.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1))
 			.filter((_item, idx) => idx < TOP)
-		const TopMonths03 = getGroupedTags(getEntriesForLastMonths(3))
+		const topMonths03 = getGroupedTags(getEntriesForLastMonths(3))
 			.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1))
 			.filter((_item, idx) => idx < TOP)
 
 		return (
 			<section className='bg-black p-4 text-sm'>
 				<div className='row row-cols justify-content-between g-4'>
-					<div className='col'>{renderTags(TopAllTime, `All Time`)}</div>
-					<div className='col'>{renderTags(TopMonths72, `Last 72 Months`)}</div>
-					<div className='col'>{renderTags(TopMonths12, `Last 12 Months`)}</div>
-					<div className='col'>{renderTags(TopMonths03, `Last 3 Months`)}</div>
+					<div className='col'>{renderTags(topAllTime, 'All Time')}</div>
+					<div className='col'>{renderTags(topMonths72, 'Last 72 Months')}</div>
+					<div className='col'>{renderTags(topMonths12, 'Last 12 Months')}</div>
+					<div className='col'>{renderTags(topMonths03, 'Last 3 Months')}</div>
+				</div>
+			</section>
+		)
+	}
+
+	function renderTagsByYear(): JSX.Element {
+		const YEARS = 4
+
+		// STEP 1:
+		const allButThisYear = getGroupedTags(datafileEntries.filter((entry) => !entry.entryDate.startsWith('2022')))
+		const tags2022 = getGroupedTags(datafileEntries.filter((entry) => entry.entryDate.startsWith('2022')))
+		const tags2021 = getGroupedTags(datafileEntries.filter((entry) => entry.entryDate.startsWith('2021')))
+		const diffPrevYear = tags2022.map((item) => item.dreamSign).filter((el) => !tags2021.map((item) => item.dreamSign).includes(el))
+		const diffAllTime = tags2022.map((item) => item.dreamSign).filter((el) => !allButThisYear.map((item) => item.dreamSign).includes(el))
+		const newPrevYear = tags2022
+			.filter((item) => diffPrevYear.includes(item.dreamSign))
+			.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1))
+			.filter((_item, idx) => idx < TOP)
+		const newAllTime = tags2022
+			.filter((item) => diffAllTime.includes(item.dreamSign))
+			.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1))
+			.filter((_item, idx) => idx < TOP)
+
+		// STEP 2: tags from prev years not present in last 5 years
+		const tagsOlder = getGroupedTags(datafileEntries.filter((entry) => DateTime.fromISO(entry.entryDate).diffNow('months').months < -(YEARS * 12)))
+		const tagsNewer = getGroupedTags(datafileEntries.filter((entry) => DateTime.fromISO(entry.entryDate).diffNow('months').months > -(YEARS * 12)))
+		const diffOldTags = tagsOlder.map((item) => item.dreamSign).filter((el) => !tagsNewer.map((item) => item.dreamSign).includes(el))
+		const oldTags = tagsOlder
+			.filter((item) => diffOldTags.includes(item.dreamSign))
+			.sort((a, b) => (a.totalOccurs > b.totalOccurs ? -1 : 1))
+			.filter((_item, idx) => idx < TOP)
+
+		return (
+			<section className='bg-black p-4 text-sm'>
+				<div className='row row-cols justify-content-between g-4'>
+					<div className='col'>{renderTags(newAllTime, 'Brand New This Year')}</div>
+					<div className='col'>{renderTags(newPrevYear, 'Not Found Last Year')}</div>
+					<div className='col'>{renderTags(oldTags, `Not Seen in Past ${YEARS} Years`)}</div>
 				</div>
 			</section>
 		)
@@ -252,10 +293,10 @@ export default function TabAdmin(props: IAppTagsProps) {
 									<input
 										id='floatingDreamtag'
 										type='text'
-										value={filterTextTags}
+										value={textFilter}
 										placeholder='search tags'
 										className='form-control'
-										onChange={(event) => setFilterTextTags(event.target.value)}
+										onChange={(event) => setTextFilter(event.target.value)}
 										disabled={!props.dataFile ? true : false}
 									/>
 									<label htmlFor='floatingDreamtag'>
@@ -270,8 +311,8 @@ export default function TabAdmin(props: IAppTagsProps) {
 							<select
 								id='floatingFilterView'
 								placeholder='view type'
-								defaultValue={filterShowAllMons ? '1' : '0'}
-								onChange={(ev) => setFilterShowAllMons(ev.currentTarget.value === '1')}
+								defaultValue={showAllMons ? '1' : '0'}
+								onChange={(ev) => setShowAllMons(ev.currentTarget.value === '1')}
 								className='form-select'>
 								<option value='0' key={'showAllMonN'}>
 									No
@@ -332,23 +373,31 @@ export default function TabAdmin(props: IAppTagsProps) {
 						role='tab'
 						aria-controls='tab3'
 						aria-selected='false'>
-							{`Top ${TOP} Tags`}
+						Top Tags
+					</button>
+				</li>
+				<li className='nav-item' role='presentation'>
+					<button className='nav-link' id='4-tab' data-bs-toggle='tab' data-bs-target='#tab4' type='button' role='tab' aria-controls='tab4' aria-selected='true'>
+						New Tags
 					</button>
 				</li>
 				<li className='nav-item' role='presentation'>
 					<button className='nav-link' id='1-tab' data-bs-toggle='tab' data-bs-target='#tab1' type='button' role='tab' aria-controls='tab1' aria-selected='true'>
-						Overview
+						Tag Groups
 					</button>
 				</li>
 				<li className='nav-item' role='presentation'>
 					<button className='nav-link' id='2-tab' data-bs-toggle='tab' data-bs-target='#tab2' type='button' role='tab' aria-controls='tab2' aria-selected='false'>
-						Timeline
+						Tag Timeline
 					</button>
 				</li>
 			</ul>
 			<div className='tab-content'>
 				<div className='tab-pane bg-light p-4 active' id='tab3' role='tabpanel' aria-labelledby='3-tab'>
 					{renderTopTags()}
+				</div>
+				<div className='tab-pane bg-light p-4' id='tab4' role='tabpanel' aria-labelledby='4-tab'>
+					{renderTagsByYear()}
 				</div>
 				<div className='tab-pane bg-light p-4' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
 					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} />
