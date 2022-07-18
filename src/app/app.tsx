@@ -36,7 +36,8 @@ import TabHome from '../app/app-home'
 import TabBedtime, { ITabStateBedtime } from '../app/app-bedtime'
 import TabExplore, { ITabStateExplore } from '../app/app-explore'
 import TabJournal, { IAppViewState } from './app-journal'
-import TabTags, { IAppTagsState } from '../app/app-tags'
+import TabTags from '../app/app-tags'
+//import TabTags2 from '../app/app-tags2'
 import TabSearch, { IAppSearchState } from '../app/app-search'
 import TabAdmin, { IAppAdminState } from '../app/app-admin'
 import TabImport from '../app/app-import'
@@ -54,7 +55,6 @@ interface IAppState {
 	tabStateExplore: ITabStateExplore
 	childImportState: object
 	childSearchState: IAppSearchState
-	childTagsState: IAppTagsState
 	childViewState: IAppViewState
 	childAdminState: IAppAdminState
 	confFile: IDriveConfFile
@@ -77,7 +77,6 @@ class App extends React.Component<IAppProps, IAppState> {
 			tabStateExplore: null,
 			childImportState: null,
 			childSearchState: null,
-			childTagsState: null,
 			childViewState: null,
 			childAdminState: null,
 			confFile: null,
