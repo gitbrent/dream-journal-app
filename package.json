@@ -31,7 +31,7 @@
     "react-router": "^6.3.0",
     "react-router-dom": "^6.3.0",
     "react-tag-autocomplete": "^6.3.0",
-    "recharts": "^2.1.6"
+    "recharts": "^2.1.14"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",
