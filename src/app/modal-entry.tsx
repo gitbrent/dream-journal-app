@@ -10,7 +10,7 @@ export interface IModalEntryProps {
 	currEntry: IJournalEntry
 	currDreamIdx?: number
 	showModal: boolean
-	setShowModal: Function
+	setShowModal: (arg0: boolean) => void
 	modalId?: string
 }
 
@@ -123,7 +123,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 								placeholder='(entry date)'
 								value={currEntry.entryDate}
 								onChange={(ev) => {
-									let chgEntry = { ...currEntry }
+									const chgEntry = { ...currEntry }
 									chgEntry.entryDate = ev.currentTarget.value
 									setCurrEntry(chgEntry)
 									setIsDateDupe(GDrive.doesEntryDateExist(ev.currentTarget.value))
@@ -146,7 +146,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 								placeholder='(bed time)'
 								value={currEntry.bedTime}
 								onChange={(ev) => {
-									let chgEntry = { ...currEntry }
+									const chgEntry = { ...currEntry }
 									chgEntry.bedTime = ev.currentTarget.value
 									setCurrEntry(chgEntry)
 								}}
@@ -158,8 +158,8 @@ export default function ModalEntry(props: IModalEntryProps) {
 						<div className='btn-group btn-group-sm my-auto w-100' role='group'>
 							<button
 								type='button'
-								onClick={(_ev) => {
-									let updEntry = { ...currEntry }
+								onClick={() => {
+									const updEntry = { ...currEntry }
 									updEntry.dreams.push({ ...NEW_DREAM })
 									setCurrEntry(updEntry)
 								}}
@@ -193,7 +193,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 							//rows={10}
 							value={currEntry.notesPrep}
 							onChange={(ev) => {
-								let newState = { ...currEntry }
+								const newState = { ...currEntry }
 								newState.notesPrep = ev.currentTarget.value
 								setCurrEntry(newState)
 							}}
@@ -212,7 +212,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 							//rows={7}
 							value={currEntry.notesWake}
 							onChange={(ev) => {
-								let newState = { ...currEntry }
+								const newState = { ...currEntry }
 								newState.notesWake = ev.currentTarget.value
 								setCurrEntry(newState)
 							}}
@@ -227,8 +227,8 @@ export default function ModalEntry(props: IModalEntryProps) {
 	}
 
 	function renderTabDream(dreamIdx: number): JSX.Element {
-		let dream: IJournalDream = currEntry.dreams[dreamIdx]
-		let isLucid = dream ? currEntry.dreams[dreamIdx].isLucidDream : false
+		const dream: IJournalDream = currEntry.dreams[dreamIdx]
+		const isLucid = dream ? currEntry.dreams[dreamIdx].isLucidDream : false
 
 		return dream ? (
 			<div data-desc='dream-tab-pane'>
@@ -240,7 +240,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 							placeholder='title'
 							value={dream.title}
 							onChange={(ev) => {
-								let newState = { ...currEntry }
+								const newState = { ...currEntry }
 								newState.dreams[dreamIdx].title = ev.currentTarget.value
 								setCurrEntry(newState)
 							}}
@@ -252,8 +252,8 @@ export default function ModalEntry(props: IModalEntryProps) {
 							<button
 								type='button'
 								title={isLucid ? 'Lucid Dream' : 'Non-Lucid Dream'}
-								onClick={(_ev) => {
-									let updEntry = { ...currEntry }
+								onClick={() => {
+									const updEntry = { ...currEntry }
 									updEntry.dreams[dreamIdx].isLucidDream = !updEntry.dreams[dreamIdx].isLucidDream
 									setCurrEntry(updEntry)
 								}}
@@ -278,8 +278,8 @@ export default function ModalEntry(props: IModalEntryProps) {
 												key={`lucid-${type}-${dreamIdx}`}
 												className={`dropdown-item ${dream.lucidMethod === type ? 'active' : ''}`}
 												href='#'
-												onClick={(_ev) => {
-													let newState = { ...currEntry }
+												onClick={() => {
+													const newState = { ...currEntry }
 													newState.dreams[dreamIdx].lucidMethod = type as InductionTypes
 													setCurrEntry(newState)
 												}}>
@@ -292,9 +292,9 @@ export default function ModalEntry(props: IModalEntryProps) {
 							<button
 								type='button'
 								title='Delete Dream'
-								onClick={(_ev) => {
+								onClick={() => {
 									if (confirm(`Delete Dream #${dreamIdx + 1}?`)) {
-										let newState = { ...currEntry }
+										const newState = { ...currEntry }
 										newState.dreams.splice(dreamIdx, 1)
 										if (newState.dreams.length === 0) newState.dreams.push({ ...NEW_DREAM })
 										setCurrEntry(newState)
@@ -318,7 +318,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 							suggestionsFilter={(item: { id: number; name: string }, query: string) => item.name.indexOf(query.toLowerCase()) > -1}
 							addOnBlur={true}
 							onAddition={(tag: IDreamSignTag) => {
-								let newState = { ...currEntry }
+								const newState = { ...currEntry }
 								// Dont allow dupes
 								if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) {
 									newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase())
@@ -326,12 +326,12 @@ export default function ModalEntry(props: IModalEntryProps) {
 								setCurrEntry(newState)
 							}}
 							onChange={(ev) => {
-								let newState = { ...currEntry }
+								const newState = { ...currEntry }
 								newState.dreams[dreamIdx].dreamSigns = [...ev.currentTarget.value]
 								setCurrEntry(newState)
 							}}
 							onDelete={(idx: number) => {
-								let newState = { ...currEntry }
+								const newState = { ...currEntry }
 								newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
 								setCurrEntry(newState)
 							}}
@@ -349,7 +349,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 								//rows={16}
 								value={dream.notes}
 								onChange={(ev) => {
-									let newState = { ...currEntry }
+									const newState = { ...currEntry }
 									newState.dreams[dreamIdx].notes = ev.currentTarget.value
 									setCurrEntry(newState)
 								}}
