@@ -39,7 +39,7 @@ import HeaderMetrics from './components/header-metrics'
 interface Props {
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
-	doSaveAdminState: Function
+	doSaveAdminState: ()=>void
 	adminState: IAppAdminState
 }
 export interface IAppAdminState {
@@ -75,18 +75,18 @@ export default function TabAdmin(props: Props) {
 	useEffect(() => {
 		if (!props.dataFile || !props.dataFile.entries) return
 
-		let tagGroups: IDreamSignTagGroup[] = []
-		let dupeSigns: IJournalEntry[] = []
-		let bedTimes: IJournalEntry[] = []
+		const tagGroups: IDreamSignTagGroup[] = []
+		const dupeSigns: IJournalEntry[] = []
+		const bedTimes: IJournalEntry[] = []
 
 		props.dataFile.entries
 			.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 			.forEach((entry) => {
 				entry.dreams.forEach((dream) =>
 					dream.dreamSigns.forEach((sign) => {
-						let tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
+						const tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
 						if (tag) {
-							let existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
+							const existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
 							if (!existingEntry) tag.dailyEntries.push(entry)
 							tag.totalOccurs++
 						} else {
@@ -126,7 +126,7 @@ export default function TabAdmin(props: Props) {
 		let numUpdated = 0
 
 		props.dataFile.entries.forEach((entry) => {
-			let entryCopy = JSON.parse(JSON.stringify(entry)) as IJournalEntry
+			const entryCopy = JSON.parse(JSON.stringify(entry)) as IJournalEntry
 			entryCopy.dreams.forEach((dream) =>
 				dream.dreamSigns.forEach((sign, idx, arr) => {
 					if (sign === oldName) {
@@ -234,18 +234,18 @@ export default function TabAdmin(props: Props) {
 									return a.totalOccurs > b.totalOccurs
 										? -1
 										: a.totalOccurs < b.totalOccurs
-										? 1
-										: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
-										? -1
-										: 1
+											? 1
+											: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
+												? -1
+												: 1
 								else if (filterSortOrder === FilterSortOrder.lowhigh)
 									return a.totalOccurs < b.totalOccurs
 										? -1
 										: a.totalOccurs > b.totalOccurs
-										? 1
-										: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
-										? -1
-										: 1
+											? 1
+											: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
+												? -1
+												: 1
 							})
 							.map((tagGrp, idx) => (
 								<div className='col' key={`keyTagGrp${idx}`}>
@@ -273,7 +273,7 @@ export default function TabAdmin(props: Props) {
 					{dupeDreamSigns.map((entry, idx) => (
 						<button
 							key={`tagDupe${idx}`}
-							onClick={(_ev) => {
+							onClick={() => {
 								setCurrEntry(entry)
 								setShowModal(true)
 							}}
@@ -290,15 +290,15 @@ export default function TabAdmin(props: Props) {
 		return (
 			<section>
 				<h5 className='text-primary'>
-					Bad Bed Times (<code>bedTime</code> is not standard '00:00' format)
+					Bad Bed Times (<code>bedTime</code> is not standard &apos;00:00&apos; format)
 				</h5>
 
 				<div className='mt-4'>
 					{badBedTimes.map((entry, idx) => (
 						<button
 							key={`badTime${idx}`}
-							onClick={(_ev) => {
-								let chgEntry = { ...entry }
+							onClick={() => {
+								const chgEntry = { ...entry }
 								chgEntry.notesPrep += `\n[BEDTIME-FIX]='${chgEntry.bedTime}'`
 								setCurrEntry(chgEntry)
 								setShowModal(true)
