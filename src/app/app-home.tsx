@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { APP_VER, AuthState, IAuthState, IDriveDataFile } from './app.types'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
@@ -49,7 +49,7 @@ export default function TabHome(props: Props) {
 
 	function getReadableFileSizeString(fileSizeInBytes: number) {
 		let idx = -1
-		let byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB']
+		const byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB']
 		do {
 			fileSizeInBytes = fileSizeInBytes / 1024
 			idx++
@@ -215,7 +215,7 @@ export default function TabHome(props: Props) {
 									This application uses your Google Drive to store dream journals so they are safe, secure, and accessible on any of your devices.
 								</p>
 								<p className='card-text'>
-									Click "Sign In", select the Google account to use with this app, view the request permissions page asking to create and modify{' '}
+									Click &quot;Sign In&quot;, select the Google account to use with this app, view the request permissions page asking to create and modify{' '}
 									<strong>
 										<u>only its own files</u>
 									</strong>{' '}

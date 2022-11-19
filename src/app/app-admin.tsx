@@ -39,7 +39,7 @@ import HeaderMetrics from './components/header-metrics'
 interface Props {
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
-	doSaveAdminState: (state) => void
+	doSaveAdminState: (state: IAppAdminState) => void
 	adminState: IAppAdminState
 }
 export interface IAppAdminState {
