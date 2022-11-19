@@ -33,8 +33,8 @@ import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
 import { IAuthState, IDriveDataFile, IJournalEntry, AuthState, APP_VER, IDriveConfFile } from './app.types'
 import * as GDrive from './google-oauth'
 import TabHome from '../app/app-home'
-import TabBedtime, { ITabStateBedtime } from '../app/app-bedtime'
-import TabExplore, { ITabStateExplore } from '../app/app-explore'
+import TabBedtime from '../app/app-bedtime'
+import TabExplore from '../app/app-explore'
 import TabJournal, { IAppViewState } from './app-journal'
 import TabTags from '../app/app-tags'
 //import TabTags2 from '../app/app-tags2'
@@ -47,12 +47,11 @@ import '../css/react-tags.css'
 import '../css/style.scss'
 
 // App Logic
-interface IAppProps {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface IAppProps { }
 interface IAppState {
 	appErrMsg: string
 	auth: IAuthState
-	tabStateBedtime: ITabStateBedtime
-	tabStateExplore: ITabStateExplore
 	childImportState: object
 	childSearchState: IAppSearchState
 	childViewState: IAppViewState
@@ -73,8 +72,6 @@ class App extends React.Component<IAppProps, IAppState> {
 				userName: '',
 				userPhoto: '',
 			},
-			tabStateBedtime: null,
-			tabStateExplore: null,
 			childImportState: null,
 			childSearchState: null,
 			childViewState: null,
@@ -106,19 +103,6 @@ class App extends React.Component<IAppProps, IAppState> {
 
 		// Make initial call at startup, if we're logged in, the datafile will be loaded and auth state set, otherwise, wait for user to click "Login"
 		GDrive.doAuthUpdate()
-	}
-
-	/**
-	 * Retain state between tab changes
-	 */
-	doSaveTabState_Bedtime = (newState: ITabStateBedtime) => {
-		this.setState({ tabStateBedtime: newState })
-	}
-	/**
-	 * Retain state between tab changes
-	 */
-	doSaveTabState_Explore = (newState: ITabStateExplore) => {
-		this.setState({ tabStateExplore: newState })
 	}
 
 	/**
@@ -158,22 +142,13 @@ class App extends React.Component<IAppProps, IAppState> {
 	// App Pages
 	Home = () => <TabHome dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} authState={this.state.auth} />
 	Bedtime = () => (
-		<TabBedtime
-			confFile={this.state.confFile || null}
+		<TabBedtime confFile={this.state.confFile || null}
 			dataFile={this.state.dataFile || null}
 			isBusyLoad={this.state.isBusyLoad}
-			setTabState={this.doSaveTabState_Explore}
-			tabState={this.state.tabStateExplore}
 		/>
 	)
 	Explore = () => (
-		<TabExplore
-			confFile={this.state.confFile || null}
-			dataFile={this.state.dataFile || null}
-			isBusyLoad={this.state.isBusyLoad}
-			setTabState={this.doSaveTabState_Explore}
-			tabState={this.state.tabStateExplore}
-		/>
+		<TabExplore confFile={this.state.confFile || null} dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} />
 	)
 	Journal = () => (
 		<TabJournal dataFile={this.state.dataFile || null} doSaveViewState={this.doSaveViewState} viewState={this.state.childViewState} isBusyLoad={this.state.isBusyLoad} />
@@ -187,7 +162,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		/>
 	)
 	Tags = () => (
-		<TabTags dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad}  />
+		<TabTags dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} />
 	)
 	Import = () => <TabImport dataFile={this.state.dataFile || null} doSaveImportState={this.doSaveImportState} importState={this.state.childImportState} />
 	Admin = () => (

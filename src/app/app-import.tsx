@@ -39,7 +39,7 @@ const VERBOSE = false
 
 export interface IAppTabProps {
 	dataFile: IDriveDataFile
-	doSaveImportState: Function
+	doSaveImportState: (state: IAppTabState) => void
 	importState: object
 }
 interface IAppTabState {
@@ -91,7 +91,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	constructor(props: Readonly<IAppTabProps>) {
 		super(props)
 
-		let config = this.props.importState || JSON.parse(localStorage.getItem('import-config')) || {}
+		const config = this.props.importState || JSON.parse(localStorage.getItem('import-config')) || {}
 
 		this.state = {
 			_defaultBedTime: config._defaultBedTime || '00:00',
@@ -113,16 +113,16 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			_showImporter: ImportTypes.docx,
 
 			_bedTime: config._bedTime || 'BED:',
-			_dreamBreak: config._dreamBreak || `DREAM \d+:`,
+			_dreamBreak: config._dreamBreak || 'DREAM \d+:',
 			_dreamSigns: config._dreamSigns || 'DREAMSIGNS:',
-			_entryDate: config._entryDate || `\d\d/\d\d:`,
+			_entryDate: config._entryDate || '\d\d/\d\d:',
 			_isLucidDream: config._isLucidDream || 'SUCCESS',
 			_notes: config._notes || [],
 			_notesPrep: config._notesPrep || 'PREP:',
 			_notesPrepEnd: config._notesPrepEnd || 'WAKES:',
 			_notesWake: config._notesWake || 'WAKES:',
 			_notesWakeEnd: config._notesWakeEnd || 'WAKES:',
-			_title: config._title || `DREAM \d+:`,
+			_title: config._title || 'DREAM \d+:',
 
 			bedTime: null,
 			dreamBreak: [],
@@ -168,8 +168,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		if (this.state._selEntryType === 'first') {
 			if ((demoData.split('\n') || []).length > 0) {
 				try {
-					let textParse = demoData.split('\n')[0].replace(/[^0-9$\/]/g, '')
-					let dateParse = new Date(textParse)
+					const textParse = demoData.split('\n')[0].replace(/[^0-9$\/]/g, '')
+					const dateParse = new Date(textParse)
 					if (Object.prototype.toString.call(dateParse) === '[object Date]' && dateParse.getDay() > 0) {
 						this.setState({
 							entryDate: dateParse.toUTCString().substring(0, 16),
@@ -182,11 +182,11 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				}
 			}
 		} else if (this.state._selEntryType === 'match' && this.state._entryDate) {
-			;(demoData.split('\n') || []).forEach((line) => {
+			(demoData.split('\n') || []).forEach((line) => {
 				try {
 					if (line.trim().match(new RegExp(this.state._entryDate, 'g'))) {
-						let keyVal = line.trim().split(new RegExp(this.state._entryDate, 'g'))
-						let newState = { entryDate: '' }
+						const keyVal = line.trim().split(new RegExp(this.state._entryDate, 'g'))
+						const newState = { entryDate: '' }
 
 						// CASE 1: "DATE: 03/08"
 						if (keyVal[1]) {
@@ -208,10 +208,10 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 		// B: "Dream Break"
 		if ((demoData || '').split('\n').length > 0) {
-			let arrMatch = []
+			const arrMatch = []
 			demoData.split('\n').forEach((line) => {
 				if (line.trim().match(new RegExp(this.state._dreamBreak, 'g'))) {
-					let keyVal = line.trim().split(new RegExp(this.state._dreamBreak, 'g'))
+					const keyVal = line.trim().split(new RegExp(this.state._dreamBreak, 'g'))
 					arrMatch.push(keyVal[1])
 				}
 			})
@@ -222,7 +222,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		if (this.state._selNotePrepType === 'multi' && this.state._notesPrepEnd) {
 			let isCapturing = false
 			let strNotesPrep = ''
-			;(demoData.split('\n') || []).forEach((line) => {
+			const strArray = (demoData.split('\n') || [])
+			strArray.forEach((line) => {
 				if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
 					isCapturing = false
 				} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
@@ -243,7 +244,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		if (this.state._selNoteWakeType === 'multi' && this.state._notesWakeEnd) {
 			let isCapturing = false
 			let strNotesWake = ''
-			;(demoData.split('\n') || []).forEach((line) => {
+			const strArray = (demoData.split('\n') || [])
+			strArray.forEach((line) => {
 				if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
 					isCapturing = false
 				} else if (line && line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
@@ -261,12 +263,13 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		}
 
 		// E: all other fields
-		;(demoData.split('\n') || []).forEach((line) => {
+		const strArray = (demoData.split('\n') || [])
+		strArray.forEach((line) => {
 			arrOtherFields.forEach((name) => {
 				if (line.trim().match(new RegExp(this.state[name], 'g'))) {
-					let keyVal = line.trim().split(new RegExp(this.state[name], 'g'))
+					const keyVal = line.trim().split(new RegExp(this.state[name], 'g'))
 					if (keyVal[1]) {
-						let newState = {}
+						const newState = {}
 						newState[name.replace('_', '')] = name === '_isLucidDream' ? true : keyVal[1]
 						this.setState(newState)
 					}
@@ -279,8 +282,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			if (!this.state._dreamBreak) {
 				this.setState({ notes: ['(add text to Dream Section)'] })
 			} else {
-				let arrNotes = [],
-					isNotes = false
+				const arrNotes = []
+				let isNotes = false
 				// Locate "Dream Title", capture all lines after it - until next [Dream Section]/[Dream Title]
 				demoData.split('\n').forEach((line) => {
 					if (isNotes) arrNotes.push(line)
@@ -298,7 +301,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		const name = target.name
 
 		// A: Capture regex field value
-		let newState = {}
+		const newState = {}
 		if (name === 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
 			newState['dreamSigns'] = value ? value.split(this.state._dreamSignsDelim || ',') : []
@@ -332,7 +335,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		const name = target.name
 
 		// A: Capture regex field value
-		let newState = {}
+		const newState = {}
 		if (name === 'dreamSigns') {
 			// `dreamSigns` is an array and must be maintained as such
 			newState['dreamSigns'] = value && typeof value === 'string' ? value.split(this.state._dreamSignsDelim || ',') : []
@@ -369,7 +372,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		const value = target.value
 		const name = target.name
 
-		let newState = this.state._parsedSections
+		const newState = this.state._parsedSections
 		if (typeof idy === 'number')
 			newState[idx].dreams[idy][name] = name === 'dreamSigns' && typeof value === 'string' ? value.split(this.state._dreamSignsDelim || ',') : value
 		else newState[idx][name] = value
@@ -382,7 +385,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	handleDeleteEntry = (idx: number) => {
 		if (!confirm('Delete this Entry?')) return
 
-		let newState = this.state._parsedSections
+		const newState = this.state._parsedSections
 		newState.splice(idx, 1)
 
 		this.setState({
@@ -397,7 +400,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	 */
 	handleParse = () => {
 		const strDreamSignDelim = ','
-		let arrEntries: IJournalEntry[] = []
+		const arrEntries: IJournalEntry[] = []
 		let strSecBreak = new RegExp('\n\n')
 		let strImportText = this.state._importText
 		if (this.state._selBreakType === 'blankLine') strSecBreak = new RegExp('\n\n')
@@ -440,7 +443,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				//if (VERBOSE) console.log('SECTION: ' + sect)
 
 				// 1: Divide text into dream sections
-				let objEntry: IJournalEntry = {
+				const objEntry: IJournalEntry = {
 					entryDate: '',
 					bedTime: '',
 					notesPrep: '',
@@ -476,8 +479,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						// NOTE: As each of the Entry props have diff reqs, handle each one sep
 						if (idx === 0 && this.state._selEntryType === 'first') {
 							try {
-								let textParse = line.split('\n')[0].replace(/[^0-9$\/]/g, '')
-								let dateParse = new Date(textParse)
+								const textParse = line.split('\n')[0].replace(/[^0-9$\/]/g, '')
+								const dateParse = new Date(textParse)
 								if (Object.prototype.toString.call(dateParse) === '[object Date]' && dateParse.getDay() > 0) {
 									objEntry.entryDate = dateParse.toISOString().substring(0, 10)
 								}
@@ -489,7 +492,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							if (textParse) {
 								textParse = textParse.replace(/:|;/gi, '') // For "11/29/2019:"
 								if (VERBOSE) console.log('textParse = ' + textParse)
-								let dateParse = new Date(textParse)
+								const dateParse = new Date(textParse)
 								if (this.state._defaultYear && textParse && textParse.length <= 5) {
 									// "12/31"
 									if (VERBOSE) console.log('FYI using `_defaultYear`: ' + this.state._defaultYear)
@@ -507,11 +510,11 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 								}
 							}
 						} else if (line.trim().match(new RegExp(this.state._bedTime, 'g'))) {
-							let keyVal = line.trim().split(new RegExp(this.state._bedTime, 'g'))
+							const keyVal = line.trim().split(new RegExp(this.state._bedTime, 'g'))
 							if (keyVal[1].trim()) {
 								let time = keyVal[1].trim()
 								if (this.state._isTime24Hour) {
-									let arrTime = time.split(':')
+									const arrTime = time.split(':')
 									let timeHour = Number(arrTime[0])
 									if (timeHour && !isNaN(timeHour)) {
 										timeHour += 12
@@ -523,15 +526,15 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							}
 						} else if (line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
 							if (this.state._selNotePrepType === 'single') {
-								let keyVal = line.trim().split(new RegExp(this.state._notesPrep, 'g'))
+								const keyVal = line.trim().split(new RegExp(this.state._notesPrep, 'g'))
 								if (keyVal[1].trim()) objEntry.notesPrep = keyVal[1].trim()
 							}
 						} else if (line.trim().match(new RegExp(this.state._notesWake, 'g'))) {
-							let keyVal = line.trim().split(new RegExp(this.state._notesWake, 'g'))
+							const keyVal = line.trim().split(new RegExp(this.state._notesWake, 'g'))
 							if (keyVal[1].trim()) objEntry.notesWake = keyVal[1].trim()
 						} else if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
 							// DESIGN: Some people (*ahem*) choose to put DREAMSIGNS at the top-level (not as a Dream section field)
-							let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
+							const keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
 							if (keyVal[1].trim())
 								tmpDreamSigns = keyVal[1]
 									.trim()
@@ -544,7 +547,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 						// A: Capture `title` so `notes` can be subsequently captured
 						if (line.trim().match(new RegExp(this.state._title, 'g'))) {
-							let keyVal = line.trim().split(new RegExp(this.state._title, 'g'))
+							const keyVal = line.trim().split(new RegExp(this.state._title, 'g'))
 							if (keyVal[1]) objDream.title = keyVal[1].trim()
 						} else if (objDream.title && this.state._selDreamNotes === 'after' && line) {
 							objDream.notes += (line + '\n').replace(/\n\s*\n/g, '\n')
@@ -555,7 +558,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 						// B: Capture other `dream` fields
 						if (line.trim().match(new RegExp(this.state._dreamSigns, 'g'))) {
-							let keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
+							const keyVal = line.trim().split(new RegExp(this.state._dreamSigns, 'g'))
 							if (!keyVal[1].trim()) console.log(line) // FIXME:
 							if (keyVal[1].trim())
 								objDream.dreamSigns =
@@ -565,7 +568,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										.toLowerCase()
 										.split(this.state._dreamSignsDelim || strDreamSignDelim)
 						} else if (line.trim().match(new RegExp(this.state._isLucidDream, 'g'))) {
-							let keyVal = line.trim().split(new RegExp(this.state._isLucidDream, 'g'))
+							const keyVal = line.trim().split(new RegExp(this.state._isLucidDream, 'g'))
 							if (keyVal[1].trim()) objDream.isLucidDream = keyVal[1].trim() ? true : false
 						}
 						/* TODO:
@@ -580,7 +583,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				// 3: Handle fields that can be multi-line
 				if (this.state._selNotePrepType === 'multi' && this.state._notesPrepEnd) {
 					let isCapturing = false
-					;(sect.split('\n') || []).forEach((line) => {
+					const strArray = (sect.split('\n') || [])
+					strArray.forEach((line) => {
 						if (line && line.trim().match(new RegExp(this.state._notesPrepEnd, 'g'))) {
 							isCapturing = false
 						} else if (line && line.trim().match(new RegExp(this.state._notesPrep, 'g'))) {
@@ -593,7 +597,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				}
 				if (this.state._selNoteWakeType === 'multi' && this.state._notesWakeEnd) {
 					let isCapturing = false
-					;(sect.split('\n') || []).forEach((line) => {
+					const strArray = (sect.split('\n') || [])
+					strArray.forEach((line) => {
 						console.log(`line = ${line}`)
 						if (line && line.trim().match(new RegExp(this.state._notesWakeEnd, 'g'))) {
 							isCapturing = false
@@ -638,8 +643,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	 * This completes the import process
 	 */
 	handleImport = () => {
-		let arrInvalidSects = []
-		let cntImported = this.state._parsedSections.length
+		const arrInvalidSects = []
+		const cntImported = this.state._parsedSections.length
 
 		// A:
 		if (!this.props.dataFile || !this.props.dataFile.name) {
@@ -674,7 +679,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					// TODO: what to do about expired session?
 					// `save` can can oauthLogin, but file still needs ot be saved - show a save button?
 				})
-				.then((_result) => {
+				.then(() => {
 					// 1: Clear import text and parsed results
 					this.setState({
 						_importHTML: '<br>',
@@ -697,7 +702,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	/* ======================================================================== */
 
 	render() {
-		let contDemoData: JSX.Element = (
+		const contDemoData: JSX.Element = (
 			<div ref={this.refDemoData} className='container p-3 bg-black'>
 				<span className='text-white'>03/08:</span>
 				<ul>
@@ -746,12 +751,12 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		)
 
 		// TODO: this.state._showImporter == ImportTypes.xlsx
-		let importSetup: JSX.Element = (
+		const importSetup: JSX.Element = (
 			<div>
 				<div className='row align-items-top mb-4'>
 					<div className='col-8'>
 						<h5 className='text-primary'>Field Mapping</h5>
-						<p>Use the form below to map your dream journal fields to Brain Cloud's, then your data will be automatically imported into your new dream journal.</p>
+						<p>Use the form below to map your dream journal fields to Brain Cloud&apos;s, then your data will be automatically imported into your new dream journal.</p>
 					</div>
 					<div className='col-4'>
 						<h5 className='text-primary'>Current Journal Format</h5>
@@ -1028,7 +1033,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					</div>
 					<div className='col'>
 						<h5 className='text-primary'>Default Year</h5>
-						<label>Used when no year is available (ex: "Date: 10/31")</label>
+						<label>Used when no year is available (ex: &quot;Date: 10/31&quot;)</label>
 						<input
 							name='_defaultYear'
 							type='number'
@@ -1043,7 +1048,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				<div className='row align-items-center py-4 mb-4 border-bottom border-secondary'>
 					<div className='col'>
 						<h5 className='text-primary'>Bed Time Format</h5>
-						<label>Used to parse "12:30" in am/pm or 24-hour time</label>
+						<label>Used to parse &quot;12:30&quot; in am/pm or 24-hour time</label>
 
 						<div className='row align-items-center g-2'>
 							<div className='col-auto'>
@@ -1098,7 +1103,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			</div>
 		)
 
-		let importParse: JSX.Element = (
+		const importParse: JSX.Element = (
 			<div>
 				<div className='row'>
 					<div className='col'>
@@ -1133,7 +1138,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			</div>
 		)
 
-		let importResults: JSX.Element = (
+		const importResults: JSX.Element = (
 			<form>
 				<div className='row align-items-middle justify-content-between'>
 					<div className='col-auto'>
@@ -1236,7 +1241,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 													<label className='text-uppercase text-muted d-block'>Lucid Dream?</label>
 													<BootstrapSwitchButton
 														onChange={(checked: boolean) => {
-															let newState = this.state._parsedSections
+															const newState = this.state._parsedSections
 															if (idy) newState[idx].dreams[idy].isLucidDream = checked
 															this.setState({ _parsedSections: newState })
 														}}
@@ -1297,7 +1302,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							</div>
 							<div className='col'>
 								<p className='card-text'>
-									It's likely that you're already keeping a dream journal in another format, such a Document (Google Docs, Microsoft Word), spreadsheet
+									It&apos;s likely that you are already keeping a dream journal in another format, such a Document (Google Docs, Microsoft Word), spreadsheet
 									(Google Sheets, Microsoft Excel), or just plain text.
 								</p>
 								<p className='card-text'>

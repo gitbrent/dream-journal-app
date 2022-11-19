@@ -35,17 +35,17 @@ import HeaderMetrics from './components/header-metrics'
 import TableEntries from './components/table-entries'
 // FUTURE: https://github.com/hypeserver/react-date-range
 
-export interface Props {
-	dataFile: IDriveDataFile
-	isBusyLoad: boolean
-	doSaveViewState: Function
-	viewState: IAppViewState
-}
 export interface IAppViewState {
 	//dateRangeFrom: Date
 	//dateRangeTo: Date
 	pagingCurrIdx: number
 	pagingPageSize: number
+}
+export interface Props {
+	dataFile: IDriveDataFile
+	isBusyLoad: boolean
+	doSaveViewState: (state: IAppViewState) => void
+	viewState: IAppViewState
 }
 
 enum EntryType {

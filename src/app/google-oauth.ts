@@ -51,7 +51,7 @@ export function doAuthUpdate() {
 	parseStoreAccessKey()
 
 	// B: Grab newest token
-	let params = localStorage.getItem('oauth2-params') ? JSON.parse(localStorage.getItem('oauth2-params')) : null
+	const params = localStorage.getItem('oauth2-params') ? JSON.parse(localStorage.getItem('oauth2-params')) : null
 
 	// C: Check state
 	if (params) {
@@ -106,15 +106,15 @@ export function doAuthUpdate() {
  */
 export function doAuthSignIn() {
 	// Google's OAuth 2.0 endpoint for requesting an access token
-	let oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth'
+	const oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth'
 
 	// Create <form> element to submit parameters to OAuth 2.0 endpoint.
-	let form = document.createElement('form')
+	const form = document.createElement('form')
 	form.setAttribute('method', 'GET') // Send as a GET request.
 	form.setAttribute('action', oauth2Endpoint)
 
 	// Parameters to pass to OAuth 2.0 endpoint.
-	let params = {
+	const params = {
 		client_id: GITBRENT_CLIENT_ID,
 		scope: GDRIVE_SCOPE,
 		redirect_uri: location.href.indexOf('8080') > -1 ? LOCALHOST_URL : FIREBASE_URL,
@@ -124,8 +124,8 @@ export function doAuthSignIn() {
 	}
 
 	// Add form parameters as hidden input values.
-	for (let p in params) {
-		let input = document.createElement('input')
+	for (const p in params) {
+		const input = document.createElement('input')
 		input.setAttribute('type', 'hidden')
 		input.setAttribute('name', p)
 		input.setAttribute('value', params[p])
@@ -140,7 +140,7 @@ export function doAuthSignIn() {
  * @see: https://developers.google.com/identity/protocols/OAuth2UserAgent#tokenrevoke
  */
 export function doAuthSignOut() {
-	let params = JSON.parse(localStorage.getItem('oauth2-params'))
+	const params = JSON.parse(localStorage.getItem('oauth2-params'))
 
 	// FUTURE: Prompt for Save!!!
 
@@ -148,7 +148,7 @@ export function doAuthSignOut() {
 		method: 'GET',
 		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	})
-		.then((_response) => {
+		.then(() => {
 			gAuthState = {
 				status: AuthState.Unauthenticated,
 				userName: '',
@@ -198,11 +198,11 @@ export function doEditTagTypes(type: SignInventoryType, tags: string[]) {
 	gConfFile[`tagType${type}`] = tags
 }
 
-export function doSaveConfFile(): Promise<any> {
+export function doSaveConfFile(): Promise<boolean> {
 	return new Promise((resolve, reject) => {
-		let params = JSON.parse(localStorage.getItem('oauth2-params'))
+		const params = JSON.parse(localStorage.getItem('oauth2-params'))
 
-		let reqBody: string =
+		const reqBody: string =
 			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
 			JSON.stringify(CONF_FILE_HEADER) +
 			'\n' +
@@ -210,9 +210,9 @@ export function doSaveConfFile(): Promise<any> {
 			JSON.stringify(gConfFile, null, 2) +
 			'\n' +
 			'--foo_bar_baz--'
-		let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
+		const reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
 
-		let requestHeaders: any = {
+		const requestHeaders: any = {
 			Authorization: `Bearer ${params['access_token']}`,
 			'Content-Type': 'multipart/related; boundary=foo_bar_baz',
 			'Content-Length': reqBody.length + reqEnd.length,
@@ -227,7 +227,7 @@ export function doSaveConfFile(): Promise<any> {
 				response
 					.json()
 					.then((json) => {
-						let data = json
+						const data = json
 
 						// A: Check for errors
 						if (data && data.error && data.error.code) throw new Error(data.error.message) // Google error: `{error:{errors:[], code:401, message:"..."}}`
@@ -271,7 +271,7 @@ export function doEntryAdd(entry: IJournalEntry) {
 export function doEntryEdit(entry: IJournalEntry, origEntryDate?: IJournalEntry['entryDate']) {
 	if (!gDataFile || !gDataFile.entries) throw new Error('No datafile!')
 
-	let editEntry = gDataFile.entries.filter((item) => item.entryDate === (origEntryDate && origEntryDate !== entry.entryDate ? origEntryDate : entry.entryDate))[0]
+	const editEntry = gDataFile.entries.filter((item) => item.entryDate === (origEntryDate && origEntryDate !== entry.entryDate ? origEntryDate : entry.entryDate))[0]
 	if (!editEntry) throw new Error('Unable to find entry!')
 
 	Object.keys(entry).forEach((key) => {
@@ -284,7 +284,7 @@ export function doEntryEdit(entry: IJournalEntry, origEntryDate?: IJournalEntry[
 export function doEntryDelete(entryDate: IJournalEntry['entryDate']) {
 	if (!gDataFile || !gDataFile.entries) throw new Error('No datafile!')
 
-	let delIdx = gDataFile.entries.findIndex((item) => item.entryDate === entryDate)
+	const delIdx = gDataFile.entries.findIndex((item) => item.entryDate === entryDate)
 	if (delIdx === -1) throw new Error('Unable to find entry!')
 
 	gDataFile.entries.splice(delIdx, 1)
@@ -293,9 +293,9 @@ export function doEntryDelete(entryDate: IJournalEntry['entryDate']) {
 /**
  * @see: https://developers.google.com/drive/api/v3/reference/files/update
  */
-export function doSaveDataFile(): Promise<any> {
+export function doSaveDataFile(): Promise<boolean> {
 	return new Promise((resolve, reject) => {
-		let params = JSON.parse(localStorage.getItem('oauth2-params'))
+		const params = JSON.parse(localStorage.getItem('oauth2-params'))
 
 		// DATA FIXES: (20191101):
 		/*
@@ -309,16 +309,16 @@ export function doSaveDataFile(): Promise<any> {
 		*/
 
 		// A: Fix [null] dates that can be created by import data/formatting, etc.
-		let entriesFix = gDataFile.entries
+		const entriesFix = gDataFile.entries
 		entriesFix.forEach((entry, idx) => (entry.entryDate = entry.entryDate ? entry.entryDate : `1999-01-0${idx + 1}`))
 
 		// B: Sort by `entryDate`
-		let jsonBody: object = {
+		const jsonBody: object = {
 			entries: entriesFix.sort((a, b) => (a.entryDate > b.entryDate ? 1 : -1)),
 		}
 
 		// C: Write file
-		let reqBody: string =
+		const reqBody: string =
 			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
 			JSON.stringify(DATA_FILE_HEADER) +
 			'\n' +
@@ -326,9 +326,9 @@ export function doSaveDataFile(): Promise<any> {
 			JSON.stringify(jsonBody, null, 2) +
 			'\n' +
 			'--foo_bar_baz--'
-		let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
+		const reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
 
-		let requestHeaders: any = {
+		const requestHeaders: any = {
 			Authorization: 'Bearer ' + params['access_token'],
 			'Content-Type': 'multipart/related; boundary=foo_bar_baz',
 			'Content-Length': reqBody.length + reqEnd.length,
@@ -343,7 +343,7 @@ export function doSaveDataFile(): Promise<any> {
 				response
 					.json()
 					.then((json) => {
-						let data = json
+						const data = json
 
 						// A: Check for errors
 						if (data && data.error && data.error.code) throw new Error(data.error.message) // Google error: `{error:{errors:[], code:401, message:"..."}}`
@@ -381,7 +381,7 @@ export function doesEntryDateExist(checkDate: string): boolean {
  * Does this entry date already exist in the datafile
  */
 export function getUniqueDreamTags(): string[] {
-	let arrTags: string[] = []
+	const arrTags: string[] = []
 
 	if (!gDataFile || !gDataFile.entries) return []
 
@@ -401,7 +401,7 @@ export function getUniqueDreamTags(): string[] {
 // INTERNAL METHODS ----------------------------------------------------------
 
 function doGetAppFiles() {
-	let params = JSON.parse(localStorage.getItem('oauth2-params'))
+	const params = JSON.parse(localStorage.getItem('oauth2-params'))
 	if (!params || !params['access_token']) {
 		doAuthSignIn()
 		return
@@ -425,7 +425,7 @@ function doGetAppFiles() {
 			response
 				.json()
 				.then((json) => {
-					let data = json
+					const data = json
 
 					// A: Check for errors
 					// NOTE: Google returns an error object `{error:{errors:[], code:401, message:"..."}}`
@@ -461,13 +461,13 @@ function doGetAppFiles() {
  * @see: https://developers.google.com/drive/api/v3/multipart-upload
  */
 function doCreateConfFile() {
-	let params = JSON.parse(localStorage.getItem('oauth2-params'))
-	let reqBody = `--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n${JSON.stringify(
+	const params = JSON.parse(localStorage.getItem('oauth2-params'))
+	const reqBody = `--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n${JSON.stringify(
 		CONF_FILE_HEADER
 	)}\n--foo_bar_baz\nContent-Type: application/json\n\n\n--foo_bar_baz--`
-	let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
+	const reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
 
-	let requestHeaders: any = {
+	const requestHeaders: any = {
 		Authorization: `Bearer ${params['access_token']}`,
 		'Content-Type': 'multipart/related; boundary=foo_bar_baz',
 		'Content-Length': reqBody.length + reqEnd.length,
@@ -483,7 +483,7 @@ function doCreateConfFile() {
 		.then((response) => {
 			response
 				.json()
-				.then((_json) => {
+				.then(() => {
 					doGetAppFiles()
 				})
 				.catch((error) => {
@@ -503,8 +503,8 @@ function doCreateConfFile() {
  * @see: https://developers.google.com/drive/api/v3/multipart-upload
  */
 function doCreateDataFile() {
-	let params = JSON.parse(localStorage.getItem('oauth2-params'))
-	let reqBody =
+	const params = JSON.parse(localStorage.getItem('oauth2-params'))
+	const reqBody =
 		'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
 		JSON.stringify(DATA_FILE_HEADER) +
 		'\n' +
@@ -512,9 +512,9 @@ function doCreateDataFile() {
 		'' +
 		'\n' +
 		'--foo_bar_baz--'
-	let reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
+	const reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
 
-	let requestHeaders: any = {
+	const requestHeaders: any = {
 		Authorization: `Bearer ${params['access_token']}`,
 		'Content-Type': 'multipart/related; boundary=foo_bar_baz',
 		'Content-Length': reqBody.length + reqEnd.length,
@@ -530,7 +530,7 @@ function doCreateDataFile() {
 		.then((response) => {
 			response
 				.json()
-				.then((_json) => {
+				.then(() => {
 					doGetAppFiles()
 				})
 				.catch((error) => {
@@ -551,7 +551,7 @@ function doCreateDataFile() {
  */
 function doSelectConfFile() {
 	// A
-	let params = JSON.parse(localStorage.getItem('oauth2-params'))
+	const params = JSON.parse(localStorage.getItem('oauth2-params'))
 
 	// B
 	fetch(`https://www.googleapis.com/drive/v3/files/${gConfFile.id}?alt=media`, {
@@ -562,7 +562,7 @@ function doSelectConfFile() {
 			response
 				.arrayBuffer()
 				.then((buffer) => {
-					let decoded: string = new TextDecoder('utf-8').decode(buffer)
+					const decoded: string = new TextDecoder('utf-8').decode(buffer)
 					let json: Object = {}
 
 					// A:
@@ -610,7 +610,7 @@ function doSelectConfFile() {
  */
 function doSelectDataFile() {
 	// A
-	let params = JSON.parse(localStorage.getItem('oauth2-params'))
+	const params = JSON.parse(localStorage.getItem('oauth2-params'))
 
 	// B
 	fetch(`https://www.googleapis.com/drive/v3/files/${gDataFile.id}?alt=media`, {
@@ -621,7 +621,7 @@ function doSelectDataFile() {
 			response
 				.arrayBuffer()
 				.then((buffer) => {
-					let decoded: string = new TextDecoder('utf-8').decode(buffer)
+					const decoded: string = new TextDecoder('utf-8').decode(buffer)
 					let json: Object = {}
 					let entries: IJournalEntry[]
 
@@ -663,11 +663,11 @@ function doSelectDataFile() {
 // UTILITY FUNCS -------------------------------------------------------------
 
 function parseStoreAccessKey() {
-	let fragmentString = location.hash.substring(1)
+	const fragmentString = location.hash.substring(1)
 
 	// Parse query string to see if page request is coming from OAuth 2.0 server.
-	let params = {}
-	let regex = /([^&=]+)=([^&]*)/g
+	const params = {}
+	const regex = /([^&=]+)=([^&]*)/g
 	let m: RegExpExecArray
 
 	while ((m = regex.exec(fragmentString))) {

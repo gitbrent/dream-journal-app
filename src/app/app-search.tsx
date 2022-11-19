@@ -6,12 +6,6 @@ import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
 
-export interface Props {
-	dataFile: IDriveDataFile
-	isBusyLoad: boolean
-	doSaveSearchState: Function
-	searchState: IAppSearchState
-}
 export interface IAppSearchState {
 	searchMatches: ISearchMatch[]
 	searchOptMatchType: SearchMatchTypes
@@ -19,6 +13,12 @@ export interface IAppSearchState {
 	searchTerm: string
 	searchTermInvalidMsg: string
 	showAlert: boolean
+}
+export interface Props {
+	dataFile: IDriveDataFile
+	isBusyLoad: boolean
+	doSaveSearchState: (state:IAppSearchState)=>void
+	searchState: IAppSearchState
 }
 
 export default function TabSearch(props: Props) {
@@ -75,7 +75,7 @@ export default function TabSearch(props: Props) {
 	// ------------------------------------------------------------------------
 
 	function doKeywordSearch() {
-		let arrFound: ISearchMatch[] = []
+		const arrFound: ISearchMatch[] = []
 		let regex = new RegExp(searchTerm, 'gi') // SearchMatchTypes.contains
 
 		if (searchOptMatchType === SearchMatchTypes.whole) regex = new RegExp('\\b' + searchTerm + '\\b', 'gi')
@@ -83,7 +83,7 @@ export default function TabSearch(props: Props) {
 		if (!props.dataFile || props.dataFile.entries.length <= 0) return
 
 		props.dataFile.entries.forEach((entry) => {
-			;(entry.dreams || []).forEach((dream, idx) => {
+			(entry.dreams || []).forEach((dream, idx) => {
 				if (searchOptScope === SearchScopes.all) {
 					if (
 						(dream.notes || '').match(regex) ||
@@ -124,7 +124,7 @@ export default function TabSearch(props: Props) {
 	}
 
 	function doShowByType(type: SearchScopes) {
-		let arrFound = []
+		const arrFound = []
 
 		if (!props.dataFile || props.dataFile.entries.length <= 0) return
 
@@ -175,7 +175,7 @@ export default function TabSearch(props: Props) {
 						<li>What are your common dream signs?</li>
 						<li>How many times have you dreamed about school?</li>
 					</ul>
-					<p>Let's find out!</p>
+					<p>Let&apos;s find out!</p>
 					<hr />
 					<div className='d-flex justify-content-end'>
 						<button className='btn btn-light' onClick={handleHideAlert}>
