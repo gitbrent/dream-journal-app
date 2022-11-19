@@ -90,6 +90,7 @@ class App extends React.Component<IAppProps, IAppState> {
 		console.log(APP_VER)
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	componentDidCatch = (error: any, errorInfo: any) => {
 		this.setState({ appErrMsg: error.toString() })
 		console.error(error)
