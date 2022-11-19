@@ -3,15 +3,14 @@ import { DateTime } from 'luxon'
 import { ISearchMatch, SearchScopes, SearchMatchTypes, MetaType } from '../app.types'
 
 interface Props {
-	setCurrEntry: Function
-	setDreamIdx?: Function
-	setShowModal: Function
+	setCurrEntry: (entry) => void
+	setDreamIdx?: (index) => void
+	setShowModal: (modal) => void
 	searchMatch: ISearchMatch
 	searchTerm?: string
 	searchOptMatchType?: SearchMatchTypes
 	searchOptScope: SearchScopes
 }
-export interface ISearchResultsState {}
 
 export default function SearchResults(props: Props) {
 	const dateEntry = DateTime.fromISO(props.searchMatch.entry.entryDate)
@@ -82,14 +81,14 @@ export default function SearchResults(props: Props) {
 					<div className='card-footer bg-black p-3'>
 						<div className='row row-cols-auto g-2'>
 							{props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns &&
-							Array.isArray(props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns)
+								Array.isArray(props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns)
 								? props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns.map((sign, idx) => {
-										return (
-											<div className='col' key={`${sign}${idx}`}>
-												<div className='badge bg-info text-lowercase p-2'>{sign}</div>
-											</div>
-										)
-								  })
+									return (
+										<div className='col' key={`${sign}${idx}`}>
+											<div className='badge bg-info text-lowercase p-2'>{sign}</div>
+										</div>
+									)
+								})
 								: ''}
 						</div>
 					</div>

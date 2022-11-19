@@ -3,11 +3,11 @@ import { DateTime } from 'luxon'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup } from '../app.types'
 
 export interface Props {
-	setCurrEntry: Function
-	setShowModal: Function
+	setCurrEntry: (entry) => void
+	setShowModal: (modal) => void
 	tagGrp: IDreamSignTagGroup
 	viewType: CardDreamSignGrpViewType
-	doMassUpdateTag: Function
+	doMassUpdateTag: (oldTag, newTag) => void
 }
 
 export default function DreamTagCard(props: Props) {
@@ -24,7 +24,7 @@ export default function DreamTagCard(props: Props) {
 						<div
 							key={`cardTagDate${props.tagGrp.dreamSign}${idy}`}
 							title={Math.abs(Math.round(dateEntry.diff(DateTime.now(), 'months').months)) + ' months ago'}
-							onClick={(_ev) => {
+							onClick={() => {
 								props.setCurrEntry(entry)
 								props.setShowModal(true)
 							}}

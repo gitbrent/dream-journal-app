@@ -95,8 +95,8 @@ export default function TableEntries(props: Props) {
 								Array.isArray(dream.dreamSigns)
 									? (dreamSignsUnq = [...new Set(dream.dreamSigns.concat(dreamSignsUnq))])
 									: dream.dreamSigns
-									? dreamSignsUnq.push(dream.dreamSigns + ' (FIXME)')
-									: ''
+										? dreamSignsUnq.push(dream.dreamSigns + ' (FIXME)')
+										: ''
 							)
 
 							return (
@@ -123,7 +123,7 @@ export default function TableEntries(props: Props) {
 									</td>
 									<td className='align-middle text-center'>
 										<button
-											onClick={(_ev) => {
+											onClick={() => {
 												setCurrEntry(entry)
 												setShowModal(true)
 											}}

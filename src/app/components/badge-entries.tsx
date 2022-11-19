@@ -52,23 +52,23 @@ export default function BadgeEntries(props: Props) {
 	useEffect(() => {
 		if (!props.dataFile || !props.dataFile.entries) return
 
-		let tmpOnlyDreams: IOnlyDream[] = []
+		const tmpOnlyDreams: IOnlyDream[] = []
 
-		let filterDays =
+		const filterDays =
 			filterDate === FilterDate.last10
 				? 10
 				: filterDate === FilterDate.last30
-				? 30
-				: filterDate === FilterDate.last90
-				? 90
-				: filterDate === FilterDate.last180
-				? 180
-				: filterDate === FilterDate.last360
-				? 360
-				: 0
+					? 30
+					: filterDate === FilterDate.last90
+						? 90
+						: filterDate === FilterDate.last180
+							? 180
+							: filterDate === FilterDate.last360
+								? 360
+								: 0
 
 		// Tag Groups
-		let tagGroups: IDreamSignTagGroup[] = []
+		const tagGroups: IDreamSignTagGroup[] = []
 		{
 			props.dataFile.entries
 				.filter((entry) => filterDate === FilterDate.all || DateTime.fromISO(entry.entryDate).startOf('day') >= DateTime.now().minus({ days: filterDays }))
@@ -85,16 +85,16 @@ export default function BadgeEntries(props: Props) {
 				.forEach((entry) => {
 					entry.dreams.forEach((dream) => {
 						dream.dreamSigns.forEach((sign) => {
-							let tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
+							const tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
 							if (tag) {
-								let existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
+								const existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
 								if (!existingEntry) tag.dailyEntries.push(entry)
 								tag.totalOccurs++
 							} else {
 								tagGroups.push({ dreamSign: sign, dailyEntries: [entry], totalOccurs: 1 })
 							}
 						})
-						let currEntry = tmpOnlyDreams.filter((item) => item.entryDate === entry.entryDate)[0]
+						const currEntry = tmpOnlyDreams.filter((item) => item.entryDate === entry.entryDate)[0]
 						if (currEntry) {
 							currEntry.dreams.push(dream)
 							currEntry.tags = [...currEntry.tags, ...dream.dreamSigns]
@@ -109,12 +109,12 @@ export default function BadgeEntries(props: Props) {
 		}
 		setOnlyDreams(tmpOnlyDreams)
 
-		let tagByCats: IDreamTagByCat[] = []
+		const tagByCats: IDreamTagByCat[] = []
 		tagGroups.forEach((tagGrp) => {
-			let tagTag = tagGrp.dreamSign
-			let tagCat = tagTag.indexOf(':') ? tagTag.split(':')[0] : tagTag
+			const tagTag = tagGrp.dreamSign
+			const tagCat = tagTag.indexOf(':') ? tagTag.split(':')[0] : tagTag
 
-			let cat = tagByCats.filter((item) => item.dreamCat === tagCat)[0]
+			const cat = tagByCats.filter((item) => item.dreamCat === tagCat)[0]
 			if (cat) cat.dreamTagGroups.push(tagGrp)
 			else tagByCats.push({ dreamCat: tagCat, dreamTagGroups: [tagGrp] })
 		})
@@ -243,18 +243,18 @@ export default function BadgeEntries(props: Props) {
 													return a.totalOccurs > b.totalOccurs
 														? -1
 														: a.totalOccurs < b.totalOccurs
-														? 1
-														: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
-														? -1
-														: 1
+															? 1
+															: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
+																? -1
+																: 1
 												else if (filterSortOrder === FilterSortOrder.lowhigh)
 													return a.totalOccurs < b.totalOccurs
 														? -1
 														: a.totalOccurs > b.totalOccurs
-														? 1
-														: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
-														? -1
-														: 1
+															? 1
+															: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
+																? -1
+																: 1
 											})
 											.map((tagGrp, idx) => (
 												<DreamTagCard
@@ -287,7 +287,7 @@ export default function BadgeEntries(props: Props) {
 								<div
 									key={`byDateKey${idx}`}
 									title={Math.abs(Math.round(dateEntry.diff(DateTime.now(), 'months').months)) + ' months ago'}
-									onClick={(_ev) => {
+									onClick={() => {
 										setCurrEntry(props.dataFile.entries.filter((entry) => entry.entryDate == item.entryDate)[0])
 										setShowModal(true)
 									}}
