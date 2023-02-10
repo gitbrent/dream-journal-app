@@ -28,11 +28,11 @@
  */
 
 import React, { useState } from 'react'
-import { APP_VER, AuthState, IAuthState, IDriveDataFile } from './app.types'
+import { AuthState, IAuthState, IDriveDataFile } from './app.types'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
 import ModalEntry from './modal-entry'
-import * as GDrive from './google-oauth'
+//import * as GDrive from './google-oauth'
 
 interface Props {
 	authState: IAuthState
@@ -60,7 +60,7 @@ export default function TabHome(props: Props) {
 
 	function renderCardAuthUser(): JSX.Element {
 		let cardAuthUser: JSX.Element
-
+		/*
 		if (props.authState && props.authState.status === AuthState.Authenticated) {
 			cardAuthUser = (
 				<div>
@@ -107,7 +107,7 @@ export default function TabHome(props: Props) {
 				</div>
 			)
 		}
-
+		*/
 		return cardAuthUser
 	}
 
@@ -148,7 +148,7 @@ export default function TabHome(props: Props) {
 	}
 
 	return (
-		<div className='container-xl my-auto my-md-5'>
+		<section className='container-xl my-auto my-md-5'>
 			<ModalEntry currEntry={null} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
 
 			<div className='jumbotron p-4 p-md-5'>
@@ -226,6 +226,6 @@ export default function TabHome(props: Props) {
 					</div>
 				</div>
 			</div>
-		</div>
+		</section>
 	)
 }

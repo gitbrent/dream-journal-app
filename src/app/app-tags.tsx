@@ -40,7 +40,7 @@ interface IOnlyDream {
 	tags: string[]
 }
 
-export default function TabAdmin(props: IAppTagsProps) {
+export default function TabTags(props: IAppTagsProps) {
 	const TOP = 20 //15
 	// TAB: Tag Timeline
 	const [chartDataTags, setChartDataTags] = useState<IChartData[]>([])

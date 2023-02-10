@@ -25,23 +25,23 @@ const DATA_FILE_HEADER = {
 let gAuthState: IAuthState = { status: AuthState.Unauthenticated, userName: '', userPhoto: '' }
 let gConfFile: IDriveConfFile = null
 let gDataFile: IDriveDataFile = null
-let gAuthCallback: Function = null
-let gConfCallback: Function = null
-let gDataCallback: Function = null
-let gBusyLoadCallback: Function = null
+let gAuthCallback: (data: IAuthState) => IAuthState = null
+let gConfCallback: (data: IDriveConfFile) => IDriveConfFile = null
+let gDataCallback: (data: IDriveDataFile) => IDriveDataFile = null
+let gBusyLoadCallback: (data: boolean) => boolean = null
 
 // PUBLIC METHODS ------------------------------------------------------------
 
-export function authStateCallback(callback: Function) {
+export function authStateCallback(callback: (data: IAuthState) => IAuthState): void {
 	gAuthCallback = callback
 }
-export function confFileCallback(callback: Function) {
+export function confFileCallback(callback: (data: IDriveConfFile) => IDriveConfFile) {
 	gConfCallback = callback
 }
-export function dataFileCallback(callback: Function) {
+export function dataFileCallback(callback: (data: IDriveDataFile) => IDriveDataFile) {
 	gDataCallback = callback
 }
-export function busyLoadCallback(callback: Function) {
+export function busyLoadCallback(callback: (data: boolean) => boolean) {
 	gBusyLoadCallback = callback
 }
 // TODO: export function busySaveCallback(callback: Function) {
@@ -563,7 +563,7 @@ function doSelectConfFile() {
 				.arrayBuffer()
 				.then((buffer) => {
 					const decoded: string = new TextDecoder('utf-8').decode(buffer)
-					let json: Object = {}
+					let json: object = {}
 
 					// A:
 					if (decoded && decoded.length > 0) {
@@ -622,7 +622,7 @@ function doSelectDataFile() {
 				.arrayBuffer()
 				.then((buffer) => {
 					const decoded: string = new TextDecoder('utf-8').decode(buffer)
-					let json: Object = {}
+					let json: object = {}
 					let entries: IJournalEntry[]
 
 					// A:
