@@ -21,7 +21,7 @@ module.exports = {
 		project: ["./tsconfig.json"],
 	},
 	plugins: ["react", "@typescript-eslint"],
-	ignorePatterns: [".eslintrc.js"],
+	ignorePatterns: [".eslintrc.js", "webpack.*"],
 	rules: {
 		"@typescript-eslint/indent": ["error", "tab"],
 		"@typescript-eslint/strict-boolean-expressions": 0,
