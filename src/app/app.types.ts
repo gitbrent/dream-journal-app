@@ -161,3 +161,85 @@ export interface IDreamTagByCat {
 	/** @example ['rude person'] */
 	dreamTagGroups: IDreamSignTagGroup[]
 }
+
+// ==========
+
+export interface IGapiCurrUser {
+	'le': {
+		'wt': {
+			/**
+			 * Full Name
+			 * @example "Git Brent"
+			 */
+			'Ad': string,
+			/**
+			 * First Name
+			 * @example "Git"
+			 */
+			'rV': string,
+			/**
+			 * Last Name
+			 * @example "Brent"
+			 */
+			'uT': string,
+			/**
+			 * Account Picture
+			 * @example "https://lh3.googleusercontent.com/a/ALm5wu3R_tKI4hZd9DbwPh8SShfBYgaNN95WZYZYvfwy=s96-c"
+			 */
+			'hK': string,
+			/**
+			 * Email
+			 * @example "gitbrent@gmail.com"
+			 */
+			'cu': string
+		}
+	},
+}
+
+export interface IGapiFile {
+	/**
+	 * id
+	 * @example "1l5mVFTysjVoZ14_unp5F8F3tLH7Vkbtc"
+	 */
+	id: string
+	/**
+	 * created time (ISO format)
+	 * @example "2022-11-21T14:54:14.453Z"
+	 */
+	createdTime: string
+	/**
+	 * mime type
+	 * @example "application/json"
+	 */
+	mimeType: string
+	/**
+	 * modified time (ISO format)
+	 * @example "2022-11-21T14:54:14.453Z"
+	 */
+	modifiedTime: string
+	/**
+	 * file name
+	 * @example "corp-logo.png"
+	 */
+	name: string
+	/**
+	 * file size (bytes)
+	 * - only populated for files
+	 * @example "3516911"
+	 */
+	size?: string
+	/**
+	 * blob from google drive
+	 * - custom property (not in GAPI API)
+	 * @example "blob:http://localhost:3000/2ba6f9a8-f8cf-4242-af53-b89418441b53"
+	 */
+	imageBlobUrl: string
+	imageW: number
+	imageH: number
+	/**
+	 * FUTURE: show parent folder
+	 * `application/vnd.google-apps.folder`
+	 * @example ["1jjOs28hGj3as3vorJveCI00NY1PmDbTr"]
+	 */
+	// parents: string[]
+}
