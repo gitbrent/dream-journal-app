@@ -35,8 +35,8 @@ import ModalEntry from './modal-entry'
 //import * as GDrive from './google-oauth'
 
 interface Props {
-	authState: IAuthState
-	dataFile: IDriveDataFile
+	authState?: IAuthState
+	dataFile?: IDriveDataFile
 	isBusyLoad: boolean
 }
 
@@ -59,7 +59,7 @@ export default function TabHome(props: Props) {
 	}
 
 	function renderCardAuthUser(): JSX.Element {
-		let cardAuthUser: JSX.Element
+		const cardAuthUser: JSX.Element = <div/>
 		/*
 		if (props.authState && props.authState.status === AuthState.Authenticated) {
 			cardAuthUser = (

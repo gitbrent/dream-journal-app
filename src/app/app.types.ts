@@ -10,7 +10,7 @@
  */
 
 // APP
-export const APP_BLD = '20230211-2100'
+export const APP_BLD = '20230212-2210'
 //export const APP_VER = `1.3.0-WIP ${APP_BLD}`
 export const APP_VER = '1.3.0-WIP'
 export const IS_LOCALHOST = window.location.href.toLowerCase().indexOf('localhost') > -1
@@ -211,6 +211,7 @@ export interface IGapiCurrUser {
 }
 
 export interface IGapiFile {
+	kind: 'drive#file',
 	/**
 	 * id
 	 * @example "1l5mVFTysjVoZ14_unp5F8F3tLH7Vkbtc"

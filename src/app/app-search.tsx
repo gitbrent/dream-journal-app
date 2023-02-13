@@ -17,8 +17,8 @@ export interface IAppSearchState {
 export interface Props {
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
-	doSaveSearchState: (state:IAppSearchState)=>void
-	searchState: IAppSearchState
+	doSaveSearchState?: (state:IAppSearchState)=>void
+	searchState?: IAppSearchState
 }
 
 export default function TabSearch(props: Props) {
