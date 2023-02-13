@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import { IAuthState, IDriveDataFile, IJournalEntry, IDriveConfFile, IGapiFile } from './app.types'
+import { IDriveDataFile, IJournalEntry, IDriveConfFile, IGapiFile, IS_LOCALHOST } from './app.types'
 import TabHome from '../app/app-home'
 import TabBedtime from '../app/app-bedtime'
 import TabExplore from '../app/app-explore'
@@ -41,7 +41,7 @@ export default function AppMain() {
 	const [googleAuth, setGoogleAuth] = useState<gapi.auth2.GoogleAuth>(null)
 	//
 	const [signedInUser, setSignedInUser] = useState('')
-	const [gapiFiles, setGapiFiles] = useState<IGapiFile[]>([])
+	const [gapiDataFile, setGapiDataFile] = useState<IGapiFile>(null)
 	//
 	const [appErrMsg, setAppErrMsg] = useState('')
 	const [dataFile, setDataFile] = useState<IDriveDataFile>(null)
@@ -79,88 +79,125 @@ export default function AppMain() {
 	}
 
 	const updateSigninStatus = async () => {
-		const currentUser = googleAuth.currentUser.get()
-		const isAuthorized = currentUser.hasGrantedScopes(GAPI_SCOPES)
-		const userName = currentUser.getBasicProfile().getName()
-		setSignedInUser(currentUser && isAuthorized ? userName : '(?)')
+		const currentUser = googleAuth?.currentUser.get()
+		const isAuthorized = currentUser?.hasGrantedScopes(GAPI_SCOPES) || false
+		const userName = currentUser?.getBasicProfile().getName() || ''
+		setSignedInUser(isAuthorized ? userName : '(?)')
 	}
 
 	const signInFunction = () => {
-		googleAuth.signIn().then(() => {
+		googleAuth?.signIn().then(() => {
 			updateSigninStatus()
 		})
 	}
 
 	const signOutFunction = () => {
-		googleAuth.signOut().then(() => {
+		googleAuth?.signOut().then(() => {
 			updateSigninStatus()
 		})
 	}
 
 	const listFiles = () => {
-		window.gapi.client.drive.files
+		gapi.client.drive.files
 			.list({ q: 'trashed=false and mimeType = \'application/json\'' })
 			.then((response: { body: string }) => {
-				const res = JSON.parse(response.body)
-				setGapiFiles(res.files)
-				console.log(res.files)
+				const respBody = JSON.parse(response.body)
+				const respFiles: IGapiFile[] = respBody.files
+				if (IS_LOCALHOST) console.log('respFiles', respFiles)
+				const dataFile = respFiles.filter(item => item.name === 'dream-journal.json')[0]
+				if (IS_LOCALHOST) console.log('dataFile', dataFile)
+				setGapiDataFile(dataFile)
 			})
 	}
 
-	/*
+	/**
+	 * `window.gapi.client.drive.files.get` can onyl get metadata, contents requires below
+	 * @see https://developers.google.com/drive/api/v2/reference/files/get#javascript
+	 * @returns
+	 */
 	const downloadDataFile = async () => {
-		const service = window.gapi.drive({ version: 'v3', googleAuth })
-
 		try {
-			const file = await service.files.get({ fileId: fileId })
-			console.log(file.status)
-			return file.status
+			const accessToken = gapi.auth.getToken().access_token
+
+			fetch(`https://www.googleapis.com/drive/v3/files/${gapiDataFile.id}?alt=media`, {
+				method: 'GET',
+				headers: { Authorization: `Bearer ${accessToken}` },
+			})
+				.then((response) => {
+					response
+						.arrayBuffer()
+						.then((buffer) => {
+							const decoded: string = new TextDecoder('utf-8').decode(buffer)
+							let json: object = {}
+							let entries: IJournalEntry[] = []
+
+							// A:
+							if (decoded && decoded.length > 0) {
+								try {
+									// NOTE: Initial dream-journal file is empty!
+									json = JSON.parse(decoded)
+									entries = json['entries']
+								} catch (ex) {
+									alert(ex)
+									console.error ? console.error(ex) : console.log(ex)
+								}
+							}
+
+							// B:
+							console.log(entries ? entries : [])
+						})
+						.catch((error) => {
+							throw new Error(error)
+						})
+				})
+				.catch((error) => {
+					if (error.code === '401') {
+						//doAuthSignIn()
+					} else if (error.code === '503') {
+						//let newState = this.state.dataFile
+						// TODO: new field like `hasError` to hold "Service Unavailable" etc
+					} else {
+						console.error ? console.error(error) : console.log(error)
+					}
+				})
+
+
+			const xhr = new XMLHttpRequest()
+			xhr.open('GET', `https://www.googleapis.com/drive/v3/files/${gapiDataFile.id}?alt=media`)
+			xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken)
+			xhr.onload = () => {
+				console.log(xhr.responseText)
+			}
+			xhr.onerror = (err) => {
+				console.error(err)
+			}
+			xhr.send()
 		} catch (err) {
 			// TODO(developer) - Handle error
 			throw err
 		}
 	}
-	*/
 
 	//
 
 	function renderLogin(): JSX.Element {
 		return (<div className="App">
-			<div>UserName: <strong>{signedInUser}</strong></div>
+			<div className='bg-info text-white p-3 mb-3'>UserName: <strong>{signedInUser}</strong></div>
 			{signedInUser ? (<div>
+				<button type='button' className='btn btn-primary me-2' onClick={listFiles}>List Files</button>
+				<button type='button' className='btn btn-info me-2' disabled={!gapiDataFile?.id} onClick={downloadDataFile}>Download File</button>
 				<button type='button' className='btn btn-secondary' onClick={signOutFunction}>Sign Out</button>
-				<button type='button' className='btn btn-secondary' onClick={listFiles}>List Files</button>
 			</div>) :
 				<button type='button' className='btn btn-primary' onClick={signInFunction}>Sign In</button>
 			}
 		</div>)
-
-		return (<section onClick={signInFunction} className="text-center p-4 bg-black">
-			<div className='row align-items-center justify-content-center'>
-				<div className='col-auto'>
-					<img height="100" width="100" src="/google-drive-icon.svg" alt="google drive logo" />
-				</div>
-				<div className='col-auto'>
-					<h5>Google Drive</h5>
-					{signedInUser
-						? <div>{signedInUser}</div>
-						: <p>(click to login)</p>
-					}
-				</div>
-			</div>
-			{isBusyLoad && <div className='bg-info p-4'>BUSY</div>}
-			<div>gapiFiles = {gapiFiles?.length}</div>
-		</section>)
 	}
 
 	//#region tabs
-	const Home = () => (<TabHome dataFile={dataFile || null} isBusyLoad={isBusyLoad} authState={null} />)
+	const Home = () => (<TabHome dataFile={dataFile} isBusyLoad={isBusyLoad} authState={null} />)
 
 	const Bedtime = () => (
-		<TabBedtime confFile={confFile || null}
-			dataFile={dataFile || null}
-			isBusyLoad={isBusyLoad}
-		/>
+		<TabBedtime confFile={confFile || null} dataFile={dataFile || null} isBusyLoad={isBusyLoad} />
 	)
 	const Explore = () => (
 		<TabExplore confFile={confFile || null} dataFile={dataFile || null} isBusyLoad={isBusyLoad} />
@@ -168,9 +205,7 @@ export default function AppMain() {
 	const Journal = () => (
 		<TabJournal dataFile={dataFile || null} doSaveViewState={null} viewState={null} isBusyLoad={isBusyLoad} />
 	)
-	const Search = () => (
-		<TabSearch dataFile={dataFile || null} isBusyLoad={isBusyLoad} doSaveSearchState={null} searchState={null} />
-	)
+	const Search = () => (<TabSearch dataFile={dataFile || null} isBusyLoad={isBusyLoad} />)
 	const Tags = () => (
 		<TabTags dataFile={dataFile || null} isBusyLoad={isBusyLoad} />
 	)
