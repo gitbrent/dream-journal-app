@@ -3,12 +3,10 @@
  * @see https://developers.google.com/drive/api/guides/search-files#node.js
  * @see https://developers.google.com/drive/api/guides/fields-parameter
  * @see https://developers.google.com/drive/api/v3/reference/files/get
- * @see https://medium.com/@willikay11/how-to-link-your-react-application-with-google-drive-api-v3-list-and-search-files-2e4e036291b7
  */
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import { gapi } from 'gapi-script'
-import { IAuthState, IDriveDataFile, IJournalEntry, IDriveConfFile, IGapiCurrUser, IGapiFile } from './app.types'
+import { IAuthState, IDriveDataFile, IJournalEntry, IDriveConfFile, IGapiFile } from './app.types'
 import TabHome from '../app/app-home'
 import TabBedtime from '../app/app-bedtime'
 import TabExplore from '../app/app-explore'
@@ -19,6 +17,19 @@ import TabSearch from '../app/app-search'
 import TabAdmin from '../app/app-admin'
 import TabImport from '../app/app-import'
 import LogoBase64 from '../img/logo_base64'
+// integrate <script>-loaded googeapi library with typescript
+/// <reference types="../../node_modules/@types/gapi/index.d.ts" />
+/// <reference types="../../node_modules/@types/gapi.auth2/index.d.ts" />
+/// <reference types="../../node_modules/@types/gapi.drive/index.d.ts" />
+declare global {
+	interface Window {
+		gapi: {
+			client: () => void,
+			load: () => void,
+		};
+	}
+}
+// integrate <script> ^^^
 
 export default function AppMain() {
 	const GAPI_CLIENT_ID = process.env.REACT_APP_GOOGLE_DRIVE_CLIENT_ID
@@ -26,108 +37,124 @@ export default function AppMain() {
 	const GAPI_DISC_DOCS = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
 	const GAPI_SCOPES = 'https://www.googleapis.com/auth/drive.file'
 	//
+	//const [gapiClient, setGapiClient] = useState<gapi.client.init>(undefined)
+	const [googleAuth, setGoogleAuth] = useState<gapi.auth2.GoogleAuth>(null)
+	//
 	const [signedInUser, setSignedInUser] = useState('')
 	const [gapiFiles, setGapiFiles] = useState<IGapiFile[]>([])
 	//
 	const [appErrMsg, setAppErrMsg] = useState('')
-	const [auth, setAuth] = useState<IAuthState>(null)
 	const [dataFile, setDataFile] = useState<IDriveDataFile>(null)
 	const [confFile, setConfFile] = useState<IDriveConfFile>(null)
 	const [isBusyLoad, setIsBusyLoad] = useState(false)
 	const [editEntry, setEditEntry] = useState<IJournalEntry>(null)
 
-	/**
-	 * Sign in the user upon button click.
-	 */
-	const handleAuthClick = () => {
-		gapi.auth2.getAuthInstance().signIn()
-	}
+	/** load gapi script on startup */
+	useEffect(() => {
+		const script = document.createElement('script')
+		script.src = 'https://apis.google.com/js/api.js'
+		script.onload = () => window.gapi.load('client:auth2', initClient)
+		document.body.appendChild(script)
+	}, [])
 
-	/**
-	 * Called when the signed in status changes, to update the UI appropriately. After a sign-in, the API is called.
-	 */
-	const updateSigninStatus = (isSignedIn: boolean) => {
-		if (isSignedIn) {
-			const currentUser: IGapiCurrUser = gapi.auth2.getAuthInstance().currentUser
+	useEffect(() => {
+		if (googleAuth) updateSigninStatus()
+	}, [googleAuth])
 
-			// Set the signed in user
-			setSignedInUser(currentUser?.le?.wt?.Ad)
-			setIsBusyLoad(false)
-
-			// list files if user is authenticated
-			listFiles()
-			//fetchFolders() // WIP:
-		} else {
-			// prompt user to sign in
-			handleAuthClick()
+	const initClient = () => {
+		try {
+			window.gapi.client.init({
+				apiKey: GAPI_API_KEY,
+				clientId: GAPI_CLIENT_ID,
+				scope: GAPI_SCOPES,
+				discoveryDocs: GAPI_DISC_DOCS
+			}).then(() => {
+				const auth2 = window.gapi.auth2.getAuthInstance()
+				auth2.isSignedIn.listen(updateSigninStatus)
+				setGoogleAuth(auth2)
+			})
+		} catch (e) {
+			console.error(e)
 		}
 	}
 
-	/**
-	 * Print files
-	 */
-	const listFiles = (searchTerm = null) => {
-		console.log('TODO: `searchTerm`', searchTerm)
+	const updateSigninStatus = async () => {
+		const currentUser = googleAuth.currentUser.get()
+		const isAuthorized = currentUser.hasGrantedScopes(GAPI_SCOPES)
+		const userName = currentUser.getBasicProfile().getName()
+		setSignedInUser(currentUser && isAuthorized ? userName : '(?)')
+	}
 
-		gapi.client.drive.files
-			.list({
-				pageSize: 1000,
-				fields: 'nextPageToken, files(id, name, createdTime, mimeType, modifiedTime, size)',
-				// TODO: works! but we need to add filter/scaling for videos q: `mimeType = 'image/png' or mimeType = 'image/jpeg' or mimeType = 'image/gif' or mimeType = 'video/mp4'`,
-				q: 'trashed=false and (mimeType = \'image/png\' or mimeType = \'image/jpeg\' or mimeType = \'image/gif\')',
-			})
-			.then(function(response: any) {
+	const signInFunction = () => {
+		googleAuth.signIn().then(() => {
+			updateSigninStatus()
+		})
+	}
+
+	const signOutFunction = () => {
+		googleAuth.signOut().then(() => {
+			updateSigninStatus()
+		})
+	}
+
+	const listFiles = () => {
+		window.gapi.client.drive.files
+			.list({ q: 'trashed=false and mimeType = \'application/json\'' })
+			.then((response: { body: string }) => {
 				const res = JSON.parse(response.body)
 				setGapiFiles(res.files)
+				console.log(res.files)
 			})
 	}
 
-	/**
- *  Initializes the API client library and sets up sign-in state listeners.
- */
-	const initClient = () => {
-		setIsBusyLoad(true)
-		gapi.client
-			.init({
-				apiKey: GAPI_API_KEY,
-				clientId: GAPI_CLIENT_ID,
-				discoveryDocs: GAPI_DISC_DOCS,
-				scope: GAPI_SCOPES,
-			})
-			.then(
-				() => {
-					// Listen for sign-in state changes.
-					gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus)
+	/*
+	const downloadDataFile = async () => {
+		const service = window.gapi.drive({ version: 'v3', googleAuth })
 
-					// Handle the initial sign-in state.
-					updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get())
-
-					setIsBusyLoad(false)
-				},
-				(error: any) => {
-					console.error(error)
-					setIsBusyLoad(false)
-				}
-			)
+		try {
+			const file = await service.files.get({ fileId: fileId })
+			console.log(file.status)
+			return file.status
+		} catch (err) {
+			// TODO(developer) - Handle error
+			throw err
+		}
 	}
+	*/
 
-	const handleClientLoad = () => {
-		gapi.load('client:auth2', initClient)
-	}
+	//
 
 	function renderLogin(): JSX.Element {
-		return (<section onClick={handleClientLoad} className="text-center p-4 bg-dark">
-			<div className='p-4'>
-				<img height="150" width="150" src="/google-drive.png" alt="GoogleDriveImage" />
+		return (<div className="App">
+			<div>UserName: <strong>{signedInUser}</strong></div>
+			{signedInUser ? (<div>
+				<button type='button' className='btn btn-secondary' onClick={signOutFunction}>Sign Out</button>
+				<button type='button' className='btn btn-secondary' onClick={listFiles}>List Files</button>
+			</div>) :
+				<button type='button' className='btn btn-primary' onClick={signInFunction}>Sign In</button>
+			}
+		</div>)
+
+		return (<section onClick={signInFunction} className="text-center p-4 bg-black">
+			<div className='row align-items-center justify-content-center'>
+				<div className='col-auto'>
+					<img height="100" width="100" src="/google-drive-icon.svg" alt="google drive logo" />
+				</div>
+				<div className='col-auto'>
+					<h5>Google Drive</h5>
+					{signedInUser
+						? <div>{signedInUser}</div>
+						: <p>(click to login)</p>
+					}
+				</div>
 			</div>
-			<h5>Google Drive</h5>
-			<p>view media directly from your google drive</p>
+			{isBusyLoad && <div className='bg-info p-4'>BUSY</div>}
+			<div>gapiFiles = {gapiFiles?.length}</div>
 		</section>)
 	}
 
-
 	//#region tabs
-	const Home = () => (<TabHome dataFile={dataFile || null} isBusyLoad={isBusyLoad} authState={auth} />)
+	const Home = () => (<TabHome dataFile={dataFile || null} isBusyLoad={isBusyLoad} authState={null} />)
 
 	const Bedtime = () => (
 		<TabBedtime confFile={confFile || null}
