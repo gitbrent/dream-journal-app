@@ -2,6 +2,7 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 
+// `process.env` depends upon this setup
 const webpack = require('webpack');
 const dotenv = require('dotenv');
 const env = dotenv.config().parsed;
@@ -117,5 +118,5 @@ module.exports = {
 		static: path.join(__dirname, "public"),
 		compress: true,
 		port: 8080,
-	},
+	}
 };

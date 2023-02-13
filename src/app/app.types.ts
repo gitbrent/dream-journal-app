@@ -1,7 +1,21 @@
+/**
+ * @see https://medium.com/@willikay11/how-to-link-your-react-application-with-google-drive-api-v3-list-and-search-files-2e4e036291b7
+ * `googleapis` is a node.js app and has deps on fs, etc.
+ * @see https://github.com/googleapis/google-auth-library-nodejs/issues/150#issuecomment-488780989
+ * @see https://github.com/googleapis/google-api-nodejs-client/issues/2211
+ * @see https://googleapis.dev/nodejs/googleapis/latest/oauth2/classes/Oauth2.html
+ * @see https://developers.google.com/drive/api/quickstart/nodejs
+ * FUCK ABOVE
+ * @see https://dev.to/arnabsen1729/using-google-drive-api-v3-to-upload-a-file-to-drive-using-react-4loi // WIP:
+ */
+
 // APP
-export const APP_BLD = '20230205-1400'
+export const APP_BLD = '20230211-2100'
 //export const APP_VER = `1.3.0-WIP ${APP_BLD}`
 export const APP_VER = '1.3.0-WIP'
+export const IS_LOCALHOST = window.location.href.toLowerCase().indexOf('localhost') > -1
+
+// ============================================================================
 
 // ENUMS
 export enum AuthState {
@@ -228,18 +242,8 @@ export interface IGapiFile {
 	 * @example "3516911"
 	 */
 	size?: string
-	/**
-	 * blob from google drive
-	 * - custom property (not in GAPI API)
-	 * @example "blob:http://localhost:3000/2ba6f9a8-f8cf-4242-af53-b89418441b53"
-	 */
-	imageBlobUrl: string
-	imageW: number
-	imageH: number
-	/**
-	 * FUTURE: show parent folder
-	 * `application/vnd.google-apps.folder`
-	 * @example ["1jjOs28hGj3as3vorJveCI00NY1PmDbTr"]
-	 */
-	// parents: string[]
+}
+
+export interface IGapiFileListResp {
+	files: IGapiFile[]
 }
