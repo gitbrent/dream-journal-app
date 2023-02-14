@@ -41,9 +41,9 @@ export default function AppMain() {
 		return (<div className="App">
 			<div className='bg-info text-white p-3 mb-3'>UserName: <strong>{googleapi?.currentUsername}</strong></div>
 			{googleapi?.currentUsername ? (<div>
-				<button type='button' className='btn btn-secondary' onClick={googleapi?.signOut}>Sign Out</button>
+				<button type='button' className='btn btn-secondary' >Sign Out</button>
 			</div>) :
-				<button type='button' className='btn btn-primary' onClick={googleapi?.signIn}>Sign In</button>
+				<button type='button' className='btn btn-primary' >Sign In</button>
 			}
 		</div>)
 	}

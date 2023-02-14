@@ -1,10 +1,11 @@
 /**
  * NOTE: `this.GAPI_API_KEY` will always be empty unless we use the "private initGapiClient = (): void => {}" style!
  */
-
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference types="google-one-tap" />
-
+import { CredentialResponse } from 'google-one-tap'
 import { IDriveDataFile, IGapiFile, IJournalEntry, IS_LOCALHOST } from './app.types'
+import { decodeJwt } from 'jose'
 
 declare global {
 	interface Window {
@@ -30,21 +31,24 @@ export class googlegsi {
 
 	constructor(callbackFunc: (() => void)) {
 		this.clientCallback = callbackFunc
-		this.loadGapiScript()
+		this.loadGsiScript()
 	}
 
-	/** Step 1: load <script> */
-	private loadGapiScript = (): void => {
+	/** STEP 1: load <script> */
+	private loadGsiScript = (): void => {
 		const script = document.createElement('script')
 		script.src = 'https://accounts.google.com/gsi/client'
 		script.async = true
 		script.defer = true
-		script.onload = this.initGapiClient
+		script.onload = this.initGsiClient
 		document.body.appendChild(script)
 	}
 
-	/** Step 2: init <script> */
-	private initGapiClient = (): void => {
+	/**
+	 * STEP 2: init <script>
+	 * @see https://developers.google.com/identity/gsi/web/guides/use-one-tap-js-api
+	 */
+	private initGsiClient = (): void => {
 		window.google.accounts.id.initialize({
 			client_id: this.GAPI_CLIENT_ID,
 			callback: this.updateSigninStatus,
@@ -56,9 +60,45 @@ export class googlegsi {
 	}
 
 	/** Step 3: check current user's auth state */
-	private async updateSigninStatus() {
+	private updateSigninStatus = async (response: CredentialResponse) => {
 		console.log('updateSigninStatus!!')
 		// TODO: now what???
+		console.log(response)
+		console.log(response.credential)
+
+		// `credential`: This field is the ID token as a base64-encoded JSON Web Token (JWT) string."
+		// https://developers.google.com/identity/gsi/web/reference/js-reference#credential
+
+		const responsePayload = decodeJwt(response.credential)
+		console.log('ID: ' + responsePayload.sub)
+		console.log('Full Name: ' + responsePayload.name)
+		console.log('Given Name: ' + responsePayload.given_name)
+		console.log('Family Name: ' + responsePayload.family_name)
+		console.log('Image URL: ' + responsePayload.picture)
+		console.log('Email: ' + responsePayload.email)
+
+		return
+
+		/*
+		{
+			"iss": "https://accounts.google.com",
+			"nbf": 1676348859,
+			"aud": "300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com",
+			"sub": "101280436360833726869",
+			"email": "gitbrent@gmail.com",
+			"email_verified": true,
+			"azp": "300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com",
+			"name": "Git Brent",
+			"picture": "https://lh3.googleusercontent.com/a/AEdFTp4Tw1g8xUq1u8crhAHVBR87CSJNzBTFVN593txN=s96-c",
+			"given_name": "Git",
+			"family_name": "Brent",
+			"iat": 1676349159,
+			"exp": 1676352759,
+			"jti": "b9d7558a6fda4870c20d68ac47e5f5e3eebf51f9"
+		}
+	*/
+
+		// OLD BELOW!!!!
 
 		const currentUser = this.googleAuth.currentUser.get()
 		const isAuthorized = currentUser?.hasGrantedScopes(this.GAPI_SCOPES) || false
@@ -158,7 +198,7 @@ export class googlegsi {
 	}
 
 	//#region public methods
-
+	/*
 	public signIn(): void {
 		this.googleAuth.signIn().then(() => {
 			this.updateSigninStatus()
@@ -170,6 +210,7 @@ export class googlegsi {
 			this.updateSigninStatus()
 		})
 	}
+	*/
 
 	//#endregion
 

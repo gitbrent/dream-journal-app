@@ -2,11 +2,12 @@
  * As of 2023, Google now uses GSI
  * @see https://developers.google.com/identity/oauth2/web/guides/overview
  * @see https://github.com/BurakGur/google-one-tap/blob/master/index.js
- * @see https://dev.to/arnabsen1729/using-google-drive-api-v3-to-upload-a-file-to-drive-using-react-4loi // WIP:
+ * @see https://jwt.io/#debugger
+ * @note Add both http://localhost and http://localhost:<port_number> to the Authorized JavaScript origins box for local tests or development. [google console]
  */
 
 // APP
-export const APP_BLD = '20230212-2210'
+export const APP_BLD = '20230213-2240'
 //export const APP_VER = `1.3.0-WIP ${APP_BLD}`
 export const APP_VER = '1.3.0-WIP'
 export const IS_LOCALHOST = window.location.href.toLowerCase().indexOf('localhost') > -1
