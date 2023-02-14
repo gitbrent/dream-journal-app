@@ -15,9 +15,7 @@ module.exports = {
 	entry: "./src/app/app.tsx",
 	plugins: [
 		new CleanWebpackPlugin(),
-		new HtmlWebpackPlugin({
-			template: "src/templates/index.html",
-		}),
+		new HtmlWebpackPlugin({ template: "src/templates/index.html" }),
 		new webpack.DefinePlugin(envKeys),
 	],
 	output: {
