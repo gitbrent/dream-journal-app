@@ -1,11 +1,7 @@
 /**
- * @see https://medium.com/@willikay11/how-to-link-your-react-application-with-google-drive-api-v3-list-and-search-files-2e4e036291b7
- * `googleapis` is a node.js app and has deps on fs, etc.
- * @see https://github.com/googleapis/google-auth-library-nodejs/issues/150#issuecomment-488780989
- * @see https://github.com/googleapis/google-api-nodejs-client/issues/2211
- * @see https://googleapis.dev/nodejs/googleapis/latest/oauth2/classes/Oauth2.html
- * @see https://developers.google.com/drive/api/quickstart/nodejs
- * FUCK ABOVE
+ * As of 2023, Google now uses GSI
+ * @see https://developers.google.com/identity/oauth2/web/guides/overview
+ * @see https://github.com/BurakGur/google-one-tap/blob/master/index.js
  * @see https://dev.to/arnabsen1729/using-google-drive-api-v3-to-upload-a-file-to-drive-using-react-4loi // WIP:
  */
 
