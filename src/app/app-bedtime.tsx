@@ -60,9 +60,9 @@ import * as GDrive from './google-oauth'
 //import LocalAdminBrent from './z.admin.local'
 
 export interface Props {
-	confFile: IDriveConfFile
-	dataFile: IDriveDataFile
-	isBusyLoad: boolean
+	confFile?: IDriveConfFile
+	dataFile?: IDriveDataFile
+	isBusyLoad?: boolean
 }
 
 export default function TabBedtime(props: Props) {
