@@ -1,5 +1,6 @@
 /**
- * As of 2023, Google now uses GSI
+ * As of early 2023, Google now uses Google Identity Services (GSI)
+ * @see https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow
  * @see https://developers.google.com/identity/oauth2/web/guides/overview
  * @see https://github.com/BurakGur/google-one-tap/blob/master/index.js
  * @see https://jwt.io/#debugger
@@ -171,77 +172,4 @@ export interface IDreamTagByCat {
 	/** @example ['action', 'action:crime', 'action:military'] */
 	/** @example ['rude person'] */
 	dreamTagGroups: IDreamSignTagGroup[]
-}
-
-// ==========
-
-export interface IGapiCurrUser {
-	'le': {
-		'wt': {
-			/**
-			 * Full Name
-			 * @example "Git Brent"
-			 */
-			'Ad': string,
-			/**
-			 * First Name
-			 * @example "Git"
-			 */
-			'rV': string,
-			/**
-			 * Last Name
-			 * @example "Brent"
-			 */
-			'uT': string,
-			/**
-			 * Account Picture
-			 * @example "https://lh3.googleusercontent.com/a/ALm5wu3R_tKI4hZd9DbwPh8SShfBYgaNN95WZYZYvfwy=s96-c"
-			 */
-			'hK': string,
-			/**
-			 * Email
-			 * @example "gitbrent@gmail.com"
-			 */
-			'cu': string
-		}
-	},
-}
-
-export interface IGapiFile {
-	kind: 'drive#file',
-	/**
-	 * id
-	 * @example "1l5mVFTysjVoZ14_unp5F8F3tLH7Vkbtc"
-	 */
-	id: string
-	/**
-	 * created time (ISO format)
-	 * @example "2022-11-21T14:54:14.453Z"
-	 */
-	createdTime: string
-	/**
-	 * mime type
-	 * @example "application/json"
-	 */
-	mimeType: string
-	/**
-	 * modified time (ISO format)
-	 * @example "2022-11-21T14:54:14.453Z"
-	 */
-	modifiedTime: string
-	/**
-	 * file name
-	 * @example "corp-logo.png"
-	 */
-	name: string
-	/**
-	 * file size (bytes)
-	 * - only populated for files
-	 * @example "3516911"
-	 */
-	size?: string
-}
-
-export interface IGapiFileListResp {
-	files: IGapiFile[]
 }
