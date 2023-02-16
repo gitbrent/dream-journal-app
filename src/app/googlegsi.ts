@@ -16,7 +16,7 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference types="google-one-tap" />
 /// <reference types="gapi" />
-import { AuthState, IAuthState, IDriveDataFile, IJournalEntry, IS_LOCALHOST } from './app.types'
+import { AuthState, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry, IS_LOCALHOST } from './app.types'
 import { CredentialResponse } from 'google-one-tap'
 import { TokenResponse, IGapiFile, TokenClientConfig } from './googlegsi.types'
 import { decodeJwt } from 'jose'
@@ -43,15 +43,29 @@ export class googlegsi {
 	private readonly GAPI_SCOPES = 'https://www.googleapis.com/auth/drive.file'
 	private clientCallback: () => void
 	private signedInUser = '(none)'
-	private gapiDataFile: IGapiFile
-	private driveDataFile: IDriveDataFile
 	private isAuthorized = false
+	private gapiDataFile: IGapiFile
+	private gapiConfFile: IGapiFile
+	private driveConfFile: IDriveConfFile
+	private driveDataFile: IDriveDataFile
 	private tokenResponse: TokenResponse
 
 	constructor(callbackFunc: (() => void)) {
 		this.clientCallback = callbackFunc
 		this.loadGapiScript()
 		this.loadGsiScript()
+
+		this.driveConfFile = {
+			_isLoading: false,
+			_isSaving: false,
+			id: '',
+			dreamIdeas: [],
+			mildAffirs: [],
+			tagTypeAW: [],
+			tagTypeCO: [],
+			tagTypeFO: [],
+			tagTypeAC: [],
+		}
 	}
 
 	//#region GAPI
@@ -193,15 +207,52 @@ export class googlegsi {
 		const respBody = JSON.parse(response.body)
 		const respFiles: IGapiFile[] = respBody.items
 		if (IS_LOCALHOST) console.log('respFiles', respFiles)
+
+		const confFile = respFiles.filter(item => item.title === 'dream-journal-conf.json')[0]
+		this.gapiConfFile = confFile
+		if (IS_LOCALHOST) console.log('this.gapiConfFile', this.gapiConfFile)
+
 		const dataFile = respFiles.filter(item => item.title === 'dream-journal.json')[0]
-		if (IS_LOCALHOST) console.log('dataFile', dataFile)
 		this.gapiDataFile = dataFile
-		if (this.gapiDataFile) this.downloadDataFile()
-		else this.clientCallback()
+		if (IS_LOCALHOST) console.log('this.gapiDataFile', this.gapiDataFile)
+
+		if (this.gapiConfFile) await this.downloadConfFile()
+		if (this.gapiDataFile) await this.downloadDataFile()
+		this.clientCallback()
+	}
+
+	private downloadConfFile = async () => {
+		const response = await fetch(`https://www.googleapis.com/drive/v3/files/${this.gapiConfFile.id}?alt=media`, {
+			method: 'GET',
+			headers: { Authorization: `Bearer ${this.tokenResponse.access_token}` },
+		})
+		const buffer = await response.arrayBuffer()
+		const decoded: string = new TextDecoder('utf-8').decode(buffer)
+		let json: object = {}
+
+		// A:
+		if (decoded?.length > 0) {
+			try {
+				// NOTE: Initial dream-journal file is empty!
+				json = JSON.parse(decoded)
+			} catch (ex) {
+				alert(ex)
+				console.error ? console.error(ex) : console.log(ex)
+			}
+		}
+
+		// B:
+		this.driveConfFile.dreamIdeas = json['dreamIdeas'] || []
+		this.driveConfFile.lucidGoals = json['lucidGoals'] || []
+		this.driveConfFile.mildAffirs = json['mildAffirs'] || []
+		this.driveConfFile.tagTypeAW = json['tagTypeAW'] || []
+		this.driveConfFile.tagTypeCO = json['tagTypeCO'] || []
+		this.driveConfFile.tagTypeFO = json['tagTypeFO'] || []
+		this.driveConfFile.tagTypeAC = json['tagTypeAC'] || []
 	}
 
 	/**
-	 * `gapi.client.drive.files.get` can only get metadata, contents requires below
+	 * `gapi.client.drive.files.get` can only get metadata, retrieving contents requires this
 	 * @see https://developers.google.com/drive/api/v2/reference/files/get#javascript
 	 * @returns
 	 */
@@ -239,7 +290,7 @@ export class googlegsi {
 		}
 
 		// C:
-		this.clientCallback()
+		return
 	}
 
 	// TODO: upload https://developers.google.com/drive/api/guides/manage-uploads#node.js
@@ -248,6 +299,10 @@ export class googlegsi {
 	}
 
 	//#region getters
+	get confFile(): IDriveConfFile {
+		return this.driveConfFile
+	}
+
 	get dataFile(): IDriveDataFile {
 		return this.driveDataFile
 	}
