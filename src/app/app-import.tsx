@@ -39,8 +39,8 @@ const VERBOSE = false
 
 export interface IAppTabProps {
 	dataFile: IDriveDataFile
-	doSaveImportState: (state: IAppTabState) => void
-	importState: object
+	//doSaveImportState: (state: IAppTabState) => void
+	//importState: object
 }
 interface IAppTabState {
 	_defaultBedTime: string

@@ -39,19 +39,6 @@ import HeaderMetrics from './components/header-metrics'
 interface Props {
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
-	doSaveAdminState: (state: IAppAdminState) => void
-	adminState: IAppAdminState
-}
-export interface IAppAdminState {
-	searchDone: boolean
-	/*
-	searchMatches: ISearchMatch[]
-	searchOptMatchType: SearchMatchTypes
-	searchOptScope: SearchScopes
-	searchTerm: string
-	searchTermInvalidMsg: string
-	showAlert: boolean
-	*/
 }
 
 enum FilterSortOrder {
