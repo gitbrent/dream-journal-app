@@ -1,14 +1,20 @@
 /**
  * As of early 2023, Google now uses Google Identity Services (GSI)
- * @see https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow
+ * @see https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow // (!!!)
  * @see https://developers.google.com/identity/oauth2/web/guides/overview
+ * @see https://stackoverflow.com/a/71394671/12519131
+ * @see https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#gis-and-gapi
+ * @see https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#the_new_way // HERE IS GOOGLE USING BOTH GIS AND GAPI
  * @see https://github.com/BurakGur/google-one-tap/blob/master/index.js
  * @see https://jwt.io/#debugger
  * @note Add both http://localhost and http://localhost:<port_number> to the Authorized JavaScript origins box for local tests or development. [google console]
  */
 
+// TODO: rotate client secrets
+// @see https://support.google.com/cloud/answer/6158849?hl=en#zippy=%2Cstep-create-a-new-client-secret
+
 // APP
-export const APP_BLD = '20230213-2240'
+export const APP_BLD = '20230215-2040'
 //export const APP_VER = `1.3.0-WIP ${APP_BLD}`
 export const APP_VER = '1.3.0-WIP'
 export const IS_LOCALHOST = window.location.href.toLowerCase().indexOf('localhost') > -1

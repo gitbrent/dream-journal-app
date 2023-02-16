@@ -29,7 +29,8 @@ export default function AppMain() {
 
 	/** load gapi script on startup */
 	useEffect(() => {
-		googleapi = new googlegsi(gapiCallback)
+		if (!googleapi) googleapi = new googlegsi(gapiCallback)
+		else gapiCallback()
 	}, [])
 
 	function gapiCallback(): void {

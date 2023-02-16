@@ -4,10 +4,13 @@
  * - gsi = provides google-one-tap login/auth
  * - gapi = provides ability to perfrom CRUD operations against Drive
  *
- * Source: [Google documentation](https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow#redirecting),
+ * @see https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow#redirecting
  * "While gapi.client is still the recommended choice to access Google APIs, the newer Google Identity Services library should be used for authentication and authorization instead."
  *
+ * Design: "Using the token model"
+ * @see https://developers.google.com/identity/oauth2/web/guides/use-token-model
  * ========================================================
+ *
  * NOTE: `this.GAPI_API_KEY` will always be empty unless we use the "private initGapiClient = (): void => {}" style!
  */
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
@@ -38,14 +41,12 @@ export class googlegsi {
 	private readonly GAPI_API_KEY = process.env.REACT_APP_GOOGLE_DRIVE_API_KEY || ''
 	private readonly GAPI_DISC_DOCS = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
 	private readonly GAPI_SCOPES = 'https://www.googleapis.com/auth/drive.file'
-	//
+	private clientCallback: () => void
 	private signedInUser = '(none)'
 	private gapiDataFile: IGapiFile
 	private driveDataFile: IDriveDataFile
-	private isGapiLoaded = false
+	private isAuthorized = false
 	private tokenResponse: TokenResponse
-	//
-	private clientCallback: () => void
 
 	constructor(callbackFunc: (() => void)) {
 		this.clientCallback = callbackFunc
@@ -53,48 +54,29 @@ export class googlegsi {
 		this.loadGsiScript()
 	}
 
-	// TODO: WIP: https://stackoverflow.com/a/71394671/12519131
-	// https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#gis-and-gapi
-	// WIP: FINALLY!!! HERE IS GOOGLE USING BOTH GIS AND GAPI:
-	// https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#the_new_way
-	// BUT: this is easier duh
-	// @see https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#the_new_way_2
-	//
-	// "Complete example" from google:
-	// @see https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow#example
-
 	//#region GAPI
-
+	/**
+	 * Load gapi script and load gapi drive client
+	 */
 	private loadGapiScript = (): void => {
 		const script = document.createElement('script')
 		script.src = 'https://apis.google.com/js/api.js'
-		script.onload = () => gapi.load('client', () => gapi.client.load('drive', 'v2', () => { this.isGapiLoaded = true }))
+		script.onload = () => gapi.load('client', () => gapi.client.load('drive', 'v2'))
 		document.body.appendChild(script)
 	}
 
-	private initGapiClient = () => {
-		gapi.client.init({
+	private initGapiClient = async () => {
+		await gapi.client.init({
 			apiKey: this.GAPI_API_KEY,
 			clientId: this.GAPI_CLIENT_ID,
 			scope: this.GAPI_SCOPES,
 			discoveryDocs: this.GAPI_DISC_DOCS
-		}).then(() => {
-			const auth2 = gapi.auth2.getAuthInstance()
-			auth2.isSignedIn.listen(this.updateSigninStatus)
 		})
+		this.updateSigninStatus()
 	}
-
-	private updateSigninStatus = async () => {
-		// [docs say use hasGrAllSc](https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#token_and_consent_response)
-		const isAuthorized = window.google.accounts.oauth2.hasGrantedAllScopes(this.tokenResponse, this.GAPI_SCOPES) || false
-		console.log('isAuthorized', isAuthorized)
-		// Assuming this is the second part of our user flow (that being GIS is loaded and init), we're clear to read/write from Drive
-		if (isAuthorized && this.tokenResponse?.access_token) this.listFiles()
-		else console.log('FUCK!!')
-	}
-
 	//#endregion
 
+	//#region GSI
 	/** STEP 1: load <script> */
 	private loadGsiScript = (): void => {
 		const script = document.createElement('script')
@@ -110,40 +92,6 @@ export class googlegsi {
 	 * @see https://developers.google.com/identity/gsi/web/guides/use-one-tap-js-api
 	 */
 	private initGsiClient = (): void => {
-		const client = window.google.accounts.oauth2.initTokenClient({
-			client_id: this.GAPI_CLIENT_ID,
-			scope: this.GAPI_SCOPES,
-			callback: (tokenResponse: TokenResponse) => {
-				this.tokenResponse = tokenResponse
-				console.log('this.tokenResponse', this.tokenResponse)
-				this.updateSigninStatus()
-				/*
-					// DEMO: works! but has insuffiecne tscopes
-					const xhr = new XMLHttpRequest()
-					xhr.open('GET', 'https://www.googleapis.com/calendar/v3/calendars/primary/events')
-					xhr.setRequestHeader('Authorization', 'Bearer ' + access_token)
-					xhr.onreadystatechange = () => {
-						if (xhr.readyState == 4 && xhr.status == 200) {
-							console.log(xhr.responseText)
-						}
-					}
-					xhr.send()
-				*/
-			},
-		})
-		client.requestAccessToken()
-
-		// AFTER ABOVE succeed - we can do this in another method and thats it?!
-		/*
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET', 'https://www.googleapis.com/calendar/v3/calendars/primary/events');
-		xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
-		xhr.send();
-		*/
-
-		// GIS BELOW - but without `scope` so ???
-		// WIP: got it - google dev docs say its moved to token req instead, this is fine
-		/*
 		window.google.accounts.id.initialize({
 			client_id: this.GAPI_CLIENT_ID,
 			callback: this.initGsiCallback,
@@ -152,7 +100,6 @@ export class googlegsi {
 			context: 'signin',
 		})
 		window.google.accounts.id.prompt()
-		*/
 	}
 
 	/**
@@ -164,39 +111,44 @@ export class googlegsi {
 		 * @see https://developers.google.com/identity/gsi/web/reference/js-reference#credential
 		 */
 		const responsePayload = decodeJwt(response.credential)
-		console.log('ID: ' + responsePayload.sub)
-		console.log('Full Name: ' + responsePayload.name)
-		console.log('Given Name: ' + responsePayload.given_name)
-		console.log('Family Name: ' + responsePayload.family_name)
-		console.log('Image URL: ' + responsePayload.picture)
-		console.log('Email: ' + responsePayload.email)
+		if (IS_LOCALHOST) {
+			console.log('ID: ' + responsePayload.sub)
+			console.log('Full Name: ' + responsePayload.name)
+			console.log('Given Name: ' + responsePayload.given_name)
+			console.log('Family Name: ' + responsePayload.family_name)
+			console.log('Image URL: ' + responsePayload.picture)
+			console.log('Email: ' + responsePayload.email)
 
-		// TODO: create interface
-		/*
-		{
-			"iss": "https://accounts.google.com",
-			"nbf": 1676348859,
-			"aud": "300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com",
-			"sub": "101280436360833726869",
-			"email": "gitbrent@gmail.com",
-			"email_verified": true,
-			"azp": "300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com",
-			"name": "Git Brent",
-			"picture": "https://lh3.googleusercontent.com/a/AEdFTp4Tw1g8xUq1u8crhAHVBR87CSJNzBTFVN593txN=s96-c",
-			"given_name": "Git",
-			"family_name": "Brent",
-			"iat": 1676349159,
-			"exp": 1676352759,
-			"jti": "b9d7558a6fda4870c20d68ac47e5f5e3eebf51f9"
+			// TODO: create interface
+			/*
+			{
+				"iss": "https://accounts.google.com",
+				"nbf": 1676348859,
+				"aud": "300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com",
+				"sub": "101280436360833726869",
+				"email": "gitbrent@gmail.com",
+				"email_verified": true,
+				"azp": "300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com",
+				"name": "Git Brent",
+				"picture": "https://lh3.googleusercontent.com/a/AEdFTp4Tw1g8xUq1u8crhAHVBR87CSJNzBTFVN593txN=s96-c",
+				"given_name": "Git",
+				"family_name": "Brent",
+				"iat": 1676349159,
+				"exp": 1676352759,
+				"jti": "b9d7558a6fda4870c20d68ac47e5f5e3eebf51f9"
+			}
+			*/
 		}
-		*/
 
+		// A: set signedf in user
 		this.signedInUser = responsePayload?.name?.toString() || ''
-		if (this.signedInUser && this.isGapiLoaded) this.initGapiClient() /// this.tokenFlow()
-		else console.warn('FUCK!!!', this.isGapiLoaded)
+
+		// B: now that gsi is init and user is signed-in, get access token
+		this.tokenFlow()
 	}
 
-	/** STEP 4:
+	/**
+	 * STEP 4: request access token
 	 * @see https://developers.google.com/identity/oauth2/web/guides/use-token-model#working_with_tokens
 	 * @see https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#token_request
 	 */
@@ -204,28 +156,48 @@ export class googlegsi {
 		const client = window.google.accounts.oauth2.initTokenClient({
 			client_id: this.GAPI_CLIENT_ID,
 			scope: this.GAPI_SCOPES,
-			callback: (response) => {
-				console.log(response)
-				//this.initGapiClient()
+			callback: (tokenResponse: TokenResponse) => {
+				// A: capture token
+				this.tokenResponse = tokenResponse
+				if (IS_LOCALHOST) console.log('this.tokenResponse', this.tokenResponse)
+
+				// B: now that gsi is init and user is signed-in, setup gapi so we can use Drive API's with the token from prev step
+				this.initGapiClient()
 			},
 		})
 		client.requestAccessToken()
 	}
+	//#endregion
 
-	/** Step 4: query all app files */
+	/**
+	 * Sets if user is authorized. Called after both scripts are init.
+	 * @see https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#token_and_consent_response
+	 */
+	private updateSigninStatus = async () => {
+		// A: set auth status
+		this.isAuthorized = window.google.accounts.oauth2.hasGrantedAllScopes(this.tokenResponse, this.GAPI_SCOPES) || false
+		if (IS_LOCALHOST) console.log('this.isAuthorized', this.isAuthorized)
+
+		if (this.isAuthorized) {
+			this.listFiles()
+		}
+		else {
+			// B: callback to notify signin complete
+			this.clientCallback()
+		}
+	}
+
+	/** query all app files */
 	private listFiles = async () => {
-		gapi.client.drive.files
-			.list({ q: 'trashed=false and mimeType = \'application/json\'' })
-			.then((response: { body: string }) => {
-				const respBody = JSON.parse(response.body)
-				const respFiles: IGapiFile[] = respBody.items
-				if (IS_LOCALHOST) console.log('respFiles', respFiles)
-				const dataFile = respFiles.filter(item => item.title === 'dream-journal.json')[0]
-				if (IS_LOCALHOST) console.log('dataFile', dataFile)
-				this.gapiDataFile = dataFile
-				if (this.gapiDataFile) this.downloadDataFile()
-				else this.clientCallback()
-			})
+		const response: { body: string } = await gapi.client.drive.files.list({ q: 'trashed=false and mimeType = \'application/json\'' })
+		const respBody = JSON.parse(response.body)
+		const respFiles: IGapiFile[] = respBody.items
+		if (IS_LOCALHOST) console.log('respFiles', respFiles)
+		const dataFile = respFiles.filter(item => item.title === 'dream-journal.json')[0]
+		if (IS_LOCALHOST) console.log('dataFile', dataFile)
+		this.gapiDataFile = dataFile
+		if (this.gapiDataFile) this.downloadDataFile()
+		else this.clientCallback()
 	}
 
 	/**
@@ -234,58 +206,40 @@ export class googlegsi {
 	 * @returns
 	 */
 	private downloadDataFile = async () => {
-		fetch(`https://www.googleapis.com/drive/v3/files/${this.gapiDataFile.id}?alt=media`, {
+		const response = await fetch(`https://www.googleapis.com/drive/v3/files/${this.gapiDataFile.id}?alt=media`, {
 			method: 'GET',
 			headers: { Authorization: `Bearer ${this.tokenResponse.access_token}` },
 		})
-			.then((response) => {
-				response
-					.arrayBuffer()
-					.then((buffer) => {
-						const decoded: string = new TextDecoder('utf-8').decode(buffer)
-						let json: object = {}
-						let entries: IJournalEntry[] = []
+		const buffer = await response.arrayBuffer()
+		const decoded: string = new TextDecoder('utf-8').decode(buffer)
+		let json: object = {}
+		let entries: IJournalEntry[] = []
 
-						// A:
-						if (decoded && decoded.length > 0) {
-							try {
-								// NOTE: Initial dream-journal file is empty!
-								json = JSON.parse(decoded)
-								entries = json['entries']
-							} catch (ex) {
-								alert(ex)
-								console.error ? console.error(ex) : console.log(ex)
-							}
-						}
+		// A:
+		if (decoded && decoded.length > 0) {
+			try {
+				// NOTE: Initial dream-journal file is empty!
+				json = JSON.parse(decoded)
+				entries = json['entries']
+			} catch (ex) {
+				alert(ex)
+				console.error ? console.error(ex) : console.log(ex)
+			}
+		}
 
-						// B:
-						this.driveDataFile = {
-							_isLoading: false,
-							_isSaving: false,
-							id: this.gapiDataFile.id,
-							entries: entries || [],
-							modifiedTime: this.gapiDataFile.modifiedDate,
-							name: this.gapiDataFile.title,
-							size: this.gapiDataFile.fileSize || '',
-						}
+		// B:
+		this.driveDataFile = {
+			_isLoading: false,
+			_isSaving: false,
+			id: this.gapiDataFile.id,
+			entries: entries || [],
+			modifiedTime: this.gapiDataFile.modifiedDate,
+			name: this.gapiDataFile.title,
+			size: this.gapiDataFile.fileSize || '',
+		}
 
-						// C:
-						this.clientCallback()
-					})
-					.catch((error) => {
-						throw new Error(error)
-					})
-			})
-			.catch((error) => {
-				if (error.code === '401') {
-					//doAuthSignIn()
-				} else if (error.code === '503') {
-					//let newState = this.state.dataFile
-					// TODO: new field like `hasError` to hold "Service Unavailable" etc
-				} else {
-					console.error ? console.error(error) : console.log(error)
-				}
-			})
+		// C:
+		this.clientCallback()
 	}
 
 	// TODO: upload https://developers.google.com/drive/api/guides/manage-uploads#node.js
@@ -294,7 +248,6 @@ export class googlegsi {
 	}
 
 	//#region getters
-
 	get dataFile(): IDriveDataFile {
 		return this.driveDataFile
 	}
@@ -302,6 +255,5 @@ export class googlegsi {
 	get currentUsername(): string {
 		return this.signedInUser
 	}
-
 	//#endregion
 }
