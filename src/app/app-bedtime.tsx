@@ -62,7 +62,7 @@ import * as GDrive from './google-oauth'
 export interface Props {
 	confFile?: IDriveConfFile
 	dataFile?: IDriveDataFile
-	isBusyLoad?: boolean
+	isBusyLoad: boolean
 }
 
 export default function TabBedtime(props: Props) {
@@ -73,7 +73,7 @@ export default function TabBedtime(props: Props) {
 	const [lucidGoals, setLucidGoals] = useState<IConfMetaCats>(null)
 
 	useEffect(() => {
-		if (props.confFile && props.confFile.lucidGoals) setLucidGoals(props.confFile.lucidGoals)
+		if (props?.confFile?.lucidGoals) setLucidGoals(props.confFile.lucidGoals)
 	}, [props.confFile])
 
 	const allLucids = useMemo(() => {
@@ -130,7 +130,7 @@ export default function TabBedtime(props: Props) {
 					<div className='card-header bg-primary h5 text-white'>Affirmations</div>
 					<div className='card-body bg-black p-4'>
 						<div className='row row-cols-2 g-4'>
-							{props.confFile.mildAffirs.map((item, idx) => (
+							{props.confFile?.mildAffirs.map((item, idx) => (
 								<div className='col' key={`goalTitle${idx}`}>
 									<h5 className='text-primary text-uppercase'>{item.title}</h5>
 									<ul className='mb-0'>
@@ -212,7 +212,7 @@ export default function TabBedtime(props: Props) {
 							<div className='card-header bg-success h5 text-white'>Visualize Success</div>
 							<div className='card-body bg-black p-4'>
 								<div className='row row-cols-1 row-cols-md-3 g-4'>
-									{props.confFile.dreamIdeas.map((item, idx) => (
+									{props.confFile?.dreamIdeas.map((item, idx) => (
 										<section key={`ideaTitle${idx}`} className='col'>
 											<h6 className={`card-subtitle mb-2 ${item.headClass}`}>
 												{arrIcons[idx]}
