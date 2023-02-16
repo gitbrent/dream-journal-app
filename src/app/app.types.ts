@@ -87,8 +87,8 @@ export interface IConfMetaCats {
 // INTERFACES
 export interface IAuthState {
 	status: AuthState
-	userName: ''
-	userPhoto: ''
+	userName: string
+	userPhoto: string
 }
 /**
  * Google Drive Conf file in JSON format

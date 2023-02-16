@@ -28,16 +28,18 @@
  */
 
 import React, { useState } from 'react'
-import { AuthState, IAuthState, IDriveDataFile } from './app.types'
+import { APP_VER, AuthState, IAuthState, IDriveDataFile } from './app.types'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
 import ModalEntry from './modal-entry'
+import { googlegsi } from './googlegsi'
 //import * as GDrive from './google-oauth'
 
 interface Props {
 	authState?: IAuthState
 	dataFile?: IDriveDataFile
 	isBusyLoad: boolean
+	googleapi: googlegsi
 }
 
 export default function TabHome(props: Props) {
@@ -59,8 +61,8 @@ export default function TabHome(props: Props) {
 	}
 
 	function renderCardAuthUser(): JSX.Element {
-		const cardAuthUser: JSX.Element = <div/>
-		/*
+		let cardAuthUser: JSX.Element = <div />
+
 		if (props.authState && props.authState.status === AuthState.Authenticated) {
 			cardAuthUser = (
 				<div>
@@ -76,12 +78,12 @@ export default function TabHome(props: Props) {
 					</div>
 					<div className='row mb-0'>
 						<div className='col'>
-							<button className='btn btn-outline-primary w-100' onClick={() => GDrive.doAuthSignIn()}>
+							<button className='btn btn-outline-primary w-100' onClick={() => props.googleapi.doAuthSignIn()}>
 								Renew
 							</button>
 						</div>
 						<div className='col'>
-							<button className='btn btn-outline-secondary w-100' onClick={() => GDrive.doAuthSignOut()}>
+							<button className='btn btn-outline-secondary w-100' onClick={() => props.googleapi.doAuthSignOut()}>
 								Sign Out
 							</button>
 						</div>
@@ -92,7 +94,7 @@ export default function TabHome(props: Props) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Your session has expired. Please re-authenticate to continue.</p>
-					<button className='btn btn-warning' onClick={() => GDrive.doAuthSignIn()}>
+					<button className='btn btn-warning' onClick={() => props.googleapi.doAuthSignIn()}>
 						Sign In
 					</button>
 				</div>
@@ -101,13 +103,13 @@ export default function TabHome(props: Props) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Please sign-in to allow access to Google Drive space.</p>
-					<button className='btn btn-primary' onClick={() => GDrive.doAuthSignIn()}>
+					<button className='btn btn-primary' onClick={() => props.googleapi.doAuthSignIn()}>
 						Sign In/Authorize
 					</button>
 				</div>
 			)
 		}
-		*/
+
 		return cardAuthUser
 	}
 
@@ -149,7 +151,7 @@ export default function TabHome(props: Props) {
 
 	return (
 		<section className='container-xl my-auto my-md-5'>
-			<ModalEntry currEntry={null} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
+			<ModalEntry showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
 
 			<div className='jumbotron p-4 p-md-5'>
 				<div className='row align-items-center g-0 mb-3'>

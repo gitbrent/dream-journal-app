@@ -16,7 +16,7 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference types="google-one-tap" />
 /// <reference types="gapi" />
-import { IDriveDataFile, IJournalEntry, IS_LOCALHOST } from './app.types'
+import { AuthState, IAuthState, IDriveDataFile, IJournalEntry, IS_LOCALHOST } from './app.types'
 import { CredentialResponse } from 'google-one-tap'
 import { TokenResponse, IGapiFile, TokenClientConfig } from './googlegsi.types'
 import { decodeJwt } from 'jose'
@@ -252,8 +252,20 @@ export class googlegsi {
 		return this.driveDataFile
 	}
 
-	get currentUsername(): string {
-		return this.signedInUser
+	get authState(): IAuthState {
+		return {
+			status: this.isAuthorized ? AuthState.Authenticated : AuthState.Unauthenticated,
+			userName: this.signedInUser,
+			userPhoto: ''
+		}
 	}
 	//#endregion
+
+	public doAuthSignIn = () => {
+		console.log('TODO: doAuthSignIn')
+	}
+
+	public doAuthSignOut = () => {
+		console.log('TODO: doAuthSignIn')
+	}
 }

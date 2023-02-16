@@ -7,7 +7,7 @@ import * as GDrive from './google-oauth'
 import * as bootstrap from 'bootstrap' // NOTE: IMPORTANT: This is the sole import of the javascript library (but provides funcionality thruout app)
 
 export interface IModalEntryProps {
-	currEntry: IJournalEntry
+	currEntry?: IJournalEntry
 	currDreamIdx?: number
 	showModal: boolean
 	setShowModal: (arg0: boolean) => void

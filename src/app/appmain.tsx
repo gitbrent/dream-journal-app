@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import { IDriveDataFile, IJournalEntry, IDriveConfFile } from './app.types'
+import { IDriveDataFile, IJournalEntry, IDriveConfFile, IAuthState } from './app.types'
 import TabHome from '../app/app-home'
 import TabBedtime from '../app/app-bedtime'
 import TabExplore from '../app/app-explore'
@@ -25,6 +25,7 @@ export default function AppMain() {
 	const [confFile, setConfFile] = useState<IDriveConfFile>()
 	const [isBusyLoad, setIsBusyLoad] = useState(false)
 	const [editEntry, setEditEntry] = useState<IJournalEntry>()
+	const [authState, setAuthState] = useState<IAuthState>()
 	let googleapi: googlegsi
 
 	/** load gapi script on startup */
@@ -34,12 +35,12 @@ export default function AppMain() {
 	}, [])
 
 	function gapiCallback(): void {
-		const brent = googleapi?.dataFile
-		setDataFile(brent)
+		setAuthState(googleapi?.authState)
+		setDataFile(googleapi?.dataFile)
 	}
 
 	//#region tabs
-	const Home = () => (<TabHome dataFile={dataFile} isBusyLoad={isBusyLoad} authState={undefined} />)
+	const Home = () => (<TabHome dataFile={dataFile} isBusyLoad={isBusyLoad} authState={authState} googleapi={googleapi} />)
 	const Bedtime = () => (<TabBedtime confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} />)
 	const Explore = () => (<TabExplore confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} />)
 	const Journal = () => (<TabJournal dataFile={dataFile} doSaveViewState={null} viewState={null} isBusyLoad={isBusyLoad} />)
