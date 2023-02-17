@@ -32,14 +32,13 @@ import { APP_VER, AuthState, IAuthState, IDriveDataFile } from './app.types'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
 import ModalEntry from './modal-entry'
-import { googlegsi } from './googlegsi'
-//import * as GDrive from './google-oauth'
+import { appdata } from './appdata'
 
 interface Props {
 	authState?: IAuthState
 	dataFile?: IDriveDataFile
 	isBusyLoad: boolean
-	googleapi: googlegsi
+	appdataSvc: appdata
 }
 
 export default function TabHome(props: Props) {
@@ -78,12 +77,12 @@ export default function TabHome(props: Props) {
 					</div>
 					<div className='row mb-0'>
 						<div className='col'>
-							<button className='btn btn-outline-primary w-100' onClick={() => props.googleapi.doAuthSignIn()}>
+							<button className='btn btn-outline-primary w-100' onClick={() => props.appdataSvc.doAuthSignIn()}>
 								Renew
 							</button>
 						</div>
 						<div className='col'>
-							<button className='btn btn-outline-secondary w-100' onClick={() => props.googleapi.doAuthSignOut()}>
+							<button className='btn btn-outline-secondary w-100' onClick={() => props.appdataSvc.doAuthSignOut()}>
 								Sign Out
 							</button>
 						</div>
@@ -94,7 +93,7 @@ export default function TabHome(props: Props) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Your session has expired. Please re-authenticate to continue.</p>
-					<button className='btn btn-warning' onClick={() => props.googleapi.doAuthSignIn()}>
+					<button className='btn btn-warning' onClick={() => props.appdataSvc.doAuthSignIn()}>
 						Sign In
 					</button>
 				</div>
@@ -103,7 +102,7 @@ export default function TabHome(props: Props) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Please sign-in to allow access to Google Drive space.</p>
-					<button className='btn btn-primary' onClick={() => props.googleapi.doAuthSignIn()}>
+					<button className='btn btn-primary' onClick={() => props.appdataSvc.doAuthSignIn()}>
 						Sign In/Authorize
 					</button>
 				</div>
@@ -151,7 +150,7 @@ export default function TabHome(props: Props) {
 
 	return (
 		<section className='container-xl my-auto my-md-5'>
-			<ModalEntry showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
+			<ModalEntry showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} appdataSvc={props.appdataSvc} />
 
 			<div className='jumbotron p-4 p-md-5'>
 				<div className='row align-items-center g-0 mb-3'>

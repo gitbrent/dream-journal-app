@@ -56,17 +56,19 @@ import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
 import SearchResults from './components/search-results'
 import ModalEntry from './modal-entry'
-//import * as GDrive from './google-oauth'
+import { appdata } from './appdata'
 //import LocalAdminBrent from './z.admin.local'
 
 export interface Props {
+	appdataSvc: appdata
 	confFile?: IDriveConfFile
 	dataFile?: IDriveDataFile
 	isBusyLoad: boolean
 }
 
 export default function TabBedtime(props: Props) {
-	const [isBusySave, setIsBusySave] = useState(false)
+	const isBusySave = false
+	//const [isBusySave, setIsBusySave] = useState(false)
 	const [showModal, setShowModal] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>()
 	const [currDreamIdx, setCurrDreamIdx] = useState(0)
@@ -304,7 +306,7 @@ export default function TabBedtime(props: Props) {
 							className='btn btn-primary'
 							title='Add Goal'
 							onClick={() => {
-								const chgItem = typeof lucidGoals !== 'undefined' ? { ...lucidGoals[0] } : null
+								const chgItem = typeof lucidGoals !== 'undefined' ? [...lucidGoals][0] : null
 								if (chgItem) {
 									chgItem.bullets.push('')
 									setLucidGoals([chgItem])
@@ -643,7 +645,7 @@ export default function TabBedtime(props: Props) {
 	) : (
 		<main className='container my-auto my-md-5'>
 			<header>
-				<ModalEntry currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={setShowModal} />
+				<ModalEntry currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={setShowModal} appdataSvc={props.appdataSvc} />
 				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			</header>
 			{/*<LocalAdminBrent confFile={props.confFile} />*/}

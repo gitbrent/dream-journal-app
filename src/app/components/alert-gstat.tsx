@@ -1,5 +1,4 @@
 import React from 'react'
-import * as GDrive from '../google-oauth'
 import { CloudSlash } from 'react-bootstrap-icons'
 
 interface Props {
@@ -28,7 +27,7 @@ export default function AlertGdriveStatus(props: Props) {
 						</div>
 						<div className='col'>Your session has expired.</div>
 						<div className='col text-end'>
-							<button type='button' onClick={() => GDrive.doAuthSignIn()} className='btn btn-secondary'>
+							<button type='button' onClick={() => alert('FIXME:')} className='btn btn-secondary'>
 								Renew
 							</button>
 						</div>

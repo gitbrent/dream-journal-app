@@ -7,8 +7,10 @@ import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
 import BadgeEntries from './components/badge-entries'
 import TableEntries from './components/table-entries'
+import { appdata } from './appdata'
 
 interface IAppTagsProps {
+	appdataSvc: appdata
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 }
@@ -44,7 +46,7 @@ export default function TabTags(props: IAppTagsProps) {
 	const TOP = 20 //15
 	// TAB: Tag Timeline
 	const [chartDataTags, setChartDataTags] = useState<IChartData[]>([])
-	const [tagChartClickedIdx, setTagChartClickedIdx] = useState<number>(null)
+	const [tagChartClickedIdx, setTagChartClickedIdx] = useState(0)
 	const [tagChartClkEntries, setTagChartClkEntries] = useState<IJournalEntry[]>([])
 	// FILTERS
 	const [textFilter, setTextFilter] = useState('')
@@ -162,7 +164,7 @@ export default function TabTags(props: IAppTagsProps) {
 			.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 			.forEach((entry) => {
 				entry.dreams.forEach((dream) => {
-					dream.dreamSigns.forEach((sign) => {
+					dream.dreamSigns?.forEach((sign) => {
 						const tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
 						if (tag) {
 							const existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
@@ -400,7 +402,7 @@ export default function TabTags(props: IAppTagsProps) {
 					{renderTagsByYear()}
 				</div>
 				<div className='tab-pane bg-light p-4' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
-					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} />
+					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} appDataSvc={props.appDataSvc} />
 				</div>
 				<div className='tab-pane bg-light p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
 					{renderTabTags()}

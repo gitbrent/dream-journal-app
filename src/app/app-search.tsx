@@ -1,56 +1,32 @@
-import React, { useState, useEffect } from 'react'
-import { IDriveDataFile, IJournalEntry, ISearchMatch, MetaType, SearchMatchTypes, SearchScopes } from './app.types'
+import React, { useState } from 'react'
+import { IDriveDataFile, IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
 import { Search } from 'react-bootstrap-icons'
 import SearchResults from './components/search-results'
 import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
+import { appdata } from './appdata'
 
-export interface IAppSearchState {
-	searchMatches: ISearchMatch[]
-	searchOptMatchType: SearchMatchTypes
-	searchOptScope: SearchScopes
-	searchTerm: string
-	searchTermInvalidMsg: string
-	showAlert: boolean
-}
 export interface Props {
+	appdataSvc: appdata
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
-	doSaveSearchState?: (state:IAppSearchState)=>void
-	searchState?: IAppSearchState
 }
 
 export default function TabSearch(props: Props) {
-	const localShowAlert = JSON.parse(localStorage.getItem('show-alert-search'))
+	const localShowAlert = JSON.parse(localStorage.getItem('show-alert-search') || '')
 	//
 	const [showModal, setShowModal] = useState(false)
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
+	const [currEntry, setCurrEntry] = useState<IJournalEntry>()
 	const [currDreamIdx, setDreamIdx] = useState(0)
 	//
 	const [showAlert, setShowAlert] = useState(typeof localShowAlert === 'boolean' ? localShowAlert : true)
 	const [totalDreams, setTotalDreams] = useState(0)
-	const [searchMatches, setSearchMatches] = useState(props.searchState && props.searchState['searchMatches'] ? props.searchState['searchMatches'] : [])
-	const [searchOptScope, setSearchOptScope] = useState(props.searchState && props.searchState['searchOptScope'] ? props.searchState['searchOptScope'] : SearchScopes.all)
-	const [searchTerm, setSearchTerm] = useState(props.searchState && props.searchState['searchTerm'] ? props.searchState['searchTerm'] : '')
-	const [searchTermInvalidMsg, setSearchTermInvalidMsg] = useState(
-		props.searchState && props.searchState['searchTermInvalidMsg'] ? props.searchState['searchTermInvalidMsg'] : ''
-	)
-	const [searchOptMatchType, setSearchOptMatchType] = useState(
-		props.searchState && props.searchState['searchOptMatchType'] ? props.searchState['searchOptMatchType'] : SearchMatchTypes.whole
-	)
-
-	/** Push state up whenever it changes */
-	useEffect(() => {
-		props.doSaveSearchState({
-			searchMatches: searchMatches,
-			searchOptMatchType: searchOptMatchType,
-			searchOptScope: searchOptScope,
-			searchTerm: searchTerm,
-			searchTermInvalidMsg: searchTermInvalidMsg,
-			showAlert: false,
-		})
-	}, [searchMatches, searchOptMatchType, searchOptScope, searchTerm, searchTermInvalidMsg, showAlert])
+	const [searchMatches, setSearchMatches] = useState<ISearchMatch[]>([])
+	const [searchOptScope, setSearchOptScope] = useState(SearchScopes.all)
+	const [searchTerm, setSearchTerm] = useState('')
+	const [searchTermInvalidMsg, setSearchTermInvalidMsg] = useState('')
+	const [searchOptMatchType, setSearchOptMatchType] = useState(SearchMatchTypes.whole)
 
 	// ------------------------------------------------------------------------
 
@@ -123,46 +99,12 @@ export default function TabSearch(props: Props) {
 		setSearchMatches(arrFound)
 	}
 
-	function doShowByType(type: SearchScopes) {
-		const arrFound = []
-
-		if (!props.dataFile || props.dataFile.entries.length <= 0) return
-
-		if (type === SearchScopes._starred) {
-			props.dataFile.entries
-				.filter((entry) => entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === MetaType.star)).length > 0)
-				.forEach((entry) =>
-					entry.dreams.forEach((dream) => {
-						arrFound.push({
-							entryDate: entry.entryDate,
-							starred: true,
-							dream: dream,
-						})
-					})
-				)
-		} else {
-			props.dataFile.entries.forEach((entry) =>
-				entry.dreams.forEach((dream) => {
-					if (dream.isLucidDream) {
-						arrFound.push({
-							entryDate: entry.entryDate,
-							starred: entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === MetaType.star)).length > 0,
-							dream: dream,
-						})
-					}
-				})
-			)
-		}
-
-		setSearchMatches(arrFound)
-	}
-
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<div className='container my-auto my-md-5'>
 			<header>
-				<ModalEntry currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={setShowModal} />
+				<ModalEntry currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={setShowModal} appdataSvc={props.appdataSvc} />
 				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			</header>
 
@@ -255,9 +197,7 @@ export default function TabSearch(props: Props) {
 					</div>
 					<div className='card-body bg-light p-4' data-desc='search cards'>
 						<div
-							className={`row ${
-								searchOptScope === SearchScopes.all || searchOptScope === SearchScopes.notes ? 'row-cols-1 row-cols-md-2' : 'row-cols-2 row-cols-md-4'
-							} g-4 justify-content-between`}>
+							className={`row ${searchOptScope === SearchScopes.all || searchOptScope === SearchScopes.notes ? 'row-cols-1 row-cols-md-2' : 'row-cols-2 row-cols-md-4'} g-4 justify-content-between`}>
 							{searchMatches ? (
 								searchMatches.map((match, idx) => (
 									<SearchResults

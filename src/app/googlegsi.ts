@@ -17,8 +17,8 @@
 /// <reference types="google-one-tap" />
 /// <reference types="gapi" />
 import { AuthState, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry, IS_LOCALHOST } from './app.types'
-import { CredentialResponse } from 'google-one-tap'
 import { TokenResponse, IGapiFile, TokenClientConfig } from './googlegsi.types'
+import { CredentialResponse } from 'google-one-tap'
 import { decodeJwt } from 'jose'
 
 declare global {
@@ -46,9 +46,9 @@ export class googlegsi {
 	private isAuthorized = false
 	private gapiDataFile: IGapiFile
 	private gapiConfFile: IGapiFile
+	private tokenResponse: TokenResponse
 	private driveConfFile: IDriveConfFile
 	private driveDataFile: IDriveDataFile
-	private tokenResponse: TokenResponse
 
 	constructor(callbackFunc: (() => void)) {
 		this.clientCallback = callbackFunc
@@ -60,6 +60,7 @@ export class googlegsi {
 			_isSaving: false,
 			id: '',
 			dreamIdeas: [],
+			lucidGoals: [],
 			mildAffirs: [],
 			tagTypeAW: [],
 			tagTypeCO: [],
@@ -201,7 +202,7 @@ export class googlegsi {
 		}
 	}
 
-	/** query all app files */
+	//#region file operations
 	private listFiles = async () => {
 		const response: { body: string } = await gapi.client.drive.files.list({ q: 'trashed=false and mimeType = \'application/json\'' })
 		const respBody = JSON.parse(response.body)
@@ -297,6 +298,7 @@ export class googlegsi {
 	private async uploadDataFile() {
 		// TODO:
 	}
+	//#endregion
 
 	//#region getters
 	get confFile(): IDriveConfFile {
@@ -316,6 +318,7 @@ export class googlegsi {
 	}
 	//#endregion
 
+	//#region public methods
 	public doAuthSignIn = () => {
 		console.log('TODO: doAuthSignIn')
 	}
@@ -323,4 +326,9 @@ export class googlegsi {
 	public doAuthSignOut = () => {
 		console.log('TODO: doAuthSignIn')
 	}
+
+	public doSaveDataFile = async () => {
+		return 'TODO:'
+	}
+	//#endregion
 }

@@ -48,9 +48,9 @@ import TableEntries from './components/table-entries'
  */
 
 export interface Props {
-	confFile?: IDriveConfFile
-	dataFile?: IDriveDataFile
-	isBusyLoad?: boolean
+	confFile: IDriveConfFile
+	dataFile: IDriveDataFile
+	isBusyLoad: boolean
 }
 
 interface IChartData {

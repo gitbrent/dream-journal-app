@@ -32,15 +32,14 @@ import { IDriveDataFile, IJournalDream, IJournalEntry, ImportTypes, InductionTyp
 import BootstrapSwitchButton from 'bootstrap-switch-button-react' // TODO: BS5: Swap for new toggle
 import ContentEditable from 'react-contenteditable'
 import { Upload } from 'react-bootstrap-icons'
-import * as GDrive from './google-oauth'
+import { appdata } from './appdata'
 
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
 const VERBOSE = false
 
 export interface IAppTabProps {
 	dataFile: IDriveDataFile
-	//doSaveImportState: (state: IAppTabState) => void
-	//importState: object
+	appdataSvc: appdata
 }
 interface IAppTabState {
 	_defaultBedTime: string
@@ -91,7 +90,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	constructor(props: Readonly<IAppTabProps>) {
 		super(props)
 
-		const config = this.props.importState || JSON.parse(localStorage.getItem('import-config')) || {}
+		const config = JSON.parse(localStorage.getItem('import-config') || '') || {}
 
 		this.state = {
 			_defaultBedTime: config._defaultBedTime || '00:00',
@@ -124,15 +123,15 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			_notesWakeEnd: config._notesWakeEnd || 'WAKES:',
 			_title: config._title || 'DREAM \d+:',
 
-			bedTime: null,
+			bedTime: '',
 			dreamBreak: [],
-			dreamSigns: null,
-			entryDate: null,
+			dreamSigns: '',
+			entryDate: '',
 			isLucidDream: false,
 			notes: [],
-			notesPrep: null,
-			notesWake: null,
-			title: null,
+			notesPrep: '',
+			notesWake: '',
+			title: '',
 		}
 	}
 
@@ -141,7 +140,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	 */
 	componentDidMount = () => {
 		this.setState({
-			_demoData: this.refDemoData.current.innerText,
+			_demoData: this.refDemoData.current?.innerText || '',
 		})
 
 		this.updateOptionResults()
@@ -151,7 +150,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	 * this constructor is called whenever tab is hidden/shown, so state must be preserved by parent (lifting state up)
 	 */
 	componentWillUnmount = () => {
-		this.props.doSaveImportState(this.state)
+		//this.props.appdataSvc.doSaveImportState(this.state)
 	}
 
 	/* ======================================================================== */
@@ -161,7 +160,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	 */
 	updateOptionResults = () => {
 		const arrOtherFields = ['_bedTime', '_dreamSigns', '_isLucidDream', '_notesPrep', '_notesWake', '_title']
-		const demoData = this.refDemoData.current.innerText || ''
+		const demoData = this.refDemoData.current?.innerText || ''
 
 		// A: "Entry Date"
 		this.setState({ _entryDateInvalidMsg: '' })
@@ -208,7 +207,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 		// B: "Dream Break"
 		if ((demoData || '').split('\n').length > 0) {
-			const arrMatch = []
+			const arrMatch: string[] = []
 			demoData.split('\n').forEach((line) => {
 				if (line.trim().match(new RegExp(this.state._dreamBreak, 'g'))) {
 					const keyVal = line.trim().split(new RegExp(this.state._dreamBreak, 'g'))
@@ -282,7 +281,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			if (!this.state._dreamBreak) {
 				this.setState({ notes: ['(add text to Dream Section)'] })
 			} else {
-				const arrNotes = []
+				const arrNotes: string[] = []
 				let isNotes = false
 				// Locate "Dream Title", capture all lines after it - until next [Dream Section]/[Dream Title]
 				demoData.split('\n').forEach((line) => {
@@ -465,7 +464,6 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							dreamSigns: tmpDreamSigns || [],
 							dreamImages: [],
 							isLucidDream: false,
-							lucidMethod: null,
 						}
 						objEntry.dreams.push(objDream)
 						if (VERBOSE) {
@@ -488,7 +486,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 								objEntry.entryDate = ex
 							}
 						} else if (this.state._selEntryType === 'match' && this.state._entryDate && line.trim().match(new RegExp(this.state._entryDate, 'g'))) {
-							let textParse = line.trim().match(new RegExp(this.state._entryDate, 'gm'))[0]
+							const textRegex = line.trim().match(new RegExp(this.state._entryDate, 'gm'))
+							let textParse = textRegex && textRegex[0] ? textRegex[0] : ''
 							if (textParse) {
 								textParse = textParse.replace(/:|;/gi, '') // For "11/29/2019:"
 								if (VERBOSE) console.log('textParse = ' + textParse)
@@ -619,8 +618,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				if (this.state._useDefaultTime && !objEntry.bedTime) objEntry.bedTime = this.state._defaultBedTime || '00:00'
 
 				// 4: add section
-				objEntry.notesPrep = objEntry.notesPrep.trim()
-				objEntry.notesWake = objEntry.notesWake.trim()
+				objEntry.notesPrep = objEntry.notesPrep?.trim()
+				objEntry.notesWake = objEntry.notesWake?.trim()
 				arrEntries.push(objEntry)
 			})
 
@@ -643,7 +642,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	 * This completes the import process
 	 */
 	handleImport = () => {
-		const arrInvalidSects = []
+		const arrInvalidSects: IJournalEntry[] = []
 		const cntImported = this.state._parsedSections.length
 
 		// A:
@@ -669,8 +668,10 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				_invalidSections: arrInvalidSects,
 			})
 		} else {
-			this.state._parsedSections.forEach((sect) => GDrive.doEntryAdd(sect))
+			this.state._parsedSections.forEach((sect) => this.props.appdataSvc.doEntryAdd(sect))
 
+			// FIXME:
+			/*
 			GDrive.doSaveDataFile()
 				.catch((err) => {
 					// TODO: show onscreen
@@ -695,7 +696,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					// 3:
 					// TODO: show onscreen
 					alert('SUCCESS!\nAdded ' + cntImported + ' new entries into selected journal.')
-				})
+				})*/
 		}
 	}
 

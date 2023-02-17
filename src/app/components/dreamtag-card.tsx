@@ -7,7 +7,7 @@ export interface Props {
 	setShowModal: (modal) => void
 	tagGrp: IDreamSignTagGroup
 	viewType: CardDreamSignGrpViewType
-	doMassUpdateTag: (oldTag, newTag) => void
+	doMassUpdateTag: (oldTag:string, newTag:string) => void
 }
 
 export default function DreamTagCard(props: Props) {

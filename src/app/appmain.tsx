@@ -4,9 +4,9 @@
  * @see https://developers.google.com/drive/api/guides/fields-parameter
  * @see https://developers.google.com/drive/api/v3/reference/files/get
  */
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import { IDriveDataFile, IJournalEntry, IDriveConfFile, IAuthState } from './app.types'
+import { IDriveDataFile, IDriveConfFile, IAuthState, AuthState } from './app.types'
 import TabHome from '../app/app-home'
 import TabBedtime from '../app/app-bedtime'
 import TabExplore from '../app/app-explore'
@@ -17,37 +17,66 @@ import TabSearch from '../app/app-search'
 import TabAdmin from '../app/app-admin'
 import TabImport from '../app/app-import'
 import LogoBase64 from '../img/logo_base64'
-import { googlegsi } from './googlegsi'
+import { appdata } from './appdata'
 
 export default function AppMain() {
-	//const [appErrMsg, setAppErrMsg] = useState('')
-	const [dataFile, setDataFile] = useState<IDriveDataFile>()
-	const [confFile, setConfFile] = useState<IDriveConfFile>()
-	const [isBusyLoad, setIsBusyLoad] = useState(false)
-	const [editEntry, setEditEntry] = useState<IJournalEntry>()
-	const [authState, setAuthState] = useState<IAuthState>()
-	let googleapi: googlegsi
+	const DEF_AUTH_STATE: IAuthState = {
+		status: AuthState.Unauthenticated,
+		userName: '',
+		userPhoto: '',
+	}
+	const DEF_CONF_FILE: IDriveConfFile = {
+		_isLoading: false,
+		_isSaving: false,
+		id: '',
+		dreamIdeas: [],
+		lucidGoals: [],
+		mildAffirs: [],
+		tagTypeAW: [],
+		tagTypeCO: [],
+		tagTypeFO: [],
+		tagTypeAC: [],
+	}
+	const DEF_DATA_FILE: IDriveDataFile = {
+		_isLoading: false,
+		_isSaving: false,
+		id: '',
+		entries: [],
+		modifiedTime: '',
+		name: '',
+		size: '',
+	}
+	const isBusyLoad = false
+	// TODO: const [isBusyLoad, setIsBusyLoad] = useState(false)
+	//??? const [editEntry, setEditEntry] = useState<IJournalEntry>()
+	const [isDataSvcLoaded, setIsDataSvcLoaded] = useState(false)
+	let appdataSvc: appdata
 
 	/** load gapi script on startup */
 	useEffect(() => {
-		if (!googleapi) googleapi = new googlegsi(gapiCallback)
-		else gapiCallback()
+		if (!appdataSvc) appdataSvc = new appdata(() => setIsDataSvcLoaded(true))
 	}, [])
 
-	function gapiCallback(): void {
-		setAuthState(googleapi?.authState)
-		setDataFile(googleapi?.dataFile)
-	}
+	const authState = useMemo(() => {
+		return (isDataSvcLoaded) ? appdataSvc?.authState : DEF_AUTH_STATE
+	}, [isDataSvcLoaded])
 
-	//#region tabs
-	const Home = () => (<TabHome dataFile={dataFile} isBusyLoad={isBusyLoad} authState={authState} googleapi={googleapi} />)
-	const Bedtime = () => (<TabBedtime confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} />)
+	const confFile = useMemo(() => {
+		return (isDataSvcLoaded) ? appdataSvc?.confFile : DEF_CONF_FILE
+	}, [isDataSvcLoaded])
+
+	const dataFile = useMemo(() => {
+		return (isDataSvcLoaded) ? appdataSvc?.dataFile : DEF_DATA_FILE
+	}, [isDataSvcLoaded])
+
+	const Home = () => (<TabHome dataFile={dataFile} isBusyLoad={isBusyLoad} authState={authState} appdataSvc={appdataSvc} />)
+	const Bedtime = () => (<TabBedtime confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
 	const Explore = () => (<TabExplore confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} />)
-	const Journal = () => (<TabJournal dataFile={dataFile} doSaveViewState={null} viewState={null} isBusyLoad={isBusyLoad} />)
-	const Search = () => (<TabSearch dataFile={dataFile} isBusyLoad={isBusyLoad} />)
-	const Tags = () => (<TabTags dataFile={dataFile || null} isBusyLoad={isBusyLoad} />)
-	const Import = () => <TabImport dataFile={dataFile} doSaveImportState={null} importState={null} />
-	const Admin = () => <TabAdmin dataFile={dataFile} isBusyLoad={isBusyLoad} doSaveAdminState={null} adminState={null} />
+	const Journal = () => (<TabJournal dataFile={dataFile} isBusyLoad={isBusyLoad} />)
+	const Search = () => (<TabSearch dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
+	const Tags = () => (<TabTags dataFile={dataFile || null} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
+	const Import = () => <TabImport dataFile={dataFile} appdataSvc={appdataSvc} />
+	const Admin = () => <TabAdmin dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />
 	const Nav = (): JSX.Element => {
 		const navLinkBaseClass = !dataFile ? 'nav-link disabled' : 'nav-link'
 
@@ -116,7 +145,6 @@ export default function AppMain() {
 			</nav>
 		)
 	}
-	//#endregion
 
 	return (
 		<BrowserRouter>
@@ -133,5 +161,4 @@ export default function AppMain() {
 			</Routes>
 		</BrowserRouter>
 	)
-
 }

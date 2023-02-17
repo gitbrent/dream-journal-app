@@ -3,10 +3,11 @@ import { IDreamSignTag, IJournalDream, IJournalEntry, InductionTypes } from './a
 import { Calendar3, Clock, PlusCircle, Save, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
 import ReactTags from 'react-tag-autocomplete'
 import Modal from 'bootstrap/js/dist/modal'
-import * as GDrive from './google-oauth'
 import * as bootstrap from 'bootstrap' // NOTE: IMPORTANT: This is the sole import of the javascript library (but provides funcionality thruout app)
+import { appdata } from './appdata'
 
 export interface IModalEntryProps {
+	appdataSvc: appdata
 	currEntry?: IJournalEntry
 	currDreamIdx?: number
 	showModal: boolean
@@ -22,9 +23,8 @@ export default function ModalEntry(props: IModalEntryProps) {
 		dreamSigns: [],
 		dreamImages: [],
 		isLucidDream: false,
-		lucidMethod: null,
 	}
-	const NEW_ENTRY = {
+	const NEW_ENTRY: IJournalEntry = {
 		entryDate: new Date().toLocaleDateString('en-CA'),
 		bedTime: '01:30',
 		notesPrep: '',
@@ -33,19 +33,19 @@ export default function ModalEntry(props: IModalEntryProps) {
 	}
 	const [isBusySave, setIsBusySave] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>({ ...NEW_ENTRY })
-	const [uniqueTags, setUniqueTags] = useState([])
+	const [uniqueTags, setUniqueTags] = useState<string[]>([])
 	const [isDateDupe, setIsDateDupe] = useState(false)
-	const [modal, setModal] = useState<Modal>(null)
+	const [modal, setModal] = useState<Modal>()
 	const [modalId, setModalId] = useState(DEF_MODAL_ID)
 
 	useEffect(() => {
-		if (!modal) setModal(new Modal(document.getElementById('myModal')))
+		if (!modal) setModal(new Modal(document.getElementById('myModal') as Element))
 	}, [])
 
 	/** Set/Clear Entry */
 	useEffect(() => {
 		setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry]
-		setUniqueTags(GDrive.getUniqueDreamTags)
+		setUniqueTags(props.appdataSvc.getUniqueDreamTags())
 
 		if (modal) {
 			if (props.showModal) modal.show()
@@ -69,13 +69,13 @@ export default function ModalEntry(props: IModalEntryProps) {
 
 	function handleSave() {
 		if (props.currEntry) {
-			GDrive.doEntryEdit(currEntry, props.currEntry.entryDate)
+			props.appdataSvc.doEntryEdit(currEntry, props.currEntry.entryDate)
 		} else {
-			if (GDrive.doesEntryDateExist(currEntry.entryDate)) {
+			if (props.appdataSvc.doesEntryDateExist(currEntry.entryDate)) {
 				alert('Date already exists!')
 				return
 			}
-			GDrive.doEntryAdd(currEntry)
+			props.appdataSvc.doEntryAdd(currEntry)
 		}
 
 		doSaveDataFile()
@@ -84,14 +84,14 @@ export default function ModalEntry(props: IModalEntryProps) {
 	function handleDelete() {
 		if (!confirm('PLEASE CONFIRM\n^^^^^^ ^^^^^^^\n\nYou are deleting this *entire journal entry*!')) return
 
-		GDrive.doEntryDelete(currEntry.entryDate)
+		props.appdataSvc.doEntryDelete(currEntry.entryDate)
 		doSaveDataFile()
 	}
 
 	function doSaveDataFile() {
 		setIsBusySave(true)
 
-		GDrive.doSaveDataFile()
+		props.appdataSvc.doSaveDataFile()
 			.then(() => {
 				setIsBusySave(false)
 				props.setShowModal(false)
@@ -126,7 +126,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 									const chgEntry = { ...currEntry }
 									chgEntry.entryDate = ev.currentTarget.value
 									setCurrEntry(chgEntry)
-									setIsDateDupe(GDrive.doesEntryDateExist(ev.currentTarget.value))
+									setIsDateDupe(props.appdataSvc.doesEntryDateExist(ev.currentTarget.value))
 								}}
 								className={`form-control form-control-sm ${isDateDupe && 'is-invalid'}`}
 								required
@@ -313,15 +313,15 @@ export default function ModalEntry(props: IModalEntryProps) {
 							allowBackspace={false}
 							minQueryLength={2}
 							maxSuggestionsLength={6}
-							tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign }))}
+							tags={dream.dreamSigns?.sort().map((sign, idx) => ({ id: idx, name: sign }))}
 							suggestions={uniqueTags.map((sign, idx) => new Object({ id: idx, name: sign }))}
 							suggestionsFilter={(item: { id: number; name: string }, query: string) => item.name.indexOf(query.toLowerCase()) > -1}
 							addOnBlur={true}
 							onAddition={(tag: IDreamSignTag) => {
 								const newState = { ...currEntry }
 								// Dont allow dupes
-								if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) {
-									newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase())
+								if (newState.dreams[dreamIdx].dreamSigns?.indexOf(tag.name.trim()) === -1) {
+									newState.dreams[dreamIdx].dreamSigns?.push(tag.name.toLowerCase())
 								}
 								setCurrEntry(newState)
 							}}
@@ -332,7 +332,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 							}}
 							onDelete={(idx: number) => {
 								const newState = { ...currEntry }
-								newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
+								newState.dreams[dreamIdx].dreamSigns?.splice(idx, 1)
 								setCurrEntry(newState)
 							}}
 							className='my-2'

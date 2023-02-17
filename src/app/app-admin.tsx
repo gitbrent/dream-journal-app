@@ -30,13 +30,14 @@
 import React, { useState, useEffect } from 'react'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDriveDataFile, IJournalEntry } from './app.types'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
-import * as GDrive from './google-oauth'
 import DreamTagCard from './components/dreamtag-card'
 import AlertGdriveStatus from './components/alert-gstat'
 import ModalEntry from './modal-entry'
 import HeaderMetrics from './components/header-metrics'
+import { appdata } from './appdata'
 
 interface Props {
+	appdataSvc: appdata
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 }
@@ -49,7 +50,7 @@ enum FilterSortOrder {
 
 export default function TabAdmin(props: Props) {
 	const [showModal, setShowModal] = useState(false)
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
+	const [currEntry, setCurrEntry] = useState<IJournalEntry>()
 	//
 	const [dreamTagGroups, setDreamTagGroups] = useState<IDreamSignTagGroup[]>([])
 	const [searchTerm, setSearchTerm] = useState('')
@@ -70,7 +71,7 @@ export default function TabAdmin(props: Props) {
 			.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 			.forEach((entry) => {
 				entry.dreams.forEach((dream) =>
-					dream.dreamSigns.forEach((sign) => {
+					dream.dreamSigns?.forEach((sign) => {
 						const tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
 						if (tag) {
 							const existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
@@ -85,10 +86,10 @@ export default function TabAdmin(props: Props) {
 				// Find dupes
 				if (
 					entry.dreams &&
-					entry.dreams[0] &&
-					entry.dreams[0].dreamSigns.length > 0 &&
+					entry.dreams[0] && entry.dreams[0].dreamSigns &&
+					entry.dreams[0].dreamSigns?.length > 0 &&
 					entry.dreams[1] &&
-					entry.dreams[0].dreamSigns.toString() == entry.dreams[1].dreamSigns.toString()
+					entry.dreams[0].dreamSigns?.toString() == entry.dreams[1].dreamSigns?.toString()
 				) {
 					dupeSigns.push(entry)
 				}
@@ -109,30 +110,34 @@ export default function TabAdmin(props: Props) {
 
 	// -----------------------------------------------------------------------
 
-	function doMassUpdateTag(oldName: string, newName: string) {
+	async function doMassUpdateTag(oldName: string, newName: string) {
 		let numUpdated = 0
 
 		props.dataFile.entries.forEach((entry) => {
 			const entryCopy = JSON.parse(JSON.stringify(entry)) as IJournalEntry
 			entryCopy.dreams.forEach((dream) =>
-				dream.dreamSigns.forEach((sign, idx, arr) => {
+				dream.dreamSigns?.forEach((sign, idx, arr) => {
 					if (sign === oldName) {
 						arr[idx] = newName.toLowerCase().trim()
-						GDrive.doEntryEdit(entryCopy)
+						props.appdataSvc.doEntryEdit(entryCopy)
 						numUpdated++
 					}
 				})
 			)
 		})
 
+		await props.appdataSvc.doSaveDataFile()
+		alert(`Updated ${numUpdated} dreams`)
+		/*
 		GDrive.doSaveDataFile()
 			.then(() => {
 				alert(`Updated ${numUpdated} dreams`)
 			})
-			.catch((err) => alert(err))
+			.catch((err) => alert(err))*/
 	}
 
 	function doMassUpdateBedtime() {
+		/* TODO:
 		badBedTimes.forEach((entry) => {
 			entry.bedTime = '00:00'
 			GDrive.doEntryEdit(entry, entry.entryDate)
@@ -142,7 +147,7 @@ export default function TabAdmin(props: Props) {
 			.then(() => {
 				alert(`Updated ${badBedTimes.length} items`)
 			})
-			.catch((err) => alert(err))
+			.catch((err) => alert(err))*/
 	}
 
 	// -----------------------------------------------------------------------
@@ -214,7 +219,7 @@ export default function TabAdmin(props: Props) {
 						{dreamTagGroups
 							.filter(
 								(tagGrp) => !searchTerm || tagGrp.dreamSign.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1 || searchTerm.indexOf(tagGrp.dreamSign) > -1
-							)
+							)/* FIXME:
 							.sort((a, b) => {
 								if (filterSortOrder === FilterSortOrder.title) return a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
 								else if (filterSortOrder === FilterSortOrder.highlow)
@@ -233,7 +238,7 @@ export default function TabAdmin(props: Props) {
 											: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
 												? -1
 												: 1
-							})
+							})*/
 							.map((tagGrp, idx) => (
 								<div className='col' key={`keyTagGrp${idx}`}>
 									<DreamTagCard
@@ -315,7 +320,7 @@ export default function TabAdmin(props: Props) {
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<main className='container my-auto my-md-5'>
-			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
+			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} appdataSvc={props.appdataSvc} />
 			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 
 			<ul className='nav nav-tabs nav-fill' id='adminTab' role='tablist'>

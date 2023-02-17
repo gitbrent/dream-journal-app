@@ -4,8 +4,10 @@ import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveDat
 import { Search, Tag, Tags } from 'react-bootstrap-icons'
 import DreamTagCard from './dreamtag-card'
 import ModalEntry from '../modal-entry'
+import { appdata } from '../appdata'
 
 interface Props {
+	appdataSvc: appdata
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 }
@@ -37,7 +39,7 @@ enum FilterSortOrder {
 
 export default function BadgeEntries(props: Props) {
 	const [showModal, setShowModal] = useState(false)
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
+	const [currEntry, setCurrEntry] = useState<IJournalEntry>()
 	//
 	const [dreamTagGroups, setDreamTagGroups] = useState<IDreamSignTagGroup[]>([])
 	const [tagsByCat, setTagsByCat] = useState<IDreamTagByCat[]>([])
@@ -84,7 +86,7 @@ export default function BadgeEntries(props: Props) {
 				.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 				.forEach((entry) => {
 					entry.dreams.forEach((dream) => {
-						dream.dreamSigns.forEach((sign) => {
+						dream.dreamSigns?.forEach((sign) => {
 							const tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
 							if (tag) {
 								const existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
@@ -96,10 +98,11 @@ export default function BadgeEntries(props: Props) {
 						})
 						const currEntry = tmpOnlyDreams.filter((item) => item.entryDate === entry.entryDate)[0]
 						if (currEntry) {
+							const dsigns = dream.dreamSigns ? dream.dreamSigns : []
 							currEntry.dreams.push(dream)
-							currEntry.tags = [...currEntry.tags, ...dream.dreamSigns]
+							currEntry.tags = [...currEntry.tags, ...dsigns]
 						} else {
-							tmpOnlyDreams.push({ entryDate: entry.entryDate, dreams: [dream], tags: dream.dreamSigns })
+							tmpOnlyDreams.push({ entryDate: entry.entryDate, dreams: [dream], tags: dream.dreamSigns || [] })
 						}
 					})
 				})
@@ -203,6 +206,7 @@ export default function BadgeEntries(props: Props) {
 								return a.totalOccurs > b.totalOccurs ? -1 : a.totalOccurs < b.totalOccurs ? 1 : a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
 							else if (filterSortOrder === FilterSortOrder.lowhigh)
 								return a.totalOccurs < b.totalOccurs ? -1 : a.totalOccurs > b.totalOccurs ? 1 : a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase() ? -1 : 1
+							else return 0
 						})
 						.map((tagGrp, idx) => (
 							<DreamTagCard
@@ -211,7 +215,7 @@ export default function BadgeEntries(props: Props) {
 								setShowModal={(show: boolean) => setShowModal(show)}
 								tagGrp={tagGrp}
 								viewType={filterViewType}
-								doMassUpdateTag={null}
+								doMassUpdateTag={(oldTag: string, newTag: string) => true}
 							/>
 						))}
 				</div>
@@ -255,6 +259,7 @@ export default function BadgeEntries(props: Props) {
 															: a.dreamSign.toLowerCase() < b.dreamSign.toLowerCase()
 																? -1
 																: 1
+												else return 0
 											})
 											.map((tagGrp, idx) => (
 												<DreamTagCard
@@ -263,7 +268,7 @@ export default function BadgeEntries(props: Props) {
 													setShowModal={(show: boolean) => setShowModal(show)}
 													tagGrp={tagGrp}
 													viewType={filterViewType}
-													doMassUpdateTag={null}
+													doMassUpdateTag={(oldTag: string, newTag: string) => true}
 												/>
 											))}
 									</div>
@@ -316,7 +321,7 @@ export default function BadgeEntries(props: Props) {
 
 	return (
 		<section>
-			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} modalId='BadgeEntries' />
+			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} modalId='BadgeEntries' appdataSvc={props.appdataSvc} />
 			{renderFilters()}
 			{filterView === FilterView.group && renderGroupByCat()}
 			{filterView === FilterView.ungrp && renderTagUnGrp()}
