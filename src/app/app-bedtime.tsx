@@ -56,7 +56,7 @@ import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
 import SearchResults from './components/search-results'
 import ModalEntry from './modal-entry'
-import * as GDrive from './google-oauth'
+//import * as GDrive from './google-oauth'
 //import LocalAdminBrent from './z.admin.local'
 
 export interface Props {
@@ -68,9 +68,9 @@ export interface Props {
 export default function TabBedtime(props: Props) {
 	const [isBusySave, setIsBusySave] = useState(false)
 	const [showModal, setShowModal] = useState(false)
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
+	const [currEntry, setCurrEntry] = useState<IJournalEntry>()
 	const [currDreamIdx, setCurrDreamIdx] = useState(0)
-	const [lucidGoals, setLucidGoals] = useState<IConfMetaCats>(null)
+	const [lucidGoals, setLucidGoals] = useState<IConfMetaCats[]>()
 
 	useEffect(() => {
 		if (props?.confFile?.lucidGoals) setLucidGoals(props.confFile.lucidGoals)
@@ -175,7 +175,7 @@ export default function TabBedtime(props: Props) {
 							<div className='card-header bg-success h5 text-white'>Random Lucid Dreams</div>
 							<div className='card-body bg-black p-4'>
 								<div className='row row-cols-1 g-4'>
-									{randLucids.map((match, idx) => (
+									{randLucids?.map((match, idx) => (
 										<SearchResults
 											key={`random${idx}`}
 											setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
@@ -199,9 +199,9 @@ export default function TabBedtime(props: Props) {
 			<LightningFill key='icon1' size={20} className='me-2' />,
 			<ShieldFillCheck key='icon2' size={20} className='me-2' />,
 			<StarFill key='icon3' size={20} className='me-2' />,
-			<BrightnessHighFill key='icon4'  size={20} className='me-2' />,
-			<HeartFill key='icon5'  size={20} className='me-2' />,
-			<Translate key='icon6'  size={20} className='me-2' />,
+			<BrightnessHighFill key='icon4' size={20} className='me-2' />,
+			<HeartFill key='icon5' size={20} className='me-2' />,
+			<Translate key='icon6' size={20} className='me-2' />,
 		]
 
 		return (
@@ -231,74 +231,72 @@ export default function TabBedtime(props: Props) {
 					</div>
 				</div>
 
-				{lucidGoals &&
-					lucidGoals.bullets &&
-					lucidGoals.bullets.map((item, idx) => (
-						<div key={`goal${idx}`} className='row g-2 align-items-center mb-3'>
-							<div className='col-auto'>
-								<div className='btn-group border' role='group'>
-									<button
-										type='button'
-										className='btn btn-light py-1'
-										disabled={isBusySave || idx === 0}
-										title='move up'
-										aria-label='move up'
-										onClick={() => {
-											const chgItem = { ...lucidGoals }
-											chgItem.bullets.splice(idx - 1, 0, chgItem.bullets.splice(idx, 1)[0])
-											setLucidGoals(chgItem)
-										}}>
-										<ArrowUp />
-									</button>
-									<button
-										type='button'
-										className='btn btn-light py-1'
-										disabled={isBusySave || idx === lucidGoals.bullets.length - 1}
-										title='move down'
-										aria-label='move down'
-										onClick={() => {
-											const chgItem = { ...lucidGoals }
-											chgItem.bullets.splice(idx + 1, 0, chgItem.bullets.splice(idx, 1)[0])
-											setLucidGoals(chgItem)
-										}}>
-										<ArrowDown />
-									</button>
-								</div>
-							</div>
-							<div className='col'>
-								<input
-									type='text'
-									disabled={isBusySave}
-									value={item}
-									onChange={(ev) => {
-										const chgItem = { ...lucidGoals }
-										chgItem.bullets[idx] = ev.currentTarget.value
-										setLucidGoals(chgItem)
-									}}
-									className='form-control'
-								/>
-							</div>
-							<div className='col-auto'>
-								<div className='btn-group border' role='group'>
-									<button
-										type='button'
-										className='btn btn-light py-1'
-										disabled={isBusySave}
-										title='delete goal'
-										aria-label='delete goal'
-										onClick={() => {
-											if (confirm(`Delete Goal ${idx + 1}?`)) {
-												const chgItem = { ...lucidGoals }
-												chgItem.bullets.splice(idx, 1)
-												setLucidGoals(chgItem)
-											}
-										}}>
-										<Trash />
-									</button>
-								</div>
+				{lucidGoals && lucidGoals[0]?.bullets?.map((item, idx) => (
+					<div key={`goal${idx}`} className='row g-2 align-items-center mb-3'>
+						<div className='col-auto'>
+							<div className='btn-group border' role='group'>
+								<button
+									type='button'
+									className='btn btn-light py-1'
+									disabled={isBusySave || idx === 0}
+									title='move up'
+									aria-label='move up'
+									onClick={() => {
+										const chgItem = [...lucidGoals][0]
+										chgItem?.bullets.splice(idx - 1, 0, chgItem.bullets.splice(idx, 1)[0])
+										setLucidGoals([chgItem])
+									}}>
+									<ArrowUp />
+								</button>
+								<button
+									type='button'
+									className='btn btn-light py-1'
+									disabled={isBusySave || idx === lucidGoals[0]?.bullets.length - 1}
+									title='move down'
+									aria-label='move down'
+									onClick={() => {
+										const chgItem = [...lucidGoals][0]
+										chgItem?.bullets.splice(idx - 1, 0, chgItem.bullets.splice(idx, 1)[0])
+										setLucidGoals([chgItem])
+									}}>
+									<ArrowDown />
+								</button>
 							</div>
 						</div>
-					))}
+						<div className='col'>
+							<input
+								type='text'
+								disabled={isBusySave}
+								value={item}
+								onChange={() => {
+									const chgItem = [...lucidGoals][0]
+									chgItem?.bullets.splice(idx - 1, 0, chgItem.bullets.splice(idx, 1)[0])
+									setLucidGoals([chgItem])
+								}}
+								className='form-control'
+							/>
+						</div>
+						<div className='col-auto'>
+							<div className='btn-group border' role='group'>
+								<button
+									type='button'
+									className='btn btn-light py-1'
+									disabled={isBusySave}
+									title='delete goal'
+									aria-label='delete goal'
+									onClick={() => {
+										if (confirm(`Delete Goal ${idx + 1}?`)) {
+											const chgItem = [...lucidGoals][0]
+											chgItem?.bullets.splice(idx, 1)
+											setLucidGoals([chgItem])
+										}
+									}}>
+									<Trash />
+								</button>
+							</div>
+						</div>
+					</div>
+				))}
 
 				<div className='row justify-content-center mb-0'>
 					<div className='col-auto text-center'>
@@ -306,9 +304,11 @@ export default function TabBedtime(props: Props) {
 							className='btn btn-primary'
 							title='Add Goal'
 							onClick={() => {
-								const chgItem = { ...lucidGoals }
-								chgItem.bullets.push('')
-								setLucidGoals(chgItem)
+								const chgItem = typeof lucidGoals !== 'undefined' ? { ...lucidGoals[0] } : null
+								if (chgItem) {
+									chgItem.bullets.push('')
+									setLucidGoals([chgItem])
+								}
 							}}>
 							<PlusSquare size='16' className='me-2' />
 							Add
@@ -319,10 +319,13 @@ export default function TabBedtime(props: Props) {
 							className='btn btn-success'
 							title='Save Goals'
 							onClick={async () => {
+								console.log('TODO: GSI')
+								/*
 								setIsBusySave(true)
 								GDrive.doEditConf_LucidGoals(lucidGoals)
 								await GDrive.doSaveConfFile()
 								setIsBusySave(false)
+								*/
 							}}>
 							<Save size='16' className='me-2' />
 							Save

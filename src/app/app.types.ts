@@ -98,7 +98,7 @@ export interface IDriveConfFile {
 	_isSaving: boolean
 	id: string
 	dreamIdeas: IConfMetaCats[]
-	lucidGoals: IConfMetaCats
+	lucidGoals: IConfMetaCats[] // always has 1 item
 	mildAffirs: IConfMetaCats[]
 	tagTypeAW: string[]
 	tagTypeCO: string[]
@@ -128,7 +128,7 @@ export interface IJournalDream {
 	dreamSigns?: string[]
 	dreamImages?: string[]
 	isLucidDream: boolean
-	lucidMethod: InductionTypes
+	lucidMethod?: InductionTypes
 }
 
 /**
@@ -147,7 +147,7 @@ export interface IJournalEntry {
 	bedTime?: string
 	notesPrep?: string
 	notesWake?: string
-	dreams?: IJournalDream[]
+	dreams: IJournalDream[]
 }
 
 export interface IDreamSignTag {
