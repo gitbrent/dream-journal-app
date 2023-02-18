@@ -4,7 +4,7 @@
  * @see https://developers.google.com/drive/api/guides/fields-parameter
  * @see https://developers.google.com/drive/api/v3/reference/files/get
  */
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
 import { IDriveDataFile, IDriveConfFile, IAuthState, AuthState } from './app.types'
 import TabHome from '../app/app-home'
@@ -45,9 +45,8 @@ export default function AppMain() {
 		name: '',
 		size: '',
 	}
-	const isBusyLoad = false
-	// TODO: const [isBusyLoad, setIsBusyLoad] = useState(false)
 	//??? const [editEntry, setEditEntry] = useState<IJournalEntry>()
+	const [isBusyLoad, setIsBusyLoad] = useState(true)
 	const [isDataSvcLoaded, setIsDataSvcLoaded] = useState(false)
 	const [appdataSvc, setAppdataSvc] = useState<appdata>()
 	const [authState, setAuthState] = useState<IAuthState>(DEF_AUTH_STATE)
@@ -60,21 +59,13 @@ export default function AppMain() {
 	}, [])
 
 	useEffect(() => {
-		console.log(`${appdataSvc} && ${isDataSvcLoaded}`) // FIXME:
-
 		if (appdataSvc && isDataSvcLoaded) {
-			console.log(appdataSvc.authState)
-
 			setAuthState(appdataSvc.authState)
 			setConfFile(appdataSvc.confFile)
 			setDataFile(appdataSvc.dataFile)
+			setIsBusyLoad(false)
 		}
 	}, [appdataSvc, isDataSvcLoaded])
-
-	useEffect(() => {
-		console.log('FUCK')
-		console.log(authState)
-	}, [authState])
 
 	const Home = () => (<TabHome dataFile={dataFile} isBusyLoad={isBusyLoad} authState={authState} appdataSvc={appdataSvc} />)
 	const Bedtime = () => (<TabBedtime confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
