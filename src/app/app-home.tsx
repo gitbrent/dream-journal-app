@@ -35,10 +35,10 @@ import ModalEntry from './modal-entry'
 import { appdata } from './appdata'
 
 interface Props {
-	authState?: IAuthState
-	dataFile?: IDriveDataFile
-	isBusyLoad: boolean
 	appdataSvc: appdata
+	authState: IAuthState
+	dataFile: IDriveDataFile
+	isBusyLoad: boolean
 }
 
 export default function TabHome(props: Props) {

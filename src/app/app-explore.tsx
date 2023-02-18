@@ -50,7 +50,7 @@ import { appdata } from './appdata'
 
 export interface Props {
 	appdataSvc: appdata
-	confFile: IDriveConfFile
+	confFile?: IDriveConfFile
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
 }

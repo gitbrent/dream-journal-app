@@ -49,24 +49,32 @@ export default function AppMain() {
 	// TODO: const [isBusyLoad, setIsBusyLoad] = useState(false)
 	//??? const [editEntry, setEditEntry] = useState<IJournalEntry>()
 	const [isDataSvcLoaded, setIsDataSvcLoaded] = useState(false)
-	let appdataSvc: appdata
+	const [appdataSvc, setAppdataSvc] = useState<appdata>()
+	const [authState, setAuthState] = useState<IAuthState>(DEF_AUTH_STATE)
+	const [confFile, setConfFile] = useState<IDriveConfFile>(DEF_CONF_FILE)
+	const [dataFile, setDataFile] = useState<IDriveDataFile>(DEF_DATA_FILE)
 
 	/** load gapi script on startup */
 	useEffect(() => {
-		if (!appdataSvc) appdataSvc = new appdata(() => setIsDataSvcLoaded(true))
+		if (!appdataSvc) setAppdataSvc(new appdata(() => setIsDataSvcLoaded(true)))
 	}, [])
 
-	const authState = useMemo(() => {
-		return (isDataSvcLoaded) ? appdataSvc?.authState : DEF_AUTH_STATE
-	}, [isDataSvcLoaded])
+	useEffect(() => {
+		console.log(`${appdataSvc} && ${isDataSvcLoaded}`) // FIXME:
 
-	const confFile = useMemo(() => {
-		return (isDataSvcLoaded) ? appdataSvc?.confFile : DEF_CONF_FILE
-	}, [isDataSvcLoaded])
+		if (appdataSvc && isDataSvcLoaded) {
+			console.log(appdataSvc.authState)
 
-	const dataFile = useMemo(() => {
-		return (isDataSvcLoaded) ? appdataSvc?.dataFile : DEF_DATA_FILE
-	}, [isDataSvcLoaded])
+			setAuthState(appdataSvc.authState)
+			setConfFile(appdataSvc.confFile)
+			setDataFile(appdataSvc.dataFile)
+		}
+	}, [appdataSvc, isDataSvcLoaded])
+
+	useEffect(() => {
+		console.log('FUCK')
+		console.log(authState)
+	}, [authState])
 
 	const Home = () => (<TabHome dataFile={dataFile} isBusyLoad={isBusyLoad} authState={authState} appdataSvc={appdataSvc} />)
 	const Bedtime = () => (<TabBedtime confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
