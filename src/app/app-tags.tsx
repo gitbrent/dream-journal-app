@@ -178,10 +178,11 @@ export default function TabTags(props: IAppTagsProps) {
 					const currEntry = tmpOnlyDreams.filter((item) => item.entryDate === entry.entryDate)[0]
 
 					if (currEntry) {
+						const dsigns = dream.dreamSigns ? dream.dreamSigns : []
 						currEntry.dreams.push(dream)
-						currEntry.tags = [...currEntry.tags, ...dream.dreamSigns]
+						currEntry.tags = [...currEntry.tags, ...dsigns]
 					} else {
-						tmpOnlyDreams.push({ entryDate: entry.entryDate, dreams: [dream], tags: dream.dreamSigns })
+						tmpOnlyDreams.push({ entryDate: entry.entryDate, dreams: [dream], tags: dream.dreamSigns || [] })
 					}
 				})
 			})
@@ -336,7 +337,7 @@ export default function TabTags(props: IAppTagsProps) {
 						<ResponsiveContainer width='100%' height='100%'>
 							<BarChart
 								data={chartDataTags}
-								onClick={(data) => setTagChartClickedIdx(data && data.activeTooltipIndex !== null ? data.activeTooltipIndex : null)}>
+								onClick={(data) => setTagChartClickedIdx(data?.activeTooltipIndex || 0)}>
 								<XAxis dataKey='name' fontSize={'0.75rem'} interval='preserveStartEnd' />
 								<YAxis type='number' fontSize={'0.75rem'} />
 								<CartesianGrid stroke='#5c5c5c' strokeDasharray='6 2' vertical={false} />
@@ -349,7 +350,7 @@ export default function TabTags(props: IAppTagsProps) {
 				)}
 				{chartDataTags && chartDataTags.length > 0 && typeof tagChartClickedIdx !== null && (
 					<section className='bg-black p-4'>
-						<TableEntries entries={tagChartClkEntries} isBusyLoad={props.isBusyLoad} />
+						<TableEntries entries={tagChartClkEntries} isBusyLoad={props.isBusyLoad} appdataSvc={props.appdataSvc} />
 					</section>
 				)}
 			</section>
@@ -402,7 +403,7 @@ export default function TabTags(props: IAppTagsProps) {
 					{renderTagsByYear()}
 				</div>
 				<div className='tab-pane bg-light p-4' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
-					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} appDataSvc={props.appDataSvc} />
+					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} appdataSvc={props.appdataSvc} />
 				</div>
 				<div className='tab-pane bg-light p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
 					{renderTabTags()}

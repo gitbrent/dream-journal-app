@@ -32,15 +32,17 @@ import { IJournalEntry, MetaType } from '../app.types'
 import { CheckCircleFill, Diagram3Fill, SortDownAlt, SortUpAlt, StarFill } from 'react-bootstrap-icons'
 import ModalEntry from '../modal-entry'
 import ReactPaginate from 'react-paginate'
+import { appdata } from '../appdata'
 
 interface Props {
+	appdataSvc: appdata
 	entries: IJournalEntry[]
 	isBusyLoad: boolean
 }
 
 export default function TableEntries(props: Props) {
 	const [showModal, setShowModal] = useState(false)
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>(null)
+	const [currEntry, setCurrEntry] = useState<IJournalEntry>()
 	//
 	const [pagingCurrIdx, setPagingCurrIdx] = useState(0)
 	const [pagingPageSize, setPagingPageSize] = useState(10)
@@ -52,7 +54,7 @@ export default function TableEntries(props: Props) {
 
 	return (
 		<section>
-			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} />
+			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} appdataSvc={props.appdataSvc} />
 
 			<table className='table table-sm mb-4'>
 				<thead className='thead'>
@@ -114,7 +116,7 @@ export default function TableEntries(props: Props) {
 										</div>
 									</td>
 									<td className='align-middle text-center'>
-										{entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === MetaType.star)).length > 0 && (
+										{entry.dreams.filter((dream) => dream.dreamSigns?.some((tag) => tag === MetaType.star)).length > 0 && (
 											<StarFill size='24' className='text-warning' />
 										)}
 									</td>

@@ -19,6 +19,9 @@ import TabImport from '../app/app-import'
 import LogoBase64 from '../img/logo_base64'
 import { appdata } from './appdata'
 
+// TODO: create a modal here, then pass it everywhere (https://stackoverflow.com/a/65522446) also (https://stackoverflow.com/a/62503461)
+// ....: then we can stop passing dataSvc around!
+
 export default function AppMain() {
 	const DEF_AUTH_STATE: IAuthState = {
 		status: AuthState.Unauthenticated,
@@ -26,8 +29,6 @@ export default function AppMain() {
 		userPhoto: '',
 	}
 	const DEF_CONF_FILE: IDriveConfFile = {
-		_isLoading: false,
-		_isSaving: false,
 		id: '',
 		dreamIdeas: [],
 		lucidGoals: [],
@@ -38,8 +39,6 @@ export default function AppMain() {
 		tagTypeAC: [],
 	}
 	const DEF_DATA_FILE: IDriveDataFile = {
-		_isLoading: false,
-		_isSaving: false,
 		id: '',
 		entries: [],
 		modifiedTime: '',
@@ -71,8 +70,8 @@ export default function AppMain() {
 
 	const Home = () => (<TabHome dataFile={dataFile} isBusyLoad={isBusyLoad} authState={authState} appdataSvc={appdataSvc} />)
 	const Bedtime = () => (<TabBedtime confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
-	const Explore = () => (<TabExplore confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} />)
-	const Journal = () => (<TabJournal dataFile={dataFile} isBusyLoad={isBusyLoad} />)
+	const Explore = () => (<TabExplore confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
+	const Journal = () => (<TabJournal dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
 	const Search = () => (<TabSearch dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
 	const Tags = () => (<TabTags dataFile={dataFile || null} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
 	const Import = () => <TabImport dataFile={dataFile} appdataSvc={appdataSvc} />

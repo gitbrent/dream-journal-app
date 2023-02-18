@@ -41,48 +41,50 @@ interface Props {
 
 export default function HeaderMetrics(props: Props) {
 	const dataEntries = useMemo(() => {
-		return (props.dataFile && props.dataFile.entries) || props.entries ? props.entries || props.dataFile.entries : []
+		return (props.dataFile && props.dataFile.entries) || props.entries ? props.entries || props.dataFile?.entries : []
 	}, [props.dataFile, props.entries])
 
 	const totalMonths = useMemo(() => {
-		let ad1 = DateTime.fromISO(dataEntries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
-		let ad2 = DateTime.fromISO(dataEntries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
+		if (!dataEntries || dataEntries.length === 0) return 0
+		const ad1 = DateTime.fromISO(dataEntries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate || '')
+		const ad2 = DateTime.fromISO(dataEntries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate || '')
 		return Math.round(ad2.diff(ad1, 'months').months) + 1
 	}, [dataEntries])
 
 	const totalYears = useMemo(() => {
-		let ad1 = DateTime.fromISO(dataEntries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
-		let ad2 = DateTime.fromISO(dataEntries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
+		if (!dataEntries || dataEntries.length === 0) return 0
+		const ad1 = DateTime.fromISO(dataEntries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate || '')
+		const ad2 = DateTime.fromISO(dataEntries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate || '')
 		return (Math.round(ad2.diff(ad1, 'months').months) + 1) / 12
 	}, [dataEntries])
 
 	const totalDreams = useMemo(() => {
-		return dataEntries.map((entry) => entry.dreams.length).reduce((a, b) => a + b)
+		return (!dataEntries || dataEntries.length === 0) ? 0 : dataEntries.map((entry) => entry.dreams.length).reduce((a, b) => a + b) || 0
 	}, [dataEntries])
 
 	const totalLucids = useMemo(() => {
-		return dataEntries.map((entry) => entry.dreams.filter((dream) => dream.isLucidDream).length).reduce((a, b) => a + b)
+		return (!dataEntries || dataEntries.length === 0) ? 0 : dataEntries.map((entry) => entry.dreams.filter((dream) => dream.isLucidDream).length).reduce((a, b) => a + b) || 0
 	}, [dataEntries])
 
 	const totalStarred = useMemo(() => {
-		return dataEntries.map((entry) => entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === MetaType.star)).length).reduce((a, b) => a + b)
+		return (!dataEntries || dataEntries.length === 0) ? 0 : dataEntries?.map((entry) => entry.dreams.filter((dream) => dream.dreamSigns?.some((tag) => tag === MetaType.star)).length).reduce((a, b) => a + b) || 0
 	}, [dataEntries])
 
 	const totalUntagged = useMemo(() => {
-		return dataEntries.map((entry) => entry.dreams.filter((dream) => dream.dreamSigns.length === 0).length).reduce((a, b) => a + b)
+		return (!dataEntries || dataEntries.length === 0) ? 0 : dataEntries?.map((entry) => entry.dreams.filter((dream) => dream.dreamSigns?.length === 0).length).reduce((a, b) => a + b) || 0
 	}, [dataEntries])
 
 	const totalDreamSigns = useMemo(() => {
-		let tagGroups: IDreamSignTagGroup[] = []
+		const tagGroups: IDreamSignTagGroup[] = []
+		if (!dataEntries || dataEntries.length === 0) return 0
 
-		dataEntries
-			.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
+		dataEntries.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 			.forEach((entry) => {
 				entry.dreams.forEach((dream) =>
-					dream.dreamSigns.forEach((sign) => {
-						let tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
+					dream.dreamSigns?.forEach((sign) => {
+						const tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
 						if (tag) {
-							let existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
+							const existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
 							if (!existingEntry) tag.dailyEntries.push(entry)
 							tag.totalOccurs++
 						} else {
@@ -115,7 +117,7 @@ export default function HeaderMetrics(props: Props) {
 					<h6 className='text-teal text-uppercase mb-0'>Dreams</h6>
 					<h1 className='text-teal display-5 mb-0'>{totalDreams || '-'}</h1>
 					{props.showStats && (
-						<div className='badge rounded-pill bg-teal w-100'>{totalMonths * 30 > 0 ? (totalDreams / dataEntries.length).toFixed(2) + ' / day' : '-'}</div>
+						<div className='badge rounded-pill bg-teal w-100'>{totalMonths * 30 > 0 ? (totalDreams / (dataEntries || []).length).toFixed(2) + ' / day' : '-'}</div>
 					)}
 				</div>
 				<div className='col text-center d-none d-md-block'>
@@ -125,9 +127,9 @@ export default function HeaderMetrics(props: Props) {
 				</div>
 				<div className='col text-center d-none d-md-block'>
 					<h6 className='text-primary text-uppercase mb-0'>Days</h6>
-					<h1 className='text-primary display-5 mb-0'>{dataEntries.length || '-'}</h1>
+					<h1 className='text-primary display-5 mb-0'>{(dataEntries || []).length || '-'}</h1>
 					{props.showStats && (
-						<div className='badge rounded-pill bg-primary w-100'>{totalMonths * 30 > 0 ? (dataEntries.length / totalMonths).toFixed(2) + ' / mon' : '-'}</div>
+						<div className='badge rounded-pill bg-primary w-100'>{totalMonths * 30 > 0 ? ((dataEntries || []).length / totalMonths).toFixed(2) + ' / mon' : '-'}</div>
 					)}
 				</div>
 				<div className='col text-center'>
@@ -165,5 +167,5 @@ export default function HeaderMetrics(props: Props) {
 		)
 	}
 
-	return <header>{props.onlyMetrics ? renderBody() : renderFull()}</header>
+	return <header>{!props.entries || !props.dataFile ? <div /> : props.onlyMetrics ? renderBody() : renderFull()}</header>
 }

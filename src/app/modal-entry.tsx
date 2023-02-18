@@ -45,7 +45,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 	/** Set/Clear Entry */
 	useEffect(() => {
 		setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry]
-		setUniqueTags(props.appdataSvc.getUniqueDreamTags())
+		if (props.appdataSvc) setUniqueTags(props.appdataSvc.getUniqueDreamTags())
 
 		if (modal) {
 			if (props.showModal) modal.show()

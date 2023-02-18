@@ -44,9 +44,9 @@ export class googlegsi {
 	private clientCallback: () => void
 	private signedInUser = '(none)'
 	private isAuthorized = false
-	private gapiDataFile: IGapiFile
-	private gapiConfFile: IGapiFile
 	private tokenResponse: TokenResponse
+	private gapiConfFile: IGapiFile
+	private gapiDataFile: IGapiFile
 	private driveConfFile: IDriveConfFile
 	private driveDataFile: IDriveDataFile
 
@@ -56,8 +56,6 @@ export class googlegsi {
 		this.loadGsiScript()
 
 		this.driveConfFile = {
-			_isLoading: false,
-			_isSaving: false,
 			id: '',
 			dreamIdeas: [],
 			lucidGoals: [],
@@ -243,13 +241,16 @@ export class googlegsi {
 		}
 
 		// B:
-		this.driveConfFile.dreamIdeas = json['dreamIdeas'] || []
-		this.driveConfFile.lucidGoals = json['lucidGoals'] || []
-		this.driveConfFile.mildAffirs = json['mildAffirs'] || []
-		this.driveConfFile.tagTypeAW = json['tagTypeAW'] || []
-		this.driveConfFile.tagTypeCO = json['tagTypeCO'] || []
-		this.driveConfFile.tagTypeFO = json['tagTypeFO'] || []
-		this.driveConfFile.tagTypeAC = json['tagTypeAC'] || []
+		this.driveConfFile = {
+			id: this.gapiConfFile.id,
+			dreamIdeas: json['dreamIdeas'] || [],
+			lucidGoals: json['lucidGoals'] || [],
+			mildAffirs: json['mildAffirs'] || [],
+			tagTypeAW: json['tagTypeAW'] || [],
+			tagTypeCO: json['tagTypeCO'] || [],
+			tagTypeFO: json['tagTypeFO'] || [],
+			tagTypeAC: json['tagTypeAC'] || [],
+		}
 	}
 
 	/**
@@ -281,8 +282,6 @@ export class googlegsi {
 
 		// B:
 		this.driveDataFile = {
-			_isLoading: false,
-			_isSaving: false,
 			id: this.gapiDataFile.id,
 			entries: entries || [],
 			modifiedTime: this.gapiDataFile.modifiedDate,

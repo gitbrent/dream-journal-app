@@ -7,8 +7,6 @@ import { googlegsi } from './googlegsi'
 
 export class appdata {
 	private readonly DEF_CONF_FILE: IDriveConfFile = {
-		_isLoading: false,
-		_isSaving: false,
 		id: '',
 		dreamIdeas: [],
 		lucidGoals: [],
@@ -19,8 +17,6 @@ export class appdata {
 		tagTypeAC: [],
 	}
 	private readonly DEF_DATA_FILE: IDriveDataFile = {
-		_isLoading: false,
-		_isSaving: false,
 		id: '',
 		entries: [],
 		modifiedTime: '',

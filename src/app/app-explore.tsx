@@ -34,6 +34,7 @@ import { DateTime } from 'luxon'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
 import TableEntries from './components/table-entries'
+import { appdata } from './appdata'
 
 /**
  * TODO:
@@ -48,6 +49,7 @@ import TableEntries from './components/table-entries'
  */
 
 export interface Props {
+	appdataSvc: appdata
 	confFile: IDriveConfFile
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
@@ -69,7 +71,7 @@ interface IChartData {
 	totLucid: number
 	totStard: number
 	totTaged: number
-	totNotag?: number
+	totNotag: number
 	avgTotal: number
 }
 type AvgDreamsPerMonth = {
@@ -183,10 +185,10 @@ export default function TabExplore(props: Props) {
 			const currEntry = tmpChartData.filter((data) => data.dateTime.hasSame(dateEntry, 'month') && data.dateTime.hasSame(dateEntry, 'year'))[0]
 
 			entry.dreams.forEach((dream) => {
-				currEntry.totTaged += dream.dreamSigns.length > 0 ? 1 : 0
-				currEntry.totNotag += dream.dreamSigns.length > 0 ? 0 : 1
+				currEntry.totTaged += dream.dreamSigns && dream.dreamSigns.length > 0 ? 1 : 0
+				currEntry.totNotag += dream.dreamSigns && dream.dreamSigns.length > 0 ? 0 : 1
 				currEntry.totLucid += dream.isLucidDream ? 1 : 0
-				currEntry.totStard += dream.dreamSigns.filter((tag) => tag === MetaType.star).length > 0 ? 1 : 0
+				currEntry.totStard += dream.dreamSigns ? (dream.dreamSigns?.filter((tag) => tag === MetaType.star).length > 0 ? 1 : 0) : 0
 				currEntry.avgTotal = avgDreamsPerMonth[currEntry.dateTime.toFormat('yyyy-MM')]
 			})
 		})
@@ -326,7 +328,7 @@ export default function TabExplore(props: Props) {
 	function renderTable(): JSX.Element {
 		return (
 			<section className='bg-black p-4'>
-				<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} />
+				<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} appdataSvc={props.appdataSvc} />
 			</section>
 		)
 	}

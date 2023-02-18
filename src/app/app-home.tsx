@@ -113,7 +113,7 @@ export default function TabHome(props: Props) {
 	}
 
 	function renderCardDataFile(): JSX.Element {
-		return props.dataFile && (props.dataFile._isSaving || props.dataFile._isLoading || props.isBusyLoad) ? (
+		return props.dataFile && (props.isBusyLoad) ? (
 			<div className='text-center'>
 				<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
 					<span className='visually-hidden' />

@@ -94,8 +94,6 @@ export interface IAuthState {
  * Google Drive Conf file in JSON format
  */
 export interface IDriveConfFile {
-	_isLoading: boolean
-	_isSaving: boolean
 	id: string
 	dreamIdeas: IConfMetaCats[]
 	lucidGoals: IConfMetaCats[] // always has 1 item
@@ -109,8 +107,6 @@ export interface IDriveConfFile {
  * Google Drive Data file in JSON format
  */
 export interface IDriveDataFile {
-	_isLoading: boolean
-	_isSaving: boolean
 	id: string
 	entries: IJournalEntry[]
 	modifiedTime: string
