@@ -39,6 +39,8 @@ export class appdata {
 		this.driveAuthState = this.googleapi?.authState
 		this.driveConfFile = this.googleapi?.confFile
 		this.driveDataFile = this.googleapi?.dataFile
+		// setup done, so continue
+		this.clientCallback()
 	}
 
 	//#region getters

@@ -36,6 +36,8 @@ declare global {
 	}
 }
 
+// TODO: 20220217: were curreently using `initGsiCallback` to await/process all load logic... move to an top-level method instead
+
 export class googlegsi {
 	private readonly GAPI_CLIENT_ID = process.env.REACT_APP_GOOGLE_DRIVE_CLIENT_ID || ''
 	private readonly GAPI_API_KEY = process.env.REACT_APP_GOOGLE_DRIVE_API_KEY || ''
@@ -52,9 +54,6 @@ export class googlegsi {
 
 	constructor(callbackFunc: (() => void)) {
 		this.clientCallback = callbackFunc
-		this.loadGapiScript()
-		this.loadGsiScript()
-
 		this.driveConfFile = {
 			id: '',
 			dreamIdeas: [],
@@ -65,6 +64,9 @@ export class googlegsi {
 			tagTypeFO: [],
 			tagTypeAC: [],
 		}
+
+		this.loadGapiScript()
+		this.loadGsiScript()
 	}
 
 	//#region GAPI
@@ -79,13 +81,13 @@ export class googlegsi {
 	}
 
 	private initGapiClient = async () => {
-		await gapi.client.init({
+		return await gapi.client.init({
 			apiKey: this.GAPI_API_KEY,
 			clientId: this.GAPI_CLIENT_ID,
 			scope: this.GAPI_SCOPES,
 			discoveryDocs: this.GAPI_DISC_DOCS
 		})
-		this.updateSigninStatus()
+
 	}
 	//#endregion
 
@@ -125,12 +127,13 @@ export class googlegsi {
 		 */
 		const responsePayload = decodeJwt(response.credential)
 		if (IS_LOCALHOST) {
-			console.log('ID: ' + responsePayload.sub)
-			console.log('Full Name: ' + responsePayload.name)
-			console.log('Given Name: ' + responsePayload.given_name)
-			console.log('Family Name: ' + responsePayload.family_name)
-			console.log('Image URL: ' + responsePayload.picture)
-			console.log('Email: ' + responsePayload.email)
+			console.log('GSI-STEP-1: responsePayload:')
+			console.log('- ID.........: ' + responsePayload.sub)
+			// console.log('- Full Name..: ' + responsePayload.name)
+			// console.log('- Given Name.: ' + responsePayload.given_name)
+			// console.log('- Family Name: ' + responsePayload.family_name)
+			// console.log('- Image URL..: ' + responsePayload.picture)
+			// console.log('- Email......: ' + responsePayload.email)
 
 			// TODO: create interface
 			/*
@@ -153,11 +156,24 @@ export class googlegsi {
 			*/
 		}
 
-		// A: set signedf in user
+		// A: set signed in user
 		this.signedInUser = responsePayload?.name?.toString() || ''
+		if (IS_LOCALHOST) console.log('this.signedInUser', this.signedInUser)
 
 		// B: now that gsi is init and user is signed-in, get access token
-		this.tokenFlow()
+		if (IS_LOCALHOST) console.log('GSI-STEP-2: tokenFlow()')
+		await this.tokenFlow()
+		if (IS_LOCALHOST) console.log(`tokenFlow() = ${this.tokenResponse} `)
+
+		// C: now that token exists, setup gapi so we can use Drive API's with the token from prev step
+		if (IS_LOCALHOST) console.log('GSI-STEP-3: initGapiClient()')
+		await this.initGapiClient()
+
+		// D:
+		await this.updateSigninStatus()
+
+		// FINALLY: callback to notify class/data is loaded
+		this.clientCallback()
 	}
 
 	/**
@@ -166,19 +182,19 @@ export class googlegsi {
 	 * @see https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#token_request
 	 */
 	private tokenFlow = async () => {
-		const client = window.google.accounts.oauth2.initTokenClient({
-			client_id: this.GAPI_CLIENT_ID,
-			scope: this.GAPI_SCOPES,
-			callback: (tokenResponse: TokenResponse) => {
-				// A: capture token
-				this.tokenResponse = tokenResponse
-				if (IS_LOCALHOST) console.log('this.tokenResponse', this.tokenResponse)
-
-				// B: now that gsi is init and user is signed-in, setup gapi so we can use Drive API's with the token from prev step
-				this.initGapiClient()
-			},
+		return new Promise((resolveOuter) => {
+			const client = window.google.accounts.oauth2.initTokenClient({
+				client_id: this.GAPI_CLIENT_ID,
+				scope: this.GAPI_SCOPES,
+				callback: (tokenResponse: TokenResponse) => {
+					// A: capture token
+					this.tokenResponse = tokenResponse
+					if (IS_LOCALHOST) console.log('tokenResponse', this.tokenResponse.token_type)
+					resolveOuter(true)
+				},
+			})
+			client.requestAccessToken()
 		})
-		client.requestAccessToken()
 	}
 	//#endregion
 
@@ -189,15 +205,16 @@ export class googlegsi {
 	private updateSigninStatus = async () => {
 		// A: set auth status
 		this.isAuthorized = window.google.accounts.oauth2.hasGrantedAllScopes(this.tokenResponse, this.GAPI_SCOPES) || false
-		if (IS_LOCALHOST) console.log('this.isAuthorized', this.isAuthorized)
+		if (IS_LOCALHOST) {
+			if (!this.isAuthorized) console.warn('Unauthorized?!')
+			else console.log('this.isAuthorized', this.isAuthorized)
+		}
 
-		if (this.isAuthorized) {
-			this.listFiles()
-		}
-		else {
-			// B: callback to notify signin complete
-			this.clientCallback()
-		}
+		// B: download app files if authorized
+		if (this.isAuthorized) await this.listFiles()
+
+		// C:
+		return
 	}
 
 	//#region file operations
@@ -217,7 +234,13 @@ export class googlegsi {
 
 		if (this.gapiConfFile) await this.downloadConfFile()
 		if (this.gapiDataFile) await this.downloadDataFile()
-		this.clientCallback()
+
+		if (IS_LOCALHOST) {
+			console.log('both data files loaded')
+			console.log(`entries.length: ${this.driveDataFile.entries.length}`)
+		}
+
+		return
 	}
 
 	private downloadConfFile = async () => {
@@ -251,6 +274,9 @@ export class googlegsi {
 			tagTypeFO: json['tagTypeFO'] || [],
 			tagTypeAC: json['tagTypeAC'] || [],
 		}
+
+		// C: fulfill promise
+		return
 	}
 
 	/**
