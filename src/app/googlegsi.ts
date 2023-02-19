@@ -84,14 +84,13 @@ export class googlegsi {
 		// STEP 1: now that gsi is init and user is signed-in, get access token
 		if (IS_LOCALHOST) console.log('\nGSI-STEP-2: tokenFlow() --------------')
 		await this.tokenFlow()
-		if (IS_LOCALHOST) console.log(`- tokenResponse.token_type = ${this.tokenResponse?.token_type} `)
 
 		// STEP 2: now that token exists, setup gapi so we can use Drive API's with the token from prev step
 		if (IS_LOCALHOST) console.log('\nGSI-STEP-3: initGapiClient() ---------')
 		await this.initGapiClient()
 
 		// STEP 3: checks user scopes, sets `isAuthorized`
-		if (IS_LOCALHOST) console.log('\nGSI-STEP-4: updateSigninStatus() -----')
+		if (IS_LOCALHOST) console.log('\nGSI-STEP-4: updateUserAuthStatus() ---')
 		await this.updateUserAuthStatus()
 
 		// STEP 4: download app files if authorized
@@ -181,7 +180,7 @@ export class googlegsi {
 				callback: (tokenResponse: TokenResponse) => {
 					// A: capture token
 					this.tokenResponse = tokenResponse
-					if (IS_LOCALHOST) console.log('- tokenResponse', this.tokenResponse.token_type)
+					if (IS_LOCALHOST) console.log(`- tokenResponse.token_type = ${this.tokenResponse?.token_type}`)
 					resolveOuter(true)
 				},
 			})
