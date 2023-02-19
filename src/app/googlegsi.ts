@@ -163,13 +163,14 @@ export class googlegsi {
 		// B: now that gsi is init and user is signed-in, get access token
 		if (IS_LOCALHOST) console.log('\nGSI-STEP-2: tokenFlow()')
 		await this.tokenFlow()
-		if (IS_LOCALHOST) console.log(`tokenFlow() = ${this.tokenResponse} `)
+		if (IS_LOCALHOST) console.log(`- tokenResponse.token_type = ${this.tokenResponse?.token_type} `)
 
 		// C: now that token exists, setup gapi so we can use Drive API's with the token from prev step
 		if (IS_LOCALHOST) console.log('\nGSI-STEP-3: initGapiClient()')
 		await this.initGapiClient()
 
 		// D:
+		if (IS_LOCALHOST) console.log('\nGSI-STEP-4: updateSigninStatus()')
 		await this.updateSigninStatus()
 
 		// FINALLY: callback to notify class/data is loaded
