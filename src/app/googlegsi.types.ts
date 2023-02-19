@@ -107,3 +107,36 @@ export interface IGapiFile {
 export interface IGapiFileListResp {
 	files: IGapiFile[]
 }
+
+/*
+		const responsePayload = decodeJwt(response.credential)
+		if (IS_LOCALHOST) {
+			console.log('\nGSI-STEP-1: responsePayload:')
+			console.log('- ID.........: ' + responsePayload.sub)
+			// console.log('- Full Name..: ' + responsePayload.name)
+			// console.log('- Given Name.: ' + responsePayload.given_name)
+			// console.log('- Family Name: ' + responsePayload.family_name)
+			// console.log('- Image URL..: ' + responsePayload.picture)
+			// console.log('- Email......: ' + responsePayload.email)
+
+			// TODO: create interface
+
+			{
+				"iss": "https://accounts.google.com",
+				"nbf": 1676348859,
+				"aud": "300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com",
+				"sub": "101280436360833726869",
+				"email": "gitbrent@gmail.com",
+				"email_verified": true,
+				"azp": "300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com",
+				"name": "Git Brent",
+				"picture": "https://lh3.googleusercontent.com/a/AEdFTp4Tw1g8xUq1u8crhAHVBR87CSJNzBTFVN593txN=s96-c",
+				"given_name": "Git",
+				"family_name": "Brent",
+				"iat": 1676349159,
+				"exp": 1676352759,
+				"jti": "b9d7558a6fda4870c20d68ac47e5f5e3eebf51f9"
+			}
+
+		}
+*/

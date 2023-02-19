@@ -23,7 +23,6 @@ const DATA_FILE_HEADER = {
 }
 
 let gAuthState: IAuthState = { status: AuthState.Unauthenticated, userName: '', userPhoto: '' }
-let gConfFile: IDriveConfFile = null
 let gDataFile: IDriveDataFile = null
 let gAuthCallback: (data: IAuthState) => IAuthState = null
 let gConfCallback: (data: IDriveConfFile) => IDriveConfFile = null
