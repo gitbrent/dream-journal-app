@@ -45,15 +45,14 @@ export default function AppMain() {
 		name: '',
 		size: '',
 	}
-	//??? const [editEntry, setEditEntry] = useState<IJournalEntry>()
 	const [isBusyLoad, setIsBusyLoad] = useState(true)
 	const [isDataSvcLoaded, setIsDataSvcLoaded] = useState(false)
 	const [appdataSvc, setAppdataSvc] = useState<appdata>()
 	const [authState, setAuthState] = useState<IAuthState>(DEF_AUTH_STATE)
 	const [confFile, setConfFile] = useState<IDriveConfFile>(DEF_CONF_FILE)
 	const [dataFile, setDataFile] = useState<IDriveDataFile>(DEF_DATA_FILE)
+	//??? const [editEntry, setEditEntry] = useState<IJournalEntry>() // do we need this for new singleton modal?
 
-	/** load gapi script on startup */
 	useEffect(() => {
 		if (!appdataSvc) {
 			const appInst = new appdata(() => setIsDataSvcLoaded(true))
