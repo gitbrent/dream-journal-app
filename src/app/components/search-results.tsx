@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function SearchResults(props: Props) {
-	const dateEntry = DateTime.fromISO(props.searchMatch.entry.entryDate)
+	const dateEntry = DateTime.fromISO(props.searchMatch?.entry.entryDate)
 
 	/**
 	 * @see: https://stackoverflow.com/questions/29652862/highlight-text-using-reactjs
