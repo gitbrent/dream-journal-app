@@ -127,7 +127,7 @@ export class googlegsi {
 		 */
 		const responsePayload = decodeJwt(response.credential)
 		if (IS_LOCALHOST) {
-			console.log('GSI-STEP-1: responsePayload:')
+			console.log('\nGSI-STEP-1: responsePayload:')
 			console.log('- ID.........: ' + responsePayload.sub)
 			// console.log('- Full Name..: ' + responsePayload.name)
 			// console.log('- Given Name.: ' + responsePayload.given_name)
@@ -161,12 +161,12 @@ export class googlegsi {
 		if (IS_LOCALHOST) console.log('this.signedInUser', this.signedInUser)
 
 		// B: now that gsi is init and user is signed-in, get access token
-		if (IS_LOCALHOST) console.log('GSI-STEP-2: tokenFlow()')
+		if (IS_LOCALHOST) console.log('\nGSI-STEP-2: tokenFlow()')
 		await this.tokenFlow()
 		if (IS_LOCALHOST) console.log(`tokenFlow() = ${this.tokenResponse} `)
 
 		// C: now that token exists, setup gapi so we can use Drive API's with the token from prev step
-		if (IS_LOCALHOST) console.log('GSI-STEP-3: initGapiClient()')
+		if (IS_LOCALHOST) console.log('\nGSI-STEP-3: initGapiClient()')
 		await this.initGapiClient()
 
 		// D:
@@ -189,7 +189,7 @@ export class googlegsi {
 				callback: (tokenResponse: TokenResponse) => {
 					// A: capture token
 					this.tokenResponse = tokenResponse
-					if (IS_LOCALHOST) console.log('tokenResponse', this.tokenResponse.token_type)
+					if (IS_LOCALHOST) console.log('- tokenResponse', this.tokenResponse.token_type)
 					resolveOuter(true)
 				},
 			})
@@ -207,7 +207,7 @@ export class googlegsi {
 		this.isAuthorized = window.google.accounts.oauth2.hasGrantedAllScopes(this.tokenResponse, this.GAPI_SCOPES) || false
 		if (IS_LOCALHOST) {
 			if (!this.isAuthorized) console.warn('Unauthorized?!')
-			else console.log('this.isAuthorized', this.isAuthorized)
+			else console.log('- this.isAuthorized = ', this.isAuthorized)
 		}
 
 		// B: download app files if authorized
@@ -222,22 +222,22 @@ export class googlegsi {
 		const response: { body: string } = await gapi.client.drive.files.list({ q: 'trashed=false and mimeType = \'application/json\'' })
 		const respBody = JSON.parse(response.body)
 		const respFiles: IGapiFile[] = respBody.items
-		if (IS_LOCALHOST) console.log('respFiles', respFiles)
+		if (IS_LOCALHOST) console.log(`- respFiles.length = ${respFiles.length}`)
 
 		const confFile = respFiles.filter(item => item.title === 'dream-journal-conf.json')[0]
 		this.gapiConfFile = confFile
-		if (IS_LOCALHOST) console.log('this.gapiConfFile', this.gapiConfFile)
+		if (IS_LOCALHOST) console.log(`- this.gapiConfFile id = ${this.gapiConfFile.id}`)
 
 		const dataFile = respFiles.filter(item => item.title === 'dream-journal.json')[0]
 		this.gapiDataFile = dataFile
-		if (IS_LOCALHOST) console.log('this.gapiDataFile', this.gapiDataFile)
+		if (IS_LOCALHOST) console.log(`- this.gapiDataFile id = ${this.gapiDataFile.id}`)
 
 		if (this.gapiConfFile) await this.downloadConfFile()
 		if (this.gapiDataFile) await this.downloadDataFile()
 
 		if (IS_LOCALHOST) {
-			console.log('both data files loaded')
-			console.log(`entries.length: ${this.driveDataFile.entries.length}`)
+			console.log('- Checkpoint: both data files loaded')
+			console.log(`- data.entries.length = ${this.driveDataFile.entries.length}`)
 		}
 
 		return
