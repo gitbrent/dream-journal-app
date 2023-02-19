@@ -2,10 +2,15 @@
  * perform data engine functions
  * - acts as interface between app ("edit entry", "save data file") requests and googlegsi.ts
  */
-import { IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry } from './app.types'
+import { AuthState, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry } from './app.types'
 import { googlegsi } from './googlegsi'
 
 export class appdata {
+	private readonly DEF_AUTH_STATE: IAuthState = {
+		status: AuthState.Unauthenticated,
+		userName: '',
+		userPhoto: '',
+	}
 	private readonly DEF_CONF_FILE: IDriveConfFile = {
 		id: '',
 		dreamIdeas: [],
@@ -23,9 +28,9 @@ export class appdata {
 		name: '',
 		size: '',
 	}
+	private driveAuthState: IAuthState = this.DEF_AUTH_STATE
 	private driveConfFile: IDriveConfFile = this.DEF_CONF_FILE
 	private driveDataFile: IDriveDataFile = this.DEF_DATA_FILE
-	private driveAuthState: IAuthState
 	private googleapi: googlegsi
 	private clientCallback: () => void
 
@@ -43,7 +48,8 @@ export class appdata {
 		this.clientCallback()
 	}
 
-	//#region getters
+	// -------------------------------------------------------------
+
 	get confFile(): IDriveConfFile {
 		return this.googleapi.confFile
 	}
@@ -53,9 +59,11 @@ export class appdata {
 	}
 
 	get authState(): IAuthState {
+		console.log('HEY im returning authstate:', this.googleapi.authState)
 		return this.googleapi.authState
 	}
-	//#endregion
+
+	// -------------------------------------------------------------
 
 	public doAuthSignIn = () => {
 		console.log('TODO: doAuthSignIn')
