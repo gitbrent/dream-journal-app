@@ -36,15 +36,13 @@ declare global {
 	}
 }
 
-// TODO: 20220217: were curreently using `initGsiCallback` to await/process all load logic... move to an top-level method instead
-
 export class googlegsi {
 	private readonly GAPI_CLIENT_ID = process.env.REACT_APP_GOOGLE_DRIVE_CLIENT_ID || ''
 	private readonly GAPI_API_KEY = process.env.REACT_APP_GOOGLE_DRIVE_API_KEY || ''
 	private readonly GAPI_DISC_DOCS = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
 	private readonly GAPI_SCOPES = 'https://www.googleapis.com/auth/drive.file'
 	private clientCallback: () => void
-	private signedInUser = '(none)'
+	private signedInUser = ''
 	private isAuthorized = false
 	private tokenResponse: TokenResponse
 	private gapiConfFile: IGapiFile
@@ -64,22 +62,56 @@ export class googlegsi {
 			tagTypeFO: [],
 			tagTypeAC: [],
 		}
+		this.mainProcess()
+	}
 
-		this.loadGapiScript()
-		this.loadGsiScript()
+	private mainProcess() {
+		// GAPI (1/2)
+		if (typeof gapi === 'undefined' || !gapi.client) this.loadGapiScript()
+
+		// GSI (2/2)
+		if (typeof window.google === 'undefined' || !window.google) {
+			this.loadGsiScript()
+		}
+		else if (window.google.accounts) {
+			// This else if the case where script is loaded (eg: app login button)
+			if (!this.signedInUser) this.initGsiClient()
+			else this.mainProvessTwo()
+		}
+	}
+
+	private mainProvessTwo = async () => {
+		// STEP 1: now that gsi is init and user is signed-in, get access token
+		if (IS_LOCALHOST) console.log('\nGSI-STEP-2: tokenFlow() --------------')
+		await this.tokenFlow()
+		if (IS_LOCALHOST) console.log(`- tokenResponse.token_type = ${this.tokenResponse?.token_type} `)
+
+		// STEP 2: now that token exists, setup gapi so we can use Drive API's with the token from prev step
+		if (IS_LOCALHOST) console.log('\nGSI-STEP-3: initGapiClient() ---------')
+		await this.initGapiClient()
+
+		// STEP 3: checks user scopes, sets `isAuthorized`
+		if (IS_LOCALHOST) console.log('\nGSI-STEP-4: updateSigninStatus() -----')
+		await this.updateUserAuthStatus()
+
+		// STEP 4: download app files if authorized
+		if (IS_LOCALHOST) console.log('\nGSI-STEP-5: listFiles() --------------')
+		if (this.isAuthorized) await this.listFiles()
+
+		// FINALLY: callback to notify class/data is loaded
+		this.clientCallback()
 	}
 
 	//#region GAPI
-	/**
-	 * Load gapi script and load gapi drive client
-	 */
 	private loadGapiScript = (): void => {
 		const script = document.createElement('script')
 		script.src = 'https://apis.google.com/js/api.js'
+		// Load gapi script and load gapi drive client (`drive` must be loaded!)
 		script.onload = () => gapi.load('client', () => gapi.client.load('drive', 'v2'))
 		document.body.appendChild(script)
 	}
 
+	/** called after gsi, not called from script load above */
 	private initGapiClient = async () => {
 		return await gapi.client.init({
 			apiKey: this.GAPI_API_KEY,
@@ -118,7 +150,7 @@ export class googlegsi {
 	}
 
 	/**
-	 * STEP 3: check current user's auth state
+	 * STEP 3: process cred resp
 	 */
 	private initGsiCallback = async (response: CredentialResponse) => {
 		/**
@@ -126,55 +158,14 @@ export class googlegsi {
 		 * @see https://developers.google.com/identity/gsi/web/reference/js-reference#credential
 		 */
 		const responsePayload = decodeJwt(response.credential)
-		if (IS_LOCALHOST) {
-			console.log('\nGSI-STEP-1: responsePayload:')
-			console.log('- ID.........: ' + responsePayload.sub)
-			// console.log('- Full Name..: ' + responsePayload.name)
-			// console.log('- Given Name.: ' + responsePayload.given_name)
-			// console.log('- Family Name: ' + responsePayload.family_name)
-			// console.log('- Image URL..: ' + responsePayload.picture)
-			// console.log('- Email......: ' + responsePayload.email)
 
-			// TODO: create interface
-			/*
-			{
-				"iss": "https://accounts.google.com",
-				"nbf": 1676348859,
-				"aud": "300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com",
-				"sub": "101280436360833726869",
-				"email": "gitbrent@gmail.com",
-				"email_verified": true,
-				"azp": "300205784774-vt1v8lerdaqlnmo54repjmtgo5ckv3c3.apps.googleusercontent.com",
-				"name": "Git Brent",
-				"picture": "https://lh3.googleusercontent.com/a/AEdFTp4Tw1g8xUq1u8crhAHVBR87CSJNzBTFVN593txN=s96-c",
-				"given_name": "Git",
-				"family_name": "Brent",
-				"iat": 1676349159,
-				"exp": 1676352759,
-				"jti": "b9d7558a6fda4870c20d68ac47e5f5e3eebf51f9"
-			}
-			*/
-		}
-
-		// A: set signed in user
+		// set signed in user
+		if (IS_LOCALHOST) console.log('\nGSI-STEP-1: responsePayload ----------')
 		this.signedInUser = responsePayload?.name?.toString() || ''
 		if (IS_LOCALHOST) console.log('this.signedInUser', this.signedInUser)
 
-		// B: now that gsi is init and user is signed-in, get access token
-		if (IS_LOCALHOST) console.log('\nGSI-STEP-2: tokenFlow()')
-		await this.tokenFlow()
-		if (IS_LOCALHOST) console.log(`- tokenResponse.token_type = ${this.tokenResponse?.token_type} `)
-
-		// C: now that token exists, setup gapi so we can use Drive API's with the token from prev step
-		if (IS_LOCALHOST) console.log('\nGSI-STEP-3: initGapiClient()')
-		await this.initGapiClient()
-
-		// D:
-		if (IS_LOCALHOST) console.log('\nGSI-STEP-4: updateSigninStatus()')
-		await this.updateSigninStatus()
-
-		// FINALLY: callback to notify class/data is loaded
-		this.clientCallback()
+		// Done:
+		this.mainProvessTwo()
 	}
 
 	/**
@@ -197,26 +188,22 @@ export class googlegsi {
 			client.requestAccessToken()
 		})
 	}
-	//#endregion
 
 	/**
 	 * Sets if user is authorized. Called after both scripts are init.
 	 * @see https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#token_and_consent_response
 	 */
-	private updateSigninStatus = async () => {
-		// A: set auth status
+	private updateUserAuthStatus = async () => {
 		this.isAuthorized = window.google.accounts.oauth2.hasGrantedAllScopes(this.tokenResponse, this.GAPI_SCOPES) || false
+
 		if (IS_LOCALHOST) {
 			if (!this.isAuthorized) console.warn('Unauthorized?!')
 			else console.log('- this.isAuthorized = ', this.isAuthorized)
 		}
 
-		// B: download app files if authorized
-		if (this.isAuthorized) await this.listFiles()
-
-		// C:
 		return
 	}
+	//#endregion
 
 	//#region file operations
 	private listFiles = async () => {
