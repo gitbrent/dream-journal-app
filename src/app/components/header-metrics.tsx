@@ -167,5 +167,5 @@ export default function HeaderMetrics(props: Props) {
 		)
 	}
 
-	return <header>{!props.entries || !props.dataFile ? <div /> : props.onlyMetrics ? renderBody() : renderFull()}</header>
+	return <header>{(!props.entries && !props.dataFile) ? <div /> : props.onlyMetrics ? renderBody() : renderFull()}</header>
 }
