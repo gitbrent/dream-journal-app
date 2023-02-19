@@ -55,7 +55,10 @@ export default function AppMain() {
 
 	/** load gapi script on startup */
 	useEffect(() => {
-		if (!appdataSvc) setAppdataSvc(new appdata(() => setIsDataSvcLoaded(true)))
+		if (!appdataSvc) {
+			const appInst = new appdata(() => setIsDataSvcLoaded(true))
+			setAppdataSvc(appInst)
+		}
 	}, [])
 
 	useEffect(() => {
