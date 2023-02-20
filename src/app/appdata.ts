@@ -2,7 +2,7 @@
  * perform data engine functions
  * - acts as interface between app ("edit entry", "save data file") requests and googlegsi.ts
  */
-import { AuthState, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry } from './app.types'
+import { AuthState, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry, IS_LOCALHOST } from './app.types'
 import { googlegsi } from './googlegsi'
 
 export class appdata {
@@ -41,32 +41,32 @@ export class appdata {
 	}
 
 	private gapiCallback = () => {
-		this.driveAuthState = this.googleapi?.authState
-		this.driveConfFile = this.googleapi?.confFile
-		this.driveDataFile = this.googleapi?.dataFile
-		// setup done, so continue
+		// A: Set vars
+		this.driveAuthState = this.googleapi.authState
+		this.driveConfFile = this.googleapi.confFile
+		this.driveDataFile = this.googleapi.dataFile
+		// B: Notify caller
 		this.clientCallback()
 	}
 
 	// -------------------------------------------------------------
 
 	get confFile(): IDriveConfFile {
-		return this.googleapi.confFile
+		return this.driveConfFile
 	}
 
 	get dataFile(): IDriveDataFile {
-		return this.googleapi.dataFile
+		return this.driveDataFile
 	}
 
 	get authState(): IAuthState {
-		console.log('HEY im returning authstate:', this.googleapi.authState)
-		return this.googleapi.authState
+		return this.driveAuthState
 	}
 
 	// -------------------------------------------------------------
 
-	public doAuthSignIn = () => {
-		console.log('TODO: doAuthSignIn')
+	public doAuthSignIn = async () => {
+		return this.googleapi.doAuthSignIn()
 	}
 
 	public doAuthSignOut = () => {
@@ -74,14 +74,16 @@ export class appdata {
 	}
 
 	public doEntryAdd = async (entry: IJournalEntry) => {
-		console.log('TODO:')
-		console.log(entry)
+		if (!this.dataFile || !this.dataFile.entries) throw new Error('No datafile!')
+		this.dataFile.entries.push(entry)
+		this.dataFile.entries.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 	}
 
 	public doSaveDataFile = async () => {
-		console.log('TODO:')
+		return this.googleapi.doSaveDataFile()
 	}
 
+	// TODO: move to `modal-entry.tsx`
 	public getUniqueDreamTags = (): string[] => {
 		const arrTags: string[] = []
 

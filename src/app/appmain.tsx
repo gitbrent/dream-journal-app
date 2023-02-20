@@ -46,7 +46,7 @@ export default function AppMain() {
 		size: '',
 	}
 	const [isBusyLoad, setIsBusyLoad] = useState(true)
-	const [isDataSvcLoaded, setIsDataSvcLoaded] = useState(false)
+	const [dataSvcLoadTime, setDataSvcLoadTime] = useState('')
 	const [appdataSvc, setAppdataSvc] = useState<appdata>()
 	const [authState, setAuthState] = useState<IAuthState>(DEF_AUTH_STATE)
 	const [confFile, setConfFile] = useState<IDriveConfFile>(DEF_CONF_FILE)
@@ -55,19 +55,20 @@ export default function AppMain() {
 
 	useEffect(() => {
 		if (!appdataSvc) {
-			const appInst = new appdata(() => setIsDataSvcLoaded(true))
+			setIsBusyLoad(true)
+			const appInst = new appdata(() => { setDataSvcLoadTime(new Date().toISOString()) })
 			setAppdataSvc(appInst)
 		}
 	}, [])
 
 	useEffect(() => {
-		if (appdataSvc && isDataSvcLoaded) {
+		if (appdataSvc && dataSvcLoadTime) {
 			setAuthState(appdataSvc.authState)
 			setConfFile(appdataSvc.confFile)
 			setDataFile(appdataSvc.dataFile)
 			setIsBusyLoad(false)
 		}
-	}, [appdataSvc, isDataSvcLoaded])
+	}, [appdataSvc, dataSvcLoadTime])
 
 	const Home = () => (<TabHome dataFile={dataFile} isBusyLoad={isBusyLoad} authState={authState} appdataSvc={appdataSvc} />)
 	const Bedtime = () => (<TabBedtime confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)

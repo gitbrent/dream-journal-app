@@ -88,20 +88,11 @@ export default function ModalEntry(props: IModalEntryProps) {
 		doSaveDataFile()
 	}
 
-	function doSaveDataFile() {
+	async function doSaveDataFile() {
 		setIsBusySave(true)
-
-		props.appdataSvc.doSaveDataFile()
-			.then(() => {
-				setIsBusySave(false)
-				props.setShowModal(false)
-			})
-			.catch((ex) => {
-				setIsBusySave(false)
-				// TODO: Show error message somewhere on dialog! (20190324)
-				// Set errstate and show message in DialogFooter
-				alert(ex)
-			})
+		await props.appdataSvc.doSaveDataFile()
+		setIsBusySave(false)
+		props.setShowModal(false)
 	}
 
 	// -----------------------------------------------------------------------

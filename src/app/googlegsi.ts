@@ -82,12 +82,16 @@ export class googlegsi {
 
 	private mainProvessTwo = async () => {
 		// STEP 1: now that gsi is init and user is signed-in, get access token
-		if (IS_LOCALHOST) console.log('\nGSI-STEP-2: tokenFlow() --------------')
-		await this.tokenFlow()
+		if (!this.tokenResponse?.token_type) {
+			if (IS_LOCALHOST) console.log('\nGSI-STEP-2: tokenFlow() --------------')
+			await this.tokenFlow()
+		}
 
 		// STEP 2: now that token exists, setup gapi so we can use Drive API's with the token from prev step
-		if (IS_LOCALHOST) console.log('\nGSI-STEP-3: initGapiClient() ---------')
-		await this.initGapiClient()
+		if (typeof gapi === 'undefined' || !gapi.client) {
+			if (IS_LOCALHOST) console.log('\nGSI-STEP-3: initGapiClient() ---------')
+			await this.initGapiClient()
+		}
 
 		// STEP 3: checks user scopes, sets `isAuthorized`
 		if (IS_LOCALHOST) console.log('\nGSI-STEP-4: updateUserAuthStatus() ---')
@@ -99,6 +103,8 @@ export class googlegsi {
 
 		// FINALLY: callback to notify class/data is loaded
 		this.clientCallback()
+
+		return
 	}
 
 	//#region GAPI
@@ -118,7 +124,6 @@ export class googlegsi {
 			scope: this.GAPI_SCOPES,
 			discoveryDocs: this.GAPI_DISC_DOCS
 		})
-
 	}
 	//#endregion
 
@@ -173,7 +178,7 @@ export class googlegsi {
 	 * @see https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#token_request
 	 */
 	private tokenFlow = async () => {
-		return new Promise((resolveOuter) => {
+		return new Promise((resolve) => {
 			const client = window.google.accounts.oauth2.initTokenClient({
 				client_id: this.GAPI_CLIENT_ID,
 				scope: this.GAPI_SCOPES,
@@ -181,7 +186,7 @@ export class googlegsi {
 					// A: capture token
 					this.tokenResponse = tokenResponse
 					if (IS_LOCALHOST) console.log(`- tokenResponse.token_type = ${this.tokenResponse?.token_type}`)
-					resolveOuter(true)
+					resolve(true)
 				},
 			})
 			client.requestAccessToken()
@@ -193,7 +198,7 @@ export class googlegsi {
 	 * @see https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#token_and_consent_response
 	 */
 	private updateUserAuthStatus = async () => {
-		this.isAuthorized = window.google.accounts.oauth2.hasGrantedAllScopes(this.tokenResponse, this.GAPI_SCOPES) || false
+		this.isAuthorized = window.google.accounts.oauth2.hasGrantedAllScopes(this.tokenResponse, this.GAPI_SCOPES)
 
 		if (IS_LOCALHOST) {
 			if (!this.isAuthorized) console.warn('Unauthorized?!')
@@ -306,9 +311,65 @@ export class googlegsi {
 		return
 	}
 
-	// TODO: upload https://developers.google.com/drive/api/guides/manage-uploads#node.js
 	private async uploadDataFile() {
-		// TODO:
+		const DATA_FILE_HEADER = {
+			name: 'dream-journal.json',
+			description: 'Brain Cloud Dream Journal data file',
+			mimeType: 'application/json',
+		}
+
+		// DATA FIXES: (20191101):
+		/*
+			newState.entries.forEach(entry => {
+				entry.dreams.forEach(dream => {
+					// WORKED! if (typeof dream.dreamSigns === 'string') dream.dreamSigns = (dream.dreamSigns as string).split(',')
+					// WORKED! dream.dreamSigns = dream.dreamSigns.map(sign=>{ return sign.trim() })
+					// WORKED (20210127) dream.dreamSigns = dream.dreamSigns.map((sign) => sign.toLowerCase().trim())
+				})
+			})
+		*/
+
+		// A: Fix [null] dates that can be created by import data/formatting, etc.
+		const entriesFix = this.dataFile.entries
+		entriesFix.forEach((entry, idx) => (entry.entryDate = entry.entryDate ? entry.entryDate : `1999-01-0${idx + 1}`))
+
+		// B: Sort by `entryDate`
+		const jsonBody: object = {
+			entries: entriesFix.sort((a, b) => (a.entryDate > b.entryDate ? 1 : -1)),
+		}
+
+		// C: Write file
+		const reqBody: string =
+			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
+			JSON.stringify(DATA_FILE_HEADER) +
+			'\n' +
+			'--foo_bar_baz\nContent-Type: application/json\n\n' +
+			JSON.stringify(jsonBody, null, 2) +
+			'\n' +
+			'--foo_bar_baz--'
+		const reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
+
+		const requestHeaders: HeadersInit = {
+			Authorization: `Bearer ${this.tokenResponse.access_token}`,
+			'Content-Type': 'multipart/related; boundary=foo_bar_baz',
+			'Content-Length': `${reqBody.length + reqEnd.length}`,
+		}
+
+		const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${this.dataFile.id}?uploadType=multipart`, {
+			method: 'PATCH',
+			headers: requestHeaders,
+			body: reqBody,
+		})
+		const data = await response.json()
+
+		// A: Check for errors
+		if (data && data.error && data.error.code) throw new Error(data.error.message) // Google error: `{error:{errors:[], code:401, message:"..."}}`
+
+		// B: refresh file list (to update "size", "modified")
+		//doGetAppFiles()
+
+		// Done
+		return
 	}
 	//#endregion
 
@@ -322,6 +383,9 @@ export class googlegsi {
 	}
 
 	get authState(): IAuthState {
+		if (IS_LOCALHOST) console.log('returning this.isAuthorized:', this.isAuthorized)
+		//if (IS_LOCALHOST) console.log(window.google.accounts.oauth2.hasGrantedAllScopes(this.tokenResponse, this.GAPI_SCOPES))
+
 		return {
 			status: this.isAuthorized ? AuthState.Authenticated : AuthState.Unauthenticated,
 			userName: this.signedInUser,
@@ -331,8 +395,8 @@ export class googlegsi {
 	//#endregion
 
 	//#region public methods
-	public doAuthSignIn = () => {
-		console.log('TODO: doAuthSignIn')
+	public doAuthSignIn = async () => {
+		return this.mainProvessTwo()
 	}
 
 	public doAuthSignOut = () => {
@@ -340,7 +404,7 @@ export class googlegsi {
 	}
 
 	public doSaveDataFile = async () => {
-		return 'TODO:'
+		return this.uploadDataFile()
 	}
 	//#endregion
 }
