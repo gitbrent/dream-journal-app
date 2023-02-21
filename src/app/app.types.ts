@@ -14,7 +14,7 @@
 // @see https://support.google.com/cloud/answer/6158849?hl=en#zippy=%2Cstep-create-a-new-client-secret
 
 // APP
-export const APP_BLD = '20230215-2040'
+export const APP_BLD = '20230220-2240'
 //export const APP_VER = `1.3.0-WIP ${APP_BLD}`
 export const APP_VER = '1.3.0-WIP'
 export const IS_LOCALHOST = window.location.href.toLowerCase().indexOf('localhost') > -1

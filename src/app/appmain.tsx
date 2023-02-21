@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import { IDriveDataFile, IDriveConfFile, IAuthState, AuthState } from './app.types'
+import { IDriveDataFile, IDriveConfFile, IAuthState, AuthState, IS_LOCALHOST } from './app.types'
 import TabHome from '../app/app-home'
 import TabBedtime from '../app/app-bedtime'
 import TabExplore from '../app/app-explore'
@@ -63,6 +63,7 @@ export default function AppMain() {
 
 	useEffect(() => {
 		if (appdataSvc && dataSvcLoadTime) {
+			if (IS_LOCALHOST) console.log(`[MAIN] appdataSvc.authState = ${appdataSvc.authState.status}`)
 			setAuthState(appdataSvc.authState)
 			setConfFile(appdataSvc.confFile)
 			setDataFile(appdataSvc.dataFile)

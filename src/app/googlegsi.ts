@@ -210,6 +210,14 @@ export class googlegsi {
 	//#endregion
 
 	//#region file operations
+	private fetchWithTimeout = async (resource: RequestInfo, init: RequestInit) => {
+		const TIMEOUT_MSECS = 8000
+		const controller = new AbortController()
+		const id = setTimeout(() => controller.abort(), TIMEOUT_MSECS)
+		const response = await fetch(resource, { ...init, signal: controller.signal })
+		clearTimeout(id)
+		return response
+	}
 	private listFiles = async () => {
 		const response: { body: string } = await gapi.client.drive.files.list({ q: 'trashed=false and mimeType = \'application/json\'' })
 		const respBody = JSON.parse(response.body)
@@ -299,6 +307,7 @@ export class googlegsi {
 		}
 
 		// B:
+		if (IS_LOCALHOST) console.log(`[downloadDataFile] entries=${entries.length}`)
 		this.driveDataFile = {
 			id: this.gapiDataFile.id,
 			entries: entries || [],
@@ -311,13 +320,12 @@ export class googlegsi {
 		return
 	}
 
+	/**
+	 * Save current state of data file to Drive
+	 * @note gdrive is prone to fetch timeouts (@see https://dmitripavlutin.com/timeout-fetch-request/)
+	 * @returns
+	 */
 	private async uploadDataFile() {
-		const DATA_FILE_HEADER = {
-			name: 'dream-journal.json',
-			description: 'Brain Cloud Dream Journal data file',
-			mimeType: 'application/json',
-		}
-
 		// DATA FIXES: (20191101):
 		/*
 			newState.entries.forEach(entry => {
@@ -333,40 +341,34 @@ export class googlegsi {
 		const entriesFix = this.dataFile.entries
 		entriesFix.forEach((entry, idx) => (entry.entryDate = entry.entryDate ? entry.entryDate : `1999-01-0${idx + 1}`))
 
-		// B: Sort by `entryDate`
+		// B: sort all entries by `entryDate`
 		const jsonBody: object = {
 			entries: entriesFix.sort((a, b) => (a.entryDate > b.entryDate ? 1 : -1)),
 		}
 
-		// C: Write file
-		const reqBody: string =
-			'--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n' +
-			JSON.stringify(DATA_FILE_HEADER) +
-			'\n' +
-			'--foo_bar_baz\nContent-Type: application/json\n\n' +
-			JSON.stringify(jsonBody, null, 2) +
-			'\n' +
-			'--foo_bar_baz--'
+		// C: create file body
+		const reqHead = { name: 'dream-journal.json', description: 'Brain Cloud Dream Journal data file', mimeType: 'application/json' }
+		const reqBody: string = `--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n${JSON.stringify(reqHead)}\n` +
+			`--foo_bar_baz\nContent-Type: application/json\n\n${JSON.stringify(jsonBody, null, 2)}\n--foo_bar_baz--`
 		const reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
 
-		const requestHeaders: HeadersInit = {
-			Authorization: `Bearer ${this.tokenResponse.access_token}`,
-			'Content-Type': 'multipart/related; boundary=foo_bar_baz',
-			'Content-Length': `${reqBody.length + reqEnd.length}`,
-		}
-
-		const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${this.dataFile.id}?uploadType=multipart`, {
+		// D: upload file
+		const response = await this.fetchWithTimeout(`https://www.googleapis.com/upload/drive/v3/files/${this.dataFile.id}?uploadType=multipart`, {
 			method: 'PATCH',
-			headers: requestHeaders,
 			body: reqBody,
+			headers: {
+				Authorization: `Bearer ${this.tokenResponse.access_token}`,
+				'Content-Type': 'multipart/related; boundary=foo_bar_baz',
+				'Content-Length': `${reqBody.length + reqEnd.length}`,
+			},
 		})
 		const data = await response.json()
 
-		// A: Check for errors
+		// E: check for errors
 		if (data && data.error && data.error.code) throw new Error(data.error.message) // Google error: `{error:{errors:[], code:401, message:"..."}}`
 
-		// B: refresh file list (to update "size", "modified")
-		//doGetAppFiles()
+		// F: download the file from Drive to **ensure** we have saved without errors and that newest copy is valid (this may be overkill, but i've been bit before!)
+		await this.downloadDataFile()
 
 		// Done
 		return

@@ -2,7 +2,7 @@
  * perform data engine functions
  * - acts as interface between app ("edit entry", "save data file") requests and googlegsi.ts
  */
-import { AuthState, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry, IS_LOCALHOST } from './app.types'
+import { AuthState, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry } from './app.types'
 import { googlegsi } from './googlegsi'
 
 export class appdata {
@@ -80,7 +80,10 @@ export class appdata {
 	}
 
 	public doSaveDataFile = async () => {
-		return this.googleapi.doSaveDataFile()
+		await this.googleapi.doSaveDataFile()
+		// save auto-refreshes data file post-save, so refresh local var
+		this.driveDataFile = this.googleapi.dataFile
+		return
 	}
 
 	// TODO: move to `modal-entry.tsx`
