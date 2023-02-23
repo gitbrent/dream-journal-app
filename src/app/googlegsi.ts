@@ -210,14 +210,6 @@ export class googlegsi {
 	//#endregion
 
 	//#region file operations
-	private fetchWithTimeout = async (resource: RequestInfo, init: RequestInit) => {
-		const TIMEOUT_MSECS = 8000
-		const controller = new AbortController()
-		const id = setTimeout(() => controller.abort(), TIMEOUT_MSECS)
-		const response = await fetch(resource, { ...init, signal: controller.signal })
-		clearTimeout(id)
-		return response
-	}
 	private listFiles = async () => {
 		const response: { body: string } = await gapi.client.drive.files.list({ q: 'trashed=false and mimeType = \'application/json\'' })
 		const respBody = JSON.parse(response.body)
@@ -337,7 +329,7 @@ export class googlegsi {
 			})
 		*/
 
-		// A: Fix [null] dates that can be created by import data/formatting, etc.
+		// A: fix [null] dates that can be created by import data/formatting, etc.
 		const entriesFix = this.dataFile.entries
 		entriesFix.forEach((entry, idx) => (entry.entryDate = entry.entryDate ? entry.entryDate : `1999-01-0${idx + 1}`))
 
@@ -353,22 +345,27 @@ export class googlegsi {
 		const reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || ''
 
 		// D: upload file
-		const response = await this.fetchWithTimeout(`https://www.googleapis.com/upload/drive/v3/files/${this.dataFile.id}?uploadType=multipart`, {
-			method: 'PATCH',
-			body: reqBody,
-			headers: {
-				Authorization: `Bearer ${this.tokenResponse.access_token}`,
-				'Content-Type': 'multipart/related; boundary=foo_bar_baz',
-				'Content-Length': `${reqBody.length + reqEnd.length}`,
-			},
-		})
-		const data = await response.json()
+		const controller = new AbortController()
+		const id = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+		try {
+			const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${this.dataFile.id}?uploadType=multipart`, {
+				method: 'PATCH',
+				body: reqBody,
+				headers: {
+					Authorization: `Bearer ${this.tokenResponse.access_token}`,
+					'Content-Type': 'multipart/related; boundary=foo_bar_baz',
+					'Content-Length': `${reqBody.length + reqEnd.length}`,
+				},
+			})
+			if (IS_LOCALHOST) console.log('[uploadDataFile] response', response)
+			clearTimeout(id)
+		} catch (error) {
+			if (error.name === 'AbortError') console.log('Request timed out')
+			else console.error('Error fetching data:', error)
+		}
 
-		// E: check for errors
-		if (data && data.error && data.error.code) throw new Error(data.error.message) // Google error: `{error:{errors:[], code:401, message:"..."}}`
-
-		// F: download the file from Drive to **ensure** we have saved without errors and that newest copy is valid (this may be overkill, but i've been bit before!)
-		await this.downloadDataFile()
+		// E: download the file from Drive to **ensure** we have saved without errors and that newest copy is valid (this may be overkill, but i've been bit before!)
+		//await this.downloadDataFile() // FIXME: maybe comment after a while - this is overkill // WIP:
 
 		// Done
 		return
