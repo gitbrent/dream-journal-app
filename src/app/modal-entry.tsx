@@ -81,6 +81,11 @@ export default function ModalEntry(props: IModalEntryProps) {
 		doSaveDataFile()
 	}
 
+	function handleClose() {
+		setIsBusySave(false)
+		props.setShowModal(false)
+	}
+
 	function handleDelete() {
 		if (!confirm('PLEASE CONFIRM\n^^^^^^ ^^^^^^^\n\nYou are deleting this *entire journal entry*!')) return
 
@@ -409,7 +414,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 						</div>
 					</div>
 					<div className='modal-footer'>
-						<button type='button' className='btn btn-secondary' onClick={() => props.setShowModal(false)}>
+						<button type='button' className='btn btn-secondary' onClick={() => handleClose()}>
 							Close
 						</button>
 						<button type='submit' onClick={() => handleSave()} className='btn btn-primary px-5' disabled={isDateDupe}>
