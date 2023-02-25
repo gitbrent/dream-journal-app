@@ -76,7 +76,6 @@ export class googlegsi {
 		else if (window.google.accounts) {
 			// This else if the case where script is loaded (eg: app login button)
 			if (!this.signedInUser) this.initGsiClient()
-			//else this.mainProvessTwo()
 		}
 	}
 
@@ -163,13 +162,11 @@ export class googlegsi {
 		 */
 		const responsePayload = decodeJwt(response.credential)
 
-		// set signed in user
 		if (IS_LOCALHOST) console.log('\nGSI-STEP-1: responsePayload ----------')
 		this.signedInUser = responsePayload?.name?.toString() || ''
 		if (IS_LOCALHOST) console.log('this.signedInUser', this.signedInUser)
 
-		// Done:
-		//this.mainProvessTwo()
+		return
 	}
 
 	/**
@@ -373,14 +370,6 @@ export class googlegsi {
 	//#endregion
 
 	//#region getters
-	get confFile(): IDriveConfFile {
-		return this.driveConfFile
-	}
-
-	get dataFile(): IDriveDataFile {
-		return this.driveDataFile
-	}
-
 	get authState(): IAuthState {
 		if (IS_LOCALHOST) console.log('returning this.isAuthorized:', this.isAuthorized)
 		//if (IS_LOCALHOST) console.log(window.google.accounts.oauth2.hasGrantedAllScopes(this.tokenResponse, this.GAPI_SCOPES))
@@ -390,6 +379,14 @@ export class googlegsi {
 			userName: this.signedInUser,
 			userPhoto: ''
 		}
+	}
+
+	get confFile(): IDriveConfFile {
+		return this.driveConfFile
+	}
+
+	get dataFile(): IDriveDataFile {
+		return this.driveDataFile
 	}
 	//#endregion
 
