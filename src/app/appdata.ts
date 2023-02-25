@@ -36,11 +36,11 @@ export class appdata {
 
 	constructor(callbackFunc: (() => void)) {
 		this.clientCallback = callbackFunc
-		if (!this.googleapi) this.googleapi = new googlegsi(this.gapiCallback)
-		else this.gapiCallback()
+		if (!this.googleapi) this.googleapi = new googlegsi(this.doUpdateAndCallback)
+		else this.doUpdateAndCallback()
 	}
 
-	private gapiCallback = () => {
+	private doUpdateAndCallback = () => {
 		// A: Set vars
 		this.driveAuthState = this.googleapi.authState
 		this.driveConfFile = this.googleapi.confFile
@@ -75,7 +75,7 @@ export class appdata {
 
 	public doRefreshDataFile = async () => {
 		await this.googleapi.doReadDataFile()
-		this.gapiCallback()
+		this.doUpdateAndCallback()
 		return
 	}
 
@@ -87,9 +87,7 @@ export class appdata {
 
 	public doSaveDataFile = async () => {
 		await this.googleapi.doSaveDataFile()
-		// save auto-refreshes data file post-save, so refresh local var
-		this.driveDataFile = this.googleapi.dataFile
-		// TODO: FIXME: we need a callback to appMain so state of dataFile c/b refreshed
+		this.doUpdateAndCallback()
 		return
 	}
 
