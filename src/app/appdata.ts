@@ -69,8 +69,14 @@ export class appdata {
 		return this.googleapi.doAuthSignIn()
 	}
 
-	public doAuthSignOut = () => {
-		console.log('TODO: doAuthSignIn')
+	public doAuthSignOut = async () => {
+		return this.googleapi.doAuthSignOut()
+	}
+
+	public doRefreshDataFile = async () => {
+		await this.googleapi.doReadDataFile()
+		this.gapiCallback()
+		return
 	}
 
 	public doEntryAdd = async (entry: IJournalEntry) => {

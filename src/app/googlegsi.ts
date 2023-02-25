@@ -76,7 +76,7 @@ export class googlegsi {
 		else if (window.google.accounts) {
 			// This else if the case where script is loaded (eg: app login button)
 			if (!this.signedInUser) this.initGsiClient()
-			else this.mainProvessTwo()
+			//else this.mainProvessTwo()
 		}
 	}
 
@@ -169,7 +169,7 @@ export class googlegsi {
 		if (IS_LOCALHOST) console.log('this.signedInUser', this.signedInUser)
 
 		// Done:
-		this.mainProvessTwo()
+		//this.mainProvessTwo()
 	}
 
 	/**
@@ -398,8 +398,13 @@ export class googlegsi {
 		return this.mainProvessTwo()
 	}
 
-	public doAuthSignOut = () => {
-		console.log('TODO: doAuthSignIn')
+	public doAuthSignOut = async () => {
+		console.log('TODO: doAuthSignOut')
+		return
+	}
+
+	public doReadDataFile = async () => {
+		return this.downloadDataFile()
 	}
 
 	public doSaveDataFile = async () => {

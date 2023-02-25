@@ -38,15 +38,23 @@ interface Props {
 	appdataSvc: appdata
 	authState: IAuthState
 	dataFile: IDriveDataFile
-	isBusyLoad: boolean
 }
 
 export default function TabHome(props: Props) {
 	const [showModal, setShowModal] = useState(false)
-	//const [errorMessage, setErrorMessage] = useState('')
-	//const [isRenaming, setIsRenaming] = useState(false)
-	//const [fileBeingRenamed, setFileBeingRenamed] = useState<IDriveDataFile>(null)
-	//const [newFileName, setNewFileName] = useState('')
+	const [isBusy, setIsBusy] = useState(false)
+
+	async function doAuthSignIn() {
+		setIsBusy(true)
+		await props.appdataSvc.doAuthSignIn()
+		setIsBusy(false)
+	}
+
+	async function doReadDataFile() {
+		setIsBusy(true)
+		await props.appdataSvc.doRefreshDataFile()
+		setIsBusy(false)
+	}
 
 	function getReadableFileSizeString(fileSizeInBytes: number) {
 		let idx = -1
@@ -77,8 +85,8 @@ export default function TabHome(props: Props) {
 					</div>
 					<div className='row mb-0'>
 						<div className='col'>
-							<button className='btn btn-outline-primary w-100' onClick={() => props.appdataSvc.doAuthSignIn()}>
-								Renew
+							<button className='btn btn-outline-primary w-100' onClick={() => doReadDataFile()}>
+								Reload Data
 							</button>
 						</div>
 						<div className='col'>
@@ -93,7 +101,7 @@ export default function TabHome(props: Props) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Your session has expired. Please re-authenticate to continue.</p>
-					<button className='btn btn-warning' onClick={() => props.appdataSvc.doAuthSignIn()}>
+					<button className='btn btn-warning' onClick={() => doAuthSignIn()}>
 						Sign In
 					</button>
 				</div>
@@ -102,7 +110,7 @@ export default function TabHome(props: Props) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Please sign-in to allow access to Google Drive space.</p>
-					<button className='btn btn-primary' onClick={() => props.appdataSvc.doAuthSignIn()}>
+					<button className='btn btn-primary' onClick={() => doAuthSignIn()}>
 						Sign In/Authorize
 					</button>
 				</div>
@@ -113,7 +121,7 @@ export default function TabHome(props: Props) {
 	}
 
 	function renderCardDataFile(): JSX.Element {
-		return props.dataFile && (props.isBusyLoad) ? (
+		return isBusy ? (
 			<div className='text-center'>
 				<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
 					<span className='visually-hidden' />

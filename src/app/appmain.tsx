@@ -45,7 +45,7 @@ export default function AppMain() {
 		name: '',
 		size: '',
 	}
-	const [isBusyLoad, setIsBusyLoad] = useState(true)
+	const [isBusyLoad, setIsBusyLoad] = useState(false)
 	const [dataSvcLoadTime, setDataSvcLoadTime] = useState('')
 	const [appdataSvc, setAppdataSvc] = useState<appdata>()
 	const [authState, setAuthState] = useState<IAuthState>(DEF_AUTH_STATE)
@@ -55,7 +55,7 @@ export default function AppMain() {
 
 	useEffect(() => {
 		if (!appdataSvc) {
-			setIsBusyLoad(true)
+			//setIsBusyLoad(true)
 			const appInst = new appdata(() => { setDataSvcLoadTime(new Date().toISOString()) })
 			setAppdataSvc(appInst)
 		}
@@ -71,7 +71,7 @@ export default function AppMain() {
 		}
 	}, [appdataSvc, dataSvcLoadTime])
 
-	const Home = () => (<TabHome dataFile={dataFile} isBusyLoad={isBusyLoad} authState={authState} appdataSvc={appdataSvc} />)
+	const Home = () => (<TabHome dataFile={dataFile} authState={authState} appdataSvc={appdataSvc} />)
 	const Bedtime = () => (<TabBedtime confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
 	const Explore = () => (<TabExplore confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
 	const Journal = () => (<TabJournal dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
