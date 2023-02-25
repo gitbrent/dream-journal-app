@@ -62,10 +62,10 @@ export class googlegsi {
 			tagTypeFO: [],
 			tagTypeAC: [],
 		}
-		this.mainProcess()
+		this.doLoadInitGsiGapi()
 	}
 
-	private mainProcess() {
+	private doLoadInitGsiGapi() {
 		// GAPI (1/2)
 		if (typeof gapi === 'undefined' || !gapi.client) this.loadGapiScript()
 
@@ -79,7 +79,7 @@ export class googlegsi {
 		}
 	}
 
-	private mainProvessTwo = async () => {
+	private doAuthorizeUser = async () => {
 		// STEP 1: now that gsi is init and user is signed-in, get access token
 		if (!this.tokenResponse?.token_type) {
 			if (IS_LOCALHOST) console.log('\nGSI-STEP-2: tokenFlow() --------------')
@@ -392,7 +392,7 @@ export class googlegsi {
 
 	//#region public methods
 	public doAuthSignIn = async () => {
-		return this.mainProvessTwo()
+		return this.doAuthorizeUser()
 	}
 
 	public doAuthSignOut = async () => {
