@@ -45,7 +45,7 @@ export default function AppMain() {
 		name: '',
 		size: '',
 	}
-	const [isBusyLoad, setIsBusyLoad] = useState(false)
+	const [isBusyLoad, setIsBusyLoad] = useState(false) // TODO: get rid of this, stop passing to tabs, send an entire JSX `<AlertGdriveStatus />` if needed
 	const [dataSvcLoadTime, setDataSvcLoadTime] = useState('')
 	const [appdataSvc, setAppdataSvc] = useState<appdata>()
 	const [authState, setAuthState] = useState<IAuthState>(DEF_AUTH_STATE)
@@ -55,7 +55,6 @@ export default function AppMain() {
 
 	useEffect(() => {
 		if (!appdataSvc) {
-			//setIsBusyLoad(true)
 			const appInst = new appdata(() => { setDataSvcLoadTime(new Date().toISOString()) })
 			setAppdataSvc(appInst)
 		}
@@ -64,6 +63,7 @@ export default function AppMain() {
 	useEffect(() => {
 		if (appdataSvc && dataSvcLoadTime) {
 			if (IS_LOCALHOST) console.log(`[MAIN] appdataSvc.authState = ${appdataSvc.authState.status}`)
+			if (IS_LOCALHOST) console.log(`[MAIN] appdataSvc.dataFile = ${new Date(appdataSvc.dataFile.modifiedTime).toISOString()}`)
 			setAuthState(appdataSvc.authState)
 			setConfFile(appdataSvc.confFile)
 			setDataFile(appdataSvc.dataFile)

@@ -299,13 +299,13 @@ export class googlegsi {
 		}
 
 		// B:
-		if (IS_LOCALHOST) console.log(`[downloadDataFile] entries=${entries.length}`)
+		if (IS_LOCALHOST) console.log(`[downloadDataFile] entries=${entries.length} moddate=${new Date(this.gapiDataFile.modifiedDate).toISOString()}`)
 		this.driveDataFile = {
 			id: this.gapiDataFile.id,
 			entries: entries || [],
 			modifiedTime: this.gapiDataFile.modifiedDate,
 			name: this.gapiDataFile.title,
-			size: this.gapiDataFile.fileSize || '',
+			size: this.gapiDataFile.fileSize,
 		}
 
 		// C:
