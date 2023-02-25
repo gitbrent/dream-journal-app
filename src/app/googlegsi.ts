@@ -65,25 +65,38 @@ export class googlegsi {
 		this.doLoadInitGsiGapi()
 	}
 
-	private doLoadInitGsiGapi() {
+	private doLoadInitGsiGapi = async () => {
 		// GAPI (1/2)
-		if (typeof gapi === 'undefined' || !gapi.client) this.loadGapiScript()
+		if (typeof gapi === 'undefined' || !gapi.client) await this.loadGapiScript()
 
 		// GSI (2/2)
-		if (typeof window.google === 'undefined' || !window.google) {
-			this.loadGsiScript()
-		}
-		else if (window.google.accounts) {
-			// This else if the case where script is loaded (eg: app login button)
-			if (!this.signedInUser) this.initGsiClient()
-		}
+		if (typeof window.google === 'undefined' || !window.google) await this.loadGsiScript()
+		else if (window.google.accounts && !this.signedInUser) await this.initGsiClient()
+
+		// check for current token
+		const tokenData = sessionStorage.getItem('googleTokenData')
+		const tokenJson: TokenResponse = tokenData ? JSON.parse(tokenData) : null
+		const isExp = tokenJson?.expiresTime <= Date.now()
+		if (IS_LOCALHOST) console.log(`[doLoadInit] tokenJson=${tokenJson?.expiresTime} > dateNow=${Date.now()} = ${isExp}`)
+		this.tokenResponse = !isExp ? tokenJson : null
+
+		// proceed to read data files, etc as we're good to go
+		if (this.tokenResponse?.access_token) this.doAuthorizeUser()
 	}
 
 	private doAuthorizeUser = async () => {
-		// STEP 1: now that gsi is init and user is signed-in, get access token
-		if (!this.tokenResponse?.token_type) {
-			if (IS_LOCALHOST) console.log('\nGSI-STEP-2: tokenFlow() --------------')
-			await this.tokenFlow()
+		if (this.tokenResponse?.access_token) {
+			// A: set auth
+			this.isAuthorized = true
+			// B: *IMPORTANT* do this as `await this.initGapiClient()` below w/b skipped as gapi is loaded, however, it'll throw "no anon access" errors if token isnt set like this!
+			gapi.client.setToken(this.tokenResponse)
+		}
+		else {
+			// STEP 1: now that gsi is init and user is signed-in, get access token
+			if (!this.tokenResponse?.access_token) {
+				if (IS_LOCALHOST) console.log('\nGSI-STEP-2: tokenFlow() --------------')
+				await this.tokenFlow()
+			}
 		}
 
 		// STEP 2: now that token exists, setup gapi so we can use Drive API's with the token from prev step
@@ -107,12 +120,14 @@ export class googlegsi {
 	}
 
 	//#region GAPI
-	private loadGapiScript = (): void => {
-		const script = document.createElement('script')
-		script.src = 'https://apis.google.com/js/api.js'
-		// Load gapi script and load gapi drive client (`drive` must be loaded!)
-		script.onload = () => gapi.load('client', () => gapi.client.load('drive', 'v2'))
-		document.body.appendChild(script)
+	private loadGapiScript = async () => {
+		return new Promise((resolve) => {
+			const script = document.createElement('script')
+			script.src = 'https://apis.google.com/js/api.js'
+			// Load gapi script, load client, load gapi drive client (`drive` must be loaded!) = ready
+			script.onload = () => gapi.load('client', () => gapi.client.load('drive', 'v2').then(() => resolve(true)))
+			document.body.appendChild(script)
+		})
 	}
 
 	/** called after gsi, not called from script load above */
@@ -128,28 +143,32 @@ export class googlegsi {
 
 	//#region GSI
 	/** STEP 1: load <script> */
-	private loadGsiScript = (): void => {
-		const script = document.createElement('script')
-		script.src = 'https://accounts.google.com/gsi/client'
-		script.async = true
-		script.defer = true
-		script.onload = this.initGsiClient
-		document.body.appendChild(script)
+	private loadGsiScript = async () => {
+		return new Promise((resolve) => {
+			const script = document.createElement('script')
+			script.src = 'https://accounts.google.com/gsi/client'
+			script.async = true
+			script.defer = true
+			script.onload = () => this.initGsiClient().then(() => resolve(true))
+			document.body.appendChild(script)
+		})
 	}
 
 	/**
 	 * STEP 2: init <script>
 	 * @see https://developers.google.com/identity/gsi/web/guides/use-one-tap-js-api
 	 */
-	private initGsiClient = (): void => {
-		window.google.accounts.id.initialize({
-			client_id: this.GAPI_CLIENT_ID,
-			callback: this.initGsiCallback,
-			auto_select: true,
-			cancel_on_tap_outside: true,
-			context: 'signin',
+	private initGsiClient = async () => {
+		return new Promise((resolve) => {
+			window.google.accounts.id.initialize({
+				client_id: this.GAPI_CLIENT_ID,
+				callback: (resp) => this.initGsiCallback(resp).then(() => resolve(true)),
+				auto_select: true,
+				cancel_on_tap_outside: true,
+				context: 'signin',
+			})
+			window.google.accounts.id.prompt()
 		})
-		window.google.accounts.id.prompt()
 	}
 
 	/**
@@ -182,7 +201,13 @@ export class googlegsi {
 				callback: (tokenResponse: TokenResponse) => {
 					// A: capture token
 					this.tokenResponse = tokenResponse
-					if (IS_LOCALHOST) console.log(`- tokenResponse.token_type = ${this.tokenResponse?.token_type}`)
+					this.tokenResponse.expiresTime = Date.now() + this.tokenResponse.expires_in * 1000
+					if (IS_LOCALHOST) console.log(`- tokenResponse.expires_in = ${this.tokenResponse?.expires_in}`)
+
+					// B: store the token data in session storage
+					sessionStorage.setItem('googleTokenData', JSON.stringify(tokenResponse))
+
+					// Done
 					resolve(true)
 				},
 			})
