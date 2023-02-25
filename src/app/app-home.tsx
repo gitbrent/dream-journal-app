@@ -73,7 +73,7 @@ export default function TabHome(props: Props) {
 		if (props.authState && props.authState.status === AuthState.Authenticated) {
 			cardAuthUser = (
 				<div>
-					<div className='row mb-4'>
+					<div className='row mb-3'>
 						<div className='col'>
 							<label>User Name</label>
 							{props.authState.userName}
@@ -85,12 +85,12 @@ export default function TabHome(props: Props) {
 					</div>
 					<div className='row mb-0'>
 						<div className='col'>
-							<button className='btn btn-outline-primary w-100' onClick={() => doReadDataFile()}>
+							<button className='btn btn-outline-primary w-100 py-3' onClick={() => doReadDataFile()}>
 								Reload Data
 							</button>
 						</div>
 						<div className='col'>
-							<button className='btn btn-outline-secondary w-100' onClick={() => props.appdataSvc.doAuthSignOut()}>
+							<button className='btn btn-outline-secondary w-100 py-3' onClick={() => props.appdataSvc.doAuthSignOut()}>
 								Sign Out
 							</button>
 						</div>
@@ -183,7 +183,7 @@ export default function TabHome(props: Props) {
 						</h3>
 					</div>
 					{props.authState?.status === AuthState.Authenticated && <div className='col-auto'>
-						<button className='btn btn-primary px-3 px-md-4 text-uppercase' type='button' disabled={!props.dataFile} onClick={() => setShowModal(true)}>
+						<button className='btn btn-primary px-3 px-md-4 text-uppercase' type='button' disabled={!props.dataFile || isBusy} onClick={() => setShowModal(true)}>
 							Create
 							<br />
 							Entry
@@ -193,7 +193,7 @@ export default function TabHome(props: Props) {
 					</div>}
 				</div>
 
-				<div className='mb-4'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</div>
+				<div className='mb-5'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</div>
 
 				{props.authState?.status === AuthState.Authenticated ?
 					<div className='row g-5 row-cols-1 row-cols-md-2'>
