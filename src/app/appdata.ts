@@ -133,4 +133,28 @@ export class appdata {
 	public doesEntryDateExist = (checkDate: string): boolean => {
 		return this.dataFile.entries.filter((item) => item.entryDate === checkDate).length > 0 ? true : false
 	}
+
+	// TODO: methods from prev library not implemented as of yet (2023-02)
+	// PUBLIC METHODS: CONF FILE -------------------------------------------------
+	/*
+	public doEditConf_DreamIdeas(dreamIdeas: IConfMetaCats[]) {
+		if (!gConfFile || !gConfFile.id) throw new Error('No ConfFile!')
+		gConfFile.dreamIdeas = dreamIdeas
+	}
+
+	public doEditConf_LucidGoals(lucidGoals: IConfMetaCats) {
+		if (!gConfFile || !gConfFile.id) throw new Error('No ConfFile!')
+		gConfFile.lucidGoals = lucidGoals
+	}
+
+	public doEditConf_MildAffirs(mildAffirs: IConfMetaCats[]) {
+		if (!gConfFile || !gConfFile.id) throw new Error('No ConfFile!')
+		gConfFile.mildAffirs = mildAffirs
+	}
+
+	public doEditTagTypes(type: SignInventoryType, tags: string[]) {
+		if (!gConfFile || !gConfFile.id) throw new Error('No ConfFile!')
+		gConfFile[`tagType${type}`] = tags
+	}
+	*/
 }
