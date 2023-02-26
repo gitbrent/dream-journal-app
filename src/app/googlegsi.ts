@@ -77,7 +77,7 @@ export class googlegsi {
 		const tokenData = sessionStorage.getItem('googleTokenData')
 		const tokenJson: TokenResponse = tokenData ? JSON.parse(tokenData) : null
 		const isExp = tokenJson?.expiresTime <= Date.now()
-		if (IS_LOCALHOST) console.log(`[doLoadInit] tokenJson=${tokenJson?.expiresTime} > dateNow=${Date.now()} = ${isExp}`)
+		if (IS_LOCALHOST) console.log(`[doLoadInit] tokenJson=${tokenJson?.expiresTime} <= dateNow=${Date.now()} ??? (isExp = ${isExp})`)
 		this.tokenResponse = !isExp ? tokenJson : null
 
 		// proceed to read data files, etc as we're good to go
