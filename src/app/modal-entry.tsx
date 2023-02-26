@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { IDreamSignTag, IJournalDream, IJournalEntry, InductionTypes } from './app.types'
 import { Calendar3, Clock, PlusCircle, Save, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
+import { DateTime } from 'luxon'
 import ReactTags from 'react-tag-autocomplete'
 import Modal from 'bootstrap/js/dist/modal'
 import * as bootstrap from 'bootstrap' // NOTE: IMPORTANT: This is the sole import of the javascript library (but provides funcionality thruout app)
@@ -23,7 +24,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 		isLucidDream: false,
 	}
 	const NEW_ENTRY: IJournalEntry = {
-		entryDate: new Date().toLocaleDateString('en-CA'),
+		entryDate: DateTime.now().toFormat('yyyy-MM-dd'),
 		bedTime: '01:30',
 		notesPrep: '',
 		notesWake: '',
@@ -91,8 +92,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 	async function doSaveDataFile() {
 		setIsBusySave(true)
 		await props.appdataSvc.doSaveDataFile()
-		setIsBusySave(false)
-		props.setShowModal(false)
+		handleClose()
 	}
 
 	// -----------------------------------------------------------------------
@@ -363,7 +363,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 				<div className='modal-content'>
 					<div className='modal-header bg-primary'>
 						<h5 className='modal-title'>Journal Entry</h5>
-						<button type='button' className='btn-close' data-bs-dismiss='modal' aria-label='Close' onClick={() => props.setShowModal(false)}></button>
+						<button type='button' className='btn-close' data-bs-dismiss='modal' aria-label='Close' onClick={() => handleClose()}></button>
 					</div>
 					<div className='modal-body p-4'>
 						{renderTopToolbar()}
