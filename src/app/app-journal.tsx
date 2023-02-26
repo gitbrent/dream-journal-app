@@ -28,18 +28,18 @@
  */
 
 import React, { useState, useMemo } from 'react'
-import { IDriveDataFile } from './app.types'
+import { IDriveDataFile, IJournalEntry } from './app.types'
 import { Braces, CalendarMonth, Calendar3, Tags } from 'react-bootstrap-icons'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
 import TableEntries from './components/table-entries'
-import { appdata } from './appdata'
 // FUTURE: https://github.com/hypeserver/react-date-range
 
 export interface Props {
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
-	appdataSvc: appdata
+	setShowModal: (show: boolean) => void
+	setCurrEntry: (entry: IJournalEntry) => void
 }
 
 enum EntryType {
@@ -192,7 +192,7 @@ export default function TabJournal(props: Props) {
 			<section className='bg-light p-4'>
 				{renderFilters()}
 				<div className='bg-black p-3'>
-					<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} appdataSvc={props.appdataSvc} />
+					<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 				</div>
 			</section>
 		</div>

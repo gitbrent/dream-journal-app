@@ -4,21 +4,17 @@ import { Search } from 'react-bootstrap-icons'
 import SearchResults from './components/search-results'
 import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
-import ModalEntry from './modal-entry'
-import { appdata } from './appdata'
 
 export interface Props {
-	appdataSvc: appdata
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
+	setShowModal: (show: boolean) => void
+	setCurrEntry: (entry: IJournalEntry) => void
+	setCurrDreamIdx: (idx: number) => void
 }
 
 export default function TabSearch(props: Props) {
 	const localShowAlert = JSON.parse(localStorage.getItem('show-alert-search') || '')
-	//
-	const [showModal, setShowModal] = useState(false)
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>()
-	const [currDreamIdx, setDreamIdx] = useState(0)
 	//
 	const [showAlert, setShowAlert] = useState(typeof localShowAlert === 'boolean' ? localShowAlert : true)
 	const [totalDreams, setTotalDreams] = useState(0)
@@ -104,7 +100,6 @@ export default function TabSearch(props: Props) {
 	) : (
 		<div className='container my-auto my-md-5'>
 			<header>
-				<ModalEntry currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={setShowModal} appdataSvc={props.appdataSvc} />
 				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			</header>
 
@@ -202,9 +197,9 @@ export default function TabSearch(props: Props) {
 								searchMatches.map((match, idx) => (
 									<SearchResults
 										key={`match${idx}`}
-										setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
-										setDreamIdx={(index: number) => setDreamIdx(index)}
-										setShowModal={(show: boolean) => setShowModal(show)}
+										setCurrEntry={(entry: IJournalEntry) => props.setCurrEntry(entry)}
+										setDreamIdx={(index: number) => props.setCurrDreamIdx(index)}
+										setShowModal={(show: boolean) => props.setShowModal(show)}
 										searchMatch={match}
 										searchTerm={searchTerm}
 										searchOptScope={searchOptScope}

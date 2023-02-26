@@ -55,23 +55,20 @@ import {
 import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
 import SearchResults from './components/search-results'
-import ModalEntry from './modal-entry'
-import { appdata } from './appdata'
 //import LocalAdminBrent from './z.admin.local'
 
 export interface Props {
-	appdataSvc: appdata
 	confFile?: IDriveConfFile
 	dataFile?: IDriveDataFile
 	isBusyLoad: boolean
+	setShowModal: (show: boolean) => void
+	setCurrEntry: (entry: IJournalEntry) => void
+	setCurrDreamIdx: (idx: number) => void
 }
 
 export default function TabBedtime(props: Props) {
 	const isBusySave = false
 	//const [isBusySave, setIsBusySave] = useState(false)
-	const [showModal, setShowModal] = useState(false)
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>()
-	const [currDreamIdx, setCurrDreamIdx] = useState(0)
 	const [lucidGoals, setLucidGoals] = useState<IConfMetaCats[]>()
 
 	useEffect(() => {
@@ -161,9 +158,9 @@ export default function TabBedtime(props: Props) {
 									{randDreams.map((match, idx) => (
 										<SearchResults
 											key={`dream${idx}`}
-											setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
-											setDreamIdx={(index: number) => setCurrDreamIdx(index)}
-											setShowModal={(show: boolean) => setShowModal(show)}
+											setCurrEntry={(entry: IJournalEntry) => props.setCurrEntry(entry)}
+											setDreamIdx={(index: number) => props.setCurrDreamIdx(index)}
+											setShowModal={(show: boolean) => props.setShowModal(show)}
 											searchMatch={match}
 											searchOptScope={SearchScopes.title}
 										/>
@@ -180,9 +177,9 @@ export default function TabBedtime(props: Props) {
 									{randLucids?.map((match, idx) => (
 										<SearchResults
 											key={`random${idx}`}
-											setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
-											setDreamIdx={(index: number) => setCurrDreamIdx(index)}
-											setShowModal={(show: boolean) => setShowModal(show)}
+											setCurrEntry={(entry: IJournalEntry) => props.setCurrEntry(entry)}
+											setDreamIdx={(index: number) => props.setCurrDreamIdx(index)}
+											setShowModal={(show: boolean) => props.setShowModal(show)}
 											searchMatch={match}
 											searchOptScope={SearchScopes.title}
 										/>
@@ -644,10 +641,7 @@ export default function TabBedtime(props: Props) {
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<main className='container my-auto my-md-5'>
-			<header>
-				<ModalEntry currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={setShowModal} appdataSvc={props.appdataSvc} />
-				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
-			</header>
+			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			{/*<LocalAdminBrent confFile={props.confFile} />*/}
 			<ul className='nav nav-tabs nav-fill' id='bedtimeTab' role='tablist'>
 				<li className='nav-item' role='presentation'>

@@ -30,20 +30,16 @@
 import React, { useState } from 'react'
 import { IJournalEntry, MetaType } from '../app.types'
 import { CheckCircleFill, Diagram3Fill, SortDownAlt, SortUpAlt, StarFill } from 'react-bootstrap-icons'
-import ModalEntry from '../modal-entry'
 import ReactPaginate from 'react-paginate'
-import { appdata } from '../appdata'
 
 interface Props {
-	appdataSvc: appdata
 	entries: IJournalEntry[]
 	isBusyLoad: boolean
+	setShowModal: (show: boolean) => void
+	setCurrEntry: (entry: IJournalEntry) => void
 }
 
 export default function TableEntries(props: Props) {
-	const [showModal, setShowModal] = useState(false)
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>()
-	//
 	const [pagingCurrIdx, setPagingCurrIdx] = useState(0)
 	const [pagingPageSize, setPagingPageSize] = useState(10)
 	const [sortAsc, setSortAsc] = useState(false)
@@ -54,8 +50,6 @@ export default function TableEntries(props: Props) {
 
 	return (
 		<section>
-			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} appdataSvc={props.appdataSvc} />
-
 			<table className='table table-sm mb-4'>
 				<thead className='thead'>
 					<tr>
@@ -126,8 +120,8 @@ export default function TableEntries(props: Props) {
 									<td className='align-middle text-center'>
 										<button
 											onClick={() => {
-												setCurrEntry(entry)
-												setShowModal(true)
+												props.setCurrEntry(entry)
+												props.setShowModal(true)
 											}}
 											className='btn btn-sm btn-outline-primary px-4'>
 											Edit

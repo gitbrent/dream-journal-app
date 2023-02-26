@@ -7,12 +7,12 @@ import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
 import BadgeEntries from './components/badge-entries'
 import TableEntries from './components/table-entries'
-import { appdata } from './appdata'
 
 interface IAppTagsProps {
-	appdataSvc: appdata
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
+	setShowModal: (show: boolean) => void
+	setCurrEntry: (entry: IJournalEntry) => void
 }
 export interface IAppTagsState {
 	thisIsAplaceholder: string
@@ -350,7 +350,7 @@ export default function TabTags(props: IAppTagsProps) {
 				)}
 				{chartDataTags && chartDataTags.length > 0 && typeof tagChartClickedIdx !== null && (
 					<section className='bg-black p-4'>
-						<TableEntries entries={tagChartClkEntries} isBusyLoad={props.isBusyLoad} appdataSvc={props.appdataSvc} />
+						<TableEntries entries={tagChartClkEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 					</section>
 				)}
 			</section>
@@ -403,7 +403,7 @@ export default function TabTags(props: IAppTagsProps) {
 					{renderTagsByYear()}
 				</div>
 				<div className='tab-pane bg-light p-4' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
-					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} appdataSvc={props.appdataSvc} />
+					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 				</div>
 				<div className='tab-pane bg-light p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
 					{renderTabTags()}

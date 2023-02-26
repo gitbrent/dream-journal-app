@@ -32,7 +32,6 @@ import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDriveDataFile, IJournalE
 import { InfoCircle, Search } from 'react-bootstrap-icons'
 import DreamTagCard from './components/dreamtag-card'
 import AlertGdriveStatus from './components/alert-gstat'
-import ModalEntry from './modal-entry'
 import HeaderMetrics from './components/header-metrics'
 import { appdata } from './appdata'
 
@@ -40,6 +39,8 @@ interface Props {
 	appdataSvc: appdata
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
+	setShowModal: (show: boolean) => void
+	setCurrEntry: (entry: IJournalEntry) => void
 }
 
 enum FilterSortOrder {
@@ -49,9 +50,6 @@ enum FilterSortOrder {
 }
 
 export default function TabAdmin(props: Props) {
-	const [showModal, setShowModal] = useState(false)
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>()
-	//
 	const [dreamTagGroups, setDreamTagGroups] = useState<IDreamSignTagGroup[]>([])
 	const [searchTerm, setSearchTerm] = useState('')
 	const [filterViewType, setFilterViewType] = useState<CardDreamSignGrpViewType>(CardDreamSignGrpViewType.md)
@@ -242,8 +240,8 @@ export default function TabAdmin(props: Props) {
 							.map((tagGrp, idx) => (
 								<div className='col' key={`keyTagGrp${idx}`}>
 									<DreamTagCard
-										setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
-										setShowModal={(show: boolean) => setShowModal(show)}
+										setCurrEntry={(entry: IJournalEntry) => props.setCurrEntry(entry)}
+										setShowModal={(show: boolean) => props.setShowModal(show)}
 										tagGrp={tagGrp}
 										viewType={filterViewType}
 										doMassUpdateTag={doMassUpdateTag}
@@ -266,8 +264,8 @@ export default function TabAdmin(props: Props) {
 						<button
 							key={`tagDupe${idx}`}
 							onClick={() => {
-								setCurrEntry(entry)
-								setShowModal(true)
+								props.setCurrEntry(entry)
+								props.setShowModal(true)
 							}}
 							className='btn btn-sm btn-secondary mb-2 me-2'>
 							{entry.entryDate}
@@ -292,8 +290,8 @@ export default function TabAdmin(props: Props) {
 							onClick={() => {
 								const chgEntry = { ...entry }
 								chgEntry.notesPrep += `\n[BEDTIME-FIX]='${chgEntry.bedTime}'`
-								setCurrEntry(chgEntry)
-								setShowModal(true)
+								props.setCurrEntry(chgEntry)
+								props.setShowModal(true)
 							}}
 							className='btn btn-sm btn-secondary mb-2 me-2'>
 							{entry.bedTime || '(empty)'}
@@ -320,7 +318,6 @@ export default function TabAdmin(props: Props) {
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<main className='container my-auto my-md-5'>
-			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} appdataSvc={props.appdataSvc} />
 			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 
 			<ul className='nav nav-tabs nav-fill' id='adminTab' role='tablist'>

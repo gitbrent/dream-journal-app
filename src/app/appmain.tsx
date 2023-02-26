@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import { IDriveDataFile, IDriveConfFile, IAuthState, AuthState, IS_LOCALHOST } from './app.types'
+import { IDriveDataFile, IDriveConfFile, IAuthState, AuthState, IS_LOCALHOST, IJournalEntry } from './app.types'
 import TabHome from '../app/app-home'
 import TabBedtime from '../app/app-bedtime'
 import TabExplore from '../app/app-explore'
@@ -16,6 +16,7 @@ import TabTags from '../app/app-tags'
 import TabSearch from '../app/app-search'
 import TabAdmin from '../app/app-admin'
 import TabImport from '../app/app-import'
+import ModalEntry from './modal-entry'
 import LogoBase64 from '../img/logo_base64'
 import { appdata } from './appdata'
 
@@ -51,7 +52,11 @@ export default function AppMain() {
 	const [authState, setAuthState] = useState<IAuthState>(DEF_AUTH_STATE)
 	const [confFile, setConfFile] = useState<IDriveConfFile>(DEF_CONF_FILE)
 	const [dataFile, setDataFile] = useState<IDriveDataFile>(DEF_DATA_FILE)
-	//??? const [editEntry, setEditEntry] = useState<IJournalEntry>() // do we need this for new singleton modal?
+	const [showModal, setShowModal] = useState(false)
+	// WIP: VVVV
+	const [currEntry, setCurrEntry] = useState<IJournalEntry>()
+	const [currDreamIdx, setCurrDreamIdx] = useState(0)
+	// FIXME: ^^^ SATURDAY: WHAT? NO, the Modal itself has these vvv just pass the methods!
 
 	useEffect(() => {
 		if (!appdataSvc) {
@@ -63,7 +68,6 @@ export default function AppMain() {
 	useEffect(() => {
 		if (appdataSvc && dataSvcLoadTime) {
 			if (IS_LOCALHOST) console.log(`[MAIN] appdataSvc.authState = ${appdataSvc.authState.status}`)
-			if (IS_LOCALHOST) console.log(`[MAIN] appdataSvc.dataFile = ${new Date(appdataSvc.dataFile.modifiedTime).toISOString()}`)
 			setAuthState(appdataSvc.authState)
 			setConfFile(appdataSvc.confFile)
 			setDataFile(appdataSvc.dataFile)
@@ -71,14 +75,15 @@ export default function AppMain() {
 		}
 	}, [appdataSvc, dataSvcLoadTime])
 
-	const Home = () => (<TabHome dataFile={dataFile} authState={authState} appdataSvc={appdataSvc} />)
-	const Bedtime = () => (<TabBedtime confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
-	const Explore = () => (<TabExplore confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
-	const Journal = () => (<TabJournal dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
-	const Search = () => (<TabSearch dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
-	const Tags = () => (<TabTags dataFile={dataFile || null} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />)
+	const Modal = () => (<ModalEntry appdataSvc={appdataSvc} currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />)
+	const Home = () => (<TabHome dataFile={dataFile} authState={authState} appdataSvc={appdataSvc} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
+	const Bedtime = () => (<TabBedtime confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />)
+	const Explore = () => (<TabExplore confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
+	const Journal = () => (<TabJournal dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
+	const Search = () => (<TabSearch dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />)
+	const Tags = () => (<TabTags dataFile={dataFile || null} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
 	const Import = () => <TabImport dataFile={dataFile} appdataSvc={appdataSvc} />
-	const Admin = () => <TabAdmin dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} />
+	const Admin = () => <TabAdmin dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />
 	const Nav = (): JSX.Element => {
 		const navLinkBaseClass = !dataFile ? 'nav-link disabled' : 'nav-link'
 
@@ -151,6 +156,7 @@ export default function AppMain() {
 	return (
 		<BrowserRouter>
 			{Nav()}
+			{Modal()}
 			<Routes>
 				<Route path='/' element={Home()} />
 				<Route path='/bedtime' element={Bedtime()} />

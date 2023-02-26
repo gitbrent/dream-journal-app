@@ -12,11 +12,9 @@ export interface IModalEntryProps {
 	currDreamIdx?: number
 	showModal: boolean
 	setShowModal: (arg0: boolean) => void
-	modalId?: string
 }
 
 export default function ModalEntry(props: IModalEntryProps) {
-	const DEF_MODAL_ID = 'myModal'
 	const NEW_DREAM = {
 		title: '',
 		notes: '',
@@ -36,7 +34,6 @@ export default function ModalEntry(props: IModalEntryProps) {
 	const [uniqueTags, setUniqueTags] = useState<string[]>([])
 	const [isDateDupe, setIsDateDupe] = useState(false)
 	const [modal, setModal] = useState<Modal>()
-	const [modalId, setModalId] = useState(DEF_MODAL_ID)
 
 	useEffect(() => {
 		if (!modal) setModal(new Modal(document.getElementById('myModal') as Element))
@@ -54,8 +51,6 @@ export default function ModalEntry(props: IModalEntryProps) {
 	}, [props.showModal])
 
 	useEffect(() => setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry])
-
-	useEffect(() => setModalId(props.modalId ? props.modalId : DEF_MODAL_ID), [props.modalId])
 
 	useEffect(() => {
 		const someTabTriggerEl = document.getElementById(typeof props.currDreamIdx === 'number' ? `modalNav${props.currDreamIdx}` : 'modalNavNotes')
@@ -213,7 +208,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 								setCurrEntry(newState)
 							}}
 							className='form-control'
-							style={{ height: '180px' }}
+							style={{ height: '120px' }}
 						/>
 						<label htmlFor='notesWake'>Wake Notes</label>
 					</div>
@@ -350,7 +345,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 									setCurrEntry(newState)
 								}}
 								className='form-control'
-								style={{ height: '350px' }}
+								style={{ height: '290px' }}
 							/>
 							<label htmlFor='notes'>Dream Summary</label>
 						</div>
@@ -363,7 +358,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 	}
 
 	return (
-		<div id={modalId} className='modal' data-bs-backdrop='static' tabIndex={-1}>
+		<div id='myModal' className='modal' data-bs-backdrop='static' tabIndex={-1}>
 			<div className='modal-dialog modal-lg'>
 				<div className='modal-content'>
 					<div className='modal-header bg-primary'>

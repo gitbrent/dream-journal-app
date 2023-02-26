@@ -3,13 +3,12 @@ import { DateTime } from 'luxon'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveDataFile, IJournalDream, IJournalEntry } from '../app.types'
 import { Search, Tag, Tags } from 'react-bootstrap-icons'
 import DreamTagCard from './dreamtag-card'
-import ModalEntry from '../modal-entry'
-import { appdata } from '../appdata'
 
 interface Props {
-	appdataSvc: appdata
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
+	setShowModal: (show: boolean) => void
+	setCurrEntry: (entry: IJournalEntry) => void
 }
 
 interface IOnlyDream {
@@ -38,9 +37,6 @@ enum FilterSortOrder {
 }
 
 export default function BadgeEntries(props: Props) {
-	const [showModal, setShowModal] = useState(false)
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>()
-	//
 	const [dreamTagGroups, setDreamTagGroups] = useState<IDreamSignTagGroup[]>([])
 	const [tagsByCat, setTagsByCat] = useState<IDreamTagByCat[]>([])
 	const [onlyDreams, setOnlyDreams] = useState<IOnlyDream[]>([])
@@ -211,8 +207,8 @@ export default function BadgeEntries(props: Props) {
 						.map((tagGrp, idx) => (
 							<DreamTagCard
 								key={`keyTagGrp${idx}`}
-								setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
-								setShowModal={(show: boolean) => setShowModal(show)}
+								setCurrEntry={(entry: IJournalEntry) => props.setCurrEntry(entry)}
+								setShowModal={(show: boolean) => props.setShowModal(show)}
 								tagGrp={tagGrp}
 								viewType={filterViewType}
 								doMassUpdateTag={(oldTag: string, newTag: string) => true}
@@ -264,8 +260,8 @@ export default function BadgeEntries(props: Props) {
 											.map((tagGrp, idx) => (
 												<DreamTagCard
 													key={`keyTagGrp${idx}`}
-													setCurrEntry={(entry: IJournalEntry) => setCurrEntry(entry)}
-													setShowModal={(show: boolean) => setShowModal(show)}
+													setCurrEntry={(entry: IJournalEntry) => props.setCurrEntry(entry)}
+													setShowModal={(show: boolean) => props.setShowModal(show)}
 													tagGrp={tagGrp}
 													viewType={filterViewType}
 													doMassUpdateTag={(oldTag: string, newTag: string) => true}
@@ -293,8 +289,8 @@ export default function BadgeEntries(props: Props) {
 									key={`byDateKey${idx}`}
 									title={Math.abs(Math.round(dateEntry.diff(DateTime.now(), 'months').months)) + ' months ago'}
 									onClick={() => {
-										setCurrEntry(props.dataFile.entries.filter((entry) => entry.entryDate == item.entryDate)[0])
-										setShowModal(true)
+										props.setCurrEntry(props.dataFile.entries.filter((entry) => entry.entryDate == item.entryDate)[0])
+										props.setShowModal(true)
 									}}
 									className='col cursor-link user-select-none'
 									style={{ minWidth: '65px' }}>
@@ -321,7 +317,6 @@ export default function BadgeEntries(props: Props) {
 
 	return (
 		<section>
-			<ModalEntry currEntry={currEntry} showModal={showModal} setShowModal={setShowModal} modalId='BadgeEntries' appdataSvc={props.appdataSvc} />
 			{renderFilters()}
 			{filterView === FilterView.group && renderGroupByCat()}
 			{filterView === FilterView.ungrp && renderTagUnGrp()}

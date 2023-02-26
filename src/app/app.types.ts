@@ -16,7 +16,7 @@
 // TODO: WIP: convert Dialog to new kind, send to all tabs, stop passing appSvc around
 
 // APP
-export const APP_BLD = '20230224-2320'
+export const APP_BLD = '20230226-0020'
 //export const APP_VER = `1.3.0-WIP ${APP_BLD}`
 export const APP_VER = '1.3.0-WIP'
 export const IS_LOCALHOST = window.location.href.toLowerCase().indexOf('localhost') > -1

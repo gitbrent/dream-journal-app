@@ -34,7 +34,6 @@ import { DateTime } from 'luxon'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
 import TableEntries from './components/table-entries'
-import { appdata } from './appdata'
 
 /**
  * TODO:
@@ -49,10 +48,11 @@ import { appdata } from './appdata'
  */
 
 export interface Props {
-	appdataSvc: appdata
 	confFile?: IDriveConfFile
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
+	setShowModal: (show: boolean) => void
+	setCurrEntry: (entry: IJournalEntry) => void
 }
 
 interface IChartData {
@@ -328,7 +328,7 @@ export default function TabExplore(props: Props) {
 	function renderTable(): JSX.Element {
 		return (
 			<section className='bg-black p-4'>
-				<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} appdataSvc={props.appdataSvc} />
+				<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 			</section>
 		)
 	}

@@ -28,20 +28,20 @@
  */
 
 import React, { useState } from 'react'
-import { APP_VER, AuthState, IAuthState, IDriveDataFile } from './app.types'
+import { APP_VER, AuthState, IAuthState, IDriveDataFile, IJournalEntry } from './app.types'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
-import ModalEntry from './modal-entry'
 import { appdata } from './appdata'
 
 interface Props {
 	appdataSvc: appdata
 	authState: IAuthState
 	dataFile: IDriveDataFile
+	setShowModal: (show: boolean) => void
+	setCurrEntry: (entry: IJournalEntry) => void
 }
 
 export default function TabHome(props: Props) {
-	const [showModal, setShowModal] = useState(false)
 	const [isBusy, setIsBusy] = useState(false)
 
 	async function doAuthSignIn() {
@@ -54,6 +54,11 @@ export default function TabHome(props: Props) {
 		setIsBusy(true)
 		await props.appdataSvc.doRefreshDataFile()
 		setIsBusy(false)
+	}
+
+	function doShowNewEntryModal() {
+		props.setCurrEntry(null)
+		props.setShowModal(true)
 	}
 
 	function getReadableFileSizeString(fileSizeInBytes: number) {
@@ -158,8 +163,6 @@ export default function TabHome(props: Props) {
 
 	return (
 		<section className='container-xl my-auto my-md-5'>
-			<ModalEntry showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} appdataSvc={props.appdataSvc} />
-
 			<div className='jumbotron p-4 p-md-5'>
 				<div className='row align-items-center g-0 mb-3'>
 					<div className='col'>
@@ -183,7 +186,7 @@ export default function TabHome(props: Props) {
 						</h3>
 					</div>
 					{props.authState?.status === AuthState.Authenticated && <div className='col-auto'>
-						<button className='btn btn-primary px-3 px-md-4 text-uppercase' type='button' disabled={!props.dataFile || isBusy} onClick={() => setShowModal(true)}>
+						<button className='btn btn-primary px-3 px-md-4 text-uppercase' type='button' disabled={!props.dataFile || isBusy} onClick={() => doShowNewEntryModal()}>
 							Create
 							<br />
 							Entry
