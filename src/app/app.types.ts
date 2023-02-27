@@ -16,7 +16,7 @@
 // APP
 export const APP_BLD = '20230226-0940'
 //export const APP_VER = `1.3.0-WIP ${APP_BLD}`
-export const APP_VER = '1.3.0-RC1'
+export const APP_VER = '1.3.0'
 export const IS_LOCALHOST = window.location.href.toLowerCase().indexOf('localhost') > -1
 
 // ============================================================================

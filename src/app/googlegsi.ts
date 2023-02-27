@@ -11,7 +11,7 @@
  * @see https://developers.google.com/identity/oauth2/web/guides/use-token-model
  * ========================================================
  *
- * NOTE: `this.GAPI_API_KEY` will always be empty unless we use the "private initGapiClient = (): void => {}" style!
+ * NOTE: `this.GAPI_API_KEY` will always be empty unless the "private initGapiClient = (): void => {}" style of function declaration is used!!
  */
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference types="google-one-tap" />
