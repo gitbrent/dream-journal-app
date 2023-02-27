@@ -11,6 +11,8 @@ import TableEntries from './components/table-entries'
 interface IAppTagsProps {
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
+	setShowModal: (show: boolean) => void
+	setCurrEntry: (entry: IJournalEntry) => void
 }
 export interface IAppTagsState {
 	thisIsAplaceholder: string
@@ -40,11 +42,11 @@ interface IOnlyDream {
 	tags: string[]
 }
 
-export default function TabAdmin(props: IAppTagsProps) {
+export default function TabTags(props: IAppTagsProps) {
 	const TOP = 20 //15
 	// TAB: Tag Timeline
 	const [chartDataTags, setChartDataTags] = useState<IChartData[]>([])
-	const [tagChartClickedIdx, setTagChartClickedIdx] = useState<number>(null)
+	const [tagChartClickedIdx, setTagChartClickedIdx] = useState(0)
 	const [tagChartClkEntries, setTagChartClkEntries] = useState<IJournalEntry[]>([])
 	// FILTERS
 	const [textFilter, setTextFilter] = useState('')
@@ -162,7 +164,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 			.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 			.forEach((entry) => {
 				entry.dreams.forEach((dream) => {
-					dream.dreamSigns.forEach((sign) => {
+					dream.dreamSigns?.forEach((sign) => {
 						const tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
 						if (tag) {
 							const existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
@@ -176,10 +178,11 @@ export default function TabAdmin(props: IAppTagsProps) {
 					const currEntry = tmpOnlyDreams.filter((item) => item.entryDate === entry.entryDate)[0]
 
 					if (currEntry) {
+						const dsigns = dream.dreamSigns ? dream.dreamSigns : []
 						currEntry.dreams.push(dream)
-						currEntry.tags = [...currEntry.tags, ...dream.dreamSigns]
+						currEntry.tags = [...currEntry.tags, ...dsigns]
 					} else {
-						tmpOnlyDreams.push({ entryDate: entry.entryDate, dreams: [dream], tags: dream.dreamSigns })
+						tmpOnlyDreams.push({ entryDate: entry.entryDate, dreams: [dream], tags: dream.dreamSigns || [] })
 					}
 				})
 			})
@@ -334,7 +337,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 						<ResponsiveContainer width='100%' height='100%'>
 							<BarChart
 								data={chartDataTags}
-								onClick={(data) => setTagChartClickedIdx(data && data.activeTooltipIndex !== null ? data.activeTooltipIndex : null)}>
+								onClick={(data) => setTagChartClickedIdx(data?.activeTooltipIndex || 0)}>
 								<XAxis dataKey='name' fontSize={'0.75rem'} interval='preserveStartEnd' />
 								<YAxis type='number' fontSize={'0.75rem'} />
 								<CartesianGrid stroke='#5c5c5c' strokeDasharray='6 2' vertical={false} />
@@ -347,7 +350,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 				)}
 				{chartDataTags && chartDataTags.length > 0 && typeof tagChartClickedIdx !== null && (
 					<section className='bg-black p-4'>
-						<TableEntries entries={tagChartClkEntries} isBusyLoad={props.isBusyLoad} />
+						<TableEntries entries={tagChartClkEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 					</section>
 				)}
 			</section>
@@ -400,7 +403,7 @@ export default function TabAdmin(props: IAppTagsProps) {
 					{renderTagsByYear()}
 				</div>
 				<div className='tab-pane bg-light p-4' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
-					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} />
+					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 				</div>
 				<div className='tab-pane bg-light p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
 					{renderTabTags()}

@@ -28,7 +28,7 @@
  */
 
 import React, { useState, useMemo } from 'react'
-import { IDriveDataFile } from './app.types'
+import { IDriveDataFile, IJournalEntry } from './app.types'
 import { Braces, CalendarMonth, Calendar3, Tags } from 'react-bootstrap-icons'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
@@ -38,14 +38,8 @@ import TableEntries from './components/table-entries'
 export interface Props {
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
-	doSaveViewState: Function
-	viewState: IAppViewState
-}
-export interface IAppViewState {
-	//dateRangeFrom: Date
-	//dateRangeTo: Date
-	pagingCurrIdx: number
-	pagingPageSize: number
+	setShowModal: (show: boolean) => void
+	setCurrEntry: (entry: IJournalEntry) => void
 }
 
 enum EntryType {
@@ -80,7 +74,7 @@ export default function TabJournal(props: Props) {
 						.join()
 						.indexOf(filterText.toLowerCase()) > -1) &&
 				(filterEntryType === EntryType.all ||
-					(filterEntryType === EntryType.star && entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === 'meta:star')).length > 0) ||
+					(filterEntryType === EntryType.star && entry.dreams.filter((dream) => dream.dreamSigns?.some((tag) => tag === 'meta:star')).length > 0) ||
 					(filterEntryType === EntryType.lucid && entry.dreams.filter((dream) => dream.isLucidDream).length > 0)) &&
 				(!filterYear || entry.entryDate.substring(0, 4) === filterYear) &&
 				(!filterMon || Number(entry.entryDate.substring(5, 7)) === Number(filterMon))
@@ -198,7 +192,7 @@ export default function TabJournal(props: Props) {
 			<section className='bg-light p-4'>
 				{renderFilters()}
 				<div className='bg-black p-3'>
-					<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} />
+					<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 				</div>
 			</section>
 		</div>

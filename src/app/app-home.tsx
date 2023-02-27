@@ -27,29 +27,43 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect } from 'react'
-import { APP_VER, AuthState, IAuthState, IDriveDataFile } from './app.types'
+import React, { useState } from 'react'
+import { APP_VER, AuthState, IAuthState, IDriveDataFile, IJournalEntry } from './app.types'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
-import ModalEntry from './modal-entry'
-import * as GDrive from './google-oauth'
+import { appdata } from './appdata'
 
 interface Props {
+	appdataSvc: appdata
 	authState: IAuthState
 	dataFile: IDriveDataFile
-	isBusyLoad: boolean
+	setShowModal: (show: boolean) => void
+	setCurrEntry: (entry: IJournalEntry) => void
 }
 
 export default function TabHome(props: Props) {
-	const [showModal, setShowModal] = useState(false)
-	//const [errorMessage, setErrorMessage] = useState('')
-	//const [isRenaming, setIsRenaming] = useState(false)
-	//const [fileBeingRenamed, setFileBeingRenamed] = useState<IDriveDataFile>(null)
-	//const [newFileName, setNewFileName] = useState('')
+	const [isBusy, setIsBusy] = useState(false)
+
+	async function doAuthSignIn() {
+		setIsBusy(true)
+		await props.appdataSvc.doAuthSignIn()
+		setIsBusy(false)
+	}
+
+	async function doReadDataFile() {
+		setIsBusy(true)
+		await props.appdataSvc.doRefreshDataFile()
+		setIsBusy(false)
+	}
+
+	function doShowNewEntryModal() {
+		props.setCurrEntry(null)
+		props.setShowModal(true)
+	}
 
 	function getReadableFileSizeString(fileSizeInBytes: number) {
 		let idx = -1
-		let byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB']
+		const byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB']
 		do {
 			fileSizeInBytes = fileSizeInBytes / 1024
 			idx++
@@ -59,12 +73,12 @@ export default function TabHome(props: Props) {
 	}
 
 	function renderCardAuthUser(): JSX.Element {
-		let cardAuthUser: JSX.Element
+		let cardAuthUser: JSX.Element = <div />
 
 		if (props.authState && props.authState.status === AuthState.Authenticated) {
 			cardAuthUser = (
 				<div>
-					<div className='row mb-4'>
+					<div className='row mb-3'>
 						<div className='col'>
 							<label>User Name</label>
 							{props.authState.userName}
@@ -76,12 +90,12 @@ export default function TabHome(props: Props) {
 					</div>
 					<div className='row mb-0'>
 						<div className='col'>
-							<button className='btn btn-outline-primary w-100' onClick={() => GDrive.doAuthSignIn()}>
-								Renew
+							<button className='btn btn-outline-primary w-100 py-3' onClick={() => doReadDataFile()}>
+								Reload Data
 							</button>
 						</div>
 						<div className='col'>
-							<button className='btn btn-outline-secondary w-100' onClick={() => GDrive.doAuthSignOut()}>
+							<button className='btn btn-outline-secondary w-100 py-3' onClick={() => props.appdataSvc.doAuthSignOut()}>
 								Sign Out
 							</button>
 						</div>
@@ -92,7 +106,7 @@ export default function TabHome(props: Props) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Your session has expired. Please re-authenticate to continue.</p>
-					<button className='btn btn-warning' onClick={() => GDrive.doAuthSignIn()}>
+					<button className='btn btn-warning' onClick={() => doAuthSignIn()}>
 						Sign In
 					</button>
 				</div>
@@ -101,7 +115,7 @@ export default function TabHome(props: Props) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Please sign-in to allow access to Google Drive space.</p>
-					<button className='btn btn-primary' onClick={() => GDrive.doAuthSignIn()}>
+					<button className='btn btn-primary' onClick={() => doAuthSignIn()}>
 						Sign In/Authorize
 					</button>
 				</div>
@@ -112,7 +126,7 @@ export default function TabHome(props: Props) {
 	}
 
 	function renderCardDataFile(): JSX.Element {
-		return props.dataFile && (props.dataFile._isSaving || props.dataFile._isLoading || props.isBusyLoad) ? (
+		return isBusy ? (
 			<div className='text-center'>
 				<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
 					<span className='visually-hidden' />
@@ -124,21 +138,21 @@ export default function TabHome(props: Props) {
 				<div className='row mb-3'>
 					<div className='col'>
 						<label>File Name</label>
-						{props.dataFile.name}
+						{props.dataFile?.name || '-'}
 					</div>
 					<div className='col-auto text-end'>
 						<label>Entries</label>
-						{props.dataFile.entries ? props.dataFile.entries.length : '?'}
+						{props.dataFile?.entries ? props.dataFile.entries.length : '-'}
 					</div>
 				</div>
 				<div className='row'>
 					<div className='col'>
 						<label>Last Saved</label>
-						{props.dataFile ? new Date(props.dataFile.modifiedTime).toLocaleString() : '-'}
+						{props.dataFile?.modifiedTime ? new Date(props.dataFile.modifiedTime).toLocaleString() : '-'}
 					</div>
 					<div className='col-auto text-end'>
 						<label>File Size</label>
-						{getReadableFileSizeString(Number(props.dataFile.size))}
+						{props.dataFile?.size ? getReadableFileSizeString(Number(props.dataFile.size)) : '-'}
 					</div>
 				</div>
 			</div>
@@ -148,9 +162,7 @@ export default function TabHome(props: Props) {
 	}
 
 	return (
-		<div className='container-xl my-auto my-md-5'>
-			<ModalEntry currEntry={null} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
-
+		<section className='container-xl my-auto my-md-5'>
 			<div className='jumbotron p-4 p-md-5'>
 				<div className='row align-items-center g-0 mb-3'>
 					<div className='col'>
@@ -173,59 +185,61 @@ export default function TabHome(props: Props) {
 							Dream Journal
 						</h3>
 					</div>
-					<div className='col-auto'>
-						<button className='btn btn-primary px-3 px-md-4 text-uppercase' type='button' disabled={!props.dataFile} onClick={() => setShowModal(true)}>
+					{props.authState?.status === AuthState.Authenticated && <div className='col-auto'>
+						<button className='btn btn-primary px-3 px-md-4 text-uppercase' type='button' disabled={!props.dataFile || isBusy} onClick={() => doShowNewEntryModal()}>
 							Create
 							<br />
 							Entry
 							<Plus size='64' className='d-none  d-md-none d-lg-block' />
 							<Plus size='32' className='d-block d-lg-none mx-auto' />
 						</button>
-					</div>
+					</div>}
 				</div>
 
 				<div className='mb-5'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</div>
 
-				<div className='row g-5 row-cols-1 row-cols-md-2 mb-5'>
-					<div className='col'>
-						<div className='card h-100'>
-							<div className={'card-header' + (props.authState && props.authState.status === AuthState.Authenticated ? ' bg-success' : ' bg-warning')}>
-								<h5 className='card-title text-white mb-0'>{props.authState ? props.authState.status : '???'}</h5>
+				{props.authState?.status === AuthState.Authenticated ?
+					<div className='row g-5 row-cols-1 row-cols-md-2'>
+						<div className='col'>
+							<div className='card h-100'>
+								<div className='card-header bg-success'>
+									<h5 className='card-title text-white mb-0'>{props.authState?.status}</h5>
+								</div>
+								<div className='card-body bg-black'>{renderCardAuthUser()}</div>
 							</div>
-							<div className='card-body bg-black'>{renderCardAuthUser()}</div>
 						</div>
-					</div>
-					<div className='col'>
-						<div className='card h-100'>
-							<div className='card-header bg-info'>
-								<h5 className='card-title text-white mb-0'>Dream Journal</h5>
-							</div>
-							<div className='card-body bg-black'>{renderCardDataFile()}</div>
-						</div>
-					</div>
-				</div>
-				<div className='row g-5 row-cols-1'>
-					<div className='col'>
-						<div className='card'>
-							<div className='card-header bg-secondary'>
-								<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
-							</div>
-							<div className='card-body bg-light text-dark'>
-								<p className='card-text'>
-									This application uses your Google Drive to store dream journals so they are safe, secure, and accessible on any of your devices.
-								</p>
-								<p className='card-text'>
-									Click "Sign In", select the Google account to use with this app, view the request permissions page asking to create and modify{' '}
-									<strong>
-										<u>only its own files</u>
-									</strong>{' '}
-									on your Google Drive. (This app cannot access your other Google Drive files)
-								</p>
+						<div className='col'>
+							<div className='card h-100'>
+								<div className='card-header bg-info'>
+									<h5 className='card-title text-white mb-0'>Dream Journal</h5>
+								</div>
+								<div className='card-body bg-black'>{renderCardDataFile()}</div>
 							</div>
 						</div>
 					</div>
-				</div>
+					:
+					<div className='card'>
+						<div className='card-header bg-primary'>
+							<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
+						</div>
+						<div className='card-body bg-black p-4'>
+							<p className='card-text'>
+								This application uses your Google Drive to store dream journals so they are safe, secure, and accessible on any of your devices.
+							</p>
+							<p className='card-text'>
+								Click &quot;Sign In&quot;, select the Google account to use with this app, view the request permissions page asking to create and modify{' '}
+								<strong>
+									<u>only its own files</u>
+								</strong>{' '}
+								on your Google Drive. (This app cannot access your other Google Drive files)
+							</p>
+							<button className='btn btn-outline-primary mt-3 w-100 p-3' onClick={() => doAuthSignIn()}>
+								Sign In
+							</button>
+						</div>
+					</div>
+				}
 			</div>
-		</div>
+		</section>
 	)
 }

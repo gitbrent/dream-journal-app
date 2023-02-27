@@ -1,31 +1,30 @@
 import React, { useState, useEffect } from 'react'
 import { IDreamSignTag, IJournalDream, IJournalEntry, InductionTypes } from './app.types'
 import { Calendar3, Clock, PlusCircle, Save, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
+import { DateTime } from 'luxon'
 import ReactTags from 'react-tag-autocomplete'
 import Modal from 'bootstrap/js/dist/modal'
-import * as GDrive from './google-oauth'
 import * as bootstrap from 'bootstrap' // NOTE: IMPORTANT: This is the sole import of the javascript library (but provides funcionality thruout app)
+import { appdata } from './appdata'
 
 export interface IModalEntryProps {
-	currEntry: IJournalEntry
+	appdataSvc: appdata
+	currEntry?: IJournalEntry
 	currDreamIdx?: number
 	showModal: boolean
 	setShowModal: (arg0: boolean) => void
-	modalId?: string
 }
 
 export default function ModalEntry(props: IModalEntryProps) {
-	const DEF_MODAL_ID = 'myModal'
 	const NEW_DREAM = {
 		title: '',
 		notes: '',
 		dreamSigns: [],
 		dreamImages: [],
 		isLucidDream: false,
-		lucidMethod: null,
 	}
-	const NEW_ENTRY = {
-		entryDate: new Date().toLocaleDateString('en-CA'),
+	const NEW_ENTRY: IJournalEntry = {
+		entryDate: DateTime.now().toFormat('yyyy-MM-dd'),
 		bedTime: '01:30',
 		notesPrep: '',
 		notesWake: '',
@@ -33,19 +32,18 @@ export default function ModalEntry(props: IModalEntryProps) {
 	}
 	const [isBusySave, setIsBusySave] = useState(false)
 	const [currEntry, setCurrEntry] = useState<IJournalEntry>({ ...NEW_ENTRY })
-	const [uniqueTags, setUniqueTags] = useState([])
+	const [uniqueTags, setUniqueTags] = useState<string[]>([])
 	const [isDateDupe, setIsDateDupe] = useState(false)
-	const [modal, setModal] = useState<Modal>(null)
-	const [modalId, setModalId] = useState(DEF_MODAL_ID)
+	const [modal, setModal] = useState<Modal>()
 
 	useEffect(() => {
-		if (!modal) setModal(new Modal(document.getElementById('myModal')))
+		if (!modal) setModal(new Modal(document.getElementById('myModal') as Element))
 	}, [])
 
 	/** Set/Clear Entry */
 	useEffect(() => {
 		setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry]
-		setUniqueTags(GDrive.getUniqueDreamTags)
+		if (props.appdataSvc) setUniqueTags(props.appdataSvc.getUniqueDreamTags())
 
 		if (modal) {
 			if (props.showModal) modal.show()
@@ -54,8 +52,6 @@ export default function ModalEntry(props: IModalEntryProps) {
 	}, [props.showModal])
 
 	useEffect(() => setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry])
-
-	useEffect(() => setModalId(props.modalId ? props.modalId : DEF_MODAL_ID), [props.modalId])
 
 	useEffect(() => {
 		const someTabTriggerEl = document.getElementById(typeof props.currDreamIdx === 'number' ? `modalNav${props.currDreamIdx}` : 'modalNavNotes')
@@ -69,39 +65,34 @@ export default function ModalEntry(props: IModalEntryProps) {
 
 	function handleSave() {
 		if (props.currEntry) {
-			GDrive.doEntryEdit(currEntry, props.currEntry.entryDate)
+			props.appdataSvc.doEntryEdit(currEntry, props.currEntry.entryDate)
 		} else {
-			if (GDrive.doesEntryDateExist(currEntry.entryDate)) {
+			if (props.appdataSvc.doesEntryDateExist(currEntry.entryDate)) {
 				alert('Date already exists!')
 				return
 			}
-			GDrive.doEntryAdd(currEntry)
+			props.appdataSvc.doEntryAdd(currEntry)
 		}
 
 		doSaveDataFile()
 	}
 
+	function handleClose() {
+		setIsBusySave(false)
+		props.setShowModal(false)
+	}
+
 	function handleDelete() {
 		if (!confirm('PLEASE CONFIRM\n^^^^^^ ^^^^^^^\n\nYou are deleting this *entire journal entry*!')) return
 
-		GDrive.doEntryDelete(currEntry.entryDate)
+		props.appdataSvc.doEntryDelete(currEntry.entryDate)
 		doSaveDataFile()
 	}
 
-	function doSaveDataFile() {
+	async function doSaveDataFile() {
 		setIsBusySave(true)
-
-		GDrive.doSaveDataFile()
-			.then(() => {
-				setIsBusySave(false)
-				props.setShowModal(false)
-			})
-			.catch((ex) => {
-				setIsBusySave(false)
-				// TODO: Show error message somewhere on dialog! (20190324)
-				// Set errstate and show message in DialogFooter
-				alert(ex)
-			})
+		await props.appdataSvc.doSaveDataFile()
+		handleClose()
 	}
 
 	// -----------------------------------------------------------------------
@@ -126,7 +117,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 									const chgEntry = { ...currEntry }
 									chgEntry.entryDate = ev.currentTarget.value
 									setCurrEntry(chgEntry)
-									setIsDateDupe(GDrive.doesEntryDateExist(ev.currentTarget.value))
+									setIsDateDupe(props.appdataSvc.doesEntryDateExist(ev.currentTarget.value))
 								}}
 								className={`form-control form-control-sm ${isDateDupe && 'is-invalid'}`}
 								required
@@ -217,7 +208,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 								setCurrEntry(newState)
 							}}
 							className='form-control'
-							style={{ height: '180px' }}
+							style={{ height: '120px' }}
 						/>
 						<label htmlFor='notesWake'>Wake Notes</label>
 					</div>
@@ -313,15 +304,15 @@ export default function ModalEntry(props: IModalEntryProps) {
 							allowBackspace={false}
 							minQueryLength={2}
 							maxSuggestionsLength={6}
-							tags={dream.dreamSigns.sort().map((sign, idx) => ({ id: idx, name: sign }))}
+							tags={dream.dreamSigns?.sort().map((sign, idx) => ({ id: idx, name: sign }))}
 							suggestions={uniqueTags.map((sign, idx) => new Object({ id: idx, name: sign }))}
 							suggestionsFilter={(item: { id: number; name: string }, query: string) => item.name.indexOf(query.toLowerCase()) > -1}
 							addOnBlur={true}
 							onAddition={(tag: IDreamSignTag) => {
 								const newState = { ...currEntry }
 								// Dont allow dupes
-								if (newState.dreams[dreamIdx].dreamSigns.indexOf(tag.name.trim()) === -1) {
-									newState.dreams[dreamIdx].dreamSigns.push(tag.name.toLowerCase())
+								if (newState.dreams[dreamIdx].dreamSigns?.indexOf(tag.name.trim()) === -1) {
+									newState.dreams[dreamIdx].dreamSigns?.push(tag.name.toLowerCase())
 								}
 								setCurrEntry(newState)
 							}}
@@ -332,7 +323,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 							}}
 							onDelete={(idx: number) => {
 								const newState = { ...currEntry }
-								newState.dreams[dreamIdx].dreamSigns.splice(idx, 1)
+								newState.dreams[dreamIdx].dreamSigns?.splice(idx, 1)
 								setCurrEntry(newState)
 							}}
 							className='my-2'
@@ -354,7 +345,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 									setCurrEntry(newState)
 								}}
 								className='form-control'
-								style={{ height: '350px' }}
+								style={{ height: '290px' }}
 							/>
 							<label htmlFor='notes'>Dream Summary</label>
 						</div>
@@ -367,12 +358,12 @@ export default function ModalEntry(props: IModalEntryProps) {
 	}
 
 	return (
-		<div id={modalId} className='modal' data-bs-backdrop='static' tabIndex={-1}>
+		<div id='myModal' className='modal' data-bs-backdrop='static' tabIndex={-1}>
 			<div className='modal-dialog modal-lg'>
 				<div className='modal-content'>
 					<div className='modal-header bg-primary'>
 						<h5 className='modal-title'>Journal Entry</h5>
-						<button type='button' className='btn-close' data-bs-dismiss='modal' aria-label='Close' onClick={() => props.setShowModal(false)}></button>
+						<button type='button' className='btn-close' data-bs-dismiss='modal' aria-label='Close' onClick={() => handleClose()}></button>
 					</div>
 					<div className='modal-body p-4'>
 						{renderTopToolbar()}
@@ -418,7 +409,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 						</div>
 					</div>
 					<div className='modal-footer'>
-						<button type='button' className='btn btn-secondary' onClick={() => props.setShowModal(false)}>
+						<button type='button' className='btn btn-secondary' onClick={() => handleClose()}>
 							Close
 						</button>
 						<button type='submit' onClick={() => handleSave()} className='btn btn-primary px-5' disabled={isDateDupe}>

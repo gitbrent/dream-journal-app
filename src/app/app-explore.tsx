@@ -47,13 +47,12 @@ import TableEntries from './components/table-entries'
  * | Drm1 |      |      |
  */
 
-export interface ITabStateExplore {}
 export interface Props {
-	confFile: IDriveConfFile
+	confFile?: IDriveConfFile
 	dataFile: IDriveDataFile
 	isBusyLoad: boolean
-	setTabState: Function
-	tabState: ITabStateExplore
+	setShowModal: (show: boolean) => void
+	setCurrEntry: (entry: IJournalEntry) => void
 }
 
 interface IChartData {
@@ -72,7 +71,7 @@ interface IChartData {
 	totLucid: number
 	totStard: number
 	totTaged: number
-	totNotag?: number
+	totNotag: number
 	avgTotal: number
 }
 type AvgDreamsPerMonth = {
@@ -92,8 +91,8 @@ export default function TabExplore(props: Props) {
 	const allTimeMonths = useMemo(() => {
 		let months = 1
 		if (props.dataFile) {
-			let ad1 = DateTime.fromISO(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
-			let ad2 = DateTime.fromISO(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
+			const ad1 = DateTime.fromISO(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
+			const ad2 = DateTime.fromISO(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
 			months = Math.round(ad2.diff(ad1, 'months').months) + 1
 		}
 		return months
@@ -105,14 +104,14 @@ export default function TabExplore(props: Props) {
 			month: number
 			total: number
 		}
-		let sumByYear: SumByYear[] = []
-		let avgData: AvgDreamsPerMonth = {}
+		const sumByYear: SumByYear[] = []
+		const avgData: AvgDreamsPerMonth = {}
 
 		if (props.dataFile) {
 			props.dataFile.entries
 				.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))
 				.forEach((entry) => {
-					let entryDate = DateTime.fromISO(entry.entryDate)
+					const entryDate = DateTime.fromISO(entry.entryDate)
 					let currItem = sumByYear.filter((item) => item.year === entryDate.year && item.month === entryDate.month)[0]
 					if (!currItem) {
 						currItem = { year: entryDate.year, month: entryDate.month, total: 0 }
@@ -122,10 +121,10 @@ export default function TabExplore(props: Props) {
 				})
 
 			sumByYear.forEach((item) => {
-				let entryKey = `${item.year}-${item.month <= 9 ? '0' + item.month : item.month}`
-				let totalMon = sumByYear.filter((sum) => sum.year === item.year).length
-				let divByMon = item.month < totalMon ? item.month : totalMon
-				let totalSoFar = sumByYear
+				const entryKey = `${item.year}-${item.month <= 9 ? '0' + item.month : item.month}`
+				const totalMon = sumByYear.filter((sum) => sum.year === item.year).length
+				const divByMon = item.month < totalMon ? item.month : totalMon
+				const totalSoFar = sumByYear
 					.filter((sum) => sum.year === item.year && sum.month <= item.month)
 					.map((sum) => sum.total)
 					.reduce((p, n) => p + n)
@@ -143,7 +142,7 @@ export default function TabExplore(props: Props) {
 
 	const filteredEntries = useMemo(() => {
 		let tmpEntries: IJournalEntry[] = []
-		let dateMaxAge = DateTime.now()
+		const dateMaxAge = DateTime.now()
 			.minus({ months: filterDrmChtMonths - 1 })
 			.set({ day: 0, hour: 0, minute: 0, second: 0 })
 
@@ -182,14 +181,14 @@ export default function TabExplore(props: Props) {
 		}
 
 		filteredEntries.forEach((entry) => {
-			let dateEntry = DateTime.fromISO(entry.entryDate)
-			let currEntry = tmpChartData.filter((data) => data.dateTime.hasSame(dateEntry, 'month') && data.dateTime.hasSame(dateEntry, 'year'))[0]
+			const dateEntry = DateTime.fromISO(entry.entryDate)
+			const currEntry = tmpChartData.filter((data) => data.dateTime.hasSame(dateEntry, 'month') && data.dateTime.hasSame(dateEntry, 'year'))[0]
 
 			entry.dreams.forEach((dream) => {
-				currEntry.totTaged += dream.dreamSigns.length > 0 ? 1 : 0
-				currEntry.totNotag += dream.dreamSigns.length > 0 ? 0 : 1
+				currEntry.totTaged += dream.dreamSigns && dream.dreamSigns.length > 0 ? 1 : 0
+				currEntry.totNotag += dream.dreamSigns && dream.dreamSigns.length > 0 ? 0 : 1
 				currEntry.totLucid += dream.isLucidDream ? 1 : 0
-				currEntry.totStard += dream.dreamSigns.filter((tag) => tag === MetaType.star).length > 0 ? 1 : 0
+				currEntry.totStard += dream.dreamSigns ? (dream.dreamSigns?.filter((tag) => tag === MetaType.star).length > 0 ? 1 : 0) : 0
 				currEntry.avgTotal = avgDreamsPerMonth[currEntry.dateTime.toFormat('yyyy-MM')]
 			})
 		})
@@ -329,7 +328,7 @@ export default function TabExplore(props: Props) {
 	function renderTable(): JSX.Element {
 		return (
 			<section className='bg-black p-4'>
-				<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} />
+				<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 			</section>
 		)
 	}

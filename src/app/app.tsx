@@ -29,260 +29,37 @@
 
 import * as React from 'react'
 import * as ReactDOM from 'react-dom/client'
-import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import { IAuthState, IDriveDataFile, IJournalEntry, AuthState, APP_VER, IDriveConfFile } from './app.types'
-import * as GDrive from './google-oauth'
-import TabHome from '../app/app-home'
-import TabBedtime, { ITabStateBedtime } from '../app/app-bedtime'
-import TabExplore, { ITabStateExplore } from '../app/app-explore'
-import TabJournal, { IAppViewState } from './app-journal'
-import TabTags from '../app/app-tags'
-//import TabTags2 from '../app/app-tags2'
-import TabSearch, { IAppSearchState } from '../app/app-search'
-import TabAdmin, { IAppAdminState } from '../app/app-admin'
-import TabImport from '../app/app-import'
-import LogoBase64 from '../img/logo_base64'
+import { APP_VER } from './app.types'
 //import '../css/purged.css' // FIXME: how do we purge scss??
 import '../css/react-tags.css'
 import '../css/style.scss'
+import AppMain from './appmain'
 
 // App Logic
-interface IAppProps {}
-interface IAppState {
-	appErrMsg: string
-	auth: IAuthState
-	tabStateBedtime: ITabStateBedtime
-	tabStateExplore: ITabStateExplore
-	childImportState: object
-	childSearchState: IAppSearchState
-	childViewState: IAppViewState
-	childAdminState: IAppAdminState
-	confFile: IDriveConfFile
-	dataFile: IDriveDataFile
-	isBusyLoad: boolean
-	editEntry: IJournalEntry
-}
-class App extends React.Component<IAppProps, IAppState> {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface IAppProps { }
+
+class App extends React.Component<IAppProps> {
 	constructor(props: Readonly<IAppProps>) {
 		super(props)
-
-		this.state = {
-			appErrMsg: '',
-			auth: {
-				status: AuthState.Unauthenticated,
-				userName: '',
-				userPhoto: '',
-			},
-			tabStateBedtime: null,
-			tabStateExplore: null,
-			childImportState: null,
-			childSearchState: null,
-			childViewState: null,
-			childAdminState: null,
-			confFile: null,
-			dataFile: null,
-			isBusyLoad: false,
-			editEntry: null,
-		}
-
-		this.initSetupOauth()
-
 		console.log(APP_VER)
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	componentDidCatch = (error: any, errorInfo: any) => {
 		this.setState({ appErrMsg: error.toString() })
 		console.error(error)
 		console.error(errorInfo)
 	}
 
-	initSetupOauth = () => {
-		// Set 2 necessary callbacks to capture auth/file state changes
-		GDrive.authStateCallback((result: IAuthState) => this.setState({ auth: result }))
-		GDrive.busyLoadCallback((result: boolean) => this.setState({ isBusyLoad: result }))
-		GDrive.confFileCallback((result: IDriveConfFile) => this.setState({ confFile: result }))
-		GDrive.dataFileCallback((result: IDriveDataFile) => this.setState({ dataFile: result }))
-
-		// Make initial call at startup, if we're logged in, the datafile will be loaded and auth state set, otherwise, wait for user to click "Login"
-		GDrive.doAuthUpdate()
-	}
-
-	/**
-	 * Retain state between tab changes
-	 */
-	doSaveTabState_Bedtime = (newState: ITabStateBedtime) => {
-		this.setState({ tabStateBedtime: newState })
-	}
-	/**
-	 * Retain state between tab changes
-	 */
-	doSaveTabState_Explore = (newState: ITabStateExplore) => {
-		this.setState({ tabStateExplore: newState })
-	}
-
-	/**
-	 * the `app-import` constructor is called every damn time its shown, so we have to save state here
-	 * FUTURE: use hooks instead?
-	 */
-	doSaveImportState = (newState: object) => {
-		this.setState({
-			childImportState: newState,
-		})
-	}
-	/**
-	 * Retain state between tab changes
-	 */
-	doSaveSearchState = (newState: IAppSearchState) => {
-		this.setState({
-			childSearchState: newState,
-		})
-	}
-	/**
-	 * Retain state between tab changes
-	 */
-	doSaveViewState = (newState: IAppViewState) => {
-		this.setState({
-			childViewState: newState,
-		})
-	}
-	/**
-	 * Retain state between tab changes
-	 */
-	doSaveAdminState = (newState: IAppAdminState) => {
-		this.setState({
-			childAdminState: newState,
-		})
-	}
-
-	// App Pages
-	Home = () => <TabHome dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} authState={this.state.auth} />
-	Bedtime = () => (
-		<TabBedtime
-			confFile={this.state.confFile || null}
-			dataFile={this.state.dataFile || null}
-			isBusyLoad={this.state.isBusyLoad}
-			setTabState={this.doSaveTabState_Explore}
-			tabState={this.state.tabStateExplore}
-		/>
-	)
-	Explore = () => (
-		<TabExplore
-			confFile={this.state.confFile || null}
-			dataFile={this.state.dataFile || null}
-			isBusyLoad={this.state.isBusyLoad}
-			setTabState={this.doSaveTabState_Explore}
-			tabState={this.state.tabStateExplore}
-		/>
-	)
-	Journal = () => (
-		<TabJournal dataFile={this.state.dataFile || null} doSaveViewState={this.doSaveViewState} viewState={this.state.childViewState} isBusyLoad={this.state.isBusyLoad} />
-	)
-	Search = () => (
-		<TabSearch
-			dataFile={this.state.dataFile || null}
-			isBusyLoad={this.state.isBusyLoad}
-			doSaveSearchState={this.doSaveSearchState}
-			searchState={this.state.childSearchState}
-		/>
-	)
-	Tags = () => (
-		<TabTags dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad}  />
-	)
-	Import = () => <TabImport dataFile={this.state.dataFile || null} doSaveImportState={this.doSaveImportState} importState={this.state.childImportState} />
-	Admin = () => (
-		<TabAdmin dataFile={this.state.dataFile || null} isBusyLoad={this.state.isBusyLoad} doSaveAdminState={this.doSaveAdminState} adminState={this.state.childAdminState} />
-	)
-
-	Nav = (): JSX.Element => {
-		const navLinkBaseClass = !this.state.dataFile ? 'nav-link disabled' : 'nav-link'
-
-		return (
-			<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
-				<div className='container-fluid'>
-					<a className='navbar-brand' href='/'>
-						<img src={LogoBase64} width='30' height='30' className='d-inline-block align-top me-3' alt='logo' />
-						Brain Cloud
-					</a>
-					<button
-						type='button'
-						className='navbar-toggler'
-						data-bs-toggle='collapse'
-						data-bs-target='#navbarNav'
-						aria-controls='navbarNav'
-						aria-expanded='false'
-						aria-label='Toggle navigation'>
-						<span className='navbar-toggler-icon' />
-					</button>
-					<div className='collapse navbar-collapse' id='navbarNav'>
-						<ul className='navbar-nav me-auto mb-2 mb-lg-0'>
-							<li className='nav-item'>
-								<NavLink to='/' className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-									Home
-								</NavLink>
-							</li>
-							<li className='nav-item'>
-								<NavLink to='/bedtime' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
-									Bedtime
-								</NavLink>
-							</li>
-							<li className='nav-item'>
-								<NavLink to='/explore' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
-									Explore
-								</NavLink>
-							</li>
-							<li className='nav-item'>
-								<NavLink to='/journal' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
-									Journal
-								</NavLink>
-							</li>
-							<li className='nav-item'>
-								<NavLink to='/tags' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
-									Tags
-								</NavLink>
-							</li>
-							<li className='nav-item'>
-								<NavLink to='/search' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
-									Search
-								</NavLink>
-							</li>
-							<li className='nav-item d-none d-lg-block'>
-								<NavLink to='/import' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
-									Import
-								</NavLink>
-							</li>
-							<li className='nav-item d-none d-lg-block'>
-								<NavLink to='/admin' className={({ isActive }) => (isActive ? `${navLinkBaseClass} active` : navLinkBaseClass)}>
-									Admin
-								</NavLink>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</nav>
-		)
-	}
-
 	render() {
-		return (
-			<BrowserRouter>
-				{this.Nav()}
-				<Routes>
-					<Route path='/' element={this.Home()} />
-					<Route path='/bedtime' element={this.Bedtime()} />
-					<Route path='/explore' element={this.Explore()} />
-					<Route path='/journal' element={this.Journal()} />
-					<Route path='/tags' element={this.Tags()} />
-					<Route path='/search' element={this.Search()} />
-					<Route path='/import' element={this.Import()} />
-					<Route path='/admin' element={this.Admin()} />
-				</Routes>
-			</BrowserRouter>
-		)
+		return <AppMain />
 	}
 }
 
 // App Container
-ReactDOM.createRoot(document.getElementById('root')).render(
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+ReactDOM.createRoot(document.getElementById('root')!).render(
 	<React.StrictMode>
 		<App />
 	</React.StrictMode>

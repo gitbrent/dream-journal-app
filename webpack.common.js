@@ -2,13 +2,21 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 
+// `process.env` depends upon this setup
+const webpack = require('webpack');
+const dotenv = require('dotenv');
+const env = dotenv.config().parsed;
+const envKeys = Object.keys(env).reduce((prev, next) => {
+	prev[`process.env.${next}`] = JSON.stringify(env[next]);
+	return prev;
+}, {});
+
 module.exports = {
 	entry: "./src/app/app.tsx",
 	plugins: [
 		new CleanWebpackPlugin(),
-		new HtmlWebpackPlugin({
-			template: "src/templates/index.html",
-		}),
+		new HtmlWebpackPlugin({ template: "src/templates/index.html" }),
+		new webpack.DefinePlugin(envKeys),
 	],
 	output: {
 		path: __dirname + "/public",
@@ -108,5 +116,5 @@ module.exports = {
 		static: path.join(__dirname, "public"),
 		compress: true,
 		port: 8080,
-	},
+	}
 };
