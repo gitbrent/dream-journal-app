@@ -13,3 +13,4 @@ npm-debug.log
 src/data/*.json
 z.admin.local.tsx
 firebase-debug.log
+public/
