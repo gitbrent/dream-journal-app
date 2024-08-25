@@ -705,10 +705,10 @@ export default function TabBedtime(props: Props) {
 				<div className='tab-pane bg-black p-4' id='bedTabRandom' role='tabpanel' aria-labelledby='bedNavRandom'>
 					{renderTabRandom()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='bedTabGoals' role='tabpanel' aria-labelledby='bedNavGoals'>
+				<div className='tab-pane bg-black p-4' id='bedTabGoals' role='tabpanel' aria-labelledby='bedNavGoals'>
 					{renderTabGoals()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='bedTabSigns' role='tabpanel' aria-labelledby='bedNavSigns'>
+				<div className='tab-pane bg-black p-4' id='bedTabSigns' role='tabpanel' aria-labelledby='bedNavSigns'>
 					{renderTabInv()}
 				</div>
 			</div>

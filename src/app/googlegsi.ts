@@ -85,10 +85,12 @@ export class googlegsi {
 	}
 
 	private doAuthorizeUser = async () => {
+		if (IS_LOCALHOST) console.log(`[doAuthorizeUser] this.tokenResponse=${this.tokenResponse}`)
 		if (this.tokenResponse?.access_token) {
 			// A: set auth
 			this.isAuthorized = true
-			// B: *IMPORTANT* do this as `await this.initGapiClient()` below w/b skipped as gapi is loaded, however, it'll throw "no anon access" errors if token isnt set like this!
+			if (IS_LOCALHOST) console.log(`[doAuthorizeUser] this.isAuthorized=${this.isAuthorized}`)
+				// B: *IMPORTANT* do this as `await this.initGapiClient()` below w/b skipped as gapi is loaded, however, it'll throw "no anon access" errors if token isnt set like this!
 			gapi.client.setToken(this.tokenResponse)
 		}
 		else {
@@ -264,6 +266,7 @@ export class googlegsi {
 		})
 		const buffer = await response.arrayBuffer()
 		const decoded: string = new TextDecoder('utf-8').decode(buffer)
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let json: Record<string, any> = {}
 
 		// A:
@@ -272,8 +275,10 @@ export class googlegsi {
 				// NOTE: Initial dream-journal file is empty!
 				json = JSON.parse(decoded)
 			} catch (ex) {
-				alert(ex)
-				console.error ? console.error(ex) : console.log(ex)
+				if (ex instanceof Error) {
+					alert(ex)
+					console.error(ex)
+				}
 			}
 		}
 
@@ -309,6 +314,7 @@ export class googlegsi {
 		})
 		const buffer = await response.arrayBuffer()
 		const decoded: string = new TextDecoder('utf-8').decode(buffer)
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let json: Record<string, any> = {}
 		let entries: IJournalEntry[] = []
 
@@ -320,7 +326,7 @@ export class googlegsi {
 				entries = json['entries']
 			} catch (ex) {
 				alert(ex)
-				console.error ? console.error(ex) : console.log(ex)
+				console.error(ex)
 			}
 		}
 

@@ -352,13 +352,13 @@ export default function TabAdmin(props: Props) {
 				</li>
 			</ul>
 			<div className='tab-content'>
-				<div className='tab-pane bg-light p-4 active' id='search' role='tabpanel' aria-labelledby='search-tab'>
+				<div className='tab-pane bg-black p-4 active' id='search' role='tabpanel' aria-labelledby='search-tab'>
 					{renderTagGroups()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='dupe' role='tabpanel' aria-labelledby='dupe-tab'>
+				<div className='tab-pane bg-black p-4' id='dupe' role='tabpanel' aria-labelledby='dupe-tab'>
 					{renderDupeTags()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='bedtime' role='tabpanel' aria-labelledby='bedtime-tab'>
+				<div className='tab-pane bg-black p-4' id='bedtime' role='tabpanel' aria-labelledby='bedtime-tab'>
 					{renderBadDates()}
 				</div>
 			</div>

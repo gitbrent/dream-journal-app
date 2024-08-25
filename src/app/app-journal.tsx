@@ -189,7 +189,7 @@ export default function TabJournal(props: Props) {
 	) : (
 		<div className='container my-auto my-md-5'>
 			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
-			<section className='bg-light p-4'>
+			<section className='bg-black p-4'>
 				{renderFilters()}
 				<div className='bg-black p-3'>
 					<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />

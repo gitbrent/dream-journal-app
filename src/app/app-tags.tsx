@@ -395,16 +395,16 @@ export default function TabTags(props: IAppTagsProps) {
 				</li>
 			</ul>
 			<div className='tab-content'>
-				<div className='tab-pane bg-light p-4 active' id='tab3' role='tabpanel' aria-labelledby='3-tab'>
+				<div className='tab-pane bg-black p-4 active' id='tab3' role='tabpanel' aria-labelledby='3-tab'>
 					{renderTopTags()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='tab4' role='tabpanel' aria-labelledby='4-tab'>
+				<div className='tab-pane bg-black p-4' id='tab4' role='tabpanel' aria-labelledby='4-tab'>
 					{renderTagsByYear()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
+				<div className='tab-pane bg-black p-4' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
 					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 				</div>
-				<div className='tab-pane bg-light p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
+				<div className='tab-pane bg-black p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
 					{renderTabTags()}
 				</div>
 			</div>

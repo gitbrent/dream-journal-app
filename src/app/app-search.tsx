@@ -136,7 +136,7 @@ export default function TabSearch(props: Props) {
 							</div>
 						</div>
 					</div>
-					<div className='card-body bg-light border-bottom border-secondary' data-desc='commandbar'>
+					<div className='card-body bg-black border-bottom border-secondary' data-desc='commandbar'>
 						<div className='row align-items-center'>
 							<div className='col-12 col-md-8'>
 								<div className='row align-items-center g-0 mb-3 mb-md-0'>
@@ -190,7 +190,7 @@ export default function TabSearch(props: Props) {
 							</div>
 						</div>
 					</div>
-					<div className='card-body bg-light p-4' data-desc='search cards'>
+					<div className='card-body bg-black p-4' data-desc='search cards'>
 						<div
 							className={`row ${searchOptScope === SearchScopes.all || searchOptScope === SearchScopes.notes ? 'row-cols-1 row-cols-md-2' : 'row-cols-2 row-cols-md-4'} g-4 justify-content-between`}>
 							{searchMatches ? (
@@ -208,7 +208,7 @@ export default function TabSearch(props: Props) {
 								))
 							) : (
 								<div className='container'>
-									<h4 className='bg-light text-center text-muted mb-0 py-5'>(enter a keyword above to search)</h4>
+									<h4 className='bg-black text-center text-muted mb-0 py-5'>(enter a keyword above to search)</h4>
 								</div>
 							)}
 						</div>

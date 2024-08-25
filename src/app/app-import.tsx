@@ -282,6 +282,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					if (value) {
 						this.setState(prevState => {
 							const newKey = name.replace('_', '') as keyof IAppTabState;
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
 							let updatedValue: any;
 
 							// Handle special cases
@@ -429,11 +430,13 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					dream.dreamSigns = value.split(prevState._dreamSignsDelim || ',');
 				} else if (name in dream) {
 					// Type assertion to let TypeScript know that this key exists in IJournalDream
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					(dream as Record<string, any>)[name] = value
 				}
 			} else {
 				// Type guard to ensure `name` is a key of IJournalEntry and assign correctly
 				if (name in newParsedSections[idx]) {
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					(newParsedSections[idx] as Record<string, any>)[name] = value
 				}
 			}
@@ -446,7 +449,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	}
 
 	handleDeleteEntry = (idx: number) => {
-		// eslint-disable-next-line no-restricted-globals
+
 		if (!confirm('Delete this Entry?')) return
 
 		const newState = this.state._parsedSections
@@ -1375,7 +1378,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					<div className='card-header bg-info'>
 						<h5 className='card-title text-white mb-0'>Import Dream Journal Entries</h5>
 					</div>
-					<div className='card-body bg-light'>
+					<div className='card-body bg-black'>
 						<div className='row align-items-center'>
 							<div className='col-auto'>
 								<Upload size='48' />
@@ -1436,13 +1439,13 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					</li>
 				</ul>
 				<div className='tab-content mb-5'>
-					<div className='tab-pane bg-light p-4 active' id='setup' role='tabpanel' aria-labelledby='setup-tab'>
+					<div className='tab-pane bg-black p-4 active' id='setup' role='tabpanel' aria-labelledby='setup-tab'>
 						{importSetup}
 					</div>
-					<div className='tab-pane bg-light p-4' id='parse' role='tabpanel' aria-labelledby='parse-tab'>
+					<div className='tab-pane bg-black p-4' id='parse' role='tabpanel' aria-labelledby='parse-tab'>
 						{importParse}
 					</div>
-					<div className='tab-pane bg-light p-4' id='results' role='tabpanel' aria-labelledby='results-tab'>
+					<div className='tab-pane bg-black p-4' id='results' role='tabpanel' aria-labelledby='results-tab'>
 						{importResults}
 					</div>
 				</div>

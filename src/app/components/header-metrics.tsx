@@ -105,7 +105,7 @@ export default function HeaderMetrics(props: Props) {
 				<div className='card-header bg-primary'>
 					<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
 				</div>
-				<div className='card-body bg-light'>{renderBody()}</div>
+				<div className='card-body bg-black'>{renderBody()}</div>
 			</header>
 		)
 	}

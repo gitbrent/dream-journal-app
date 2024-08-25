@@ -339,7 +339,7 @@ export default function TabExplore(props: Props) {
 				<div className='card-header bg-primary'>
 					<h5 className='card-title text-white mb-0'>Dream Journal Exploration</h5>
 				</div>
-				<section className='bg-light p-4'>
+				<section className='bg-black p-4'>
 					{renderFilters()}
 					{renderMetrics()}
 					{renderChart()}
