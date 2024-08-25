@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "SASS_WARN=false vite",
-    "build": "SASS_WARN=false tsc -b && vite build",
+    "build": "tsc -b && vite build",
+    "deploy": "tsc -b && vite build && firebase deploy",
     "lint": "eslint .",
     "preview": "vite preview"
   },
