@@ -205,15 +205,15 @@ export default function TabExplore(props: Props) {
 					<div className='col' data-desc='search tags'>
 						<div className='form-floating'>
 							<input
-								id='floatingDreamtag'
+								id='floatingDreamtagExp'
 								type='text'
 								value={filterText}
-								placeholder='search tags'
+								title='search tags'
 								className='form-control'
 								onChange={(event) => setFilterText(event.target.value)}
 								disabled={!props.dataFile ? true : false}
 							/>
-							<label htmlFor='floatingDreamtag' className='text-nowrap'>
+							<label htmlFor='floatingDreamtagExp' className='text-nowrap'>
 								Search Tags
 							</label>
 						</div>
