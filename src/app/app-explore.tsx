@@ -194,7 +194,7 @@ export default function TabExplore(props: Props) {
 		})
 
 		return tmpChartData
-	}, [filteredEntries])
+	}, [avgDreamsPerMonth, filterDrmChtMonths, filteredEntries])
 
 	// -----------------------------------------------------------------------
 
@@ -290,7 +290,7 @@ export default function TabExplore(props: Props) {
 
 	function renderMetrics(): JSX.Element {
 		return (
-			<section className='bg-black p-4 mb-4'>
+			<section className='be-bg-darkest py-4 mb-4'>
 				<HeaderMetrics entries={filteredEntries} isBusyLoad={props.isBusyLoad} showStats={true} onlyMetrics={true} />
 			</section>
 		)
@@ -300,7 +300,7 @@ export default function TabExplore(props: Props) {
 		// FUTURE: get fancier fills, not just plain bs-colors (use strips and transparency like sample on desktop shows)
 		// CODE: https://codepen.io/LeanyLabs/pen/jOWYpJx
 		return (
-			<section className='bg-black p-4 mb-4' style={{ width: '100%', height: 400 }}>
+			<section className='be-bg-darkest p-4 mb-4' style={{ width: '100%', height: 400 }}>
 				<ResponsiveContainer width='100%' height='100%'>
 					<ComposedChart data={chartDataDreams}>
 						<XAxis dataKey='name' fontSize={'0.75rem'} />
@@ -323,7 +323,7 @@ export default function TabExplore(props: Props) {
 
 	function renderTable(): JSX.Element {
 		return (
-			<section className='bg-black p-4'>
+			<section className='be-sec-table'>
 				<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 			</section>
 		)
@@ -339,7 +339,7 @@ export default function TabExplore(props: Props) {
 				<div className='card-header bg-primary'>
 					<h5 className='card-title text-white'>Dream Journal Exploration</h5>
 				</div>
-				<section className='be-box-dark'>
+				<section className='be-bg-darker p-4'>
 					{renderFilters()}
 					{renderMetrics()}
 					{renderChart()}

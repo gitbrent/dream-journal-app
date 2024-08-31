@@ -99,7 +99,6 @@ export default function TabJournal(props: Props) {
 									id='floatingDreamtag'
 									type='text'
 									value={filterText}
-									//placeholder='search tags'
 									title='search tags'
 									className='form-control'
 									onChange={(event) => setFilterText(event.target.value)}
@@ -193,9 +192,9 @@ export default function TabJournal(props: Props) {
 			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			<section className='be-box-dark'>
 				{renderFilters()}
-				<div className='bg-black p-3'>
+				<section className='be-sec-table'>
 					<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
-				</div>
+				</section>
 			</section>
 		</main>
 	)
