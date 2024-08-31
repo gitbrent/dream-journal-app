@@ -1,3 +1,78 @@
+// Define custom variables at the top of your SCSS file
+:root {
+	--be-bg-darkest: #0a0b0c;
+	--be-bg-darker: #141618;
+}
+
 // Import all of Bootstrap's CSS
-//@import "~bootstrap/scss/bootstrap";
+// NOTE: @import "~bootstrap/scss/bootstrap"; doesnt work, use below!
+//@import "node_modules/bootstrap/scss/bootstrap";
+
+// ============================================================================
+// STEP 1: import these
+// ============================================================================
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/mixins";
+
+// NOTE: This way we dont have to add `mb-0` to every <h5> in .card-title !!!
+$card-title-spacer-y: 0;
+// NOTE: Avoid having to add `bg-black` class to every <table>
+$table-bg: var(--bs-black);
+// OVERRIDE: otherwise card-bg is dark-gray, same as body bg
+$card-bg: #141618; // var(--bs-dark-bg-subtle);
+
+// WIP
+$nav-tabs-link-active-bg: var(--be-bg-darkest);
+$nav-underline-link-active-color: var(--be-bg-darkest);
+
+// ============================================================================
+// STEP 2: after overrides above
+// ============================================================================
+//@import "bootstrap";
 @import "node_modules/bootstrap/scss/bootstrap";
+
+// ============================================================================
+// STEP 3: add additional styles
+// ============================================================================
+.navbar input.form-control,
+.navbar .btn-group button:not(.active) {
+	background-color: var(--bs-dark-bg-subtle);
+}
+
+.nav-tabs .nav-link {
+	border-bottom: none !important;
+}
+
+.tab-pane {
+	background-color: var(--be-bg-darkest);
+}
+
+.be-bg-darker {
+	background-color: var(--be-bg-darker);
+}
+
+.be-box-dark {
+	background-color: var(--be-bg-darker);
+	padding: 1.5rem; // p-4=1.5rem
+}
+
+.be-bg-darkest {
+	background-color: var(--be-bg-darkest);
+}
+
+.text-teal {
+	color: $teal; // or color: var(--bs-teal);
+}
+
+.bg-teal {
+	background-color: $teal;
+}
+
+.text-pink {
+	color: $pink; // or color: var(--bs-pink);
+}
+
+.bg-pink {
+	background-color: $pink;
+}

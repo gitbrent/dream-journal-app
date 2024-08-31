@@ -101,11 +101,11 @@ export default function HeaderMetrics(props: Props) {
 
 	function renderFull(): JSX.Element {
 		return (
-			<header className='card mb-2 mb-md-5'>
+			<header className='card mb-2 mb-md-4'>
 				<div className='card-header bg-primary'>
-					<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
+					<h5 className='card-title text-white'>Dream Journal Analysis</h5>
 				</div>
-				<div className='card-body bg-black'>{renderBody()}</div>
+				<div className='card-body'>{renderBody()}</div>
 			</header>
 		)
 	}

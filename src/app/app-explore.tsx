@@ -334,12 +334,12 @@ export default function TabExplore(props: Props) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
-		<section className='container my-auto my-md-5'>
-			<div className='card mb-2 mb-md-5'>
+		<section className='m-4'>
+			<div className='card'>
 				<div className='card-header bg-primary'>
-					<h5 className='card-title text-white mb-0'>Dream Journal Exploration</h5>
+					<h5 className='card-title text-white'>Dream Journal Exploration</h5>
 				</div>
-				<section className='bg-black p-4'>
+				<section className='be-box-dark'>
 					{renderFilters()}
 					{renderMetrics()}
 					{renderChart()}

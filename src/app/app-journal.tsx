@@ -87,7 +87,7 @@ export default function TabJournal(props: Props) {
 		return (
 			<div className='row row-cols-2 row-cols-md-4 g-4 align-items-center mb-4' data-desc='commandbar'>
 				<div className='col' data-desc='search tags'>
-					<div className='row flex-nowrap align-items-center g-0 bg-black'>
+					<div className='row flex-nowrap align-items-center g-0'>
 						<div className='col-auto px-2 d-none d-lg-block'>
 							<Tags size={32} className='text-secondary' />
 						</div>
@@ -109,7 +109,7 @@ export default function TabJournal(props: Props) {
 					</div>
 				</div>
 				<div className='col d-none d-md-block' data-desc='year'>
-					<div className='row flex-nowrap align-items-center g-0 bg-black'>
+					<div className='row flex-nowrap align-items-center g-0'>
 						<div className='col-auto px-2 d-none d-lg-block'>
 							<Calendar3 size={32} className='text-secondary' />
 						</div>
@@ -132,7 +132,7 @@ export default function TabJournal(props: Props) {
 					</div>
 				</div>
 				<div className='col d-none d-md-block' data-desc='month'>
-					<div className='row flex-nowrap align-items-center g-0 bg-black'>
+					<div className='row flex-nowrap align-items-center g-0'>
 						<div className='col-auto px-2 d-none d-lg-block'>
 							<CalendarMonth size={32} className='text-secondary' />
 						</div>
@@ -155,7 +155,7 @@ export default function TabJournal(props: Props) {
 					</div>
 				</div>
 				<div className='col' data-desc='types'>
-					<div className='row flex-nowrap align-items-center g-0 bg-black'>
+					<div className='row flex-nowrap align-items-center g-0'>
 						<div className='col-auto px-2 d-none d-lg-block'>
 							<Braces size={32} className='text-secondary' />
 						</div>
@@ -187,14 +187,14 @@ export default function TabJournal(props: Props) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
-		<div className='container my-auto my-md-5'>
+		<main className='m-4'>
 			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
-			<section className='bg-black p-4'>
+			<section className='be-box-dark'>
 				{renderFilters()}
 				<div className='bg-black p-3'>
 					<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 				</div>
 			</section>
-		</div>
+		</main>
 	)
 }

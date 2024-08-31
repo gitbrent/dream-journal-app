@@ -90,12 +90,12 @@ export default function TabHome(props: Props) {
 					</div>
 					<div className='row mb-0'>
 						<div className='col'>
-							<button className='btn btn-outline-primary btn-lg w-100' onClick={() => doReadDataFile()}>
+							<button className='btn btn-outline-warning btn-lg w-100' onClick={() => doReadDataFile()}>
 								Reload Data
 							</button>
 						</div>
 						<div className='col'>
-							<button className='btn btn-outline-secondary btn-lg w-100' onClick={() => props.appdataSvc.doAuthSignOut()}>
+							<button className='btn btn-outline-danger btn-lg w-100' onClick={() => props.appdataSvc.doAuthSignOut()}>
 								Sign Out
 							</button>
 						</div>
@@ -162,8 +162,8 @@ export default function TabHome(props: Props) {
 	}
 
 	return (
-		<section className='m-5'>
-			<div className='bg-black p-4 p-md-5'>
+		<section className='m-5' style={{ marginLeft: '10rem!important', marginRight: '10rem!important' }}>
+			<div className='be-bg-darkest p-4 p-md-5'>
 				<div className='row align-items-center g-0 mb-3'>
 					<div className='col'>
 						<h1 className='display-4 text-primary mb-0 d-none d-md-none d-xl-block'>
@@ -203,7 +203,7 @@ export default function TabHome(props: Props) {
 						<div className='col'>
 							<div className='card h-100'>
 								<div className='card-header bg-success'>
-									<h4 className='card-title text-white mb-0'>{props.authState?.status}</h4>
+									<h4 className='card-title text-white'>{props.authState?.status}</h4>
 								</div>
 								<div className='card-body'>{renderCardAuthUser()}</div>
 							</div>
@@ -211,7 +211,7 @@ export default function TabHome(props: Props) {
 						<div className='col'>
 							<div className='card h-100'>
 								<div className='card-header bg-info'>
-									<h5 className='card-title text-white mb-0'>Dream Journal</h5>
+									<h5 className='card-title text-white'>Dream Journal</h5>
 								</div>
 								<div className='card-body'>{renderCardDataFile()}</div>
 							</div>
@@ -220,7 +220,7 @@ export default function TabHome(props: Props) {
 					:
 					<div className='card'>
 						<div className='card-header bg-primary'>
-							<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
+							<h5 className='card-title text-white'>Google Drive Cloud Integration</h5>
 						</div>
 						<div className='card-body p-4'>
 							<p className='card-text'>
@@ -233,7 +233,7 @@ export default function TabHome(props: Props) {
 								</strong>{' '}
 								on your Google Drive. (This app cannot access your other Google Drive files)
 							</p>
-							<button className='btn btn-outline-primary mt-3 w-100 p-3' onClick={() => doAuthSignIn()}>
+							<button className='btn btn-outline-primary btn-lg mt-3 w-100' onClick={() => doAuthSignIn()}>
 								Sign In
 							</button>
 						</div>
