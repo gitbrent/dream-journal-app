@@ -18,9 +18,9 @@
 // NOTE: This way we dont have to add `mb-0` to every <h5> in .card-title !!!
 $card-title-spacer-y: 0;
 // NOTE: Avoid having to add custom bg class to every <table>
-$table-bg: var(--bs-bg-darkest);
+$table-bg: var(--be-bg-darkest);
 // OVERRIDE: otherwise card-bg is dark-gray, same as body bg
-$card-bg: var(--bs-bg-darker);
+$card-bg: var(--be-bg-darker);
 
 // WIP
 $nav-tabs-link-active-bg: var(--be-bg-darkest);
