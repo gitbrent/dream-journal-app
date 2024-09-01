@@ -16,9 +16,9 @@ export default function ModalReactTags({ currEntry, setCurrEntry, dreamIdx, uniq
 	const onAdd = useCallback(
 		(newTag: TagSuggestion) => {
 			// Update the currEntry state with the new tag
-			const newState = { ...currEntry };
+			const newState = { ...currEntry }
 			newState.dreams[dreamIdx].dreamSigns?.push(newTag.label)
-			setCurrEntry(newState);
+			setCurrEntry(newState)
 		},
 		[currEntry, dreamIdx, setCurrEntry]
 	);
@@ -38,14 +38,13 @@ export default function ModalReactTags({ currEntry, setCurrEntry, dreamIdx, uniq
 			ariaErrorMessage="error"
 			id="modal-react-tags"
 			labelText="Select dream tags"
-			//placeholderText="Start typing..."
 			allowNew={true}
 			allowBackspace={false}
 			selected={
-				currEntry.dreams[dreamIdx].dreamSigns?.sort().map((sign, idx) => ({ value: idx, label: sign })) as TagSuggestion[]
+				currEntry.dreams[dreamIdx].dreamSigns?.sort().map((sign) => ({ value: sign, label: sign })) as TagSuggestion[]
 			}
 			suggestions={
-				uniqueTags.map((sign, idx) => ({ value: idx, label: sign })) as TagSuggestion[]
+				uniqueTags.map((sign) => ({ value: sign, label: sign })) as TagSuggestion[]
 			}
 			onAdd={onAdd}
 			onDelete={onDelete}
