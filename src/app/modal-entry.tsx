@@ -1,12 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react'
-import { IDreamSignTag, IJournalDream, IJournalEntry, InductionTypes } from './app.types'
-import { Calendar3, CardText, ChatLeftText, Clock, PlusCircle, Save, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
+import * as bootstrap from 'bootstrap'
+import { IJournalDream, IJournalEntry, InductionTypes } from './app.types'
+import { Calendar3, ChatLeftText, Clock, PlusCircle, Save, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
 import { DateTime } from 'luxon'
 import { appdata } from './appdata'
-import { ReactTags, TagSuggestion } from 'react-tag-autocomplete'
 import Modal from 'bootstrap/js/dist/modal'
-import * as bootstrap from 'bootstrap'
+import ModalReactTags from './components/modal-react-tags'
 
 export interface IModalEntryProps {
 	appdataSvc: appdata
@@ -105,7 +105,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 					<div className='col-6 col-lg-3 mb-4'>
 						<div className='input-group match-btn-group-sm'>
 							<div className='input-group-prepend' title='Entry Date'>
-								<span className='input-group-text bg-secondary px-2'>
+								<span className='input-group-text px-2'>
 									<Calendar3 />
 								</span>
 							</div>
@@ -298,49 +298,8 @@ export default function ModalEntry(props: IModalEntryProps) {
 						</div>
 					</div>
 				</div>
-				<div className='row py-3'>
-					<div className='col'>
-						{/* FIXME: https://github.com/i-like-robots/react-tag-autocomplete/blob/HEAD/migration-guide.md */}
-						<ReactTags
-							labelText="Select dream tags"
-							allowNew={true}
-							allowBackspace={false}
-							//
-							selected={dream.dreamSigns?.sort().map((sign, idx) => ({ value: idx, label: sign })) as TagSuggestion[]}
-							//selected={[]}
-							// ============
-							// WIP: ABOVE = okay, below = WIP
-							// ============
-							//
-							// FIXME: use `onShouldExpand` now: minQueryLength={2}
-							/* FIXME: use `suggestionsTransform` for next two
-							maxSuggestionsLength={6}
-							suggestionsFilter={(item: { id: number; name: string }, query: string) => item.name.indexOf(query.toLowerCase()) > -1}
-							*/
-							// FIXME: selected={dream.dreamSigns?.sort().map((sign, idx) => ({ value: idx, label: sign }))}
-							suggestions={uniqueTags.map((sign, idx) => ({ value: idx, label: sign })) as TagSuggestion[]}
-							// FIXME: (V7: no longer supported, manual now) addOnBlur={true}
-							/* FIXME: onAdd={(tag: IDreamSignTag) => {
-								const newState = { ...currEntry }
-								// Dont allow dupes
-								if (newState.dreams[dreamIdx].dreamSigns?.indexOf(tag.label.trim()) === -1) {
-									newState.dreams[dreamIdx].dreamSigns?.push(tag.label.toLowerCase())
-								}
-								setCurrEntry(newState)
-							}}*/
-							onAdd={() => console.log('TODO:')}
-							/*onChange={(ev) => {
-								const newState = { ...currEntry }
-								newState.dreams[dreamIdx].dreamSigns = [...ev.currentTarget.value]
-								setCurrEntry(newState)
-							}}*/
-							onDelete={(idx: number) => {
-								const newState = { ...currEntry }
-								newState.dreams[dreamIdx].dreamSigns?.splice(idx, 1)
-								setCurrEntry(newState)
-							}}
-						/>
-					</div>
+				<div className='py-3'>
+					<ModalReactTags uniqueTags={uniqueTags} currEntry={currEntry} setCurrEntry={setCurrEntry} dreamIdx={dreamIdx} />
 				</div>
 				<div className='row' data-desc='details'>
 					<div className='col'>
