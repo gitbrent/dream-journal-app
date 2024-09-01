@@ -90,7 +90,7 @@ export class googlegsi {
 			// A: set auth
 			this.isAuthorized = true
 			if (IS_LOCALHOST) console.log(`[doAuthorizeUser] this.isAuthorized=${this.isAuthorized}`)
-				// B: *IMPORTANT* do this as `await this.initGapiClient()` below w/b skipped as gapi is loaded, however, it'll throw "no anon access" errors if token isnt set like this!
+			// B: *IMPORTANT* do this as `await this.initGapiClient()` below w/b skipped as gapi is loaded, however, it'll throw "no anon access" errors if token isnt set like this!
 			gapi.client.setToken(this.tokenResponse)
 		}
 		else {
@@ -392,6 +392,13 @@ export class googlegsi {
 				},
 			})
 			if (IS_LOCALHOST) console.log('[uploadDataFile] response', response)
+			if (response?.status === 401) {
+				// TODO: 20240901: set this.isAuthorized=false! or something! when response.status=401!
+				if (IS_LOCALHOST) console.log('[uploadDataFile] response === ', response.status)
+				this.isAuthorized = false
+				await this.tokenFlow()
+				if (IS_LOCALHOST) console.log('[uploadDataFile] this.isAuthorized', this.isAuthorized)
+			}
 			clearTimeout(id)
 		} catch (error) {
 			if (error instanceof Error) {

@@ -28,7 +28,7 @@
  */
 
 import { useState } from 'react'
-import { APP_VER, AuthState, IAuthState, IDriveDataFile, IJournalEntry } from './app.types'
+import { APP_VER, AuthState, IAuthState, IDriveDataFile, IJournalEntry, IS_LOCALHOST } from './app.types'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
 import { appdata } from './appdata'
@@ -75,6 +75,7 @@ export default function TabHome(props: Props) {
 	function renderCardAuthUser(): JSX.Element {
 		let cardAuthUser: JSX.Element = <div />
 
+		if (IS_LOCALHOST && props.authState) console.log(props.authState)
 		if (props.authState && props.authState.status === AuthState.Authenticated) {
 			cardAuthUser = (
 				<div>
