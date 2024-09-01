@@ -34,12 +34,12 @@ export default function ModalReactTags({ currEntry, setCurrEntry, dreamIdx, uniq
 
 	return (
 		<ReactTags
-			ariaDescribedBy="custom-validity-description"
-			ariaErrorMessage="error"
-			id="modal-react-tags"
-			labelText="Select dream tags"
 			allowNew={true}
 			allowBackspace={false}
+			collapseOnSelect={true}
+			ariaDescribedBy="dream-tags-picker"
+			placeholderText="Start typing..."
+			labelText="Select dream tags"
 			selected={
 				currEntry.dreams[dreamIdx].dreamSigns?.sort().map((sign) => ({ value: sign, label: sign })) as TagSuggestion[]
 			}
