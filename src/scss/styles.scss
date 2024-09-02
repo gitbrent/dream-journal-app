@@ -44,6 +44,17 @@ $nav-underline-link-active-color: var(--be-bg-darkest);
 	border-bottom: none !important;
 }
 
+// CUSTOM: switch are too damn small
+.form-check-input {
+	height: 1.5rem !important;
+	width: 3rem !important;
+}
+
+.form-check-label {
+	line-height: 32px;
+	margin-left: .5rem;
+}
+
 .tab-pane {
 	background-color: var(--be-bg-darkest);
 }
