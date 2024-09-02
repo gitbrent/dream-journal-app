@@ -1,6 +1,12 @@
 import AppMain from './app/appmain';
+import ErrorBoundary from './ErrorBoundary';
 
 function App() {
-	return <AppMain />
+	return (
+		<ErrorBoundary>
+			<AppMain />
+		</ErrorBoundary>
+	);
 }
-export default App
+
+export default App;
