@@ -33,7 +33,7 @@ import React from 'react'
 import { IDriveDataFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './app.types'
 //import BootstrapSwitchButton from 'bootstrap-switch-button-react' // TODO: BS5: Swap for new toggle
 import ContentEditable from 'react-contenteditable'
-import { Upload } from 'react-bootstrap-icons'
+import { Cloud, Upload } from 'react-bootstrap-icons'
 import { appdata } from './appdata'
 
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
@@ -790,6 +790,34 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	/* ======================================================================== */
 
 	render() {
+		const contHeaderCard: JSX.Element = (
+			<div className='card mb-5'>
+				<div className='card-header bg-info'>
+					<h5 className='card-title text-white mb-0'>Import Dream Journal Entries</h5>
+				</div>
+				<div className='card-body'>
+					<div className='row align-items-center'>
+						<div className='col-auto px-4'>
+							<Cloud size='48' className='d-block mb-3' />
+							<Upload size='48' className='d-block mt-3' />
+						</div>
+						<div className='col px-4'>
+							<h5 className='text-primary'>Current</h5>
+							<p className='card-text'>
+								It&apos;s likely that you are already keeping a dream journal in another format, such a Document (Google Docs, Microsoft Word), spreadsheet
+								(Google Sheets, Microsoft Excel), or just plain text.
+							</p>
+							<h5 className='text-success'>Journal</h5>
+							<p className='card-text'>
+								The importer interface allows you to import your free-form journal into the well-formatted Brain Cloud JSON format which is a universal,
+								plain text, flat-file database readable by a myriad of apps (databases, text editors, etc.)
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		)
+
 		const contDemoData: JSX.Element = (
 			<div ref={this.refDemoData} className='container p-3 bg-black'>
 				<span className='text-white'>03/08:</span>
@@ -1113,11 +1141,13 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				<div className='row align-items-center py-4 border-top border-secondary'>
 					<div className='col'>
 						<h5 className='text-primary'>Section Break</h5>
-						<label>Type of break your journal uses between entries</label>
-						<select name='_selBreakType' className='form-control w-50' onChange={this.handleSelectChange} value={this.state._selBreakType}>
-							<option value='blankLine'>Empty Line (paragraph style)</option>
-							<option value='entryDate'>Entry Date</option>
-						</select>
+						<div className="form-floating">
+							<select id="_selBreakType" className="form-select" onChange={this.handleSelectChange} value={this.state._selBreakType}>
+								<option value='blankLine'>Empty Line (paragraph style)</option>
+								<option value='entryDate'>Entry Date</option>
+							</select>
+							<label htmlFor="_selBreakType">Type of break your journal uses between entries</label>
+						</div>
 					</div>
 					<div className='col'>
 						<h5 className='text-primary'>Default Year</h5>
@@ -1137,19 +1167,19 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					<div className='col'>
 						<h5 className='text-primary'>Bed Time Format</h5>
 						<label>Used to parse &quot;12:30&quot; in am/pm or 24-hour time</label>
-
-						<div className='row align-items-center g-2'>
-							<div className='col-auto'>
-								<div className='form-check form-switch'>
-									<input
-										className='form-check-input'
-										type='checkbox'
-										checked={this.state._isTime24Hour}
-										onChange={(ev) => this.setState({ _isTime24Hour: ev.currentTarget.checked })}
-									/>
-								</div>
-							</div>
-							<div className='col'>{this.state._isTime24Hour ? '24-Hour Format' : 'AM/PM Format'}</div>
+						<div className='form-check form-switch'>
+							<input
+								id='flexSwitch_isTime24Hour'
+								className='form-check-input'
+								type='checkbox'
+								role='switch'
+								checked={this.state._isTime24Hour}
+								onChange={(ev) => this.setState({ _isTime24Hour: ev.currentTarget.checked })}
+							/>
+							<label
+								htmlFor="flexSwitch_isTime24Hour"
+								className="form-check-label"
+							>{this.state._isTime24Hour ? '24-Hour Format' : 'AM/PM Format'}</label>
 						</div>
 					</div>
 					<div className='col'>
@@ -1388,30 +1418,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		)
 
 		return (
-			<div className='container mt-5'>
-				<div className='card mb-5'>
-					<div className='card-header bg-info'>
-						<h5 className='card-title text-white mb-0'>Import Dream Journal Entries</h5>
-					</div>
-					<div className='card-body bg-black'>
-						<div className='row align-items-center'>
-							<div className='col-auto'>
-								<Upload size='48' />
-							</div>
-							<div className='col'>
-								<p className='card-text'>
-									It&apos;s likely that you are already keeping a dream journal in another format, such a Document (Google Docs, Microsoft Word), spreadsheet
-									(Google Sheets, Microsoft Excel), or just plain text.
-								</p>
-								<p className='card-text'>
-									The importer interface allows you to import your free-form journal into the well-formatted Brain Cloud JSON format which is a universal,
-									plain text, flat-file database readable by a myriad of apps (databases, text editors, etc.)
-								</p>
-							</div>
-						</div>
-					</div>
-				</div>
-
+			<main className='m-4'>
+				{contHeaderCard}
 				<ul className='nav nav-tabs nav-fill' id='importTab' role='tablist'>
 					<li className='nav-item' role='presentation'>
 						<button
@@ -1454,17 +1462,17 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					</li>
 				</ul>
 				<div className='tab-content mb-5'>
-					<div className='tab-pane bg-black p-4 active' id='setup' role='tabpanel' aria-labelledby='setup-tab'>
+					<div className='tab-pane p-4 active' id='setup' role='tabpanel' aria-labelledby='setup-tab'>
 						{importSetup}
 					</div>
-					<div className='tab-pane bg-black p-4' id='parse' role='tabpanel' aria-labelledby='parse-tab'>
+					<div className='tab-pane p-4' id='parse' role='tabpanel' aria-labelledby='parse-tab'>
 						{importParse}
 					</div>
-					<div className='tab-pane bg-black p-4' id='results' role='tabpanel' aria-labelledby='results-tab'>
+					<div className='tab-pane p-4' id='results' role='tabpanel' aria-labelledby='results-tab'>
 						{importResults}
 					</div>
 				</div>
-			</div>
+			</main>
 		)
 	}
 }
