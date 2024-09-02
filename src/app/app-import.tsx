@@ -92,38 +92,37 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	constructor(props: Readonly<IAppTabProps>) {
 		super(props)
 
-		const config = JSON.parse(localStorage.getItem('import-config') || '') || {}
-
-		this.state = {
-			_defaultBedTime: config._defaultBedTime || '00:00',
-			_defaultYear: config._defaultYear || new Date().getFullYear(),
-			_demoData: config._demoData || '',
-			_dreamSignsDelim: config._dreamSignsDelim || ',',
+		// Default state
+		const defaultState: IAppTabState = {
+			_defaultBedTime: '00:00',
+			_defaultYear: new Date().getFullYear(),
+			_demoData: '',
+			_dreamSignsDelim: ',',
 			_entryDateInvalidMsg: '',
-			_useDefaultTime: typeof config._useDefaultTime === 'boolean' ? config._useDefaultTime : true,
-			_importHTML: config._importHTML || '<br>',
-			_importText: config._importText || '',
-			_invalidSections: config._invalidSections || [],
-			_isTime24Hour: typeof config._isTime24Hour === 'boolean' ? config._isTime24Hour : false,
-			_parsedSections: config._parsedSections || [],
-			_selBreakType: config._selBreakType || 'blankLine',
-			_selDreamNotes: config._selDreamNotes || 'match',
-			_selEntryType: config._selEntryType || 'first',
-			_selNotePrepType: config._selNotePrepType || 'multi',
-			_selNoteWakeType: config._selNoteWakeType || 'single',
+			_useDefaultTime: true,
+			_importHTML: '<br>',
+			_importText: '',
+			_invalidSections: [],
+			_isTime24Hour: false,
+			_parsedSections: [],
+			_selBreakType: 'blankLine',
+			_selDreamNotes: 'match',
+			_selEntryType: 'first',
+			_selNotePrepType: 'multi',
+			_selNoteWakeType: 'single',
 			_showImporter: ImportTypes.docx,
 
-			_bedTime: config._bedTime || 'BED:',
-			_dreamBreak: config._dreamBreak || 'DREAM \d+:',
-			_dreamSigns: config._dreamSigns || 'DREAMSIGNS:',
-			_entryDate: config._entryDate || '\d\d/\d\d:',
-			_isLucidDream: config._isLucidDream || 'SUCCESS',
-			_notes: config._notes || [],
-			_notesPrep: config._notesPrep || 'PREP:',
-			_notesPrepEnd: config._notesPrepEnd || 'WAKES:',
-			_notesWake: config._notesWake || 'WAKES:',
-			_notesWakeEnd: config._notesWakeEnd || 'WAKES:',
-			_title: config._title || 'DREAM \d+:',
+			_bedTime: 'BED:',
+			_dreamBreak: 'DREAM \\d+:',
+			_dreamSigns: ['DREAMSIGNS:'],
+			_entryDate: '\\d\\d/\\d\\d:',
+			_isLucidDream: 'SUCCESS',
+			_notes: [],
+			_notesPrep: 'PREP:',
+			_notesPrepEnd: 'WAKES:',
+			_notesWake: 'WAKES:',
+			_notesWakeEnd: 'WAKES:',
+			_title: 'DREAM \\d+:',
 
 			bedTime: '',
 			dreamBreak: [],
@@ -134,6 +133,22 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			notesPrep: '',
 			notesWake: '',
 			title: '',
+		};
+
+		// Load config from localStorage
+		const savedConfig: Partial<IAppTabState> = (() => {
+			try {
+				return JSON.parse(localStorage.getItem('import-config') || '{}') as Partial<IAppTabState>
+			} catch (ex) {
+				console.error(ex)
+				return {} // Fallback to empty object if parsing fails
+			}
+		})()
+
+		// Merge default state with saved config
+		this.state = {
+			...defaultState,
+			...savedConfig,
 		}
 	}
 
