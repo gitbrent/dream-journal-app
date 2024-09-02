@@ -360,6 +360,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					dreamSigns: value ? value.split(prevState._dreamSignsDelim || ',') : [],
 				}
 			} else {
+				// FIXME: doesnt work for `_selBreakType` 20240902
 				return {
 					...prevState,
 					[name]: value,
@@ -367,7 +368,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			}
 		})
 
-		// B:
+		// B: Clear some values on changes
 		if (name === '_selEntryType') {
 			this.setState({
 				entryDate: '',
@@ -868,18 +869,24 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 		// TODO: this.state._showImporter == ImportTypes.xlsx
 		const importSetup: JSX.Element = (
-			<div>
+			<section>
+				<h3 className='text-primary mb-4'>
+					<span className="badge text-bg-primary me-2">STEP 1</span>Field Format
+				</h3>
 				<div className='row align-items-top mb-4'>
 					<div className='col-8'>
-						<h5 className='text-primary'>Field Mapping</h5>
-						<p>Use the form below to map your dream journal fields to Brain Cloud&apos;s, then your data will be automatically imported into your new dream journal.</p>
+						<div className="alert alert-secondary" role="alert">
+							<h5 className="alert-heading">Field Parsing</h5>
+							<p className='mb-0'>Map your dream journal fields below using live feedback to see the results.</p>
+						</div>
 					</div>
 					<div className='col-4'>
-						<h5 className='text-primary'>Current Journal Format</h5>
-						<p>Paste a journal entry from your current journal below.</p>
+						<div className="alert alert-secondary" role="alert">
+							<h5 className="alert-heading">Journal Format</h5>
+							<p className='mb-0'>Paste a journal entry from your current journal below.</p>
+						</div>
 					</div>
 				</div>
-
 				<div className='row align-items-top mb-4'>
 					<div id='contMapDemo' className='col-8'>
 						<div className='row'>
@@ -1138,7 +1145,10 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					</div>
 				</div>
 
-				<div className='row align-items-center py-4 border-top border-secondary'>
+				<h3 className='text-primary'>
+					<span className="badge text-bg-primary me-2">STEP 2</span>Parsing Options
+				</h3>
+				<div className='row align-items-center py-4'>
 					<div className='col'>
 						<h5 className='text-primary'>Section Break</h5>
 						<div className="form-floating">
@@ -1151,47 +1161,52 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					</div>
 					<div className='col'>
 						<h5 className='text-primary'>Default Year</h5>
-						<label>Used when no year is available (ex: &quot;Date: 10/31&quot;)</label>
-						<input
-							name='_defaultYear'
-							type='number'
-							className='form-control w-50'
-							min='1950'
-							max={new Date().getFullYear()}
-							onChange={this.handleInputChange}
-							value={this.state._defaultYear}
-						/>
+						<div className="form-floating">
+							<select id="_defaultYear" className="form-select" onChange={this.handleSelectChange} value={this.state._defaultYear}>
+								<option value='2024'>2024</option>
+								<option value='2023'>2023</option>
+								<option value='2022'>2022</option>
+								<option value='2021'>2021</option>
+								<option value='2020'>2020</option>
+							</select>
+							<label htmlFor="_defaultYear">Used when no year is available (ex: &quot;Date: 10/31&quot;)</label>
+						</div>
 					</div>
 				</div>
-				<div className='row align-items-center py-4 mb-4 border-bottom border-secondary'>
+				<div className='row align-items-center py-4'>
 					<div className='col'>
 						<h5 className='text-primary'>Bed Time Format</h5>
-						<label>Used to parse &quot;12:30&quot; in am/pm or 24-hour time</label>
-						<div className='form-check form-switch'>
-							<input
-								id='flexSwitch_isTime24Hour'
-								className='form-check-input'
-								type='checkbox'
-								role='switch'
-								checked={this.state._isTime24Hour}
-								onChange={(ev) => this.setState({ _isTime24Hour: ev.currentTarget.checked })}
-							/>
-							<label
-								htmlFor="flexSwitch_isTime24Hour"
-								className="form-check-label"
-							>{this.state._isTime24Hour ? '24-Hour Format' : 'AM/PM Format'}</label>
+						<div className='py-2 px-3 rounded border' style={{ backgroundColor: 'var(--bs-body-bg)' }}>
+							<label className='text-muted mb-1'>
+								Used to parse &quot;12:30&quot; in am/pm or 24-hour time
+							</label>
+							<div className='form-check form-switch'>
+								<input
+									id='flexSwitch_isTime24Hour'
+									className='form-check-input'
+									type='checkbox'
+									role='switch'
+									checked={this.state._isTime24Hour}
+									onChange={(ev) => this.setState({ _isTime24Hour: ev.currentTarget.checked })}
+								/>
+								<label
+									htmlFor="flexSwitch_isTime24Hour"
+									className="form-check-label"
+								>{this.state._isTime24Hour ? '24-Hour Format' : 'AM/PM Format'}</label>
+							</div>
 						</div>
 					</div>
 					<div className='col'>
 						<h5 className='text-primary'>Default Bed Time</h5>
-						<label>The time to use when no value is found</label>
-						<div className='row'>
-							<div className='col'>
-								<div className="form-check form-switch">
-									<input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" />
-									<label className="form-check-label" htmlFor="flexSwitchCheckDefault">Default switch checkbox input</label>
-								</div>
-								{/* FIXME:
+						<div className='py-2 px-3 rounded border' style={{ backgroundColor: 'var(--bs-body-bg)' }}>
+							<label>The time to use when no value is found</label>
+							<div className='row'>
+								<div className='col'>
+									<div className="form-check form-switch">
+										<input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" />
+										<label className="form-check-label" htmlFor="flexSwitchCheckDefault">Default switch checkbox input</label>
+									</div>
+									{/* FIXME:
 								<BootstrapSwitchButton
 									onChange={(checked: boolean) => {
 										this.setState({ _useDefaultTime: checked })
@@ -1203,27 +1218,29 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 									offstyle='secondary'
 									style='w-100'
 								/>*/}
-							</div>
-							<div className='col'>
-								<input
-									name='_defaultBedTime'
-									type='time'
-									className='form-control'
-									onChange={this.handleInputChange}
-									value={this.state._defaultBedTime}
-									disabled={!this.state._useDefaultTime}
-								/>
+								</div>
+								<div className='col'>
+									<input
+										name='_defaultBedTime'
+										type='time'
+										className='form-control'
+										onChange={this.handleInputChange}
+										value={this.state._defaultBedTime}
+										disabled={!this.state._useDefaultTime}
+									/>
+								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<div className='row align-items-bottom'>
-					<div className='col-12 text-center'>
-						<p>Once the options above are functioning correctly, go to the next tab to import your dream journal.</p>
-					</div>
+				<h3 className='text-primary mt-4'>
+					<span className="badge text-bg-primary me-2">STEP 3</span>Submit
+				</h3>
+				<div className="alert alert-primary mt-3" role="alert">
+					Once the options above are functioning correctly, go to the next tab to import your dream journal!
 				</div>
-			</div>
+			</section>
 		)
 
 		const importParse: JSX.Element = (
@@ -1461,7 +1478,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						</button>
 					</li>
 				</ul>
-				<div className='tab-content mb-5'>
+				<div className='tab-content'>
 					<div className='tab-pane p-4 active' id='setup' role='tabpanel' aria-labelledby='setup-tab'>
 						{importSetup}
 					</div>
