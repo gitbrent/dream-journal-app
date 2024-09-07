@@ -395,8 +395,8 @@ export class googlegsi {
 			if (response?.status === 401) {
 				// TODO: 20240901: set this.isAuthorized=false! or something! when response.status=401!
 				if (IS_LOCALHOST) console.log('[uploadDataFile] response === ', response.status)
-				this.isAuthorized = false
 				await this.tokenFlow()
+				await this.updateUserAuthStatus()
 				if (IS_LOCALHOST) console.log('[uploadDataFile] this.isAuthorized', this.isAuthorized)
 			}
 			clearTimeout(id)
