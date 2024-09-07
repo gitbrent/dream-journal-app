@@ -30,14 +30,13 @@
  */
 
 import React from 'react'
-import { IDriveDataFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes } from './app.types'
+import { IDriveDataFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes, VERBOSE_IMPORT } from './app.types'
 //import BootstrapSwitchButton from 'bootstrap-switch-button-react' // TODO: BS5: Swap for new toggle
 import ContentEditable from 'react-contenteditable'
 import { Cloud, Upload } from 'react-bootstrap-icons'
 import { appdata } from './appdata'
 
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
-const VERBOSE = false
 
 export interface IAppTabProps {
 	dataFile: IDriveDataFile
@@ -509,7 +508,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		})
 
 		// D: parse text
-		if (VERBOSE) {
+		if (VERBOSE_IMPORT) {
 			console.log('-------------------------------------------')
 			console.log(`this.state._selBreakType = ${this.state._selBreakType}`)
 			console.log('this.state._importText')
@@ -523,7 +522,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			.split(strSecBreak)
 			.filter((sect) => sect)
 			.forEach((sect) => {
-				//if (VERBOSE) console.log('SECTION: ' + sect)
+				//if (VERBOSE_IMPORT) console.log('SECTION: ' + sect)
 
 				// 1: Divide text into dream sections
 				const objEntry: IJournalEntry = {
@@ -537,7 +536,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				let tmpDreamSigns: IJournalDream['dreamSigns']
 
 				// 2: Tokenize each section into our fields
-				//if (VERBOSE) console.log('sect.split(`\\n`):')
+				//if (VERBOSE_IMPORT) console.log('sect.split(`\\n`):')
 				sect.split('\n').forEach((line, idx) => {
 					// DESIGN: dreams are 1+ lines that need to captured once they start, kind of a loop-within-loop
 					// As a initial algorithm, check for any `dream` array items, consider all other fields complete
@@ -550,7 +549,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							isLucidDream: false,
 						}
 						objEntry.dreams.push(objDream)
-						if (VERBOSE) {
+						if (VERBOSE_IMPORT) {
 							console.log('NEW (objDream)')
 							console.log(objDream)
 						}
@@ -578,17 +577,17 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							let textParse = textRegex && textRegex[0] ? textRegex[0] : ''
 							if (textParse) {
 								textParse = textParse.replace(/:|;/gi, '') // For "11/29/2019:"
-								if (VERBOSE) console.log('textParse = ' + textParse)
+								if (VERBOSE_IMPORT) console.log('textParse = ' + textParse)
 								const dateParse = new Date(textParse)
 								if (this.state._defaultYear && textParse && textParse.length <= 5) {
 									// "12/31"
-									if (VERBOSE) console.log('FYI using `_defaultYear`: ' + this.state._defaultYear)
+									if (VERBOSE_IMPORT) console.log('FYI using `_defaultYear`: ' + this.state._defaultYear)
 									dateParse.setFullYear(this.state._defaultYear)
 								}
 								if (Object.prototype.toString.call(dateParse) === '[object Date]' && dateParse.getDay() >= 0) {
 									objEntry.entryDate = dateParse.toISOString().substring(0, 10)
 								} else {
-									if (VERBOSE) {
+									if (VERBOSE_IMPORT) {
 										console.log('---> ATTN: unable to parse `entryDate` ')
 										console.log(dateParse)
 										console.log(Object.prototype.toString.call(dateParse))
@@ -638,7 +637,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							if (keyVal[1]) objDream.title = keyVal[1].trim()
 						} else if (objDream.title && this.state._selDreamNotes === 'after' && line) {
 							objDream.notes += (line + '\n').replace(/\n\s*\n/g, '\n')
-							//if (VERBOSE) console.log('dream.notes:\n' + objDream.notes)
+							//if (VERBOSE_IMPORT) console.log('dream.notes:\n' + objDream.notes)
 						} else if (this.state._selDreamNotes !== 'after') {
 							// TODO: look for regex
 						}
@@ -719,7 +718,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		// F: save current setup to localStorage
 		localStorage.setItem('import-config', JSON.stringify(this.state))
 
-		if (VERBOSE) {
+		if (VERBOSE_IMPORT) {
 			console.log(arrEntries)
 			console.log(this.state)
 		}
@@ -869,8 +868,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			</section>
 		)
 
-		// TODO: this.state._showImporter == ImportTypes.xlsx
-		const importSetup: JSX.Element = (
+		const contStep1: JSX.Element = (
 			<section>
 				<h3 className='text-primary mb-4'>
 					<span className="badge text-bg-primary me-2">STEP 1</span>Field Format
@@ -1158,7 +1156,11 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						{contDemoData}
 					</div>
 				</div>
+			</section>
+		)
 
+		const contStep2: JSX.Element = (
+			<section>
 				<h3 className='text-primary'>
 					<span className="badge text-bg-primary me-2">STEP 2</span>Parsing Options
 				</h3>
@@ -1247,7 +1249,11 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						</div>
 					</div>
 				</div>
+			</section>
+		)
 
+		const contStep3: JSX.Element = (
+			<section>
 				<h3 className='text-primary mt-4'>
 					<span className="badge text-bg-primary me-2">STEP 3</span>Submit
 				</h3>
@@ -1257,8 +1263,17 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			</section>
 		)
 
+		// TODO: this.state._showImporter == ImportTypes.xlsx
+		const importSetup: JSX.Element = (
+			<section>
+				{contStep1}
+				{contStep2}
+				{contStep3}
+			</section>
+		)
+
 		const importParse: JSX.Element = (
-			<div>
+			<section>
 				<div className='row'>
 					<div className='col'>
 						<h3 className='text-primary'>Instructions</h3>
@@ -1289,7 +1304,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					style={{ minHeight: '300px', height: 'auto' }}
 				/>
 				<div className='invalid-feedback'>Please paste your journal above</div>
-			</div>
+			</section>
 		)
 
 		const importResults: JSX.Element = (
