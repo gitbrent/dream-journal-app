@@ -820,34 +820,33 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		)
 
 		const contDemoData: JSX.Element = (
-			<div ref={this.refDemoData} className='container p-3 bg-black'>
-				<span className='text-white'>03/08:</span>
+			<section ref={this.refDemoData} className='bg-black p-4 border border-dark'>
+				<span>03/08:</span>
 				<ul>
 					<li>
-						<span className='text-white'>DREAMSIGNS:</span> Dad, Camping
+						<span>BED:</span> 11:30
 					</li>
 					<li>
-						<span className='text-white'>BED:</span> 11:30
+						<span>PREP: Long day</span>
+						{/*
+							<span>PREP:</span>
+							<ul>
+								<li>Watched Netflix from 8-10</li>
+								<li>Talked to mom</li>
+								<li>Bubble bath</li>
+							</ul>
+						*/}
 					</li>
 					<li>
-						<span className='text-white'>PREP: Long day</span>
-						{/*<span className='text-white'>PREP:</span>
-						<ul>
-							<li>Watched Netflix from 8-10</li>
-							<li>Talked to mom</li>
-							<li>Bubble bath</li>
-						</ul>*/}
-					</li>
-					<li>
-						<span className='text-white'>WAKES:</span> 06:00 for bio break
+						<span>WAKES:</span> 06:00 for bio break
 					</li>
 					{/*
-					<li>
-						<span className='text-white'>NOTE:</span> Something
-					</li>
+						<li>
+							<span>NOTE:</span> Something
+						</li>
 					*/}
 					<li>
-						<span className='text-white'>DREAM 1:</span> At the mall
+						<span>DREAM 1:</span> At the mall
 					</li>
 					<ul>
 						<li>SUCCESS!!</li>
@@ -856,449 +855,306 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<li>Realized I was dreaming when i could not find my phone</li>
 					</ul>
 					<li>
-						<span className='text-white'>DREAM 99:</span> Camping with dad
+						<span>DREAM 99:</span> Camping with dad
 					</li>
 					<ul>
+						<li>
+							<span>DREAMSIGNS:</span> Dad, Camping
+						</li>
 						<li>Dad and I were off camping</li>
 						<li>Same place we used to go</li>
 						<li>Talked about school and stuff</li>
 					</ul>
 				</ul>
-			</div>
+			</section>
 		)
 
 		// TODO: this.state._showImporter == ImportTypes.xlsx
 		const importSetup: JSX.Element = (
 			<section>
-				<div className="card">
-					<h5 className="card-header">STEP 1: Field Parsing</h5>
-					<div className="card-body">
-						<h5 className="card-title">Field Parsing</h5>
-						<h6 className="card-subtitle mb-2 text-body-secondary">Map your dream journal fields below using live feedback to see the results</h6>
-						<p className="card-text">Map your dream journal fields below using live feedback to see the results.</p>
-
-						<div className='row align-items-top mb-4'>
-							<div id='contMapDemo' className='col-8'>
-								<div className='bg-black p-3'>
-									<div className='row'>
-										<div className='col-3'>
-											<label className='text-muted text-uppercase d-block'>Description</label>
-										</div>
-										<div className='col'>
-											<label className='text-muted text-uppercase'>Your Field Name</label>
-										</div>
-										<div className='col'>
-											<label className='text-muted text-uppercase'>Result</label>
-										</div>
-									</div>
-									<div className='row align-items-top mb-3'>
-										<div className='col-3'>
-											<label className='required'>Entry Date</label>
-										</div>
-										<div className='col'>
-											<div className='row g-0'>
-												<div className='col'>
-													<select
-														name='_selEntryType'
-														className='form-select'
-														onChange={this.handleSelectChange}
-														value={this.state._selEntryType}
-														required
-													>
-														<option value='match'>Regex</option>
-														<option value='first'>First line is the Entry Date</option>
-													</select>
-												</div>
-												<div className={this.state._selEntryType === 'first' ? 'd-none' : 'col-7 ps-1'}>
-													<input
-														name='_entryDate'
-														value={this.state._entryDate}
-														type='text'
-														onChange={this.handleInputChange}
-														placeholder='DATE:'
-														className='form-control'
-														required
-													/>
-													<div className='invalid-feedback'>Entry Date format required</div>
-												</div>
-											</div>
-										</div>
-										<div className='col'>
-											<div className='form-output p-2'>{this.state.entryDate}</div>
-											<div className={this.state._entryDateInvalidMsg ? 'invalid-feedback d-block' : 'invalid-feedback'}>{this.state._entryDateInvalidMsg}</div>
-										</div>
-									</div>
-									<div className='row align-items-center mb-3'>
-										<div className='col-3'>Bed Time</div>
-										<div className='col'>
-											<input
-												name='_bedTime'
-												value={this.state._bedTime}
-												type='text'
-												className='form-control'
-												onChange={this.handleInputChange}
-												placeholder='BEDTIME'
-											/>
-										</div>
-										<div className='col'>
-											<div className='form-output p-2'>{this.state.bedTime}</div>
-										</div>
-									</div>
-									<div className='row align-items-top mb-3'>
-										<div className='col-3'>Prep Notes</div>
-										<div className='col'>
-											<div className='row g-0'>
-												<div className='col-auto'>
-													<select name='_selNotePrepType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNotePrepType}>
-														<option value='single'>Single-line</option>
-														<option value='multi'>Multi-line</option>
-													</select>
-												</div>
-												<div className='col ps-1'>
-													<input
-														name='_notesPrep'
-														value={this.state._notesPrep}
-														type='text'
-														className='form-control'
-														onChange={this.handleInputChange}
-														placeholder='PREP'
-													/>
-												</div>
-											</div>
-											<div className={this.state._selNotePrepType === 'multi' ? 'row g-0 mt-1' : 'd-none'}>
-												<input
-													name='_notesPrepEnd'
-													value={this.state._notesPrepEnd}
-													type='text'
-													className='form-control'
-													onChange={this.handleInputChange}
-													placeholder='("Prep Notes" ends with)'
-												/>
-											</div>
-										</div>
-										<div className='col'>
-											<div className='form-output p-2' style={{ whiteSpace: 'pre-line' }}>
-												{this.state.notesPrep}
-											</div>
-										</div>
-									</div>
-									<div className='row align-items-top mb-3'>
-										<div className='col-3'>Wake Notes</div>
-										<div className='col'>
-											<div className='row g-0'>
-												<div className='col-auto'>
-													<select name='_selNoteWakeType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNoteWakeType}>
-														<option value='single'>Single-line</option>
-														<option value='multi'>Multi-line</option>
-													</select>
-												</div>
-												<div className='col ps-1'>
-													<input
-														name='_notesWake'
-														value={this.state._notesWake}
-														type='text'
-														className='form-control'
-														onChange={this.handleInputChange}
-														placeholder='WAKES'
-													/>
-												</div>
-											</div>
-											<div className={this.state._selNoteWakeType === 'multi' ? 'row g-0 mt-1' : 'd-none'}>
-												<input
-													name='_notesWakeEnd'
-													value={this.state._notesWakeEnd}
-													type='text'
-													className='form-control'
-													onChange={this.handleInputChange}
-													placeholder='("Wake Notes" ends with)'
-												/>
-											</div>
-										</div>
-										<div className='col'>
-											<div className='form-output p-2'>{this.state.notesWake}</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div className='col-4'>
-								<label className='text-muted text-uppercase d-block'>Sample Entry</label>
-								{contDemoData}
-							</div>
-						</div>
-					</div>
-				</div>
-
 				<h3 className='text-primary mb-4'>
 					<span className="badge text-bg-primary me-2">STEP 1</span>Field Format
 				</h3>
-				<div className='row align-items-top mb-4'>
+				<div className='row align-items-top gx-4 mb-4' data-desc="alert headings">
 					<div className='col-8'>
-						<div className="alert alert-secondary" role="alert">
+						<div className="alert alert-info mb-0" role="alert">
 							<h5 className="alert-heading">Field Parsing</h5>
 							<p className='mb-0'>Map your dream journal fields below using live feedback to see the results.</p>
 						</div>
 					</div>
 					<div className='col-4'>
-						<div className="alert alert-secondary" role="alert">
+						<div className="alert alert-success mb-0" role="alert">
 							<h5 className="alert-heading">Journal Format</h5>
 							<p className='mb-0'>Paste a journal entry from your current journal below.</p>
 						</div>
 					</div>
 				</div>
-				<div className='row align-items-top mb-4'>
-					<div id='contMapDemo' className='col-8'>
-						<div className='row'>
-							<div className='col-3'>
-								<label className='text-muted text-uppercase d-block'>Description</label>
-							</div>
-							<div className='col'>
-								<label className='text-muted text-uppercase'>Your Field Name</label>
-							</div>
-							<div className='col'>
-								<label className='text-muted text-uppercase'>Result</label>
-							</div>
-						</div>
-						<div className='row align-items-top mb-3'>
-							<div className='col-3'>
-								Entry Date
-								<span className='text-danger mx-1' title='required field'>
-									*
-								</span>
-							</div>
-							<div className='col'>
-								<div className='row g-0'>
-									<div className='col'>
-										<select name='_selEntryType' className='form-select' onChange={this.handleSelectChange} value={this.state._selEntryType}>
-											<option value='match'>Regex</option>
-											<option value='first'>First line is the Entry Date</option>
-										</select>
+				<div className='row align-items-top gx-4 mb-4' data-desc="form-fields | sample-input">
+					<div className='col-8' id='contMapDemo'>
+						<div className='bg-black p-4 border border-dark'>
+							<h5 className='text-info mb-3'>JOURNAL ENTRY</h5>
+							<section className='form-color-info'>
+								<div className='row align-items-center mb-3'>
+									<div className='col-3'>
+										<label className='required'>Entry Date</label>
 									</div>
-									<div className={this.state._selEntryType === 'first' ? 'd-none' : 'col-7 ps-1'}>
-										<input
-											name='_entryDate'
-											value={this.state._entryDate}
-											type='text'
-											className='form-control'
-											onChange={this.handleInputChange}
-											placeholder='DATE:'
-											required
-										/>
-										<div className='invalid-feedback'>Entry Date format required</div>
-									</div>
-								</div>
-							</div>
-							<div className='col'>
-								<div className='form-output p-2'>{this.state.entryDate}</div>
-								<div className={this.state._entryDateInvalidMsg ? 'invalid-feedback d-block' : 'invalid-feedback'}>{this.state._entryDateInvalidMsg}</div>
-							</div>
-						</div>
-						<div className='row align-items-center mb-3'>
-							<div className='col-3'>Bed Time</div>
-							<div className='col'>
-								<input
-									name='_bedTime'
-									value={this.state._bedTime}
-									type='text'
-									className='form-control'
-									onChange={this.handleInputChange}
-									placeholder='BEDTIME'
-								/>
-							</div>
-							<div className='col'>
-								<div className='form-output p-2'>{this.state.bedTime}</div>
-							</div>
-						</div>
-						<div className='row align-items-top mb-3'>
-							<div className='col-3'>Prep Notes</div>
-							<div className='col'>
-								<div className='row g-0'>
-									<div className='col-auto'>
-										<select name='_selNotePrepType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNotePrepType}>
-											<option value='single'>Single-line</option>
-											<option value='multi'>Multi-line</option>
-										</select>
-									</div>
-									<div className='col ps-1'>
-										<input
-											name='_notesPrep'
-											value={this.state._notesPrep}
-											type='text'
-											className='form-control'
-											onChange={this.handleInputChange}
-											placeholder='PREP'
-										/>
-									</div>
-								</div>
-								<div className={this.state._selNotePrepType === 'multi' ? 'row g-0 mt-1' : 'd-none'}>
-									<input
-										name='_notesPrepEnd'
-										value={this.state._notesPrepEnd}
-										type='text'
-										className='form-control'
-										onChange={this.handleInputChange}
-										placeholder='("Prep Notes" ends with)'
-									/>
-								</div>
-							</div>
-							<div className='col'>
-								<div className='form-output p-2' style={{ whiteSpace: 'pre-line' }}>
-									{this.state.notesPrep}
-								</div>
-							</div>
-						</div>
-						<div className='row align-items-top mb-3'>
-							<div className='col-3'>Wake Notes</div>
-							<div className='col'>
-								<div className='row g-0'>
-									<div className='col-auto'>
-										<select name='_selNoteWakeType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNoteWakeType}>
-											<option value='single'>Single-line</option>
-											<option value='multi'>Multi-line</option>
-										</select>
-									</div>
-									<div className='col ps-1'>
-										<input
-											name='_notesWake'
-											value={this.state._notesWake}
-											type='text'
-											className='form-control'
-											onChange={this.handleInputChange}
-											placeholder='WAKES'
-										/>
-									</div>
-								</div>
-								<div className={this.state._selNoteWakeType === 'multi' ? 'row g-0 mt-1' : 'd-none'}>
-									<input
-										name='_notesWakeEnd'
-										value={this.state._notesWakeEnd}
-										type='text'
-										className='form-control'
-										onChange={this.handleInputChange}
-										placeholder='("Wake Notes" ends with)'
-									/>
-								</div>
-							</div>
-							<div className='col'>
-								<div className='form-output p-2'>{this.state.notesWake}</div>
-							</div>
-						</div>
-
-						<label className='text-muted'>DREAMS: (1 or more)</label>
-
-						<div className='row align-items-top mb-3'>
-							<div className='col-3'>Dream Section</div>
-							<div className='col'>
-								<input
-									name='_dreamBreak'
-									value={this.state._dreamBreak}
-									type='text'
-									className='form-control'
-									onChange={this.handleInputChange}
-									placeholder='DREAM \d+:'
-								/>
-							</div>
-							<div className='col'>
-								<div className='form-output p-2'>
-									{(this.state.dreamBreak || []).map((dream, idx) => (
-										<div key={'dreambreak' + idx}>
-											{idx + 1}:&nbsp;{dream}
+									<div className='col form-border'>
+										<div className='row g-0'>
+											<div className='col'>
+												<select name='_selEntryType' className='form-select' onChange={this.handleSelectChange} value={this.state._selEntryType}>
+													<option value='match'>Regex</option>
+													<option value='first'>First line is the Entry Date</option>
+												</select>
+											</div>
+											<div className={this.state._selEntryType === 'first' ? 'd-none' : 'col-7 ps-1'}>
+												<input
+													name='_entryDate'
+													value={this.state._entryDate}
+													type='text'
+													className='form-control'
+													onChange={this.handleInputChange}
+													placeholder='DATE:'
+													required
+												/>
+												<div className='invalid-feedback'>Entry Date format required</div>
+											</div>
 										</div>
-									))}
-								</div>
-							</div>
-						</div>
-						<div className='row align-items-center mb-3'>
-							<div className='col-3'>Lucid Dream?</div>
-							<div className='col'>
-								<input
-									name='_isLucidDream'
-									value={this.state._isLucidDream}
-									type='text'
-									className='form-control'
-									onChange={this.handleInputChange}
-									placeholder='SUCCESS'
-								/>
-							</div>
-							<div className='col'>
-								<div className='form-output p-2'>{this.state.isLucidDream && <div className='badge bg-success font-weight-light p-2'>YES</div>}</div>
-							</div>
-						</div>
-						<div className='row align-items-center mb-3'>
-							<div className='col-3'>Dream Signs</div>
-							<div className='col'>
-								<div className='row g-0'>
-									<div className='col me-1'>
-										<input
-											name='_dreamSigns'
-											value={this.state._dreamSigns}
-											type='text'
-											className='form-control'
-											onChange={this.handleInputChange}
-											placeholder='DREAMSIGNS'
-										/>
 									</div>
-									<div className='col-2'>
-										<select name='_dreamSignsDelim' value={this.state._dreamSignsDelim} className='form-select' onChange={this.handleSelectChange}>
-											<option value=','>,</option>
-											<option value=';'>;</option>
-											<option value=' '>(space)</option>
-										</select>
-									</div>
-								</div>
-							</div>
-							<div className='col'>
-								<div className='form-output p-2'>{this.state.dreamSigns}</div>
-							</div>
-						</div>
-						<div className='row align-items-center mb-3'>
-							<div className='col-3'>Dream Title</div>
-							<div className='col'>
-								<input
-									name='_title'
-									value={this.state._title}
-									type='text'
-									className='form-control'
-									onChange={this.handleInputChange}
-									placeholder='DREAM \d+:'
-								/>
-							</div>
-							<div className='col'>
-								<div className='form-output p-2'>{this.state.title}</div>
-							</div>
-						</div>
-						<div className='row align-items-top mb-3'>
-							<div className='col-3'>Dream Notes</div>
-							<div className='col'>
-								<div className='row g-0'>
 									<div className='col'>
-										<select name='_selDreamNotes' className='form-select' onChange={this.handleSelectChange} value={this.state._selDreamNotes}>
-											<option value='match'>Regex</option>
-											<option value='after'>All text after Dream Title</option>
-										</select>
+										<div className='form-output'>{this.state.entryDate}</div>
+										<div className={this.state._entryDateInvalidMsg ? 'invalid-feedback d-block' : 'invalid-feedback'}>{this.state._entryDateInvalidMsg}</div>
 									</div>
-									<div className={this.state._selDreamNotes === 'after' ? 'd-none' : 'col-7 ps-2'}>
+								</div>
+								<div className='row mb-3'>
+									<div className='col-3'>
+										<label>Bed Time</label>
+									</div>
+									<div className='col form-border'>
 										<input
-											name='_notes'
-											value={this.state._notes}
+											name='_bedTime'
+											value={this.state._bedTime}
 											type='text'
 											className='form-control'
 											onChange={this.handleInputChange}
-											placeholder='DREAM 1'
+											placeholder='BEDTIME'
 										/>
 									</div>
+									<div className='col'>
+										<div className='form-output'>{this.state.bedTime}</div>
+									</div>
 								</div>
-							</div>
-							<div className='col'>
-								<div className='form-output p-2'>
-									{this.state.notes.map((note, idx) => (
-										<div key={'note' + idx}>{note}</div>
-									))}
+								<div className='row mb-3'>
+									<div className='col-3'>
+										<label>Prep Notes</label>
+									</div>
+									<div className='col form-border'>
+										<div className='row g-0'>
+											<div className='col-auto'>
+												<select name='_selNotePrepType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNotePrepType}>
+													<option value='single'>Single-line</option>
+													<option value='multi'>Multi-line</option>
+												</select>
+											</div>
+											<div className='col ps-1'>
+												<input
+													name='_notesPrep'
+													value={this.state._notesPrep}
+													type='text'
+													className='form-control'
+													onChange={this.handleInputChange}
+													placeholder='PREP'
+												/>
+											</div>
+										</div>
+										<div className={this.state._selNotePrepType === 'multi' ? 'row g-0 mt-1' : 'd-none'}>
+											<input
+												name='_notesPrepEnd'
+												value={this.state._notesPrepEnd}
+												type='text'
+												className='form-control'
+												onChange={this.handleInputChange}
+												placeholder='("Prep Notes" ends with)'
+											/>
+										</div>
+									</div>
+									<div className='col'>
+										<div className='form-output' style={{ whiteSpace: 'pre-line' }}>
+											{this.state.notesPrep}
+										</div>
+									</div>
 								</div>
-							</div>
+								<div className='row mb-3'>
+									<div className='col-3'>
+										<label>Wake Notes</label>
+									</div>
+									<div className='col form-border'>
+										<div className='row g-0'>
+											<div className='col-auto'>
+												<select name='_selNoteWakeType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNoteWakeType}>
+													<option value='single'>Single-line</option>
+													<option value='multi'>Multi-line</option>
+												</select>
+											</div>
+											<div className='col ps-1'>
+												<input
+													name='_notesWake'
+													value={this.state._notesWake}
+													type='text'
+													className='form-control'
+													onChange={this.handleInputChange}
+													placeholder='WAKES'
+												/>
+											</div>
+										</div>
+										<div className={this.state._selNoteWakeType === 'multi' ? 'row g-0 mt-1' : 'd-none'}>
+											<input
+												name='_notesWakeEnd'
+												value={this.state._notesWakeEnd}
+												type='text'
+												className='form-control'
+												onChange={this.handleInputChange}
+												placeholder='("Wake Notes" ends with)'
+											/>
+										</div>
+									</div>
+									<div className='col'>
+										<div className='form-output'>{this.state.notesWake}</div>
+									</div>
+								</div>
+							</section>
+
+							<h5 className='text-success mb-3 mt-4'>ENTRY DREAMS: (1 or more)</h5>
+							<section className='form-color-success'>
+								<div className='row mb-3'>
+									<div className='col-3'>
+										<label>Dream Start</label>
+									</div>
+									<div className='col form-border'>
+										<input
+											name='_dreamBreak'
+											value={this.state._dreamBreak}
+											type='text'
+											className='form-control'
+											onChange={this.handleInputChange}
+											placeholder='DREAM \d+:'
+										/>
+									</div>
+									<div className='col'>
+										<div className='form-output'>
+											{(this.state.dreamBreak || []).map((dream, idx) => (
+												<div key={'dreambreak' + idx}>
+													{idx + 1}:&nbsp;{dream}
+												</div>
+											))}
+										</div>
+									</div>
+								</div>
+								<div className='row mb-3'>
+									<div className='col-3'>
+										<label>Lucid Dream?</label>
+									</div>
+									<div className='col form-border'>
+										<input
+											name='_isLucidDream'
+											value={this.state._isLucidDream}
+											type='text'
+											className='form-control'
+											onChange={this.handleInputChange}
+											placeholder='SUCCESS'
+										/>
+									</div>
+									<div className='col'>
+										<div className='form-output'>{this.state.isLucidDream && <div className='badge bg-success font-weight-light p-2'>YES</div>}</div>
+									</div>
+								</div>
+								<div className='row mb-3'>
+									<div className='col-3'>
+										<label>Dream Signs</label>
+									</div>
+									<div className='col form-border'>
+										<div className='row g-0'>
+											<div className='col pe-2'>
+												<input
+													name='_dreamSigns'
+													type='text'
+													value={this.state._dreamSigns}
+													placeholder='DREAMSIGNS'
+													onChange={this.handleInputChange}
+													className='form-control'
+												/>
+											</div>
+											<div className='col-2' style={{ minWidth: 60 }}>
+												<select
+													name='_dreamSignsDelim'
+													value={this.state._dreamSignsDelim}
+													onChange={this.handleSelectChange}
+													className='form-select'
+												>
+													<option value=','>,</option>
+													<option value=';'>;</option>
+													<option value=' '>(space)</option>
+												</select>
+											</div>
+										</div>
+									</div>
+									<div className='col'>
+										<div className='form-output'>{this.state.dreamSigns}</div>
+									</div>
+								</div>
+								<div className='row mb-3'>
+									<div className='col-3'>
+										<label>Dream Title</label>
+									</div>
+									<div className='col form-border'>
+										<input
+											name='_title'
+											value={this.state._title}
+											type='text'
+											className='form-control'
+											onChange={this.handleInputChange}
+											placeholder='DREAM \d+:'
+										/>
+									</div>
+									<div className='col'>
+										<div className='form-output'>{this.state.title}</div>
+									</div>
+								</div>
+								<div className='row mb-0'>
+									<div className='col-3'>
+										<label>Dream Notes</label>
+									</div>
+									<div className='col form-border'>
+										<div className='row g-0'>
+											<div className='col'>
+												<select name='_selDreamNotes' className='form-select' onChange={this.handleSelectChange} value={this.state._selDreamNotes}>
+													<option value='match'>Regex</option>
+													<option value='after'>All text after Dream Title</option>
+												</select>
+											</div>
+											<div className={this.state._selDreamNotes === 'after' ? 'd-none' : 'col-7 ps-2'}>
+												<input
+													name='_notes'
+													value={this.state._notes}
+													type='text'
+													className='form-control'
+													onChange={this.handleInputChange}
+													placeholder='DREAM 1'
+												/>
+											</div>
+										</div>
+									</div>
+									<div className='col'>
+										<div className='form-output'>
+											{this.state.notes.map((note, idx) => (
+												<div key={'note' + idx}>{note}</div>
+											))}
+										</div>
+									</div>
+								</div>
+							</section>
 						</div>
 					</div>
 					<div className='col-4'>
-						<label className='text-muted text-uppercase d-block'>Sample Entry</label>
 						{contDemoData}
 					</div>
 				</div>

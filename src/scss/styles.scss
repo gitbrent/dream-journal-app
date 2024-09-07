@@ -99,3 +99,35 @@ label.required:after {
 	color: red;
 	margin-left: .25rem;
 }
+
+.form-color-info {
+	border-left: 4px var(--bs-info) solid;
+	padding-left: 8px;
+}
+.form-color-info label {
+	color: var(--bs-info);
+	text-transform: uppercase;
+	font-size: 0.9rem;
+}
+.form-color-info .form-border {
+	border-left: 1px var(--bs-info) solid;
+}
+
+.form-color-success {
+	border-left: 4px var(--bs-success) solid;
+	padding-left: 8px;
+}
+.form-color-success label {
+	color: var(--bs-success);
+	text-transform: uppercase;
+	font-size: 0.9rem;
+}
+.form-color-success .form-border {
+	border-left: 1px var(--bs-success) solid;
+}
+
+.form-output {
+	background-color: var(--be-bg-darker);
+	padding: 0.5rem;
+	min-height: 38px;
+}
