@@ -870,6 +870,164 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		// TODO: this.state._showImporter == ImportTypes.xlsx
 		const importSetup: JSX.Element = (
 			<section>
+				<div className="card">
+					<h5 className="card-header">STEP 1: Field Parsing</h5>
+					<div className="card-body">
+						<h5 className="card-title">Field Parsing</h5>
+						<h6 className="card-subtitle mb-2 text-body-secondary">Map your dream journal fields below using live feedback to see the results</h6>
+						<p className="card-text">Map your dream journal fields below using live feedback to see the results.</p>
+
+						<div className='row align-items-top mb-4'>
+							<div id='contMapDemo' className='col-8'>
+								<div className='bg-black p-3'>
+									<div className='row'>
+										<div className='col-3'>
+											<label className='text-muted text-uppercase d-block'>Description</label>
+										</div>
+										<div className='col'>
+											<label className='text-muted text-uppercase'>Your Field Name</label>
+										</div>
+										<div className='col'>
+											<label className='text-muted text-uppercase'>Result</label>
+										</div>
+									</div>
+									<div className='row align-items-top mb-3'>
+										<div className='col-3'>
+											<label className='required'>Entry Date</label>
+										</div>
+										<div className='col'>
+											<div className='row g-0'>
+												<div className='col'>
+													<select
+														name='_selEntryType'
+														className='form-select'
+														onChange={this.handleSelectChange}
+														value={this.state._selEntryType}
+														required
+													>
+														<option value='match'>Regex</option>
+														<option value='first'>First line is the Entry Date</option>
+													</select>
+												</div>
+												<div className={this.state._selEntryType === 'first' ? 'd-none' : 'col-7 ps-1'}>
+													<input
+														name='_entryDate'
+														value={this.state._entryDate}
+														type='text'
+														onChange={this.handleInputChange}
+														placeholder='DATE:'
+														className='form-control'
+														required
+													/>
+													<div className='invalid-feedback'>Entry Date format required</div>
+												</div>
+											</div>
+										</div>
+										<div className='col'>
+											<div className='form-output p-2'>{this.state.entryDate}</div>
+											<div className={this.state._entryDateInvalidMsg ? 'invalid-feedback d-block' : 'invalid-feedback'}>{this.state._entryDateInvalidMsg}</div>
+										</div>
+									</div>
+									<div className='row align-items-center mb-3'>
+										<div className='col-3'>Bed Time</div>
+										<div className='col'>
+											<input
+												name='_bedTime'
+												value={this.state._bedTime}
+												type='text'
+												className='form-control'
+												onChange={this.handleInputChange}
+												placeholder='BEDTIME'
+											/>
+										</div>
+										<div className='col'>
+											<div className='form-output p-2'>{this.state.bedTime}</div>
+										</div>
+									</div>
+									<div className='row align-items-top mb-3'>
+										<div className='col-3'>Prep Notes</div>
+										<div className='col'>
+											<div className='row g-0'>
+												<div className='col-auto'>
+													<select name='_selNotePrepType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNotePrepType}>
+														<option value='single'>Single-line</option>
+														<option value='multi'>Multi-line</option>
+													</select>
+												</div>
+												<div className='col ps-1'>
+													<input
+														name='_notesPrep'
+														value={this.state._notesPrep}
+														type='text'
+														className='form-control'
+														onChange={this.handleInputChange}
+														placeholder='PREP'
+													/>
+												</div>
+											</div>
+											<div className={this.state._selNotePrepType === 'multi' ? 'row g-0 mt-1' : 'd-none'}>
+												<input
+													name='_notesPrepEnd'
+													value={this.state._notesPrepEnd}
+													type='text'
+													className='form-control'
+													onChange={this.handleInputChange}
+													placeholder='("Prep Notes" ends with)'
+												/>
+											</div>
+										</div>
+										<div className='col'>
+											<div className='form-output p-2' style={{ whiteSpace: 'pre-line' }}>
+												{this.state.notesPrep}
+											</div>
+										</div>
+									</div>
+									<div className='row align-items-top mb-3'>
+										<div className='col-3'>Wake Notes</div>
+										<div className='col'>
+											<div className='row g-0'>
+												<div className='col-auto'>
+													<select name='_selNoteWakeType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNoteWakeType}>
+														<option value='single'>Single-line</option>
+														<option value='multi'>Multi-line</option>
+													</select>
+												</div>
+												<div className='col ps-1'>
+													<input
+														name='_notesWake'
+														value={this.state._notesWake}
+														type='text'
+														className='form-control'
+														onChange={this.handleInputChange}
+														placeholder='WAKES'
+													/>
+												</div>
+											</div>
+											<div className={this.state._selNoteWakeType === 'multi' ? 'row g-0 mt-1' : 'd-none'}>
+												<input
+													name='_notesWakeEnd'
+													value={this.state._notesWakeEnd}
+													type='text'
+													className='form-control'
+													onChange={this.handleInputChange}
+													placeholder='("Wake Notes" ends with)'
+												/>
+											</div>
+										</div>
+										<div className='col'>
+											<div className='form-output p-2'>{this.state.notesWake}</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div className='col-4'>
+								<label className='text-muted text-uppercase d-block'>Sample Entry</label>
+								{contDemoData}
+							</div>
+						</div>
+					</div>
+				</div>
+
 				<h3 className='text-primary mb-4'>
 					<span className="badge text-bg-primary me-2">STEP 1</span>Field Format
 				</h3>
@@ -910,7 +1068,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							<div className='col'>
 								<div className='row g-0'>
 									<div className='col'>
-										<select name='_selEntryType' className='form-control' onChange={this.handleSelectChange} value={this.state._selEntryType}>
+										<select name='_selEntryType' className='form-select' onChange={this.handleSelectChange} value={this.state._selEntryType}>
 											<option value='match'>Regex</option>
 											<option value='first'>First line is the Entry Date</option>
 										</select>
@@ -955,7 +1113,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							<div className='col'>
 								<div className='row g-0'>
 									<div className='col-auto'>
-										<select name='_selNotePrepType' className='form-control' onChange={this.handleSelectChange} value={this.state._selNotePrepType}>
+										<select name='_selNotePrepType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNotePrepType}>
 											<option value='single'>Single-line</option>
 											<option value='multi'>Multi-line</option>
 										</select>
@@ -993,7 +1151,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							<div className='col'>
 								<div className='row g-0'>
 									<div className='col-auto'>
-										<select name='_selNoteWakeType' className='form-control' onChange={this.handleSelectChange} value={this.state._selNoteWakeType}>
+										<select name='_selNoteWakeType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNoteWakeType}>
 											<option value='single'>Single-line</option>
 											<option value='multi'>Multi-line</option>
 										</select>
@@ -1080,7 +1238,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										/>
 									</div>
 									<div className='col-2'>
-										<select name='_dreamSignsDelim' value={this.state._dreamSignsDelim} className='form-control' onChange={this.handleSelectChange}>
+										<select name='_dreamSignsDelim' value={this.state._dreamSignsDelim} className='form-select' onChange={this.handleSelectChange}>
 											<option value=','>,</option>
 											<option value=';'>;</option>
 											<option value=' '>(space)</option>
@@ -1113,7 +1271,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							<div className='col'>
 								<div className='row g-0'>
 									<div className='col'>
-										<select name='_selDreamNotes' className='form-control' onChange={this.handleSelectChange} value={this.state._selDreamNotes}>
+										<select name='_selDreamNotes' className='form-select' onChange={this.handleSelectChange} value={this.state._selDreamNotes}>
 											<option value='match'>Regex</option>
 											<option value='after'>All text after Dream Title</option>
 										</select>
@@ -1404,7 +1562,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 														name='lucidMethod'
 														value={dream.lucidMethod || InductionTypes.dild}
 														onChange={(event) => this.handleResultChange(event, idx, idy)}
-														className='form-control'>
+														className='form-select'>
 														{Object.keys(InductionTypes).map((type) => (
 															<option key={'lucid-' + type + '-' + idx + '-' + idy} value={type}>
 																{InductionTypes[type as keyof typeof InductionTypes]}

@@ -92,3 +92,10 @@ $nav-underline-link-active-color: var(--be-bg-darkest);
 .bg-pink {
 	background-color: $pink;
 }
+
+/* Custom: add red asterisk (*) on <label> for required fields */
+label.required:after {
+	content: "*";
+	color: red;
+	margin-left: .25rem;
+}
