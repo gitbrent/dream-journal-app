@@ -34,6 +34,7 @@ import { IDriveDataFile, IJournalDream, IJournalEntry, ImportTypes, InductionTyp
 //import BootstrapSwitchButton from 'bootstrap-switch-button-react' // TODO: BS5: Swap for new toggle
 import ContentEditable from 'react-contenteditable'
 import { Cloud, Upload } from 'react-bootstrap-icons'
+import { DateTime } from 'luxon'
 import { appdata } from './appdata'
 
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
@@ -169,6 +170,32 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		//this.props.appdataSvc.doSaveImportState(this.state)
 	}
 
+	parseDate = (input: string): string | null => {
+		const currentYear = new Date().getFullYear();
+
+		// Try different date formats
+		const formats = ['MM/dd/yyyy', 'MM/dd'];
+
+		let parsedDate = null;
+
+		for (const format of formats) {
+			const date = DateTime.fromFormat(input, format);
+
+			// If the format was MM/dd, append the current year
+			if (format === 'MM/dd' && date.isValid) {
+				parsedDate = date.set({ year: currentYear });
+			}
+
+			if (date.isValid) {
+				parsedDate = date;
+				break;
+			}
+		}
+
+		// EX: "03/08" => "2024-03-08"
+		return parsedDate ? parsedDate.toISODate() : null
+	}
+
 	/* ======================================================================== */
 
 	/**
@@ -183,14 +210,15 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		if (this.state._selEntryType === 'first') {
 			if ((demoData.split('\n') || []).length > 0) {
 				try {
-					const textParse = demoData.split('\n')[0].replace(/[^0-9$\/]/g, '')
-					const dateParse = new Date(textParse)
-					if (Object.prototype.toString.call(dateParse) === '[object Date]' && dateParse.getDay() > 0) {
+					const textParse = demoData.split('\n')[0].replace(/[^0-9\/]/g, '');  // Extract the date string
+					const parsedDate = this.parseDate(textParse)
+					if (parsedDate) {
 						this.setState({
-							entryDate: dateParse.toUTCString().substring(0, 16),
-						})
+							entryDate: parsedDate,
+						});
 					}
 				} catch (ex) {
+					console.error('Date parsing error:', ex);
 					if (ex instanceof Error) {
 						this.setState({ entryDate: ex.message })
 					} else {
@@ -892,7 +920,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<div className='bg-black p-4 border border-dark'>
 							<h5 className='text-info mb-3'>JOURNAL ENTRY</h5>
 							<section className='form-color-info'>
-								<div className='row align-items-center mb-3'>
+								<div className='row mb-3'>
 									<div className='col-3'>
 										<label className='required'>Entry Date</label>
 									</div>
@@ -1025,7 +1053,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							<section className='form-color-success'>
 								<div className='row mb-3'>
 									<div className='col-3'>
-										<label>Dream Start</label>
+										<label className='required'>Dream Start</label>
 									</div>
 									<div className='col form-border'>
 										<input
@@ -1035,6 +1063,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 											className='form-control'
 											onChange={this.handleInputChange}
 											placeholder='DREAM \d+:'
+											required
 										/>
 									</div>
 									<div className='col'>
