@@ -377,21 +377,13 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
 		const target = event.target
 		const value = target.value
-		const name = target.name
+		const name = target.id
 
 		// A: Capture regex field value
 		this.setState(prevState => {
-			if (name === 'dreamSigns') {
-				return {
-					...prevState,
-					dreamSigns: value ? value.split(prevState._dreamSignsDelim || ',') : [],
-				}
-			} else {
-				// FIXME: doesnt work for `_selBreakType` 20240902
-				return {
-					...prevState,
-					[name]: value,
-				}
+			return {
+				...prevState,
+				[name as keyof IAppTabState]: value,
 			}
 		})
 
