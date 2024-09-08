@@ -46,7 +46,8 @@ export interface IAppTabProps {
 interface IAppTabState {
 	_defaultBedTime: string
 	_defaultYear: number
-	_demoData: string
+	_demoHTML: string
+	_demoText: string
 	_dreamSignsDelim: string
 	_entryDateInvalidMsg: string
 	_useDefaultTime: boolean
@@ -96,7 +97,8 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		const defaultState: IAppTabState = {
 			_defaultBedTime: '00:00',
 			_defaultYear: new Date().getFullYear(),
-			_demoData: '',
+			_demoHTML: '<br>',
+			_demoText: '',
 			_dreamSignsDelim: ',',
 			_entryDateInvalidMsg: '',
 			_useDefaultTime: true,
@@ -157,7 +159,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 	 */
 	componentDidMount = () => {
 		this.setState({
-			_demoData: this.refDemoData.current?.innerText || '',
+			_demoText: this.refDemoData.current?.innerText || '',
 		})
 
 		this.updateOptionResults()
@@ -174,16 +176,19 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		const currentYear = new Date().getFullYear();
 
 		// Try different date formats
-		const formats = ['MM/dd/yyyy', 'MM/dd'];
+		const formats = ['MM/dd/yyyy', 'MM/dd', 'MMM dd', 'MMMM dd'];
 
 		let parsedDate = null;
 
 		for (const format of formats) {
-			const date = DateTime.fromFormat(input, format);
+			let date = DateTime.fromFormat(input, format)
+			console.log('format', format);
+			console.log('date', date);
+
 
 			// If the format was MM/dd, append the current year
-			if (format === 'MM/dd' && date.isValid) {
-				parsedDate = date.set({ year: currentYear });
+			if (date.isValid && (format === 'MM/dd' || format === 'MMM dd' || format === 'MMMM dd')) {
+				date = date.set({ year: currentYear });
 			}
 
 			if (date.isValid) {
@@ -192,7 +197,12 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			}
 		}
 
-		// EX: "03/08" => "2024-03-08"
+		/**
+		 * parseDate("03/08");        // returns "2024-03-08"
+		 * parseDate("March 20");      // returns "2024-03-20"
+		 * parseDate("Mar 20");        // returns "2024-03-20"
+		 * parseDate("03/08/2024");    // returns "2024-03-08"
+		 */
 		return parsedDate ? parsedDate.toISODate() : null
 	}
 
@@ -210,7 +220,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		if (this.state._selEntryType === 'first') {
 			if ((demoData.split('\n') || []).length > 0) {
 				try {
-					const textParse = demoData.split('\n')[0].replace(/[^0-9\/]/g, '');  // Extract the date string
+					const textParse = demoData.split('\n')[0]
 					const parsedDate = this.parseDate(textParse)
 					if (parsedDate) {
 						this.setState({
@@ -379,7 +389,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		const value = target.value
 		const name = target.id
 
-		// A: Capture regex field value
+		// Update this one field
 		this.setState(prevState => {
 			return {
 				...prevState,
@@ -387,22 +397,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			}
 		})
 
-		// B: Clear some values on changes
-		if (name === '_selEntryType') {
-			this.setState({
-				entryDate: '',
-			})
-		} else if (name === '_selNotePrepType') {
-			this.setState({
-				notesPrep: '',
-			})
-		} else if (name === '_selNoteWakeType') {
-			this.setState({
-				notesWake: '',
-			})
-		}
-
-		// C: Update UI (delay reqd as state isnt committed to memory fast enough for render to read it back!)
+		// LAST: Update UI (delay reqd as state isnt committed to memory fast enough for render to read it back!)
 		setTimeout(this.updateOptionResults, 100)
 	}
 
@@ -426,22 +421,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 			}
 		})
 
-		// B:
-		if (name === '_selEntryType') {
-			this.setState({
-				entryDate: '',
-			})
-		} else if (name === '_selNotePrepType') {
-			this.setState({
-				notesPrep: '',
-			})
-		} else if (name === '_selNoteWakeType') {
-			this.setState({
-				notesWake: '',
-			})
-		}
-
-		// C: Update UI (delay reqd as state isnt committed to memory fast enough for render to read it back!)
+		// Last: Update UI (delay reqd as state isnt committed to memory fast enough for render to read it back!)
 		setTimeout(this.updateOptionResults, 100)
 	}
 
@@ -839,6 +819,26 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 		)
 
 		const contDemoData: JSX.Element = (
+			<section className='bg-black p-4 border border-dark'>
+				<h5 className='text-success text-uppercase mb-3'>Sample Journal Entry</h5>
+				<ContentEditable
+					innerRef={this.refDemoData}
+					html={this.state._demoHTML} // innerHTML of the editable div
+					disabled={false} // use true to disable editing
+					onChange={(event) => {
+						this.setState({
+							_demoText: event.currentTarget.innerText,
+							_demoHTML: event.target.value,
+						})
+						setTimeout(this.updateOptionResults, 100)
+					}} // handle innerHTML change
+					className='form-control mb-2'
+					style={{ minHeight: '300px', height: 'auto' }}
+				/>
+			</section>
+		)
+
+		const contDemoData2: JSX.Element = (
 			<section ref={this.refDemoData} className='bg-black p-4 border border-dark'>
 				<span>03/08:</span>
 				<ul>
@@ -919,7 +919,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 									<div className='col form-border'>
 										<div className='row g-0'>
 											<div className='col'>
-												<select name='_selEntryType' className='form-select' onChange={this.handleSelectChange} value={this.state._selEntryType}>
+												<select id='_selEntryType' className='form-select' onChange={this.handleSelectChange} value={this.state._selEntryType}>
 													<option value='match'>Regex</option>
 													<option value='first'>First line is the Entry Date</option>
 												</select>
@@ -968,7 +968,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 									<div className='col form-border'>
 										<div className='row g-0'>
 											<div className='col-auto'>
-												<select name='_selNotePrepType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNotePrepType}>
+												<select id='_selNotePrepType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNotePrepType}>
 													<option value='single'>Single-line</option>
 													<option value='multi'>Multi-line</option>
 												</select>
@@ -1008,7 +1008,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 									<div className='col form-border'>
 										<div className='row g-0'>
 											<div className='col-auto'>
-												<select name='_selNoteWakeType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNoteWakeType}>
+												<select id='_selNoteWakeType' className='form-select' onChange={this.handleSelectChange} value={this.state._selNoteWakeType}>
 													<option value='single'>Single-line</option>
 													<option value='multi'>Multi-line</option>
 												</select>
@@ -1145,7 +1145,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 									<div className='col form-border'>
 										<div className='row g-0'>
 											<div className='col'>
-												<select name='_selDreamNotes' className='form-select' onChange={this.handleSelectChange} value={this.state._selDreamNotes}>
+												<select id='_selDreamNotes' className='form-select' onChange={this.handleSelectChange} value={this.state._selDreamNotes}>
 													<option value='match'>Regex</option>
 													<option value='after'>All text after Dream Title</option>
 												</select>
@@ -1295,21 +1295,21 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 		const importParse: JSX.Element = (
 			<section>
-				<div className='row'>
+				<div className='row align-items-center'>
 					<div className='col'>
-						<h3 className='text-primary'>Instructions</h3>
-						<ul>
-							<li>Copy one or more entries from your Dream Journal, then paste them below and click the Parse button</li>
-							<li>The options in the Setup tab will be used to parse your existing entries into a new, well-structured format</li>
-							<li>Review the results, make any changes, then click Import to add them to your Brain Cloud journal</li>
-						</ul>
+						<h3 className='text-warning'>Instructions</h3>
 					</div>
-					<div className='col-auto pt-2'>
-						<button className='btn btn-success' onClick={this.handleParse} disabled={(this.state._importText || '').length === 0}>
+					<div className='col-auto'>
+						<button className='btn btn-warning btn-lg' onClick={this.handleParse} disabled={(this.state._importText || '').length === 0}>
 							Parse Journal Entries
 						</button>
 					</div>
 				</div>
+				<ul>
+					<li>Copy one or more entries from your Dream Journal, then paste them below and click the Parse button</li>
+					<li>The options in the Setup tab will be used to parse your existing entries into a new, well-structured format</li>
+					<li>Review the results, make any changes, then click Import to add them to your Brain Cloud journal</li>
+				</ul>
 
 				<ContentEditable
 					innerRef={this.refContentEditable}
@@ -1324,7 +1324,6 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					className='form-control mb-2'
 					style={{ minHeight: '300px', height: 'auto' }}
 				/>
-				<div className='invalid-feedback'>Please paste your journal above</div>
 			</section>
 		)
 
