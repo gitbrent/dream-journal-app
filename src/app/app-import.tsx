@@ -781,39 +781,38 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 
 		// D: mark invalid entries, or do import if no errors
 		if (arrInvalidSects.length > 0) {
-			this.setState({
-				_invalidSections: arrInvalidSects,
-			})
+			this.setState({ _invalidSections: arrInvalidSects })
 		} else {
+			// STEP 1: Add all entry (this only adds entry to current JSON file)
 			this.state._parsedSections.forEach((sect) => this.props.appdataSvc.doEntryAdd(sect))
 
-			// FIXME:
-			/*
-			GDrive.doSaveDataFile()
-				.catch((err) => {
-					// TODO: show onscreen
-					alert('ERROR: ' + err)
-					console.error(err)
-					// TODO: what to do about expired session?
-					// `save` can can oauthLogin, but file still needs ot be saved - show a save button?
-				})
+			// STEP 2: Write changes to cloud
+			this.props.appdataSvc.doSaveDataFile()
 				.then(() => {
-					// 1: Clear import text and parsed results
+					// A:
+					alert(`SUCCESS!\nAdded ${this.state._parsedSections.length} new entries into selected journal.`)
+					console.log('All entries successfully added!');
+
+					// B: Clear import text and parsed results
 					this.setState({
 						_importHTML: '<br>',
 						_importText: '',
 						_parsedSections: [],
 					})
 
-					// 2:
+					// C:
 					setTimeout(() => {
 						localStorage.setItem('import-config', JSON.stringify(this.state))
 					}, 100)
-
-					// 3:
-					// TODO: show onscreen
-					alert('SUCCESS!\nAdded ' + cntImported + ' new entries into selected journal.')
-				})*/
+				})
+				.catch((error) => {
+					// Handle any errors if one of the promises fails
+					console.error('Error adding entries:', error)
+					alert('ERROR: ' + error)
+					console.error(error)
+					// TODO: what to do about expired session?
+					// `save` can can oauthLogin, but file still needs ot be saved - show a save button?
+				})
 		}
 	}
 
@@ -825,26 +824,28 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 				<div className='card-header bg-info'>
 					<h5 className='card-title text-white mb-0'>Import Dream Journal Entries</h5>
 				</div>
-				<div className='card-body'>
-					<div className='row align-items-center'>
-						<div className='col-auto px-4'>
-							<Cloud size='48' className='d-block mb-3' />
-							<Upload size='48' className='d-block mt-3' />
-						</div>
-						<div className='col px-4'>
-							<h5 className='text-primary'>Current</h5>
-							<p className='card-text'>
-								It&apos;s likely that you are already keeping a dream journal in another format, such a Document (Google Docs, Microsoft Word), spreadsheet
-								(Google Sheets, Microsoft Excel), or just plain text.
-							</p>
-							<h5 className='text-success'>Journal</h5>
-							<p className='card-text'>
-								The importer interface allows you to import your free-form journal into the well-formatted Brain Cloud JSON format which is a universal,
-								plain text, flat-file database readable by a myriad of apps (databases, text editors, etc.)
-							</p>
+				{window.location.href.toLowerCase().indexOf('localhost') === -1 &&
+					<div className='card-body'>
+						<div className='row align-items-center'>
+							<div className='col-auto px-4'>
+								<Cloud size='48' className='d-block mb-3' />
+								<Upload size='48' className='d-block mt-3' />
+							</div>
+							<div className='col px-4'>
+								<h5 className='text-primary'>Current</h5>
+								<p className='card-text'>
+									It&apos;s likely that you are already keeping a dream journal in another format, such a Document (Google Docs, Microsoft Word), spreadsheet
+									(Google Sheets, Microsoft Excel), or just plain text.
+								</p>
+								<h5 className='text-success'>Journal</h5>
+								<p className='card-text'>
+									The importer interface allows you to import your free-form journal into the well-formatted Brain Cloud JSON format which is a universal,
+									plain text, flat-file database readable by a myriad of apps (databases, text editors, etc.)
+								</p>
+							</div>
 						</div>
 					</div>
-				</div>
+				}
 			</div>
 		)
 
@@ -1272,7 +1273,11 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						<h3 className='text-warning mb-0'>Instructions</h3>
 					</div>
 					<div className='col-auto'>
-						<button className='btn btn-warning btn-lg' onClick={this.handleParse} disabled={(this.state._importText || '').length === 0}>
+						<button
+							disabled={(this.state._importText || '').length === 0}
+							onClick={this.handleParse}
+							className='btn btn-warning btn-lg'
+						>
 							Parse Journal Entries
 						</button>
 					</div>
@@ -1282,7 +1287,6 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					<li>The options in the Setup tab will be used to parse your existing entries into a new, well-structured format</li>
 					<li>Review the results, make any changes, then click Import to add them to your Brain Cloud journal</li>
 				</ul>
-
 				<ContentEditable
 					innerRef={this.refContentEditable}
 					html={this.state._importHTML} // innerHTML of the editable div
@@ -1296,6 +1300,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 					className='form-control mb-2'
 					style={{ minHeight: '300px', height: 'auto' }}
 				/>
+				<div className='text-secondary'>({(this.state._importText || '').length} characters)</div>
 			</section>
 		)
 
@@ -1311,9 +1316,15 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 						</button>
 					</div>
 				</div>
-				<div className='alert alert-success'>
-					Review the results below and make changes as needed, then click Import Entries to add these new entries to your current Dream Journal.
-				</div>
+				{this.state._invalidSections.length === 0 ?
+					<div className='alert alert-success'>
+						Review the results below and make changes as needed, then click Import Entries to add these new entries to your current Dream Journal.
+					</div>
+					:
+					<div className='alert alert-warning'>
+						Invalid fields shown below.
+					</div>
+				}
 
 				{this.state._parsedSections.map((sect, idx) => (
 					<div key={`parsedsect${idx}`} className='card mt-5'>
@@ -1358,7 +1369,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										value={sect.notesPrep}
 										className='form-control'
 										onChange={(event) => this.handleResultChange(event, idx)}
-										rows={1}
+										rows={2}
 									/>
 								</div>
 								<div className='col'>
@@ -1368,7 +1379,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 										className='form-control'
 										value={sect.notesWake}
 										onChange={(event) => this.handleResultChange(event, idx)}
-										rows={1}
+										rows={2}
 									/>
 								</div>
 							</div>
@@ -1487,7 +1498,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							role='tab'
 							aria-controls='parse'
 							aria-selected='false'>
-							<span className="badge text-bg-primary me-2">STEP 2</span>Parse Journal Entries
+							<span className="badge text-bg-warning me-2">STEP 2</span>Parse Journal Entries
 						</button>
 					</li>
 					<li className='nav-item'>
@@ -1500,7 +1511,7 @@ export default class TabImport extends React.Component<IAppTabProps, IAppTabStat
 							role='tab'
 							aria-controls='results'
 							aria-selected='false'>
-							<span className="badge text-bg-primary me-2">STEP 3</span>Import Journal Entries
+							<span className="badge text-bg-success me-2">STEP 3</span>Import Journal Entries
 						</button>
 					</li>
 				</ul>
