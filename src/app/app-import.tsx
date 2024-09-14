@@ -31,7 +31,6 @@
 
 import React from 'react'
 import { IDriveDataFile, IJournalDream, IJournalEntry, ImportTypes, InductionTypes, VERBOSE_IMPORT } from './app.types'
-//import BootstrapSwitchButton from 'bootstrap-switch-button-react' // TODO: BS5: Swap for new toggle
 import ContentEditable from 'react-contenteditable'
 import { ChevronRight, Cloud, Trash, Upload } from 'react-bootstrap-icons'
 import { DateTime } from 'luxon'
