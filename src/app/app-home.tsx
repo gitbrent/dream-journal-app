@@ -163,7 +163,7 @@ export default function TabHome(props: Props) {
 	}
 
 	return (
-		<section className='m-5' style={{ marginLeft: '10rem!important', marginRight: '10rem!important' }}>
+		<section className='m-2 m-md-5' style={{ marginLeft: '10rem!important', marginRight: '10rem!important' }}>
 			<div className='be-bg-darkest p-4 p-md-5'>
 				<div className='row align-items-center g-0 mb-3'>
 					<div className='col'>

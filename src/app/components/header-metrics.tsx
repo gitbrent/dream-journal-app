@@ -133,9 +133,9 @@ export default function HeaderMetrics(props: Props) {
 					)}
 				</div>
 				<div className='col text-center'>
-					<h6 className='text-pink text-uppercase mb-0'>Tags</h6>
-					<h1 className='text-pink display-5 mb-0'>{totalDreamSigns || '-'}</h1>
-					{props.showStats && <div className='badge rounded-pill bg-pink w-100'>-</div>}
+					<h6 className='text-be-tag text-uppercase mb-0'>Tags</h6>
+					<h1 className='text-be-tag display-5 mb-0'>{totalDreamSigns || '-'}</h1>
+					{props.showStats && <div className='badge rounded-pill bg-be-tag w-100'>-</div>}
 				</div>
 				<div className='col text-center d-none d-md-block'>
 					<h6 className='text-info text-uppercase mb-0'>Tagged</h6>

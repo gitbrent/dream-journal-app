@@ -188,7 +188,7 @@ export default function TabJournal(props: Props) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
-		<main className='m-4'>
+		<main className='m-2 m-md-4'>
 			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			<section className='be-box-dark'>
 				{renderFilters()}
