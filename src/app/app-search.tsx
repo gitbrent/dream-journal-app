@@ -14,7 +14,7 @@ export interface Props {
 }
 
 export default function TabSearch(props: Props) {
-	const localShowAlert = JSON.parse(localStorage.getItem('show-alert-search') || '')
+	const localShowAlert = false // JSON.parse(localStorage.getItem('show-alert-search') || '')
 	//
 	const [showAlert, setShowAlert] = useState(typeof localShowAlert === 'boolean' ? localShowAlert : true)
 	const [totalDreams, setTotalDreams] = useState(0)
@@ -99,9 +99,7 @@ export default function TabSearch(props: Props) {
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<div className='container my-auto my-md-5'>
-			<header>
-				<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
-			</header>
+			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 
 			{showAlert && (
 				<div className='alert alert-secondary'>
@@ -136,7 +134,7 @@ export default function TabSearch(props: Props) {
 							</div>
 						</div>
 					</div>
-					<div className='card-body bg-black border-bottom border-secondary' data-desc='commandbar'>
+					<div className='card-body border-bottom border-secondary' data-desc='commandbar'>
 						<div className='row align-items-center'>
 							<div className='col-12 col-md-8'>
 								<div className='row align-items-center g-0 mb-3 mb-md-0'>
@@ -168,7 +166,7 @@ export default function TabSearch(props: Props) {
 							</div>
 							<div className='col-6 col-md'>
 								<label className='text-uppercase text-muted'>Fields</label>
-								<select className='form-control' defaultValue={searchOptScope} onChange={handleScopeChange}>
+								<select className='form-select' defaultValue={searchOptScope} onChange={handleScopeChange}>
 									{Object.keys(SearchScopes)
 										.filter((key) => key.indexOf('_') === -1)
 										.map((val) => (
@@ -180,7 +178,7 @@ export default function TabSearch(props: Props) {
 							</div>
 							<div className='col-6 col-md'>
 								<label className='text-uppercase text-muted'>Type</label>
-								<select className='form-control' defaultValue={searchOptMatchType} onChange={handleTypeChange}>
+								<select className='form-select' defaultValue={searchOptMatchType} onChange={handleTypeChange}>
 									{Object.keys(SearchMatchTypes).map((val) => (
 										<option value={SearchMatchTypes[val as keyof typeof SearchMatchTypes]} key={'enum' + val}>
 											{SearchMatchTypes[val as keyof typeof SearchMatchTypes]}

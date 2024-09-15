@@ -1,3 +1,4 @@
+import { TagFill } from 'react-bootstrap-icons'
 import { ISearchMatch, SearchScopes, SearchMatchTypes, MetaType, IJournalEntry } from '../app.types'
 import { DateTime } from 'luxon'
 
@@ -44,7 +45,7 @@ export default function SearchResults(props: Props) {
 		props.searchMatch?.entry ?
 			<div key={`searchResultCard${props.searchMatch.entry.entryDate}`} className='col'>
 				<div className='card'>
-					<div className={`card-header p-3 ${props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'bg-success' : 'bg-black-90'}`}>
+					<div className={`card-header p-3 ${props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'bg-success' : 'bg-primary-subtle'}`}>
 						<div className='row g-0 align-items-center'>
 							<div className='col-auto'>
 								<div
@@ -52,7 +53,7 @@ export default function SearchResults(props: Props) {
 									style={{ cursor: 'help', userSelect: 'none' }}
 									title={Math.abs(Math.round(dateEntry.diff(DateTime.now(), 'months').months)) + ' months ago'}>
 									<div className='bg-danger p-2 rounded-top text-white h5 mb-0'>{dateEntry.toFormat('yyyy')}</div>
-									<div className='bg-white px-2 py-1 rounded-bottom text-sm text-muted mb-0'>{dateEntry.toFormat('LLL dd')}</div>
+									<div className='bg-white px-2 py-1 rounded-bottom text-sm text-danger mb-0'>{dateEntry.toFormat('LLL dd')}</div>
 								</div>
 							</div>
 							<div className='col mx-3'>
@@ -78,23 +79,24 @@ export default function SearchResults(props: Props) {
 						</div>
 					</div>
 					{(props.searchOptScope === SearchScopes.all || props.searchOptScope === SearchScopes.signs) && (
-						<div className='card-footer bg-black p-3'>
+						<div className='card-footer bg-info-subtle p-3 border-bottom' style={{ minHeight: 62 }}>
 							<div className='row row-cols-auto g-2'>
 								{props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns &&
 									Array.isArray(props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns)
 									? props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns?.map((sign, idx) => {
 										return (
 											<div className='col' key={`${sign}${idx}`}>
-												<div className='badge bg-info text-lowercase p-2'>{sign}</div>
+												<div className='badge bg-be-tag text-lowercase p-2'><TagFill className='me-1' style={{ fontSize: '1.25rem', marginTop: '-0.5rem', marginBottom: '-0.5rem' }} />{sign}</div>
 											</div>
 										)
 									})
-									: ''}
+									: ''
+								}
 							</div>
 						</div>
 					)}
 					{(props.searchOptScope === SearchScopes.all || props.searchOptScope === SearchScopes.notes) && (
-						<div className='card-body bg-black'>
+						<div className='card-body'>
 							<p className='card-text' style={{ whiteSpace: 'pre-line' }}>
 								{props.searchTerm
 									? getHighlightedText(props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].notes || '', props.searchTerm)
