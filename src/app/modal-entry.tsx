@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react'
-import { IDreamSignTag, IJournalDream, IJournalEntry, InductionTypes } from './app.types'
-import { Calendar3, Clock, PlusCircle, Save, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState, useEffect } from 'react'
+import * as bootstrap from 'bootstrap'
+import { IJournalDream, IJournalEntry, InductionTypes } from './app.types'
+import { Calendar3, ChatLeftText, Clock, PlusCircle, Save, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
 import { DateTime } from 'luxon'
-import ReactTags from 'react-tag-autocomplete'
-import Modal from 'bootstrap/js/dist/modal'
-import * as bootstrap from 'bootstrap' // NOTE: IMPORTANT: This is the sole import of the javascript library (but provides funcionality thruout app)
 import { appdata } from './appdata'
+import Modal from 'bootstrap/js/dist/modal'
+import ModalReactTags from './components/modal-react-tags'
 
 export interface IModalEntryProps {
 	appdataSvc: appdata
@@ -42,14 +43,14 @@ export default function ModalEntry(props: IModalEntryProps) {
 
 	/** Set/Clear Entry */
 	useEffect(() => {
-		setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry]
+		setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY })
 		if (props.appdataSvc) setUniqueTags(props.appdataSvc.getUniqueDreamTags())
 
 		if (modal) {
 			if (props.showModal) modal.show()
 			else modal.hide()
 		}
-	}, [props.showModal])
+	}, [modal, props.appdataSvc, props.currEntry, props.showModal])
 
 	useEffect(() => setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry])
 
@@ -104,14 +105,14 @@ export default function ModalEntry(props: IModalEntryProps) {
 					<div className='col-6 col-lg-3 mb-4'>
 						<div className='input-group match-btn-group-sm'>
 							<div className='input-group-prepend' title='Entry Date'>
-								<span className='input-group-text bg-secondary px-2'>
+								<span className='input-group-text px-2'>
 									<Calendar3 />
 								</span>
 							</div>
 							<input
 								name='entryDate'
 								type='date'
-								placeholder='(entry date)'
+								title='(entry date)'
 								value={currEntry.entryDate}
 								onChange={(ev) => {
 									const chgEntry = { ...currEntry }
@@ -127,14 +128,14 @@ export default function ModalEntry(props: IModalEntryProps) {
 					<div className='col-6 col-lg-3 mb-4'>
 						<div className='input-group match-btn-group-sm'>
 							<div className='input-group-prepend' title='Bed Time'>
-								<span className='input-group-text bg-secondary px-2'>
+								<span className='input-group-text px-2'>
 									<Clock />
 								</span>
 							</div>
 							<input
 								name='bedTime'
 								type='time'
-								placeholder='(bed time)'
+								title='(bed time)'
 								value={currEntry.bedTime}
 								onChange={(ev) => {
 									const chgEntry = { ...currEntry }
@@ -180,7 +181,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 						<textarea
 							id='notesPrep'
 							name='notesPrep'
-							placeholder='Prep Notes'
+							title='Prep Notes'
 							//rows={10}
 							value={currEntry.notesPrep}
 							onChange={(ev) => {
@@ -191,7 +192,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 							className='form-control'
 							style={{ height: '240px' }}
 						/>
-						<label htmlFor='notesPrep'>Prep Notes</label>
+						<label htmlFor='notesPrep'><ChatLeftText className='me-2' />Prep Notes</label>
 					</div>
 				</div>
 				<div>
@@ -199,7 +200,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 						<textarea
 							id='notesWake'
 							name='notesWake'
-							placeholder='Wake Notes'
+							title='Wake Notes'
 							//rows={7}
 							value={currEntry.notesWake}
 							onChange={(ev) => {
@@ -210,7 +211,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 							className='form-control'
 							style={{ height: '120px' }}
 						/>
-						<label htmlFor='notesWake'>Wake Notes</label>
+						<label htmlFor='notesWake'><ChatLeftText className='me-2' />Wake Notes</label>
 					</div>
 				</div>
 			</div>
@@ -252,7 +253,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 								{isLucid ? <TrophyFill size='1rem' /> : <Trophy size='1rem' />}
 							</button>
 							{dream.isLucidDream && (
-								<div className='btn-group' role='lucid type group'>
+								<div className='btn-group'>
 									<button
 										id='btnGroupDropIndType'
 										type='button'
@@ -261,7 +262,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 										aria-haspopup='true'
 										aria-expanded='false'
 										className='btn btn-success text-white dropdown-toggle'>
-										{dream.lucidMethod ? InductionTypes[dream.lucidMethod] : InductionTypes.dild}
+										{dream.lucidMethod ? dream.lucidMethod : InductionTypes.dild}
 									</button>
 									<div className='dropdown-menu' aria-labelledby='btnGroupDropIndType'>
 										{Object.keys(InductionTypes).map((type) => (
@@ -274,7 +275,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 													newState.dreams[dreamIdx].lucidMethod = type as InductionTypes
 													setCurrEntry(newState)
 												}}>
-												{InductionTypes[type]}
+												{InductionTypes[type as keyof typeof InductionTypes]}
 											</a>
 										))}
 									</div>
@@ -297,58 +298,25 @@ export default function ModalEntry(props: IModalEntryProps) {
 						</div>
 					</div>
 				</div>
-				<div className='row'>
-					<div className='col'>
-						<ReactTags
-							allowNew={true}
-							allowBackspace={false}
-							minQueryLength={2}
-							maxSuggestionsLength={6}
-							tags={dream.dreamSigns?.sort().map((sign, idx) => ({ id: idx, name: sign }))}
-							suggestions={uniqueTags.map((sign, idx) => new Object({ id: idx, name: sign }))}
-							suggestionsFilter={(item: { id: number; name: string }, query: string) => item.name.indexOf(query.toLowerCase()) > -1}
-							addOnBlur={true}
-							onAddition={(tag: IDreamSignTag) => {
-								const newState = { ...currEntry }
-								// Dont allow dupes
-								if (newState.dreams[dreamIdx].dreamSigns?.indexOf(tag.name.trim()) === -1) {
-									newState.dreams[dreamIdx].dreamSigns?.push(tag.name.toLowerCase())
-								}
-								setCurrEntry(newState)
-							}}
-							onChange={(ev) => {
-								const newState = { ...currEntry }
-								newState.dreams[dreamIdx].dreamSigns = [...ev.currentTarget.value]
-								setCurrEntry(newState)
-							}}
-							onDelete={(idx: number) => {
-								const newState = { ...currEntry }
-								newState.dreams[dreamIdx].dreamSigns?.splice(idx, 1)
-								setCurrEntry(newState)
-							}}
-							className='my-2'
-						/>
-					</div>
+				<div className='py-3'>
+					<ModalReactTags uniqueTags={uniqueTags} currEntry={currEntry} setCurrEntry={setCurrEntry} dreamIdx={dreamIdx} />
 				</div>
 				<div className='row' data-desc='details'>
 					<div className='col'>
-						<div className='form-floating'>
-							<textarea
-								id='notes'
-								name='notes'
-								placeholder='Dream Summary'
-								//rows={16}
-								value={dream.notes}
-								onChange={(ev) => {
-									const newState = { ...currEntry }
-									newState.dreams[dreamIdx].notes = ev.currentTarget.value
-									setCurrEntry(newState)
-								}}
-								className='form-control'
-								style={{ height: '290px' }}
-							/>
-							<label htmlFor='notes'>Dream Summary</label>
-						</div>
+						<textarea
+							id='notes'
+							name='notes'
+							placeholder='Dream Summary'
+							//rows={16}
+							value={dream.notes}
+							onChange={(ev) => {
+								const newState = { ...currEntry }
+								newState.dreams[dreamIdx].notes = ev.currentTarget.value
+								setCurrEntry(newState)
+							}}
+							className='form-control'
+							style={{ height: '290px' }}
+						/>
 					</div>
 				</div>
 			</div>
@@ -365,9 +333,9 @@ export default function ModalEntry(props: IModalEntryProps) {
 						<h5 className='modal-title'>Journal Entry</h5>
 						<button type='button' className='btn-close' data-bs-dismiss='modal' aria-label='Close' onClick={() => handleClose()}></button>
 					</div>
-					<div className='modal-body p-4'>
+					<div className='modal-body p-3'>
 						{renderTopToolbar()}
-						<ul className='nav nav-tabs mb-3' id='entryTab' role='tablist'>
+						<ul className='nav nav-tabs' id='entryTab' role='tablist'>
 							<li className='nav-item' role='presentation'>
 								<button
 									className='nav-link active'
@@ -398,11 +366,11 @@ export default function ModalEntry(props: IModalEntryProps) {
 							))}
 						</ul>
 						<div className='tab-content'>
-							<div className='tab-pane active' id='modalTabNotes' role='tabpanel' aria-labelledby='modalNavNotes'>
+							<div className='tab-pane active p-3' id='modalTabNotes' role='tabpanel' aria-labelledby='modalNavNotes'>
 								{renderTabNotes()}
 							</div>
 							{currEntry.dreams.map((_dream, idx) => (
-								<div className='tab-pane' id={`modalTab${idx}`} role='tabpanel' aria-labelledby={`modalTab${idx}`} key={`tab${idx + 1}`}>
+								<div className='tab-pane p-3' id={`modalTab${idx}`} role='tabpanel' aria-labelledby={`modalTab${idx}`} key={`tab${idx + 1}`}>
 									{renderTabDream(idx)}
 								</div>
 							))}

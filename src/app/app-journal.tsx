@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { IDriveDataFile, IJournalEntry } from './app.types'
 import { Braces, CalendarMonth, Calendar3, Tags } from 'react-bootstrap-icons'
 import AlertGdriveStatus from './components/alert-gstat'
@@ -84,12 +84,14 @@ export default function TabJournal(props: Props) {
 	// ------------------------------------------------------------------------
 
 	function renderFilters(): JSX.Element {
+		const ICON_SIZE = 24
+
 		return (
-			<div className='row row-cols-2 row-cols-md-4 g-4 align-items-center mb-4' data-desc='commandbar'>
+			<div className='row row-cols-2 row-cols-md-4 g-4 mb-4' data-desc='commandbar'>
 				<div className='col' data-desc='search tags'>
-					<div className='row flex-nowrap align-items-center g-0 bg-black'>
-						<div className='col-auto px-2 d-none d-lg-block'>
-							<Tags size={32} className='text-secondary' />
+					<div className='row flex-nowrap g-0'>
+						<div className='col-auto px-2 py-1 d-none d-lg-block'>
+							<Tags size={ICON_SIZE} className='text-secondary' />
 						</div>
 						<div className='col'>
 							<div className='form-floating'>
@@ -97,7 +99,6 @@ export default function TabJournal(props: Props) {
 									id='floatingDreamtag'
 									type='text'
 									value={filterText}
-									//placeholder='search tags'
 									title='search tags'
 									className='form-control'
 									onChange={(event) => setFilterText(event.target.value)}
@@ -109,9 +110,9 @@ export default function TabJournal(props: Props) {
 					</div>
 				</div>
 				<div className='col d-none d-md-block' data-desc='year'>
-					<div className='row flex-nowrap align-items-center g-0 bg-black'>
-						<div className='col-auto px-2 d-none d-lg-block'>
-							<Calendar3 size={32} className='text-secondary' />
+					<div className='row flex-nowrap g-0'>
+						<div className='col-auto px-2 py-1 d-none d-lg-block'>
+							<Calendar3 size={ICON_SIZE} className='text-secondary' />
 						</div>
 						<div className='col'>
 							<div className='form-floating'>
@@ -132,9 +133,9 @@ export default function TabJournal(props: Props) {
 					</div>
 				</div>
 				<div className='col d-none d-md-block' data-desc='month'>
-					<div className='row flex-nowrap align-items-center g-0 bg-black'>
-						<div className='col-auto px-2 d-none d-lg-block'>
-							<CalendarMonth size={32} className='text-secondary' />
+					<div className='row flex-nowrap g-0'>
+						<div className='col-auto px-2 py-1 d-none d-lg-block'>
+							<CalendarMonth size={ICON_SIZE} className='text-secondary' />
 						</div>
 						<div className='col'>
 							<div className='form-floating'>
@@ -155,9 +156,9 @@ export default function TabJournal(props: Props) {
 					</div>
 				</div>
 				<div className='col' data-desc='types'>
-					<div className='row flex-nowrap align-items-center g-0 bg-black'>
-						<div className='col-auto px-2 d-none d-lg-block'>
-							<Braces size={32} className='text-secondary' />
+					<div className='row flex-nowrap g-0'>
+						<div className='col-auto px-2 py-1 d-none d-lg-block'>
+							<Braces size={ICON_SIZE} className='text-secondary' />
 						</div>
 						<div className='col'>
 							<div className='form-floating'>
@@ -167,8 +168,8 @@ export default function TabJournal(props: Props) {
 									onChange={(ev) => setFilterEntryType(ev.currentTarget.value as EntryType)}
 									className='form-select'>
 									{Object.keys(EntryType).map((val) => (
-										<option value={EntryType[val]} key={`entryType ${val}`}>
-											{EntryType[val]}
+										<option value={EntryType[val as keyof typeof EntryType]} key={`entryType ${val}`}>
+											{EntryType[val as keyof typeof EntryType]}
 										</option>
 									))}
 								</select>
@@ -187,14 +188,14 @@ export default function TabJournal(props: Props) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
-		<div className='container my-auto my-md-5'>
+		<main className='m-2 m-md-4'>
 			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
-			<section className='bg-light p-4'>
+			<section className='be-box-dark'>
 				{renderFilters()}
-				<div className='bg-black p-3'>
+				<section className='be-sec-table'>
 					<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
-				</div>
+				</section>
 			</section>
-		</div>
+		</main>
 	)
 }

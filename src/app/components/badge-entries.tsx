@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { DateTime } from 'luxon'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveDataFile, IJournalDream, IJournalEntry } from '../app.types'
 import { Search, Tag, Tags } from 'react-bootstrap-icons'
@@ -67,6 +67,7 @@ export default function BadgeEntries(props: Props) {
 
 		// Tag Groups
 		const tagGroups: IDreamSignTagGroup[] = []
+		 
 		{
 			props.dataFile.entries
 				.filter((entry) => filterDate === FilterDate.all || DateTime.fromISO(entry.entryDate).startOf('day') >= DateTime.now().minus({ days: filterDays }))
@@ -85,7 +86,7 @@ export default function BadgeEntries(props: Props) {
 						dream.dreamSigns?.forEach((sign) => {
 							const tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
 							if (tag) {
-								const existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
+								const existingEntry = tag.dailyEntries.filter((item) => item.entryDate === entry.entryDate)[0]
 								if (!existingEntry) tag.dailyEntries.push(entry)
 								tag.totalOccurs++
 							} else {
@@ -152,13 +153,12 @@ export default function BadgeEntries(props: Props) {
 					<div className='form-floating'>
 						<select
 							id='floatingFilterDates'
-							placeholder='date range'
 							defaultValue={filterDate}
 							onChange={(ev) => setFilterDate(ev.currentTarget.value as FilterDate)}
 							className='form-select'>
 							{Object.keys(FilterDate).map((val) => (
-								<option value={FilterDate[val]} key={'entryType' + val}>
-									{FilterDate[val]}
+								<option value={FilterDate[val as keyof typeof FilterDate]} key={'entryType' + val}>
+									{FilterDate[val as keyof typeof FilterDate]}
 								</option>
 							))}
 						</select>
@@ -171,13 +171,12 @@ export default function BadgeEntries(props: Props) {
 					<div className='form-floating'>
 						<select
 							id='floatingFilterView'
-							placeholder='view type'
 							defaultValue={filterView}
 							onChange={(ev) => setFilterView(ev.currentTarget.value as FilterView)}
 							className='form-select'>
 							{Object.keys(FilterView).map((val) => (
-								<option value={FilterView[val]} key={'filterView' + val}>
-									{FilterView[val]}
+								<option value={FilterView[val as keyof typeof FilterView]} key={'filterView' + val}>
+									{FilterView[val as keyof typeof FilterView]}
 								</option>
 							))}
 						</select>
@@ -289,7 +288,7 @@ export default function BadgeEntries(props: Props) {
 									key={`byDateKey${idx}`}
 									title={Math.abs(Math.round(dateEntry.diff(DateTime.now(), 'months').months)) + ' months ago'}
 									onClick={() => {
-										props.setCurrEntry(props.dataFile.entries.filter((entry) => entry.entryDate == item.entryDate)[0])
+										props.setCurrEntry(props.dataFile.entries.filter((entry) => entry.entryDate === item.entryDate)[0])
 										props.setShowModal(true)
 									}}
 									className='col cursor-link user-select-none'

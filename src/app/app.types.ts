@@ -14,10 +14,11 @@
 // @see https://support.google.com/cloud/answer/6158849?hl=en#zippy=%2Cstep-create-a-new-client-secret
 
 // APP
-export const APP_BLD = '20230226-0940'
-//export const APP_VER = `1.3.0-WIP ${APP_BLD}`
-export const APP_VER = '1.3.0'
+export const APP_BLD = '20240914-1221'
+//export const APP_VER = `2.0.0-WIP ${APP_BLD}`
+export const APP_VER = '2.0.0'
 export const IS_LOCALHOST = window.location.href.toLowerCase().indexOf('localhost') > -1
+export const VERBOSE_IMPORT = true
 
 // ============================================================================
 
@@ -147,8 +148,8 @@ export interface IJournalEntry {
 }
 
 export interface IDreamSignTag {
-	id: number
-	name: string
+	value: number
+	label: string
 }
 
 /**

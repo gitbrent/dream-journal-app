@@ -4,7 +4,7 @@
  * @see https://developers.google.com/drive/api/guides/fields-parameter
  * @see https://developers.google.com/drive/api/v3/reference/files/get
  */
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
 import { IDriveDataFile, IDriveConfFile, IAuthState, AuthState, IS_LOCALHOST, IJournalEntry } from './app.types'
 import TabHome from '../app/app-home'
@@ -19,6 +19,7 @@ import TabImport from '../app/app-import'
 import ModalEntry from './modal-entry'
 import LogoBase64 from '../img/logo_base64'
 import { appdata } from './appdata'
+import AlertGdriveStatus from './components/alert-gstat'
 
 // TODO: create a modal here, then pass it everywhere (https://stackoverflow.com/a/65522446) also (https://stackoverflow.com/a/62503461)
 // ....: then we can stop passing dataSvc around!
@@ -54,15 +55,14 @@ export default function AppMain() {
 	const [dataFile, setDataFile] = useState<IDriveDataFile>(DEF_DATA_FILE)
 	const [showModal, setShowModal] = useState(false)
 	// WIP: VVVV
-	const [currEntry, setCurrEntry] = useState<IJournalEntry>()
+	const [currEntry, setCurrEntry] = useState<IJournalEntry | undefined>()
 	const [currDreamIdx, setCurrDreamIdx] = useState(0)
 	// FIXME: ^^^ SATURDAY: WHAT? NO, the Modal itself has these vvv just pass the methods!
 
 	useEffect(() => {
-		if (!appdataSvc) {
-			const appInst = new appdata(() => { setDataSvcLoadTime(new Date().toISOString()) })
-			setAppdataSvc(appInst)
-		}
+		const appInst = appdataSvc ?? new appdata(() => { setDataSvcLoadTime(new Date().toISOString()) });
+		setAppdataSvc(appInst)
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
 	useEffect(() => {
@@ -75,15 +75,31 @@ export default function AppMain() {
 		}
 	}, [appdataSvc, dataSvcLoadTime])
 
-	const Modal = () => (<ModalEntry appdataSvc={appdataSvc} currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />)
-	const Home = () => (<TabHome dataFile={dataFile} authState={authState} appdataSvc={appdataSvc} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
+	const Modal = () => {
+		return appdataSvc
+			? <ModalEntry appdataSvc={appdataSvc} currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
+			: <AlertGdriveStatus isBusyLoad={true} />
+	}
+	const Home = () => {
+		return appdataSvc
+			? <TabHome appdataSvc={appdataSvc} dataFile={dataFile} authState={authState} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />
+			: <AlertGdriveStatus isBusyLoad={true} />
+	}
+	const Admin = () => {
+		return appdataSvc
+			? <TabAdmin dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />
+			: <AlertGdriveStatus isBusyLoad={true} />
+	}
+	const Import = () => {
+		return appdataSvc
+			? <TabImport dataFile={dataFile} appdataSvc={appdataSvc} />
+			: <AlertGdriveStatus isBusyLoad={true} />
+	}
 	const Bedtime = () => (<TabBedtime confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />)
 	const Explore = () => (<TabExplore confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
 	const Journal = () => (<TabJournal dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
 	const Search = () => (<TabSearch dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />)
 	const Tags = () => (<TabTags dataFile={dataFile || null} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
-	const Import = () => <TabImport dataFile={dataFile} appdataSvc={appdataSvc} />
-	const Admin = () => <TabAdmin dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />
 	const Nav = (): JSX.Element => {
 		const navLinkBaseClass = !dataFile ? 'nav-link disabled' : 'nav-link'
 

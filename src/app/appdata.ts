@@ -31,7 +31,7 @@ export class appdata {
 	private driveAuthState: IAuthState = this.DEF_AUTH_STATE
 	private driveConfFile: IDriveConfFile = this.DEF_CONF_FILE
 	private driveDataFile: IDriveDataFile = this.DEF_DATA_FILE
-	private googleapi: googlegsi
+	private googleapi: googlegsi | undefined
 	private clientCallback: () => void
 
 	constructor(callbackFunc: (() => void)) {
@@ -41,10 +41,14 @@ export class appdata {
 	}
 
 	private doUpdateAndCallback = () => {
+		if (!this.googleapi) {
+			throw new Error('googleapi is not initialized');
+		}
+
 		// A: Set vars
 		this.driveAuthState = this.googleapi.authState
-		this.driveConfFile = this.googleapi.confFile
-		this.driveDataFile = this.googleapi.dataFile
+		if (this.googleapi.confFile) this.driveConfFile = this.googleapi.confFile
+		if (this.googleapi.dataFile) this.driveDataFile = this.googleapi.dataFile
 		// B: Notify caller
 		this.clientCallback()
 	}
@@ -66,14 +70,15 @@ export class appdata {
 	// -------------------------------------------------------------
 
 	public doAuthSignIn = async () => {
-		return this.googleapi.doAuthSignIn()
+		return this.googleapi?.doAuthSignIn()
 	}
 
 	public doAuthSignOut = async () => {
-		return this.googleapi.doAuthSignOut()
+		return this.googleapi?.doAuthSignOut()
 	}
 
 	public doRefreshDataFile = async () => {
+		if (!this.googleapi) return
 		await this.googleapi.doReadDataFile()
 		this.doUpdateAndCallback()
 		return
@@ -86,6 +91,7 @@ export class appdata {
 	}
 
 	public doSaveDataFile = async () => {
+		if (!this.googleapi) return
 		await this.googleapi.doSaveDataFile()
 		this.doUpdateAndCallback()
 		return
@@ -111,14 +117,20 @@ export class appdata {
 	}
 
 	public doEntryEdit = (entry: IJournalEntry, origEntryDate?: IJournalEntry['entryDate']) => {
-		if (!this.dataFile?.entries) throw new Error('No datafile!')
+		if (!this.dataFile?.entries) {
+			throw new Error('No datafile!');
+		}
 
-		const editEntry = this.dataFile.entries.filter((item) => item.entryDate === (origEntryDate && origEntryDate !== entry.entryDate ? origEntryDate : entry.entryDate))[0]
-		if (!editEntry) throw new Error('Unable to find entry!')
+		const editEntry = this.dataFile.entries.find((item) =>
+			item.entryDate === (origEntryDate && origEntryDate !== entry.entryDate ? origEntryDate : entry.entryDate)
+		);
 
-		Object.keys(entry).forEach((key) => {
-			editEntry[key] = entry[key]
-		})
+		if (!editEntry) {
+			throw new Error('Unable to find entry!');
+		}
+
+		// Update the existing entry with the new entry data
+		Object.assign(editEntry, entry);
 	}
 
 	public doEntryDelete = (entryDate: IJournalEntry['entryDate']) => {

@@ -1,0 +1,152 @@
+// Define custom variables at the top of your SCSS file
+:root {
+	--be-bg-darkest: #0a0b0c;
+	--be-bg-darker: #141618;
+}
+
+// Import all of Bootstrap's CSS
+// NOTE: @import "~bootstrap/scss/bootstrap"; doesnt work, use below!
+//@import "node_modules/bootstrap/scss/bootstrap";
+
+// ============================================================================
+// STEP 1: import these
+// ============================================================================
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/mixins";
+
+// NOTE: This way we dont have to add `mb-0` to every <h5> in .card-title !!!
+$card-title-spacer-y: 0;
+// NOTE: Avoid having to add custom bg class to every <table>
+$table-bg: var(--be-bg-darkest);
+// OVERRIDE: otherwise card-bg is dark-gray, same as body bg
+$card-bg: var(--be-bg-darker);
+
+// WIP
+$nav-tabs-link-active-bg: var(--be-bg-darkest);
+$nav-underline-link-active-color: var(--be-bg-darkest);
+
+// ============================================================================
+// STEP 2: after overrides above
+// ============================================================================
+//@import "bootstrap";
+@import "node_modules/bootstrap/scss/bootstrap";
+
+// ============================================================================
+// STEP 3: add additional styles
+// ============================================================================
+.navbar input.form-control,
+.navbar .btn-group button:not(.active) {
+	background-color: var(--bs-dark-bg-subtle);
+}
+
+.nav-tabs .nav-link {
+	border-bottom: none !important;
+}
+
+// CUSTOM: switch are too damn small
+.form-check-input {
+	height: 1.5rem !important;
+	width: 3rem !important;
+}
+
+.form-check-label {
+	line-height: 32px;
+	margin-left: .5rem;
+}
+
+.tab-pane {
+	background-color: var(--be-bg-darkest);
+}
+
+.be-bg-darker {
+	background-color: var(--be-bg-darker);
+}
+
+.be-box-dark {
+	background-color: var(--be-bg-darker);
+	padding: 1.5rem; // p-4=1.5rem
+}
+
+.be-sec-table {
+	background-color: var(--be-bg-darkest);
+	padding: 1.5rem; // p-4=1.5rem
+}
+
+.be-bg-darkest {
+	background-color: var(--be-bg-darkest);
+}
+
+.text-teal {
+	color: $teal; // or color: var(--bs-teal);
+}
+
+.bg-teal {
+	background-color: $teal;
+}
+
+.text-be-tag {
+	color: $pink; // or color: var(--bs-pink);
+}
+
+.bg-be-tag {
+	background-color: $pink;
+}
+
+/* Custom: add red asterisk (*) on <label> for required fields */
+label.required:after {
+	content: "*";
+	color: red;
+	margin-left: .25rem;
+}
+.form-label label {
+	color: var(--bs-tertiary-color);
+	text-transform: uppercase;
+	font-size: 0.9rem;
+}
+.form-color-info {
+	border-left: 4px var(--bs-info) solid;
+	padding-left: 8px;
+}
+.form-color-info label {
+	color: var(--bs-info);
+	text-transform: uppercase;
+	font-size: 0.9rem;
+}
+.form-color-info .form-border {
+	border-left: 1px var(--bs-info) solid;
+}
+
+.form-color-success {
+	border-left: 4px var(--bs-success) solid;
+	padding-left: 8px;
+}
+.form-color-success label {
+	color: var(--bs-success);
+	text-transform: uppercase;
+	font-size: 0.9rem;
+}
+.form-color-success .form-border {
+	border-left: 1px var(--bs-success) solid;
+}
+
+.form-output {
+	background-color: var(--be-bg-darker);
+	padding: 0.5rem;
+	min-height: 38px;
+}
+
+/*
+	$primary: #1E3A8A; // Deep blue
+	$secondary: #D61C4E; // Bold magenta
+	$success: #10B981; // Vibrant teal green
+	$warning: #FBBF24; // Amber yellow
+	$body-bg: #181818; // Dark background
+	$body-color: #E5E7EB; // Softer text color
+	$tag-color-action: #F87171; // Action tag color
+	$tag-color-location: #38BDF8; // Location tag color
+	$tag-color-emotion: #F472B6; // Emotion tag color
+	$btn-primary-bg: #3B82F6; // Edit button background color
+	$starred-bg: #F59E0B; // Starred indicator color
+	$lucid-bg: #22C55E; // Lucid indicator color
+*/

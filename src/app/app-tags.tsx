@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { DateTime } from 'luxon'
 import { IDreamSignTagGroup, IDreamTagByCat, IDriveDataFile, IJournalDream, IJournalEntry } from './app.types'
 import { BarChart, Bar, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -134,7 +134,7 @@ export default function TabTags(props: IAppTagsProps) {
 
 	/** Handle barchart click: tags */
 	useEffect(() => {
-		if (typeof tagChartClickedIdx !== null && chartDataTags && chartDataTags[tagChartClickedIdx]) {
+		if (!isNaN(tagChartClickedIdx) && chartDataTags && chartDataTags[tagChartClickedIdx]) {
 			const dateEntry = chartDataTags[tagChartClickedIdx].dateTime
 			setTagChartClkEntries(
 				props.dataFile.entries
@@ -167,7 +167,7 @@ export default function TabTags(props: IAppTagsProps) {
 					dream.dreamSigns?.forEach((sign) => {
 						const tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
 						if (tag) {
-							const existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
+							const existingEntry = tag.dailyEntries.filter((item) => item.entryDate === entry.entryDate)[0]
 							if (!existingEntry) tag.dailyEntries.push(entry)
 							tag.totalOccurs++
 						} else {
@@ -313,7 +313,6 @@ export default function TabTags(props: IAppTagsProps) {
 						<div className='form-floating'>
 							<select
 								id='floatingFilterView'
-								placeholder='view type'
 								defaultValue={showAllMons ? '1' : '0'}
 								onChange={(ev) => setShowAllMons(ev.currentTarget.value === '1')}
 								className='form-select'>
@@ -348,7 +347,7 @@ export default function TabTags(props: IAppTagsProps) {
 						</ResponsiveContainer>
 					</div>
 				)}
-				{chartDataTags && chartDataTags.length > 0 && typeof tagChartClickedIdx !== null && (
+				{chartDataTags && chartDataTags.length > 0 && !isNaN(tagChartClickedIdx) && (
 					<section className='bg-black p-4'>
 						<TableEntries entries={tagChartClkEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 					</section>
@@ -396,16 +395,16 @@ export default function TabTags(props: IAppTagsProps) {
 				</li>
 			</ul>
 			<div className='tab-content'>
-				<div className='tab-pane bg-light p-4 active' id='tab3' role='tabpanel' aria-labelledby='3-tab'>
+				<div className='tab-pane bg-black p-4 active' id='tab3' role='tabpanel' aria-labelledby='3-tab'>
 					{renderTopTags()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='tab4' role='tabpanel' aria-labelledby='4-tab'>
+				<div className='tab-pane bg-black p-4' id='tab4' role='tabpanel' aria-labelledby='4-tab'>
 					{renderTagsByYear()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
+				<div className='tab-pane bg-black p-4' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
 					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 				</div>
-				<div className='tab-pane bg-light p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
+				<div className='tab-pane bg-black p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
 					{renderTabTags()}
 				</div>
 			</div>

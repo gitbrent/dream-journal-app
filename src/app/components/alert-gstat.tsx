@@ -1,4 +1,3 @@
-import React from 'react'
 import { CloudSlash } from 'react-bootstrap-icons'
 
 interface Props {

@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDriveDataFile, IJournalEntry } from './app.types'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
 import DreamTagCard from './components/dreamtag-card'
@@ -72,7 +72,7 @@ export default function TabAdmin(props: Props) {
 					dream.dreamSigns?.forEach((sign) => {
 						const tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
 						if (tag) {
-							const existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
+							const existingEntry = tag.dailyEntries.filter((item) => item.entryDate === entry.entryDate)[0]
 							if (!existingEntry) tag.dailyEntries.push(entry)
 							tag.totalOccurs++
 						} else {
@@ -87,13 +87,13 @@ export default function TabAdmin(props: Props) {
 					entry.dreams[0] && entry.dreams[0].dreamSigns &&
 					entry.dreams[0].dreamSigns?.length > 0 &&
 					entry.dreams[1] &&
-					entry.dreams[0].dreamSigns?.toString() == entry.dreams[1].dreamSigns?.toString()
+					entry.dreams[0].dreamSigns?.toString() === entry.dreams[1].dreamSigns?.toString()
 				) {
 					dupeSigns.push(entry)
 				}
 
 				// Bad `bedTime` items
-				if (!entry.bedTime || entry.bedTime.length != 5) {
+				if (!entry.bedTime || entry.bedTime.length !== 5) {
 					bedTimes.push(entry)
 				}
 			})
@@ -175,14 +175,13 @@ export default function TabAdmin(props: Props) {
 						<div className='form-floating'>
 							<select
 								id='floatingDisplay'
-								placeholder='card size'
 								defaultValue={filterViewType}
 								disabled={!props.dataFile ? true : false}
 								onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
 								className='form-select'>
 								{Object.keys(CardDreamSignGrpViewType).map((val) => (
-									<option value={CardDreamSignGrpViewType[val]} key={'viewType' + val}>
-										{CardDreamSignGrpViewType[val]}
+									<option value={CardDreamSignGrpViewType[val as keyof typeof CardDreamSignGrpViewType]} key={'viewType' + val}>
+										{CardDreamSignGrpViewType[val as keyof typeof CardDreamSignGrpViewType]}
 									</option>
 								))}
 							</select>
@@ -195,13 +194,12 @@ export default function TabAdmin(props: Props) {
 						<div className='form-floating'>
 							<select
 								id='floatingSortOrder'
-								placeholder='sort order'
 								defaultValue={filterSortOrder}
 								onChange={(ev) => setFilterSortOrder(ev.currentTarget.value as FilterSortOrder)}
 								className='form-select'>
 								{Object.keys(FilterSortOrder).map((val) => (
-									<option value={FilterSortOrder[val]} key={'sortOrder' + val}>
-										{FilterSortOrder[val]}
+									<option value={FilterSortOrder[val as keyof typeof FilterSortOrder]} key={'sortOrder' + val}>
+										{FilterSortOrder[val as keyof typeof FilterSortOrder]}
 									</option>
 								))}
 							</select>
@@ -354,13 +352,13 @@ export default function TabAdmin(props: Props) {
 				</li>
 			</ul>
 			<div className='tab-content'>
-				<div className='tab-pane bg-light p-4 active' id='search' role='tabpanel' aria-labelledby='search-tab'>
+				<div className='tab-pane bg-black p-4 active' id='search' role='tabpanel' aria-labelledby='search-tab'>
 					{renderTagGroups()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='dupe' role='tabpanel' aria-labelledby='dupe-tab'>
+				<div className='tab-pane bg-black p-4' id='dupe' role='tabpanel' aria-labelledby='dupe-tab'>
 					{renderDupeTags()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='bedtime' role='tabpanel' aria-labelledby='bedtime-tab'>
+				<div className='tab-pane bg-black p-4' id='bedtime' role='tabpanel' aria-labelledby='bedtime-tab'>
 					{renderBadDates()}
 				</div>
 			</div>

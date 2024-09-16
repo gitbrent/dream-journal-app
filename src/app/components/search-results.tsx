@@ -1,11 +1,11 @@
-import React from 'react'
+import { TagFill } from 'react-bootstrap-icons'
+import { ISearchMatch, SearchScopes, SearchMatchTypes, MetaType, IJournalEntry } from '../app.types'
 import { DateTime } from 'luxon'
-import { ISearchMatch, SearchScopes, SearchMatchTypes, MetaType } from '../app.types'
 
 interface Props {
-	setCurrEntry: (entry) => void
-	setDreamIdx?: (index) => void
-	setShowModal: (modal) => void
+	setCurrEntry: (entry: IJournalEntry) => void
+	setDreamIdx: (index: number) => void
+	setShowModal: (show: boolean) => void
 	searchMatch: ISearchMatch
 	searchTerm?: string
 	searchOptMatchType?: SearchMatchTypes
@@ -21,7 +21,7 @@ export default function SearchResults(props: Props) {
 	function getHighlightedText(text: string, highlight: string) {
 		// Split on highlight term and include term into parts, ignore case
 		//let parts = text.split(new RegExp(`(${highlight})`, 'gi'));
-		let parts = []
+		let parts: string[] = []
 		try {
 			if (props.searchOptMatchType === SearchMatchTypes.contains) parts = text.split(new RegExp('(' + highlight + ')', 'gi'))
 			else if (props.searchOptMatchType === SearchMatchTypes.whole) parts = text.split(new RegExp('\\b(' + highlight + ')\\b', 'gi'))
@@ -45,7 +45,7 @@ export default function SearchResults(props: Props) {
 		props.searchMatch?.entry ?
 			<div key={`searchResultCard${props.searchMatch.entry.entryDate}`} className='col'>
 				<div className='card'>
-					<div className={`card-header p-3 ${props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'bg-success' : 'bg-black-90'}`}>
+					<div className={`card-header p-3 ${props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'bg-success' : 'bg-primary-subtle'}`}>
 						<div className='row g-0 align-items-center'>
 							<div className='col-auto'>
 								<div
@@ -53,7 +53,7 @@ export default function SearchResults(props: Props) {
 									style={{ cursor: 'help', userSelect: 'none' }}
 									title={Math.abs(Math.round(dateEntry.diff(DateTime.now(), 'months').months)) + ' months ago'}>
 									<div className='bg-danger p-2 rounded-top text-white h5 mb-0'>{dateEntry.toFormat('yyyy')}</div>
-									<div className='bg-white px-2 py-1 rounded-bottom text-sm text-muted mb-0'>{dateEntry.toFormat('LLL dd')}</div>
+									<div className='bg-white px-2 py-1 rounded-bottom text-sm text-danger mb-0'>{dateEntry.toFormat('LLL dd')}</div>
 								</div>
 							</div>
 							<div className='col mx-3'>
@@ -64,7 +64,7 @@ export default function SearchResults(props: Props) {
 										className={props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].isLucidDream ? 'card-link text-white' : 'card-link'}
 										onClick={() => {
 											props.setCurrEntry(props.searchMatch.entry)
-											props.setDreamIdx(props.searchMatch.dreamIdx)
+											props.setDreamIdx(props.searchMatch.dreamIdx || -1)
 											props.setShowModal(true)
 										}}>
 										{props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].title}
@@ -72,33 +72,34 @@ export default function SearchResults(props: Props) {
 								</h5>
 							</div>
 							<div className='col-auto'>
-								{props.searchMatch.entry.dreams.filter((dream) => dream.dreamSigns.some((tag) => tag === MetaType.star)).length > 0 && (
+								{props.searchMatch.entry.dreams.filter((dream) => dream.dreamSigns?.some((tag) => tag === MetaType.star)).length > 0 && (
 									<div className='iconSvg size24 star-on' />
 								)}
 							</div>
 						</div>
 					</div>
 					{(props.searchOptScope === SearchScopes.all || props.searchOptScope === SearchScopes.signs) && (
-						<div className='card-footer bg-black p-3'>
+						<div className='card-footer bg-info-subtle p-3 border-bottom' style={{ minHeight: 62 }}>
 							<div className='row row-cols-auto g-2'>
 								{props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns &&
 									Array.isArray(props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns)
-									? props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns.map((sign, idx) => {
+									? props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].dreamSigns?.map((sign, idx) => {
 										return (
 											<div className='col' key={`${sign}${idx}`}>
-												<div className='badge bg-info text-lowercase p-2'>{sign}</div>
+												<div className='badge bg-be-tag text-lowercase p-2'><TagFill className='me-1' style={{ fontSize: '1.25rem', marginTop: '-0.5rem', marginBottom: '-0.5rem' }} />{sign}</div>
 											</div>
 										)
 									})
-									: ''}
+									: ''
+								}
 							</div>
 						</div>
 					)}
 					{(props.searchOptScope === SearchScopes.all || props.searchOptScope === SearchScopes.notes) && (
-						<div className='card-body bg-black'>
+						<div className='card-body'>
 							<p className='card-text' style={{ whiteSpace: 'pre-line' }}>
 								{props.searchTerm
-									? getHighlightedText(props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].notes, props.searchTerm)
+									? getHighlightedText(props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].notes || '', props.searchTerm)
 									: props.searchMatch.entry.dreams[props.searchMatch.dreamIdx].notes}
 							</p>
 						</div>

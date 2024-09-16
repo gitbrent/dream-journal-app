@@ -37,18 +37,18 @@ declare global {
 }
 
 export class googlegsi {
-	private readonly GAPI_CLIENT_ID = process.env.REACT_APP_GOOGLE_DRIVE_CLIENT_ID || ''
-	private readonly GAPI_API_KEY = process.env.REACT_APP_GOOGLE_DRIVE_API_KEY || ''
+	private readonly GAPI_CLIENT_ID = import.meta.env.VITE_GDRIVE_CLIENT_ID || ''
+	private readonly GAPI_API_KEY = import.meta.env.VITE_GDRIVE_API_KEY || ''
 	private readonly GAPI_DISC_DOCS = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
 	private readonly GAPI_SCOPES = 'https://www.googleapis.com/auth/drive.file'
 	private clientCallback: () => void
 	private signedInUser = ''
 	private isAuthorized = false
-	private tokenResponse: TokenResponse
-	private gapiConfFile: IGapiFile
-	private gapiDataFile: IGapiFile
-	private driveConfFile: IDriveConfFile
-	private driveDataFile: IDriveDataFile
+	private tokenResponse: TokenResponse | undefined | null = null
+	private gapiConfFile: IGapiFile | undefined | null = null
+	private gapiDataFile: IGapiFile | undefined | null = null
+	private driveConfFile: IDriveConfFile | undefined | null = null
+	private driveDataFile: IDriveDataFile | undefined | null = null
 
 	constructor(callbackFunc: (() => void)) {
 		this.clientCallback = callbackFunc
@@ -85,9 +85,11 @@ export class googlegsi {
 	}
 
 	private doAuthorizeUser = async () => {
+		if (IS_LOCALHOST) console.log(`[doAuthorizeUser] this.tokenResponse=${this.tokenResponse}`)
 		if (this.tokenResponse?.access_token) {
 			// A: set auth
 			this.isAuthorized = true
+			if (IS_LOCALHOST) console.log(`[doAuthorizeUser] this.isAuthorized=${this.isAuthorized}`)
 			// B: *IMPORTANT* do this as `await this.initGapiClient()` below w/b skipped as gapi is loaded, however, it'll throw "no anon access" errors if token isnt set like this!
 			gapi.client.setToken(this.tokenResponse)
 		}
@@ -220,7 +222,7 @@ export class googlegsi {
 	 * @see https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#token_and_consent_response
 	 */
 	private updateUserAuthStatus = async () => {
-		this.isAuthorized = window.google.accounts.oauth2.hasGrantedAllScopes(this.tokenResponse, this.GAPI_SCOPES)
+		this.isAuthorized = this.tokenResponse ? window.google.accounts.oauth2.hasGrantedAllScopes(this.tokenResponse, this.GAPI_SCOPES) : false
 
 		if (IS_LOCALHOST) {
 			if (!this.isAuthorized) console.warn('Unauthorized?!')
@@ -251,20 +253,21 @@ export class googlegsi {
 
 		if (IS_LOCALHOST) {
 			console.log('- Checkpoint: both data files loaded')
-			console.log(`- data.entries.length = ${this.driveDataFile.entries.length}`)
+			console.log(`- data.entries.length = ${this.driveDataFile?.entries.length}`)
 		}
 
 		return
 	}
 
 	private downloadConfFile = async () => {
-		const response = await fetch(`https://www.googleapis.com/drive/v3/files/${this.gapiConfFile.id}?alt=media`, {
+		const response = await fetch(`https://www.googleapis.com/drive/v3/files/${this.gapiConfFile?.id}?alt=media`, {
 			method: 'GET',
-			headers: { Authorization: `Bearer ${this.tokenResponse.access_token}` },
+			headers: { Authorization: `Bearer ${this.tokenResponse?.access_token}` },
 		})
 		const buffer = await response.arrayBuffer()
 		const decoded: string = new TextDecoder('utf-8').decode(buffer)
-		let json: object = {}
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let json: Record<string, any> = {}
 
 		// A:
 		if (decoded?.length > 0) {
@@ -272,21 +275,25 @@ export class googlegsi {
 				// NOTE: Initial dream-journal file is empty!
 				json = JSON.parse(decoded)
 			} catch (ex) {
-				alert(ex)
-				console.error ? console.error(ex) : console.log(ex)
+				if (ex instanceof Error) {
+					alert(ex)
+					console.error(ex)
+				}
 			}
 		}
 
 		// B:
-		this.driveConfFile = {
-			id: this.gapiConfFile.id,
-			dreamIdeas: json['dreamIdeas'] || [],
-			lucidGoals: json['lucidGoals'] || [],
-			mildAffirs: json['mildAffirs'] || [],
-			tagTypeAW: json['tagTypeAW'] || [],
-			tagTypeCO: json['tagTypeCO'] || [],
-			tagTypeFO: json['tagTypeFO'] || [],
-			tagTypeAC: json['tagTypeAC'] || [],
+		if (this.gapiConfFile) {
+			this.driveConfFile = {
+				id: this.gapiConfFile.id,
+				dreamIdeas: json['dreamIdeas'] || [],
+				lucidGoals: json['lucidGoals'] || [],
+				mildAffirs: json['mildAffirs'] || [],
+				tagTypeAW: json['tagTypeAW'] || [],
+				tagTypeCO: json['tagTypeCO'] || [],
+				tagTypeFO: json['tagTypeFO'] || [],
+				tagTypeAC: json['tagTypeAC'] || [],
+			}
 		}
 
 		// C: fulfill promise
@@ -299,13 +306,16 @@ export class googlegsi {
 	 * @returns
 	 */
 	private downloadDataFile = async () => {
+		if (!this.gapiDataFile) return
+
 		const response = await fetch(`https://www.googleapis.com/drive/v3/files/${this.gapiDataFile.id}?alt=media`, {
 			method: 'GET',
-			headers: { Authorization: `Bearer ${this.tokenResponse.access_token}` },
+			headers: { Authorization: `Bearer ${this.tokenResponse?.access_token}` },
 		})
 		const buffer = await response.arrayBuffer()
 		const decoded: string = new TextDecoder('utf-8').decode(buffer)
-		let json: object = {}
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let json: Record<string, any> = {}
 		let entries: IJournalEntry[] = []
 
 		// A:
@@ -316,7 +326,7 @@ export class googlegsi {
 				entries = json['entries']
 			} catch (ex) {
 				alert(ex)
-				console.error ? console.error(ex) : console.log(ex)
+				console.error(ex)
 			}
 		}
 
@@ -327,7 +337,7 @@ export class googlegsi {
 			entries: entries || [],
 			modifiedTime: this.gapiDataFile.modifiedDate,
 			name: this.gapiDataFile.title,
-			size: this.gapiDataFile.fileSize,
+			size: this.gapiDataFile.fileSize?.toString() || '-1',
 		}
 
 		// C:
@@ -350,6 +360,8 @@ export class googlegsi {
 				})
 			})
 		*/
+
+		if (!this.dataFile) return
 
 		// A: fix [null] dates that can be created by import data/formatting, etc.
 		const entriesFix = this.dataFile.entries
@@ -374,16 +386,30 @@ export class googlegsi {
 				method: 'PATCH',
 				body: reqBody,
 				headers: {
-					Authorization: `Bearer ${this.tokenResponse.access_token}`,
+					Authorization: `Bearer ${this.tokenResponse?.access_token}`,
 					'Content-Type': 'multipart/related; boundary=foo_bar_baz',
 					'Content-Length': `${reqBody.length + reqEnd.length}`,
 				},
 			})
 			if (IS_LOCALHOST) console.log('[uploadDataFile] response', response)
+			if (response?.status === 401) {
+				// TODO: 20240901: set this.isAuthorized=false! or something! when response.status=401!
+				if (IS_LOCALHOST) console.log('[uploadDataFile] response === ', response.status)
+				await this.tokenFlow()
+				await this.updateUserAuthStatus()
+				if (IS_LOCALHOST) console.log('[uploadDataFile] this.isAuthorized', this.isAuthorized)
+			}
 			clearTimeout(id)
 		} catch (error) {
-			if (error.name === 'AbortError') console.log('Request timed out')
-			else console.error('Error fetching data:', error)
+			if (error instanceof Error) {
+				if (error.name === 'AbortError') {
+					console.log('Request timed out');
+				} else {
+					console.error('Error fetching data:', error.message);
+				}
+			} else {
+				console.error('Unexpected error:', error);
+			}
 		}
 
 		// E: download the file from Drive to **ensure** we have saved without errors and that newest copy is valid (this may be overkill, but i've been bit before!)
@@ -406,12 +432,12 @@ export class googlegsi {
 		}
 	}
 
-	get confFile(): IDriveConfFile {
-		return this.driveConfFile
+	get confFile(): IDriveConfFile | null {
+		return this.driveConfFile ? this.driveConfFile : null
 	}
 
-	get dataFile(): IDriveDataFile {
-		return this.driveDataFile
+	get dataFile(): IDriveDataFile | null {
+		return this.driveDataFile ? this.driveDataFile : null
 	}
 	//#endregion
 

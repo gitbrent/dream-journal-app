@@ -27,8 +27,8 @@
  *  SOFTWARE.
  */
 
-import React, { useState } from 'react'
-import { APP_VER, AuthState, IAuthState, IDriveDataFile, IJournalEntry } from './app.types'
+import { useState } from 'react'
+import { APP_VER, AuthState, IAuthState, IDriveDataFile, IJournalEntry, IS_LOCALHOST } from './app.types'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
 import { appdata } from './appdata'
@@ -38,7 +38,7 @@ interface Props {
 	authState: IAuthState
 	dataFile: IDriveDataFile
 	setShowModal: (show: boolean) => void
-	setCurrEntry: (entry: IJournalEntry) => void
+	setCurrEntry: (entry: IJournalEntry | undefined) => void
 }
 
 export default function TabHome(props: Props) {
@@ -57,7 +57,7 @@ export default function TabHome(props: Props) {
 	}
 
 	function doShowNewEntryModal() {
-		props.setCurrEntry(null)
+		props.setCurrEntry(undefined)
 		props.setShowModal(true)
 	}
 
@@ -75,27 +75,28 @@ export default function TabHome(props: Props) {
 	function renderCardAuthUser(): JSX.Element {
 		let cardAuthUser: JSX.Element = <div />
 
+		if (IS_LOCALHOST && props.authState) console.log(props.authState)
 		if (props.authState && props.authState.status === AuthState.Authenticated) {
 			cardAuthUser = (
 				<div>
 					<div className='row mb-3'>
 						<div className='col'>
-							<label>User Name</label>
-							{props.authState.userName}
+							<h5 className='card-title'>User Name</h5>
+							<p className='card-text'>{props.authState.userName || '(?)'}</p>
 						</div>
 						<div className='col-auto text-end'>
-							<label>App Version</label>
-							{APP_VER}
+							<h5>App Version</h5>
+							<h6 className='mb-0'>{APP_VER}</h6>
 						</div>
 					</div>
 					<div className='row mb-0'>
 						<div className='col'>
-							<button className='btn btn-outline-primary w-100 py-3' onClick={() => doReadDataFile()}>
+							<button className='btn btn-outline-warning btn-lg w-100' onClick={() => doReadDataFile()}>
 								Reload Data
 							</button>
 						</div>
 						<div className='col'>
-							<button className='btn btn-outline-secondary w-100 py-3' onClick={() => props.appdataSvc.doAuthSignOut()}>
+							<button className='btn btn-outline-danger btn-lg w-100' onClick={() => props.appdataSvc.doAuthSignOut()}>
 								Sign Out
 							</button>
 						</div>
@@ -137,22 +138,22 @@ export default function TabHome(props: Props) {
 			<div>
 				<div className='row mb-3'>
 					<div className='col'>
-						<label>File Name</label>
-						{props.dataFile?.name || '-'}
+						<h5 className='card-title'>File Name</h5>
+						<p className='card-text'>{props.dataFile?.name || '(?)'}</p>
 					</div>
 					<div className='col-auto text-end'>
-						<label>Entries</label>
-						{props.dataFile?.entries ? props.dataFile.entries.length : '-'}
+						<h5 className='card-title'>Entries</h5>
+						<p className='card-text'>{props.dataFile?.entries ? props.dataFile.entries.length : '-'}</p>
 					</div>
 				</div>
 				<div className='row'>
 					<div className='col'>
-						<label>Last Saved</label>
-						{props.dataFile?.modifiedTime ? new Date(props.dataFile.modifiedTime).toLocaleString() : '-'}
+						<h5 className='card-title'>Last Saved</h5>
+						<p className='card-text'>{props.dataFile?.modifiedTime ? new Date(props.dataFile.modifiedTime).toLocaleString() : '-'}</p>
 					</div>
 					<div className='col-auto text-end'>
-						<label>File Size</label>
-						{props.dataFile?.size ? getReadableFileSizeString(Number(props.dataFile.size)) : '-'}
+						<h5 className='card-title'>File Size</h5>
+						<p className='card-text'>{props.dataFile?.size ? getReadableFileSizeString(Number(props.dataFile.size)) : '-'}</p>
 					</div>
 				</div>
 			</div>
@@ -162,8 +163,8 @@ export default function TabHome(props: Props) {
 	}
 
 	return (
-		<section className='container-xl my-auto my-md-5'>
-			<div className='jumbotron p-4 p-md-5'>
+		<section className='m-2 m-md-5' style={{ marginLeft: '10rem!important', marginRight: '10rem!important' }}>
+			<div className='be-bg-darkest p-4 p-md-5'>
 				<div className='row align-items-center g-0 mb-3'>
 					<div className='col'>
 						<h1 className='display-4 text-primary mb-0 d-none d-md-none d-xl-block'>
@@ -196,33 +197,33 @@ export default function TabHome(props: Props) {
 					</div>}
 				</div>
 
-				<div className='mb-5'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</div>
+				<h6 className='my-5'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</h6>
 
 				{props.authState?.status === AuthState.Authenticated ?
 					<div className='row g-5 row-cols-1 row-cols-md-2'>
 						<div className='col'>
 							<div className='card h-100'>
 								<div className='card-header bg-success'>
-									<h5 className='card-title text-white mb-0'>{props.authState?.status}</h5>
+									<h4 className='card-title text-white'>{props.authState?.status}</h4>
 								</div>
-								<div className='card-body bg-black'>{renderCardAuthUser()}</div>
+								<div className='card-body'>{renderCardAuthUser()}</div>
 							</div>
 						</div>
 						<div className='col'>
 							<div className='card h-100'>
 								<div className='card-header bg-info'>
-									<h5 className='card-title text-white mb-0'>Dream Journal</h5>
+									<h5 className='card-title text-white'>Dream Journal</h5>
 								</div>
-								<div className='card-body bg-black'>{renderCardDataFile()}</div>
+								<div className='card-body'>{renderCardDataFile()}</div>
 							</div>
 						</div>
 					</div>
 					:
 					<div className='card'>
 						<div className='card-header bg-primary'>
-							<h5 className='card-title text-white mb-0'>Google Drive Cloud Integration</h5>
+							<h5 className='card-title text-white'>Google Drive Cloud Integration</h5>
 						</div>
-						<div className='card-body bg-black p-4'>
+						<div className='card-body p-4'>
 							<p className='card-text'>
 								This application uses your Google Drive to store dream journals so they are safe, secure, and accessible on any of your devices.
 							</p>
@@ -233,7 +234,7 @@ export default function TabHome(props: Props) {
 								</strong>{' '}
 								on your Google Drive. (This app cannot access your other Google Drive files)
 							</p>
-							<button className='btn btn-outline-primary mt-3 w-100 p-3' onClick={() => doAuthSignIn()}>
+							<button className='btn btn-outline-primary btn-lg mt-3 w-100' onClick={() => doAuthSignIn()}>
 								Sign In
 							</button>
 						</div>

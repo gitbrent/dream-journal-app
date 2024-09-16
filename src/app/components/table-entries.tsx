@@ -27,9 +27,9 @@
  *  SOFTWARE.
  */
 
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { IJournalEntry, MetaType } from '../app.types'
-import { CheckCircleFill, Diagram3Fill, SortDownAlt, SortUpAlt, StarFill } from 'react-bootstrap-icons'
+import { CheckCircleFill, Diagram3Fill, SortDownAlt, SortUpAlt, StarFill, TagFill } from 'react-bootstrap-icons'
 import ReactPaginate from 'react-paginate'
 
 interface Props {
@@ -41,7 +41,7 @@ interface Props {
 
 export default function TableEntries(props: Props) {
 	const [pagingCurrIdx, setPagingCurrIdx] = useState(0)
-	const [pagingPageSize, setPagingPageSize] = useState(10)
+	const [pagingPageSize, _setPagingPageSize] = useState(10)
 	const [sortAsc, setSortAsc] = useState(false)
 	//const [dateRangeFrom, setDateRangeFrom] = useState(null)
 	//const [dateRangeTo, setDateRangeTo] = useState(null)
@@ -98,13 +98,17 @@ export default function TableEntries(props: Props) {
 							return (
 								<tr key={`journalrow${idx}`}>
 									<td className='align-middle text-nowrap'>{entry.entryDate}</td>
-									<td className='align-middle text-center d-none d-lg-table-cell'>{entry.bedTime}</td>
-									<td className='align-middle text-center'>{entry.dreams.length}</td>
+									<td className='align-middle text-center d-none d-lg-table-cell text-secondary'>{entry.bedTime}</td>
+									<td className='align-middle text-center text-primary'>
+										<h4 className='mb-0'><span className="badge text-bg-success fw-light px-4">{entry.dreams.length}</span></h4>
+									</td>
 									<td className='align-middle text-left d-none d-md-table-cell'>
 										<div className='row row-cols-auto g-2'>
 											{dreamSignsUnq.sort().map((sign, idy) => (
 												<div key={`${idx}-${idy}`} className='col'>
-													<div className='badge bg-info p-2'>{sign}</div>
+													<div className='badge bg-be-tag p-2'>
+														<TagFill className='me-1' style={{ fontSize: '1.25rem', marginTop: '-0.5rem', marginBottom: '-0.5rem' }} />{sign}
+													</div>
 												</div>
 											))}
 										</div>

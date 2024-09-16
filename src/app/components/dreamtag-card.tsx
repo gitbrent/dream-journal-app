@@ -1,13 +1,13 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { DateTime } from 'luxon'
-import { CardDreamSignGrpViewType, IDreamSignTagGroup } from '../app.types'
+import { CardDreamSignGrpViewType, IDreamSignTagGroup, IJournalEntry } from '../app.types'
 
 export interface Props {
-	setCurrEntry: (entry) => void
-	setShowModal: (modal) => void
+	setCurrEntry: (entry: IJournalEntry) => void
+	setShowModal: (show: boolean) => void
 	tagGrp: IDreamSignTagGroup
 	viewType: CardDreamSignGrpViewType
-	doMassUpdateTag: (oldTag:string, newTag:string) => void
+	doMassUpdateTag: (oldTag: string, newTag: string) => void
 }
 
 export default function DreamTagCard(props: Props) {

@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { IDreamSignTagGroup, IDriveDataFile, IJournalEntry, MetaType } from '../app.types'
 import { DateTime } from 'luxon'
 
@@ -84,7 +84,7 @@ export default function HeaderMetrics(props: Props) {
 					dream.dreamSigns?.forEach((sign) => {
 						const tag = tagGroups.filter((tag) => tag.dreamSign === sign)[0]
 						if (tag) {
-							const existingEntry = tag.dailyEntries.filter((item) => item.entryDate == entry.entryDate)[0]
+							const existingEntry = tag.dailyEntries.filter((item) => item.entryDate === entry.entryDate)[0]
 							if (!existingEntry) tag.dailyEntries.push(entry)
 							tag.totalOccurs++
 						} else {
@@ -101,11 +101,11 @@ export default function HeaderMetrics(props: Props) {
 
 	function renderFull(): JSX.Element {
 		return (
-			<header className='card mb-2 mb-md-5'>
+			<header className='card mb-2 mb-md-4'>
 				<div className='card-header bg-primary'>
-					<h5 className='card-title text-white mb-0'>Dream Journal Analysis</h5>
+					<h5 className='card-title text-white'>Dream Journal Analysis</h5>
 				</div>
-				<div className='card-body bg-light'>{renderBody()}</div>
+				<div className='card-body'>{renderBody()}</div>
 			</header>
 		)
 	}
@@ -133,9 +133,9 @@ export default function HeaderMetrics(props: Props) {
 					)}
 				</div>
 				<div className='col text-center'>
-					<h6 className='text-pink text-uppercase mb-0'>Tags</h6>
-					<h1 className='text-pink display-5 mb-0'>{totalDreamSigns || '-'}</h1>
-					{props.showStats && <div className='badge rounded-pill bg-pink w-100'>-</div>}
+					<h6 className='text-be-tag text-uppercase mb-0'>Tags</h6>
+					<h1 className='text-be-tag display-5 mb-0'>{totalDreamSigns || '-'}</h1>
+					{props.showStats && <div className='badge rounded-pill bg-be-tag w-100'>-</div>}
 				</div>
 				<div className='col text-center d-none d-md-block'>
 					<h6 className='text-info text-uppercase mb-0'>Tagged</h6>

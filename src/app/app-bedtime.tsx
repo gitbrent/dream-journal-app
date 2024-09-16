@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { IConfMetaCats, IDriveConfFile, IDriveDataFile, IJournalEntry, ISearchMatch, SearchScopes } from './app.types'
 import {
 	ArrowDown,
@@ -127,7 +127,7 @@ export default function TabBedtime(props: Props) {
 			<section>
 				<div className='card h-100'>
 					<div className='card-header bg-primary h5 text-white'>Affirmations</div>
-					<div className='card-body bg-black p-4'>
+					<div className='card-body p-4'>
 						<div className='row row-cols-2 g-4'>
 							{props.confFile?.mildAffirs.map((item, idx) => (
 								<div className='col' key={`goalTitle${idx}`}>
@@ -153,7 +153,7 @@ export default function TabBedtime(props: Props) {
 					<div className='col'>
 						<div className='card h-100'>
 							<div className='card-header bg-primary h5 text-white'>Random Dreams</div>
-							<div className='card-body bg-black p-4'>
+							<div className='card-body p-4'>
 								<div className='row row-cols-1 g-4'>
 									{randDreams.map((match, idx) => (
 										<SearchResults
@@ -172,7 +172,7 @@ export default function TabBedtime(props: Props) {
 					<div className='col'>
 						<div className='card h-100'>
 							<div className='card-header bg-success h5 text-white'>Random Lucid Dreams</div>
-							<div className='card-body bg-black p-4'>
+							<div className='card-body p-4'>
 								<div className='row row-cols-1 g-4'>
 									{randLucids?.map((match, idx) => (
 										<SearchResults
@@ -209,7 +209,7 @@ export default function TabBedtime(props: Props) {
 					<div className='col'>
 						<div className='card h-100'>
 							<div className='card-header bg-success h5 text-white'>Visualize Success</div>
-							<div className='card-body bg-black p-4'>
+							<div className='card-body'>
 								<div className='row row-cols-1 row-cols-md-3 g-4'>
 									{props.confFile?.dreamIdeas.map((item, idx) => (
 										<section key={`ideaTitle${idx}`} className='col'>
@@ -284,6 +284,7 @@ export default function TabBedtime(props: Props) {
 									title='delete goal'
 									aria-label='delete goal'
 									onClick={() => {
+
 										if (confirm(`Delete Goal ${idx + 1}?`)) {
 											const chgItem = [...lucidGoals][0]
 											chgItem?.bullets.splice(idx, 1)
@@ -351,7 +352,7 @@ export default function TabBedtime(props: Props) {
 									</div>
 								</div>
 							</div>
-							<div className='card-body bg-black'>
+							<div className='card-body'>
 								<p className='card-text'>You have a peculiar thought, a strong emotion, feel an unusual sensation, or have altered perceptions.</p>
 								<dl className='row'>
 									<dt className='col-sm-3'>Thoughts</dt>
@@ -430,7 +431,7 @@ export default function TabBedtime(props: Props) {
 									</div>
 								</div>
 							</div>
-							<div className='card-body bg-black'>
+							<div className='card-body'>
 								<p className='card-text'>
 									The place or situation in the dream is strange. You may be somewhere that you are unlikely to be in wak ing life, or involved in a strange
 									social situation.
@@ -525,7 +526,7 @@ export default function TabBedtime(props: Props) {
 									</div>
 								</div>
 							</div>
-							<div className='card-body bg-black'>
+							<div className='card-body'>
 								<p className='card-text'>
 									Your shape, the shape of a dream character, or that of a dream object is oddly formed, deformed, or transforms. Unusual clothing and hair
 									count as anomalies of form.
@@ -587,7 +588,7 @@ export default function TabBedtime(props: Props) {
 									</div>
 								</div>
 							</div>
-							<div className='card-body bg-black'>
+							<div className='card-body'>
 								<p className='card-text'>
 									You, another dream character, or a dream thing (including inanimate objects and animals) do something unusual or impossible in waking life.
 								</p>
@@ -640,7 +641,7 @@ export default function TabBedtime(props: Props) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
-		<main className='container my-auto my-md-5'>
+		<main className='m-4'>
 			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 			{/*<LocalAdminBrent confFile={props.confFile} />*/}
 			<ul className='nav nav-tabs nav-fill' id='bedtimeTab' role='tablist'>
@@ -698,16 +699,16 @@ export default function TabBedtime(props: Props) {
 				</li>
 			</ul>
 			<div className='tab-content'>
-				<div className='tab-pane bg-light p-4 active' id='bedTabMild' role='tabpanel' aria-labelledby='bedNavMild'>
+				<div className='tab-pane p-4 active' id='bedTabMild' role='tabpanel' aria-labelledby='bedNavMild'>
 					{renderTabMild()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='bedTabRandom' role='tabpanel' aria-labelledby='bedNavRandom'>
+				<div className='tab-pane p-4' id='bedTabRandom' role='tabpanel' aria-labelledby='bedNavRandom'>
 					{renderTabRandom()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='bedTabGoals' role='tabpanel' aria-labelledby='bedNavGoals'>
+				<div className='tab-pane p-4' id='bedTabGoals' role='tabpanel' aria-labelledby='bedNavGoals'>
 					{renderTabGoals()}
 				</div>
-				<div className='tab-pane bg-light p-4' id='bedTabSigns' role='tabpanel' aria-labelledby='bedNavSigns'>
+				<div className='tab-pane p-4' id='bedTabSigns' role='tabpanel' aria-labelledby='bedNavSigns'>
 					{renderTabInv()}
 				</div>
 			</div>

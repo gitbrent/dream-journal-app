@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { IDriveConfFile, IDriveDataFile, IJournalEntry, MetaType } from './app.types'
 import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { DateTime } from 'luxon'
@@ -138,7 +138,7 @@ export default function TabExplore(props: Props) {
 	useEffect(() => {
 		const handler = setTimeout(() => setDebouncedValue(filterText), 500)
 		return () => clearTimeout(handler)
-	}, [filterText, 500])
+	}, [filterText])
 
 	const filteredEntries = useMemo(() => {
 		let tmpEntries: IJournalEntry[] = []
@@ -194,7 +194,7 @@ export default function TabExplore(props: Props) {
 		})
 
 		return tmpChartData
-	}, [filteredEntries])
+	}, [avgDreamsPerMonth, filterDrmChtMonths, filteredEntries])
 
 	// -----------------------------------------------------------------------
 
@@ -205,15 +205,15 @@ export default function TabExplore(props: Props) {
 					<div className='col' data-desc='search tags'>
 						<div className='form-floating'>
 							<input
-								id='floatingDreamtag'
+								id='floatingDreamtagExp'
 								type='text'
 								value={filterText}
-								placeholder='search tags'
+								title='search tags'
 								className='form-control'
 								onChange={(event) => setFilterText(event.target.value)}
 								disabled={!props.dataFile ? true : false}
 							/>
-							<label htmlFor='floatingDreamtag' className='text-nowrap'>
+							<label htmlFor='floatingDreamtagExp' className='text-nowrap'>
 								Search Tags
 							</label>
 						</div>
@@ -222,7 +222,6 @@ export default function TabExplore(props: Props) {
 						<div className='form-floating'>
 							<select
 								id='floatingMonthsShown'
-								placeholder='months shown'
 								defaultValue={filterDrmChtMonths}
 								onChange={(ev) => setFilterDrmChtMonths(Number(ev.currentTarget.value))}
 								className='form-select'>
@@ -243,9 +242,8 @@ export default function TabExplore(props: Props) {
 						<div className='form-floating'>
 							<select
 								id='floatingShowStard'
-								placeholder='show starred dreams'
 								defaultValue={filterDrmChtShowStard ? 'Yes' : 'No'}
-								onChange={(ev) => setFilterDrmChtShowStard(ev.currentTarget.value == 'Yes')}
+								onChange={(ev) => setFilterDrmChtShowStard(ev.currentTarget.value === 'Yes')}
 								className='form-select'>
 								<option value={'Yes'}>Yes</option>
 								<option value={'No'}>No</option>
@@ -259,9 +257,8 @@ export default function TabExplore(props: Props) {
 						<div className='form-floating'>
 							<select
 								id='floatingShowUntag'
-								placeholder='show untagged dreams'
 								defaultValue={filterDrmChtShowNotag ? 'Yes' : 'No'}
-								onChange={(ev) => setFilterDrmChtShowNotag(ev.currentTarget.value == 'Yes')}
+								onChange={(ev) => setFilterDrmChtShowNotag(ev.currentTarget.value === 'Yes')}
 								className='form-select'>
 								<option value={'Yes'}>Yes</option>
 								<option value={'No'}>No</option>
@@ -275,9 +272,8 @@ export default function TabExplore(props: Props) {
 						<div className='form-floating'>
 							<select
 								id='floatingShowTaged'
-								placeholder='show untagged dreams'
 								defaultValue={filterDrmChtShowTaged ? 'Yes' : 'No'}
-								onChange={(ev) => setFilterDrmChtShowTaged(ev.currentTarget.value == 'Yes')}
+								onChange={(ev) => setFilterDrmChtShowTaged(ev.currentTarget.value === 'Yes')}
 								className='form-select'>
 								<option value={'Yes'}>Yes</option>
 								<option value={'No'}>No</option>
@@ -294,7 +290,7 @@ export default function TabExplore(props: Props) {
 
 	function renderMetrics(): JSX.Element {
 		return (
-			<section className='bg-black p-4 mb-4'>
+			<section className='be-bg-darkest py-4 mb-4'>
 				<HeaderMetrics entries={filteredEntries} isBusyLoad={props.isBusyLoad} showStats={true} onlyMetrics={true} />
 			</section>
 		)
@@ -304,7 +300,7 @@ export default function TabExplore(props: Props) {
 		// FUTURE: get fancier fills, not just plain bs-colors (use strips and transparency like sample on desktop shows)
 		// CODE: https://codepen.io/LeanyLabs/pen/jOWYpJx
 		return (
-			<section className='bg-black p-4 mb-4' style={{ width: '100%', height: 400 }}>
+			<section className='be-bg-darkest p-4 mb-4' style={{ width: '100%', height: 400 }}>
 				<ResponsiveContainer width='100%' height='100%'>
 					<ComposedChart data={chartDataDreams}>
 						<XAxis dataKey='name' fontSize={'0.75rem'} />
@@ -327,7 +323,7 @@ export default function TabExplore(props: Props) {
 
 	function renderTable(): JSX.Element {
 		return (
-			<section className='bg-black p-4'>
+			<section className='be-sec-table'>
 				<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 			</section>
 		)
@@ -338,12 +334,12 @@ export default function TabExplore(props: Props) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
-		<section className='container my-auto my-md-5'>
-			<div className='card mb-2 mb-md-5'>
+		<section className='m-4'>
+			<div className='card'>
 				<div className='card-header bg-primary'>
-					<h5 className='card-title text-white mb-0'>Dream Journal Exploration</h5>
+					<h5 className='card-title text-white'>Dream Journal Exploration</h5>
 				</div>
-				<section className='bg-light p-4'>
+				<section className='be-bg-darker p-4'>
 					{renderFilters()}
 					{renderMetrics()}
 					{renderChart()}
