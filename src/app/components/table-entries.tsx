@@ -97,31 +97,35 @@ export default function TableEntries(props: Props) {
 
 							return (
 								<tr key={`journalrow${idx}`}>
-									<td className='align-middle text-nowrap'>{entry.entryDate}</td>
-									<td className='align-middle text-center d-none d-lg-table-cell text-secondary'>{entry.bedTime}</td>
-									<td className='align-middle text-center text-primary'>
-										<h4 className='mb-0'><span className="badge text-bg-success fw-light px-4">{entry.dreams.length}</span></h4>
+									<td className='align-middle text-nowrap' data-desc="entryDate">
+										{entry.entryDate}
 									</td>
-									<td className='align-middle text-left d-none d-md-table-cell'>
+									<td className='align-middle text-center d-none d-lg-table-cell'>
+										{entry.bedTime}
+									</td>
+									<td className='align-middle text-center' data-desc="dreams">
+										<h4 className='mb-0'><span className="badge bg-app-dream fw-light px-4">{entry.dreams.length}</span></h4>
+									</td>
+									<td className='align-middle text-left d-none d-md-table-cell' data-desc="tags">
 										<div className='row row-cols-auto g-2'>
 											{dreamSignsUnq.sort().map((sign, idy) => (
 												<div key={`${idx}-${idy}`} className='col'>
-													<div className='badge bg-be-tag p-2'>
+													<div className='badge bg-app-tag p-2'>
 														<TagFill className='me-1' style={{ fontSize: '1.25rem', marginTop: '-0.5rem', marginBottom: '-0.5rem' }} />{sign}
 													</div>
 												</div>
 											))}
 										</div>
 									</td>
-									<td className='align-middle text-center'>
+									<td className='align-middle text-center' data-desc="star">
 										{entry.dreams.filter((dream) => dream.dreamSigns?.some((tag) => tag === MetaType.star)).length > 0 && (
-											<StarFill size='24' className='text-warning' />
+											<StarFill size='24' className='text-app-star' />
 										)}
 									</td>
-									<td className='align-middle text-center'>
-										{entry.dreams.filter((dream) => dream.isLucidDream === true).length > 0 && <CheckCircleFill size='24' className='text-success' />}
+									<td className='align-middle text-center' data-desc="lucid">
+										{entry.dreams.filter((dream) => dream.isLucidDream === true).length > 0 && <CheckCircleFill size='24' className='text-app-lucid' />}
 									</td>
-									<td className='align-middle text-center'>
+									<td className='align-middle text-center' data-desc="[edit]">
 										<button
 											onClick={() => {
 												props.setCurrEntry(entry)

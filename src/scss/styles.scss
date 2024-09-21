@@ -1,12 +1,30 @@
-// Define custom variables at the top of your SCSS file
+// Define custom color variables
 :root {
 	--be-bg-darkest: #0a0b0c;
 	--be-bg-darker: #141618;
 }
 
-// Import all of Bootstrap's CSS
-// NOTE: @import "~bootstrap/scss/bootstrap"; doesnt work, use below!
-//@import "node_modules/bootstrap/scss/bootstrap";
+// Core boostrap overrides
+$body-bg: #181818; // Dark background
+$body-color: #E5E7EB; // Softer text color
+$table-color: #BDBDBD; // Softer text color
+$pagination-color: #BDBDBD; // Softer text color
+$primary: #006cb3; // Deep blue
+
+// DESIGN PATTERN: rather than overload bootstrap `primary`, etc. create classes for each category in header/journal table
+$app-dream: #f82c6a; // "right red"
+$app-date: #93238d; // "pleasant purple"
+$app-tag: #1b968d; // "terrific teal"
+$app-tagged: #4382cb; // "beautiful light blue, perfect for bs-dark-mode"
+$app-star: #fbc600;
+$app-lucid: #0b9c59;
+
+/*
+	FUTURE: show tags in various colors by type
+	$tag-color-action: #F87171; // Action tag color
+	$tag-color-location: #38BDF8; // Location tag color
+	$tag-color-emotion: #F472B6; // Emotion tag color
+*/
 
 // ============================================================================
 // STEP 1: import these
@@ -59,6 +77,59 @@ $nav-underline-link-active-color: var(--be-bg-darkest);
 	background-color: var(--be-bg-darkest);
 }
 
+/* Custom: add red asterisk (*) on <label> for required fields */
+label.required:after {
+	content: "*";
+	color: red;
+	margin-left: .25rem;
+}
+
+.form-label label {
+	color: var(--bs-tertiary-color);
+	text-transform: uppercase;
+	font-size: 0.9rem;
+}
+
+.form-color-info {
+	border-left: 4px var(--bs-info) solid;
+	padding-left: 8px;
+}
+
+.form-color-info label {
+	color: var(--bs-info);
+	text-transform: uppercase;
+	font-size: 0.9rem;
+}
+
+.form-color-info .form-border {
+	border-left: 1px var(--bs-info) solid;
+}
+
+.form-color-success {
+	border-left: 4px var(--bs-success) solid;
+	padding-left: 8px;
+}
+
+.form-color-success label {
+	color: var(--bs-success);
+	text-transform: uppercase;
+	font-size: 0.9rem;
+}
+
+.form-color-success .form-border {
+	border-left: 1px var(--bs-success) solid;
+}
+
+.form-output {
+	background-color: var(--be-bg-darker);
+	padding: 0.5rem;
+	min-height: 38px;
+}
+
+// ========================================================
+// SECTION: my custom classes
+// ========================================================
+
 .be-bg-darker {
 	background-color: var(--be-bg-darker);
 }
@@ -77,76 +148,55 @@ $nav-underline-link-active-color: var(--be-bg-darkest);
 	background-color: var(--be-bg-darkest);
 }
 
-.text-teal {
-	color: $teal; // or color: var(--bs-teal);
+// ========================================================
+// APP COLORS
+// DESIGN PATTERN: follow bootstrap convention: `text-$color` and `bg-$color`
+// ========================================================
+
+.text-app-tag {
+	color: $app-tag;
 }
 
-.bg-teal {
-	background-color: $teal;
+.bg-app-tag {
+	background-color: $app-tag;
 }
 
-.text-be-tag {
-	color: $pink; // or color: var(--bs-pink);
+.text-app-dream {
+	color: $app-dream;
 }
 
-.bg-be-tag {
-	background-color: $pink;
+.bg-app-dream {
+	background-color: $app-dream;
 }
 
-/* Custom: add red asterisk (*) on <label> for required fields */
-label.required:after {
-	content: "*";
-	color: red;
-	margin-left: .25rem;
-}
-.form-label label {
-	color: var(--bs-tertiary-color);
-	text-transform: uppercase;
-	font-size: 0.9rem;
-}
-.form-color-info {
-	border-left: 4px var(--bs-info) solid;
-	padding-left: 8px;
-}
-.form-color-info label {
-	color: var(--bs-info);
-	text-transform: uppercase;
-	font-size: 0.9rem;
-}
-.form-color-info .form-border {
-	border-left: 1px var(--bs-info) solid;
+.text-app-tagged {
+	color: $app-tagged;
 }
 
-.form-color-success {
-	border-left: 4px var(--bs-success) solid;
-	padding-left: 8px;
-}
-.form-color-success label {
-	color: var(--bs-success);
-	text-transform: uppercase;
-	font-size: 0.9rem;
-}
-.form-color-success .form-border {
-	border-left: 1px var(--bs-success) solid;
+.bg-app-tagged {
+	background-color: $app-tagged;
 }
 
-.form-output {
-	background-color: var(--be-bg-darker);
-	padding: 0.5rem;
-	min-height: 38px;
+.text-app-date {
+	color: $app-date;
 }
 
-/*
-	$primary: #1E3A8A; // Deep blue
-	$secondary: #D61C4E; // Bold magenta
-	$success: #10B981; // Vibrant teal green
-	$warning: #FBBF24; // Amber yellow
-	$body-bg: #181818; // Dark background
-	$body-color: #E5E7EB; // Softer text color
-	$tag-color-action: #F87171; // Action tag color
-	$tag-color-location: #38BDF8; // Location tag color
-	$tag-color-emotion: #F472B6; // Emotion tag color
-	$btn-primary-bg: #3B82F6; // Edit button background color
-	$starred-bg: #F59E0B; // Starred indicator color
-	$lucid-bg: #22C55E; // Lucid indicator color
-*/
+.bg-app-date {
+	background-color: $app-date;
+}
+
+.text-app-star {
+	color: $app-star;
+}
+
+.bg-app-star {
+	background-color: $app-star;
+}
+
+.text-app-lucid {
+	color: $app-lucid;
+}
+
+.bg-app-lucid {
+	background-color: $app-lucid;
+}
