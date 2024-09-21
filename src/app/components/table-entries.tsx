@@ -98,7 +98,7 @@ export default function TableEntries(props: Props) {
 							return (
 								<tr key={`journalrow${idx}`}>
 									<td className='align-middle text-nowrap'>{entry.entryDate}</td>
-									<td className='align-middle text-center d-none d-lg-table-cell text-secondary'>{entry.bedTime}</td>
+									<td className='align-middle text-center d-none d-lg-table-cell text-light'>{entry.bedTime}</td>
 									<td className='align-middle text-center text-primary'>
 										<h4 className='mb-0'><span className="badge text-bg-success fw-light px-4">{entry.dreams.length}</span></h4>
 									</td>

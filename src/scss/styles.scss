@@ -1,8 +1,103 @@
-// Define custom variables at the top of your SCSS file
+// Define custom color variables
 :root {
 	--be-bg-darkest: #0a0b0c;
 	--be-bg-darker: #141618;
 }
+
+/*
+// Base colors
+$primary-blue: #00b7ff;
+$green-success: #00ff75;
+$pink-action: #ff007f;
+$dark-bg: #121212;
+$text-light: #E0E0E0;
+$text-dark: #BDBDBD;
+
+// Accent variants
+$blue-hover: #008ecc;
+$green-hover: #00cc5b;
+$pink-muted: #ff87a2;
+$tag-bg: #ff4c91;
+
+// Typography
+body {
+  background-color: $dark-bg;
+  color: $text-light;
+}
+
+h1, h2, h3 {
+  color: $primary-blue;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+// Buttons
+.btn-primary {
+  background-color: $primary-blue;
+  &:hover {
+    background-color: $blue-hover;
+  }
+}
+
+// Tags
+.tag-feel {
+  background-color: $pink-muted;
+}
+*/
+
+/*
+	$primary: #1E3A8A; // Deep blue
+	$secondary: #D61C4E; // Bold magenta
+	$success: #10B981; // Vibrant teal green
+	$warning: #FBBF24; // Amber yellow
+	$body-bg: #181818; // Dark background
+	$body-color: #E5E7EB; // Softer text color
+	$tag-color-action: #F87171; // Action tag color
+	$tag-color-location: #38BDF8; // Location tag color
+	$tag-color-emotion: #F472B6; // Emotion tag color
+	$btn-primary-bg: #3B82F6; // Edit button background color
+	$starred-bg: #F59E0B; // Starred indicator color
+	$lucid-bg: #22C55E; // Lucid indicator color
+*/
+/*
+$be-primary: #00b7ff;
+$be-success: #00ff75;
+$be-danger: #ff007f;
+$be-info: #00eaff;
+$be-warning: #ffeb3b;
+
+// Optionally: define Bootstrap color overrides
+$primary: $be-primary;
+$success: $be-success;
+$danger: $be-danger;
+$info: $be-info;
+$warning: $be-warning;
+
+// Add your custom colors here
+$pink: #ff007f;
+$teal: #00eaff;
+*/
+
+// https://huemint.com/bootstrap-basic/
+//$primary: #00b7ff; // Deep blue
+$secondary: #984995;
+$success: #5ca300; // Vibrant teal green
+$warning: #ffbf67; // Amber yellow
+$danger: #f10066; // #ff007f;
+$light: #c4e8e9;
+$info: #4382cb;
+
+$body-bg: #181818; // Dark background
+$body-color: #E5E7EB; // Softer text color
+
+$tag-color-action: #F87171; // Action tag color
+$tag-color-location: #38BDF8; // Location tag color
+$tag-color-emotion: #F472B6; // Emotion tag color
+
+$btn-primary-bg: #3B82F6; // Edit button background color
+
+$dark-purple: #93238d;
+$starred-bg: #F59E0B; // Starred indicator color
+$lucid-bg: #22C55E; // Lucid indicator color
 
 // Import all of Bootstrap's CSS
 // NOTE: @import "~bootstrap/scss/bootstrap"; doesnt work, use below!
@@ -86,7 +181,7 @@ $nav-underline-link-active-color: var(--be-bg-darkest);
 }
 
 .text-be-tag {
-	color: $pink; // or color: var(--bs-pink);
+	color: $dark-purple; // or color: var(--bs-pink);
 }
 
 .bg-be-tag {
@@ -99,20 +194,24 @@ label.required:after {
 	color: red;
 	margin-left: .25rem;
 }
+
 .form-label label {
 	color: var(--bs-tertiary-color);
 	text-transform: uppercase;
 	font-size: 0.9rem;
 }
+
 .form-color-info {
 	border-left: 4px var(--bs-info) solid;
 	padding-left: 8px;
 }
+
 .form-color-info label {
 	color: var(--bs-info);
 	text-transform: uppercase;
 	font-size: 0.9rem;
 }
+
 .form-color-info .form-border {
 	border-left: 1px var(--bs-info) solid;
 }
@@ -121,11 +220,13 @@ label.required:after {
 	border-left: 4px var(--bs-success) solid;
 	padding-left: 8px;
 }
+
 .form-color-success label {
 	color: var(--bs-success);
 	text-transform: uppercase;
 	font-size: 0.9rem;
 }
+
 .form-color-success .form-border {
 	border-left: 1px var(--bs-success) solid;
 }
@@ -135,18 +236,3 @@ label.required:after {
 	padding: 0.5rem;
 	min-height: 38px;
 }
-
-/*
-	$primary: #1E3A8A; // Deep blue
-	$secondary: #D61C4E; // Bold magenta
-	$success: #10B981; // Vibrant teal green
-	$warning: #FBBF24; // Amber yellow
-	$body-bg: #181818; // Dark background
-	$body-color: #E5E7EB; // Softer text color
-	$tag-color-action: #F87171; // Action tag color
-	$tag-color-location: #38BDF8; // Location tag color
-	$tag-color-emotion: #F472B6; // Emotion tag color
-	$btn-primary-bg: #3B82F6; // Edit button background color
-	$starred-bg: #F59E0B; // Starred indicator color
-	$lucid-bg: #22C55E; // Lucid indicator color
-*/
