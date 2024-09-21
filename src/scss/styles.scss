@@ -4,121 +4,27 @@
 	--be-bg-darker: #141618;
 }
 
-/*
-	// Base colors
-	$primary-blue: #00b7ff;
-	$green-success: #00ff75;
-	$pink-action: #ff007f;
-	$dark-bg: #121212;
-	$text-light: #E0E0E0;
-	$text-dark: #BDBDBD;
+// Core boostrap overrides
+$body-bg: #181818; // Dark background
+$body-color: #E5E7EB; // Softer text color
+$table-color: #BDBDBD; // Softer text color
+$pagination-color: #BDBDBD; // Softer text color
+$primary: #006cb3; // Deep blue
 
-	// Accent variants
-	$blue-hover: #008ecc;
-	$green-hover: #00cc5b;
-	$pink-muted: #ff87a2;
-	$tag-bg: #ff4c91;
-
-	// Typography
-	body {
-	background-color: $dark-bg;
-	color: $text-light;
-	}
-
-	h1, h2, h3 {
-	color: $primary-blue;
-	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-	}
-
-	// Buttons
-	.btn-primary {
-	background-color: $primary-blue;
-	&:hover {
-		background-color: $blue-hover;
-	}
-	}
-
-	// Tags
-	.tag-feel {
-	background-color: $pink-muted;
-	}
-*/
+// DESIGN PATTERN: rather than overload bootstrap `primary`, etc. create classes for each category in header/journal table
+$app-dream: #f82c6a; // "right red"
+$app-date: #93238d; // "pleasant purple"
+$app-tag: #1b968d; // "terrific teal"
+$app-tagged: #4382cb; // "beautiful light blue, perfect for bs-dark-mode"
+$app-star: #fbc600;
+$app-lucid: #0b9c59;
 
 /*
-	$primary: #1E3A8A; // Deep blue
-	$secondary: #D61C4E; // Bold magenta
-	$success: #10B981; // Vibrant teal green
-	$warning: #FBBF24; // Amber yellow
-	$body-bg: #181818; // Dark background
-	$body-color: #E5E7EB; // Softer text color
+	FUTURE: show tags in various colors by type
 	$tag-color-action: #F87171; // Action tag color
 	$tag-color-location: #38BDF8; // Location tag color
 	$tag-color-emotion: #F472B6; // Emotion tag color
-	$btn-primary-bg: #3B82F6; // Edit button background color
-	$starred-bg: #F59E0B; // Starred indicator color
-	$lucid-bg: #22C55E; // Lucid indicator color
 */
-
-/*
-	$be-primary: #00b7ff;
-	$be-success: #00ff75;
-	$be-danger: #ff007f;
-	$be-info: #00eaff;
-	$be-warning: #ffeb3b;
-
-	// Optionally: define Bootstrap color overrides
-	$primary: $be-primary;
-	$success: $be-success;
-	$danger: $be-danger;
-	$info: $be-info;
-	$warning: $be-warning;
-
-	// Add your custom colors here
-	$pink: #ff007f;
-	$teal: #00eaff;
-*/
-
-// https://huemint.com/bootstrap-basic/
-//$primary: #00b7ff; // Deep blue
-/*
-$secondary: #984995;
-$success: #5ca300; // Vibrant teal green
-$warning: #ffbf67; // Amber yellow
-$danger: #f2000a; // #ff007f;
-$light: #c4e8e9;
-$info: #4382cb;
-*/
-$body-bg: #181818; // Dark background
-$body-color: #E5E7EB; // Softer text color
-/*
-$tag-color-action: #F87171; // Action tag color
-$tag-color-location: #38BDF8; // Location tag color
-$tag-color-emotion: #F472B6; // Emotion tag color
-
-$btn-primary-bg: #3B82F6; // Edit button background color
-
-$dark-purple: #984995; // #93238d;
-$starred-bg: #F59E0B; // Starred indicator color
-$lucid-bg: #22C55E; // Lucid indicator color
-*/
-/*
-	// DESIGN PATTERN:
-	// - rather than overload bootstrap `primary`, etc. create classes for each category in header/journal table
-	DREAMS
-	MONTHS
-	DAYS
-	TAGS
-	TAGGED
-	UN-TAGGED
-	STARRED
-	LUCIDS
-*/
-$app-dream: #d15a39; // WIP:
-$app-date: #1b968d; // "terrific teal"
-$app-tagged: #4382cb; // "beautiful light blue, perfect for bs-dark-mode"
-$app-star: #F59E0B;
-$app-lucid: #22C55E;
-$app-tag: #984995; // "pleasant purple"
 
 // ============================================================================
 // STEP 1: import these
@@ -220,7 +126,9 @@ label.required:after {
 	min-height: 38px;
 }
 
-// SECTION: be stuff
+// ========================================================
+// SECTION: my custom classes
+// ========================================================
 
 .be-bg-darker {
 	background-color: var(--be-bg-darker);
@@ -240,12 +148,10 @@ label.required:after {
 	background-color: var(--be-bg-darkest);
 }
 
-
-// =======================
-// BRAND NEW 2024-09-21
-// ==============================
-// Define classes for each category in the header/journal table
+// ========================================================
+// APP COLORS
 // DESIGN PATTERN: follow bootstrap convention: `text-$color` and `bg-$color`
+// ========================================================
 
 .text-app-tag {
 	color: $app-tag;
@@ -277,4 +183,20 @@ label.required:after {
 
 .bg-app-date {
 	background-color: $app-date;
+}
+
+.text-app-star {
+	color: $app-star;
+}
+
+.bg-app-star {
+	background-color: $app-star;
+}
+
+.text-app-lucid {
+	color: $app-lucid;
+}
+
+.bg-app-lucid {
+	background-color: $app-lucid;
 }
