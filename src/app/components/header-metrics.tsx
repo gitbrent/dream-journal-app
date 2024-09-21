@@ -114,40 +114,40 @@ export default function HeaderMetrics(props: Props) {
 		return (
 			<div className='row align-items-end justify-content-around row-cols-auto row-cols-md-4 row-cols-lg-auto g-4'>
 				<div className='col text-center'>
-					<h6 className='text-teal text-uppercase mb-0'>Dreams</h6>
-					<h1 className='text-teal display-5 mb-0'>{totalDreams || '-'}</h1>
+					<h6 className='text-app-dream text-uppercase mb-0'>Dreams</h6>
+					<h1 className='text-app-dream display-5 mb-0'>{totalDreams || '-'}</h1>
 					{props.showStats && (
-						<div className='badge rounded-pill bg-teal w-100'>{totalMonths * 30 > 0 ? (totalDreams / (dataEntries || []).length).toFixed(2) + ' / day' : '-'}</div>
+						<div className='badge rounded-pill bg-app-dream w-100'>{totalMonths * 30 > 0 ? (totalDreams / (dataEntries || []).length).toFixed(2) + ' / day' : '-'}</div>
 					)}
 				</div>
 				<div className='col text-center d-none d-md-block'>
-					<h6 className='text-primary text-uppercase mb-0 mb-0'>Months</h6>
-					<h1 className='text-primary display-5 mb-0'>{totalMonths || '-'}</h1>
-					{props.showStats && <div className='badge rounded-pill bg-primary w-100'>{`${totalYears.toFixed(1)} years`}</div>}
+					<h6 className='text-app-date text-uppercase mb-0 mb-0'>Months</h6>
+					<h1 className='text-app-date display-5 mb-0'>{totalMonths || '-'}</h1>
+					{props.showStats && <div className='badge rounded-pill bg-app-date w-100'>{`${totalYears.toFixed(1)} years`}</div>}
 				</div>
-				<div className='col text-center d-none d-md-block'>
-					<h6 className='text-primary text-uppercase mb-0'>Days</h6>
-					<h1 className='text-primary display-5 mb-0'>{(dataEntries || []).length || '-'}</h1>
+				<div className='col text-center d-none d-md-block' data-desc="days">
+					<h6 className='text-app-date text-uppercase mb-0'>Days</h6>
+					<h1 className='text-app-date display-5 mb-0'>{(dataEntries || []).length || '-'}</h1>
 					{props.showStats && (
-						<div className='badge rounded-pill bg-primary w-100'>{totalMonths * 30 > 0 ? ((dataEntries || []).length / totalMonths).toFixed(2) + ' / mon' : '-'}</div>
+						<div className='badge rounded-pill bg-app-date w-100'>{totalMonths * 30 > 0 ? ((dataEntries || []).length / totalMonths).toFixed(2) + ' / mon' : '-'}</div>
 					)}
 				</div>
-				<div className='col text-center'>
-					<h6 className='text-be-tag text-uppercase mb-0'>Tags</h6>
-					<h1 className='text-be-tag display-5 mb-0'>{totalDreamSigns || '-'}</h1>
-					{props.showStats && <div className='badge rounded-pill bg-be-tag w-100'>-</div>}
+				<div className='col text-center' data-desc="tags">
+					<h6 className='text-app-tag text-uppercase mb-0'>Tags</h6>
+					<h1 className='text-app-tag display-5 mb-0'>{totalDreamSigns || '-'}</h1>
+					{props.showStats && <div className='badge rounded-pill bg-app-tag w-100'>-</div>}
 				</div>
 				<div className='col text-center d-none d-md-block'>
-					<h6 className='text-info text-uppercase mb-0'>Tagged</h6>
-					<h1 className='text-info display-5 mb-0'>{totalDreams - totalUntagged || '-'}</h1>
+					<h6 className='text-app-tagged text-uppercase mb-0'>Tagged</h6>
+					<h1 className='text-app-tagged display-5 mb-0'>{totalDreams - totalUntagged || '-'}</h1>
 					{props.showStats && (
-						<div className='badge rounded-pill bg-info w-100'>{totalDreams ? (((totalDreams - totalUntagged) / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
+						<div className='badge rounded-pill bg-app-tagged w-100'>{totalDreams ? (((totalDreams - totalUntagged) / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
 					)}
 				</div>
 				<div className='col text-center d-none d-md-block'>
-					<h6 className='text-info text-uppercase mb-0'>Un-Tagged</h6>
-					<h1 className='text-info display-5 mb-0'>{totalUntagged || '-'}</h1>
-					{props.showStats && <div className='badge rounded-pill bg-info w-100'>{totalDreams ? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>}
+					<h6 className='text-app-tagged text-uppercase mb-0'>Un-Tagged</h6>
+					<h1 className='text-app-tagged display-5 mb-0'>{totalUntagged || '-'}</h1>
+					{props.showStats && <div className='badge rounded-pill bg-app-tagged w-100'>{totalDreams ? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>}
 				</div>
 				<div className='col text-center'>
 					<h6 className='text-warning text-uppercase mb-0'>Starred</h6>

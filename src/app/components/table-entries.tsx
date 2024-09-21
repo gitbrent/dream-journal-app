@@ -97,16 +97,16 @@ export default function TableEntries(props: Props) {
 
 							return (
 								<tr key={`journalrow${idx}`}>
-									<td className='align-middle text-nowrap'>{entry.entryDate}</td>
-									<td className='align-middle text-center d-none d-lg-table-cell text-light'>{entry.bedTime}</td>
-									<td className='align-middle text-center text-primary'>
-										<h4 className='mb-0'><span className="badge text-bg-success fw-light px-4">{entry.dreams.length}</span></h4>
+									<td className='align-middle text-nowrap text-app-date'>{entry.entryDate}</td>
+									<td className='align-middle text-center d-none d-lg-table-cell text-app-date'>{entry.bedTime}</td>
+									<td className='align-middle text-center'>
+										<h4 className='mb-0'><span className="badge bg-app-dream fw-light px-4">{entry.dreams.length}</span></h4>
 									</td>
 									<td className='align-middle text-left d-none d-md-table-cell'>
 										<div className='row row-cols-auto g-2'>
 											{dreamSignsUnq.sort().map((sign, idy) => (
 												<div key={`${idx}-${idy}`} className='col'>
-													<div className='badge bg-be-tag p-2'>
+													<div className='badge bg-app-tag p-2'>
 														<TagFill className='me-1' style={{ fontSize: '1.25rem', marginTop: '-0.5rem', marginBottom: '-0.5rem' }} />{sign}
 													</div>
 												</div>

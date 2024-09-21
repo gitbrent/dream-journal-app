@@ -5,43 +5,43 @@
 }
 
 /*
-// Base colors
-$primary-blue: #00b7ff;
-$green-success: #00ff75;
-$pink-action: #ff007f;
-$dark-bg: #121212;
-$text-light: #E0E0E0;
-$text-dark: #BDBDBD;
+	// Base colors
+	$primary-blue: #00b7ff;
+	$green-success: #00ff75;
+	$pink-action: #ff007f;
+	$dark-bg: #121212;
+	$text-light: #E0E0E0;
+	$text-dark: #BDBDBD;
 
-// Accent variants
-$blue-hover: #008ecc;
-$green-hover: #00cc5b;
-$pink-muted: #ff87a2;
-$tag-bg: #ff4c91;
+	// Accent variants
+	$blue-hover: #008ecc;
+	$green-hover: #00cc5b;
+	$pink-muted: #ff87a2;
+	$tag-bg: #ff4c91;
 
-// Typography
-body {
-  background-color: $dark-bg;
-  color: $text-light;
-}
+	// Typography
+	body {
+	background-color: $dark-bg;
+	color: $text-light;
+	}
 
-h1, h2, h3 {
-  color: $primary-blue;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
+	h1, h2, h3 {
+	color: $primary-blue;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+	}
 
-// Buttons
-.btn-primary {
-  background-color: $primary-blue;
-  &:hover {
-    background-color: $blue-hover;
-  }
-}
+	// Buttons
+	.btn-primary {
+	background-color: $primary-blue;
+	&:hover {
+		background-color: $blue-hover;
+	}
+	}
 
-// Tags
-.tag-feel {
-  background-color: $pink-muted;
-}
+	// Tags
+	.tag-feel {
+	background-color: $pink-muted;
+	}
 */
 
 /*
@@ -58,50 +58,67 @@ h1, h2, h3 {
 	$starred-bg: #F59E0B; // Starred indicator color
 	$lucid-bg: #22C55E; // Lucid indicator color
 */
+
 /*
-$be-primary: #00b7ff;
-$be-success: #00ff75;
-$be-danger: #ff007f;
-$be-info: #00eaff;
-$be-warning: #ffeb3b;
+	$be-primary: #00b7ff;
+	$be-success: #00ff75;
+	$be-danger: #ff007f;
+	$be-info: #00eaff;
+	$be-warning: #ffeb3b;
 
-// Optionally: define Bootstrap color overrides
-$primary: $be-primary;
-$success: $be-success;
-$danger: $be-danger;
-$info: $be-info;
-$warning: $be-warning;
+	// Optionally: define Bootstrap color overrides
+	$primary: $be-primary;
+	$success: $be-success;
+	$danger: $be-danger;
+	$info: $be-info;
+	$warning: $be-warning;
 
-// Add your custom colors here
-$pink: #ff007f;
-$teal: #00eaff;
+	// Add your custom colors here
+	$pink: #ff007f;
+	$teal: #00eaff;
 */
 
 // https://huemint.com/bootstrap-basic/
 //$primary: #00b7ff; // Deep blue
+/*
 $secondary: #984995;
 $success: #5ca300; // Vibrant teal green
 $warning: #ffbf67; // Amber yellow
-$danger: #f10066; // #ff007f;
+$danger: #f2000a; // #ff007f;
 $light: #c4e8e9;
 $info: #4382cb;
-
+*/
 $body-bg: #181818; // Dark background
 $body-color: #E5E7EB; // Softer text color
-
+/*
 $tag-color-action: #F87171; // Action tag color
 $tag-color-location: #38BDF8; // Location tag color
 $tag-color-emotion: #F472B6; // Emotion tag color
 
 $btn-primary-bg: #3B82F6; // Edit button background color
 
-$dark-purple: #93238d;
+$dark-purple: #984995; // #93238d;
 $starred-bg: #F59E0B; // Starred indicator color
 $lucid-bg: #22C55E; // Lucid indicator color
-
-// Import all of Bootstrap's CSS
-// NOTE: @import "~bootstrap/scss/bootstrap"; doesnt work, use below!
-//@import "node_modules/bootstrap/scss/bootstrap";
+*/
+/*
+	// DESIGN PATTERN:
+	// - rather than overload bootstrap `primary`, etc. create classes for each category in header/journal table
+	DREAMS
+	MONTHS
+	DAYS
+	TAGS
+	TAGGED
+	UN-TAGGED
+	STARRED
+	LUCIDS
+*/
+$app-dream: #d15a39; // WIP:
+$app-date: #1b968d; // "terrific teal"
+$app-tagged: #4382cb; // "beautiful light blue, perfect for bs-dark-mode"
+$app-star: #F59E0B;
+$app-lucid: #22C55E;
+$app-tag: #984995; // "pleasant purple"
 
 // ============================================================================
 // STEP 1: import these
@@ -154,40 +171,6 @@ $nav-underline-link-active-color: var(--be-bg-darkest);
 	background-color: var(--be-bg-darkest);
 }
 
-.be-bg-darker {
-	background-color: var(--be-bg-darker);
-}
-
-.be-box-dark {
-	background-color: var(--be-bg-darker);
-	padding: 1.5rem; // p-4=1.5rem
-}
-
-.be-sec-table {
-	background-color: var(--be-bg-darkest);
-	padding: 1.5rem; // p-4=1.5rem
-}
-
-.be-bg-darkest {
-	background-color: var(--be-bg-darkest);
-}
-
-.text-teal {
-	color: $teal; // or color: var(--bs-teal);
-}
-
-.bg-teal {
-	background-color: $teal;
-}
-
-.text-be-tag {
-	color: $dark-purple; // or color: var(--bs-pink);
-}
-
-.bg-be-tag {
-	background-color: $pink;
-}
-
 /* Custom: add red asterisk (*) on <label> for required fields */
 label.required:after {
 	content: "*";
@@ -235,4 +218,63 @@ label.required:after {
 	background-color: var(--be-bg-darker);
 	padding: 0.5rem;
 	min-height: 38px;
+}
+
+// SECTION: be stuff
+
+.be-bg-darker {
+	background-color: var(--be-bg-darker);
+}
+
+.be-box-dark {
+	background-color: var(--be-bg-darker);
+	padding: 1.5rem; // p-4=1.5rem
+}
+
+.be-sec-table {
+	background-color: var(--be-bg-darkest);
+	padding: 1.5rem; // p-4=1.5rem
+}
+
+.be-bg-darkest {
+	background-color: var(--be-bg-darkest);
+}
+
+
+// =======================
+// BRAND NEW 2024-09-21
+// ==============================
+// Define classes for each category in the header/journal table
+// DESIGN PATTERN: follow bootstrap convention: `text-$color` and `bg-$color`
+
+.text-app-tag {
+	color: $app-tag;
+}
+
+.bg-app-tag {
+	background-color: $app-tag;
+}
+
+.text-app-dream {
+	color: $app-dream;
+}
+
+.bg-app-dream {
+	background-color: $app-dream;
+}
+
+.text-app-tagged {
+	color: $app-tagged;
+}
+
+.bg-app-tagged {
+	background-color: $app-tagged;
+}
+
+.text-app-date {
+	color: $app-date;
+}
+
+.bg-app-date {
+	background-color: $app-date;
 }
