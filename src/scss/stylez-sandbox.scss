@@ -1,0 +1,289 @@
+// Define custom color variables
+:root {
+	--be-bg-darkest: #0a0b0c;
+	--be-bg-darker: #141618;
+}
+
+/*
+	// Base colors
+	$primary-blue: #00b7ff;
+	$green-success: #00ff75;
+	$pink-action: #ff007f;
+	$dark-bg: #121212;
+	$text-light: #E0E0E0;
+	$text-dark: #BDBDBD;
+
+	// Accent variants
+	$blue-hover: #008ecc;
+	$green-hover: #00cc5b;
+	$pink-muted: #ff87a2;
+	$tag-bg: #ff4c91;
+
+	// Typography
+	body {
+	background-color: $dark-bg;
+	color: $text-light;
+	}
+
+	h1, h2, h3 {
+	color: $primary-blue;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+	}
+
+	// Buttons
+	.btn-primary {
+	background-color: $primary-blue;
+	&:hover {
+		background-color: $blue-hover;
+	}
+	}
+
+	// Tags
+	.tag-feel {
+	background-color: $pink-muted;
+	}
+*/
+
+/*
+	$primary: #1E3A8A; // Deep blue
+	$secondary: #D61C4E; // Bold magenta
+	$success: #10B981; // Vibrant teal green
+	$warning: #FBBF24; // Amber yellow
+	$body-bg: #181818; // Dark background
+	$body-color: #E5E7EB; // Softer text color
+	$tag-color-action: #F87171; // Action tag color
+	$tag-color-location: #38BDF8; // Location tag color
+	$tag-color-emotion: #F472B6; // Emotion tag color
+	$btn-primary-bg: #3B82F6; // Edit button background color
+	$starred-bg: #F59E0B; // Starred indicator color
+	$lucid-bg: #22C55E; // Lucid indicator color
+*/
+
+/*
+	$be-primary: #00b7ff;
+	$be-success: #00ff75;
+	$be-danger: #ff007f;
+	$be-info: #00eaff;
+	$be-warning: #ffeb3b;
+
+	// Optionally: define Bootstrap color overrides
+	$primary: $be-primary;
+	$success: $be-success;
+	$danger: $be-danger;
+	$info: $be-info;
+	$warning: $be-warning;
+
+	// Add your custom colors here
+	$pink: #ff007f;
+	$teal: #00eaff;
+*/
+
+// https://huemint.com/bootstrap-basic/
+//$primary: #00b7ff; // Deep blue
+$secondary: #984995;
+$success: #5ca300; // Vibrant teal green
+$warning: #ffbf67; // Amber yellow
+$danger: #f2000a; // #ff007f;
+$light: #c4e8e9;
+$info: #4382cb;
+
+$body-bg: #181818; // Dark background
+$body-color: #E5E7EB; // Softer text color
+
+$tag-color-action: #F87171; // Action tag color
+$tag-color-location: #38BDF8; // Location tag color
+$tag-color-emotion: #F472B6; // Emotion tag color
+
+$btn-primary-bg: #3B82F6; // Edit button background color
+
+$dark-purple: #984995; // #93238d;
+$starred-bg: #F59E0B; // Starred indicator color
+$lucid-bg: #22C55E; // Lucid indicator color
+
+/*
+	// DESIGN PATTERN:
+	// - rather than overload bootstrap `primary`, etc. create classes for each category in header/journal table
+	DREAMS
+	MONTHS
+	DAYS
+	TAGS
+	TAGGED
+	UN-TAGGED
+	STARRED
+	LUCIDS
+*/
+$metric-dream: #984995; // #93238d;
+$metric-tags: #984995; // #93238d;
+$starred-bg: #F59E0B; // Starred indicator color
+$lucid-bg: #22C55E; // Lucid indicator color
+
+// ============================================================================
+// STEP 1: import these
+// ============================================================================
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/mixins";
+
+// NOTE: This way we dont have to add `mb-0` to every <h5> in .card-title !!!
+$card-title-spacer-y: 0;
+// NOTE: Avoid having to add custom bg class to every <table>
+$table-bg: var(--be-bg-darkest);
+// OVERRIDE: otherwise card-bg is dark-gray, same as body bg
+$card-bg: var(--be-bg-darker);
+
+// WIP
+$nav-tabs-link-active-bg: var(--be-bg-darkest);
+$nav-underline-link-active-color: var(--be-bg-darkest);
+
+// ============================================================================
+// STEP 2: after overrides above
+// ============================================================================
+//@import "bootstrap";
+@import "node_modules/bootstrap/scss/bootstrap";
+
+// ============================================================================
+// STEP 3: add additional styles
+// ============================================================================
+.navbar input.form-control,
+.navbar .btn-group button:not(.active) {
+	background-color: var(--bs-dark-bg-subtle);
+}
+
+.nav-tabs .nav-link {
+	border-bottom: none !important;
+}
+
+// CUSTOM: switch are too damn small
+.form-check-input {
+	height: 1.5rem !important;
+	width: 3rem !important;
+}
+
+.form-check-label {
+	line-height: 32px;
+	margin-left: .5rem;
+}
+
+.tab-pane {
+	background-color: var(--be-bg-darkest);
+}
+
+.be-bg-darker {
+	background-color: var(--be-bg-darker);
+}
+
+.be-box-dark {
+	background-color: var(--be-bg-darker);
+	padding: 1.5rem; // p-4=1.5rem
+}
+
+.be-sec-table {
+	background-color: var(--be-bg-darkest);
+	padding: 1.5rem; // p-4=1.5rem
+}
+
+.be-bg-darkest {
+	background-color: var(--be-bg-darkest);
+}
+
+.text-teal {
+	color: $teal; // or color: var(--bs-teal);
+}
+
+.bg-teal {
+	background-color: $teal;
+}
+
+.text-be-tag {
+	color: $dark-purple; // or color: var(--bs-pink);
+}
+
+.bg-be-tag {
+	background-color: $pink;
+}
+
+/* Custom: add red asterisk (*) on <label> for required fields */
+label.required:after {
+	content: "*";
+	color: red;
+	margin-left: .25rem;
+}
+
+.form-label label {
+	color: var(--bs-tertiary-color);
+	text-transform: uppercase;
+	font-size: 0.9rem;
+}
+
+.form-color-info {
+	border-left: 4px var(--bs-info) solid;
+	padding-left: 8px;
+}
+
+.form-color-info label {
+	color: var(--bs-info);
+	text-transform: uppercase;
+	font-size: 0.9rem;
+}
+
+.form-color-info .form-border {
+	border-left: 1px var(--bs-info) solid;
+}
+
+.form-color-success {
+	border-left: 4px var(--bs-success) solid;
+	padding-left: 8px;
+}
+
+.form-color-success label {
+	color: var(--bs-success);
+	text-transform: uppercase;
+	font-size: 0.9rem;
+}
+
+.form-color-success .form-border {
+	border-left: 1px var(--bs-success) solid;
+}
+
+.form-output {
+	background-color: var(--be-bg-darker);
+	padding: 0.5rem;
+	min-height: 38px;
+}
+
+// =======================
+// BRAND NEW 2024-09-21
+// ==============================
+// Define classes for each category in the header/journal table
+
+.dream-metric-dreams {
+	color: #984995; // or #93238d, depending on the tone you prefer
+}
+
+.dream-metric-months {
+	color: #1E3A8A; // Use the primary deep blue for months
+}
+
+.dream-metric-days {
+	color: #3B82F6; // Use your button color to keep things consistent
+}
+
+.dream-metric-tags {
+	color: #D61C4E; // Bold magenta to highlight tags
+}
+
+.dream-metric-tagged {
+	color: #38BDF8; // Light blue for clarity, similar to location tag color
+}
+
+.dream-metric-untagged {
+	color: #FBBF24; // Amber yellow for "un-tagged"
+}
+
+.dream-metric-starred {
+	background-color: #F59E0B; // Starred indicator
+}
+
+.dream-metric-lucids {
+	background-color: #22C55E; // Lucid indicator
+}
