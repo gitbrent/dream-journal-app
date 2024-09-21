@@ -81,15 +81,15 @@ export default function TabHome(props: Props) {
 				<div>
 					<div className='row mb-3'>
 						<div className='col'>
-							<h5 className='card-title'>User Name</h5>
-							<p className='card-text'>{props.authState.userName || '(?)'}</p>
+							<h6 className='card-title text-secondary'>User Name</h6>
+							<h3 className='fw-light mb-0'>{props.authState.userName || '(?)'}</h3>
 						</div>
 						<div className='col-auto text-end'>
-							<h5>App Version</h5>
-							<h6 className='mb-0'>{APP_VER}</h6>
+							<h6 className='card-title text-secondary'>App Version</h6>
+							<h3 className='fw-light mb-0'>{APP_VER || '(?)'}</h3>
 						</div>
 					</div>
-					<div className='row mb-0'>
+					<div className='row mt-4'>
 						<div className='col'>
 							<button className='btn btn-outline-warning btn-lg w-100' onClick={() => doReadDataFile()}>
 								Reload Data
@@ -135,28 +135,28 @@ export default function TabHome(props: Props) {
 				<div>Loading/Saving...</div>
 			</div>
 		) : props.dataFile ? (
-			<div>
+			<section>
 				<div className='row mb-3'>
 					<div className='col'>
-						<h5 className='card-title'>File Name</h5>
-						<p className='card-text'>{props.dataFile?.name || '(?)'}</p>
+						<h6 className='card-title text-secondary'>File Name</h6>
+						<h3 className='fw-light mb-0'>{props.dataFile?.name || '(?)'}</h3>
 					</div>
 					<div className='col-auto text-end'>
-						<h5 className='card-title'>Entries</h5>
-						<p className='card-text'>{props.dataFile?.entries ? props.dataFile.entries.length : '-'}</p>
+						<h6 className='card-title text-secondary'>Entries</h6>
+						<h3 className='fw-light mb-0'>{props.dataFile?.entries ? props.dataFile.entries.length : '-'}</h3>
 					</div>
 				</div>
-				<div className='row'>
+				<div className='row mt-4'>
 					<div className='col'>
-						<h5 className='card-title'>Last Saved</h5>
-						<p className='card-text'>{props.dataFile?.modifiedTime ? new Date(props.dataFile.modifiedTime).toLocaleString() : '-'}</p>
+						<h6 className='card-title text-secondary'>Last Saved</h6>
+						<h3 className='fw-light mb-0'>{props.dataFile?.modifiedTime ? new Date(props.dataFile.modifiedTime).toLocaleString() : '-'}</h3>
 					</div>
 					<div className='col-auto text-end'>
-						<h5 className='card-title'>File Size</h5>
-						<p className='card-text'>{props.dataFile?.size ? getReadableFileSizeString(Number(props.dataFile.size)) : '-'}</p>
+						<h6 className='card-title text-secondary'>File Size</h6>
+						<h3 className='fw-light mb-0'>{props.dataFile?.size ? getReadableFileSizeString(Number(props.dataFile.size)) : '-'}</h3>
 					</div>
 				</div>
-			</div>
+			</section>
 		) : (
 			<div className='text-muted'>(none)</div>
 		)
@@ -211,7 +211,7 @@ export default function TabHome(props: Props) {
 						</div>
 						<div className='col'>
 							<div className='card h-100'>
-								<div className='card-header bg-info'>
+								<div className='card-header bg-primary'>
 									<h5 className='card-title text-white'>Dream Journal</h5>
 								</div>
 								<div className='card-body'>{renderCardDataFile()}</div>
