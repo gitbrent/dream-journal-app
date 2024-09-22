@@ -139,21 +139,21 @@ export default function TabHome(props: Props) {
 				<div className='row mb-3'>
 					<div className='col'>
 						<h6 className='card-title text-secondary'>File Name</h6>
-						<h3 className='fw-light mb-0'>{props.dataFile?.name || '(?)'}</h3>
+						<h4 className='fw-light mb-0'>{props.dataFile?.name || '(?)'}</h4>
 					</div>
 					<div className='col-auto text-end'>
 						<h6 className='card-title text-secondary'>Entries</h6>
-						<h3 className='fw-light mb-0'>{props.dataFile?.entries ? props.dataFile.entries.length : '-'}</h3>
+						<h4 className='fw-light mb-0'>{props.dataFile?.entries ? props.dataFile.entries.length : '-'}</h4>
 					</div>
 				</div>
 				<div className='row mt-4'>
 					<div className='col'>
 						<h6 className='card-title text-secondary'>Last Saved</h6>
-						<h3 className='fw-light mb-0'>{props.dataFile?.modifiedTime ? new Date(props.dataFile.modifiedTime).toLocaleString() : '-'}</h3>
+						<h4 className='fw-light mb-0'>{props.dataFile?.modifiedTime ? new Date(props.dataFile.modifiedTime).toLocaleString() : '-'}</h4>
 					</div>
 					<div className='col-auto text-end'>
 						<h6 className='card-title text-secondary'>File Size</h6>
-						<h3 className='fw-light mb-0'>{props.dataFile?.size ? getReadableFileSizeString(Number(props.dataFile.size)) : '-'}</h3>
+						<h4 className='fw-light mb-0'>{props.dataFile?.size ? getReadableFileSizeString(Number(props.dataFile.size)) : '-'}</h4>
 					</div>
 				</div>
 			</section>

@@ -203,18 +203,16 @@ export default function TabTags(props: IAppTagsProps) {
 	function renderTags(tags: IDreamSignTagGroup[], title: string): JSX.Element {
 		return (
 			<div className='card h-100'>
-				<div className='card-header bg-info h6'>{title}</div>
-				<div className='card-body bg-black-90 p-0'>
-					{tags.map((tagGrp, idx) => (
-						<div key={`topTag${idx}`} className='col text-white user-select-none'>
-							<div className='row g-0 flex-nowrap bg-info border-bottom'>
-								<div className='col py-1 px-3 text-break bg-trans-50'>{tagGrp.dreamSign}</div>
-								<div className='col-auto py-1 px-3 text-white-50 text-monospace text-end bg-trans-75' style={{ minWidth: 55 }}>
-									{tagGrp.totalOccurs}
-								</div>
-							</div>
-						</div>
-					))}
+				<div className='card-header bg-primary h6'>{title}</div>
+				<div className='card-body p-0'>
+					<ul className="list-group list-group-flush">
+						{tags.map((tagGrp, idx) => (
+							<li key={`topTag${idx}`} className="list-group-item d-flex justify-content-between align-items-center">
+								{tagGrp.dreamSign}
+								<span className="badge text-bg-primary rounded-pill">{tagGrp.totalOccurs}</span>
+							</li>
+						))}
+					</ul>
 				</div>
 			</div>
 		)
@@ -284,7 +282,7 @@ export default function TabTags(props: IAppTagsProps) {
 
 	function renderTabTags(): JSX.Element {
 		return (
-			<section>
+			<section className='p-4'>
 				<div className='row row-cols g-4 align-items-center justify-content-between mb-4' data-desc='commandbar'>
 					<div className='col-12 col-md' data-desc='search tags'>
 						<div className='row flex-nowrap align-items-center g-0 bg-black'>
@@ -361,7 +359,7 @@ export default function TabTags(props: IAppTagsProps) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
-		<div className='container my-auto my-md-5'>
+		<section className='m-2 m-md-4'>
 			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 
 			<ul className='nav nav-tabs nav-fill' id='tagsTab' role='tablist'>
@@ -395,19 +393,19 @@ export default function TabTags(props: IAppTagsProps) {
 				</li>
 			</ul>
 			<div className='tab-content'>
-				<div className='tab-pane bg-black p-4 active' id='tab3' role='tabpanel' aria-labelledby='3-tab'>
+				<div className='tab-pane active' id='tab3' role='tabpanel' aria-labelledby='3-tab'>
 					{renderTopTags()}
 				</div>
-				<div className='tab-pane bg-black p-4' id='tab4' role='tabpanel' aria-labelledby='4-tab'>
+				<div className='tab-pane' id='tab4' role='tabpanel' aria-labelledby='4-tab'>
 					{renderTagsByYear()}
 				</div>
-				<div className='tab-pane bg-black p-4' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
+				<div className='tab-pane' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
 					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 				</div>
-				<div className='tab-pane bg-black p-4' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
+				<div className='tab-pane' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
 					{renderTabTags()}
 				</div>
 			</div>
-		</div>
+		</section>
 	)
 }

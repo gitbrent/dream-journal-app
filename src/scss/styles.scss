@@ -130,6 +130,10 @@ label.required:after {
 // SECTION: my custom classes
 // ========================================================
 
+.cursor-link {
+	cursor: pointer;
+}
+
 .be-bg-darker {
 	background-color: var(--be-bg-darker);
 }
