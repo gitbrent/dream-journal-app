@@ -315,7 +315,7 @@ export default function TabAdmin(props: Props) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
-		<main className='container my-auto my-md-5'>
+		<section className='m-2 m-md-4'>
 			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 
 			<ul className='nav nav-tabs nav-fill' id='adminTab' role='tablist'>
@@ -362,6 +362,6 @@ export default function TabAdmin(props: Props) {
 					{renderBadDates()}
 				</div>
 			</div>
-		</main>
+		</section>
 	)
 }

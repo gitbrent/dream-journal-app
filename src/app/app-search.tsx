@@ -98,7 +98,7 @@ export default function TabSearch(props: Props) {
 	return !props.dataFile || !props.dataFile.entries ? (
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
-		<div className='container my-auto my-md-5'>
+		<section className='m-2 m-md-4'>
 			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
 
 			{showAlert && (
@@ -213,6 +213,6 @@ export default function TabSearch(props: Props) {
 					</div>
 				</div>
 			</section>
-		</div>
+		</section>
 	)
 }
