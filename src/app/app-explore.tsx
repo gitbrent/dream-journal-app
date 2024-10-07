@@ -309,11 +309,11 @@ export default function TabExplore(props: Props) {
 						<CartesianGrid stroke='#555555' strokeDasharray='6 2' vertical={false} />
 						<Legend verticalAlign={'bottom'} align={'center'} iconSize={20} />
 						<Tooltip cursor={false} />
-						{filterDrmChtShowNotag && <Bar dataKey='totNotag' name='Untagged' stackId='a' fill='var(--bs-primary)' />}
-						{filterDrmChtShowTaged && <Bar dataKey='totTaged' name='Tagged' stackId='a' fill='var(--bs-info)' />}
-						{filterDrmChtShowStard && <Bar dataKey='totStard' name='Starred' stackId='a' fill='var(--bs-warning)' />}
-						<Bar yAxisId={0} dataKey='totLucid' name='Lucid Dream' stackId='a' fill='var(--bs-success)' />
-						{!debouncedValue && <Line yAxisId={1} dataKey='avgTotal' name='Dreams/Month' dot={false} stroke='var(--bs-danger)' strokeWidth={2} />}
+						{filterDrmChtShowNotag && <Bar dataKey='totNotag' name='Untagged' stackId='a' fill='var(--app-untagged)' />}
+						{filterDrmChtShowTaged && <Bar dataKey='totTaged' name='Tagged' stackId='a' fill='var(--app-tagged)' />}
+						{filterDrmChtShowStard && <Bar dataKey='totStard' name='Starred' stackId='a' fill='var(--app-star)' />}
+						<Bar yAxisId={0} dataKey='totLucid' name='Lucid Dream' stackId='a' fill='var(--app-lucid)' />
+						{!debouncedValue && <Line yAxisId={1} dataKey='avgTotal' name='Dreams/Month' dot={false} stroke='var(--app-dream)' strokeWidth={2} />}
 						{/*<Legend layout='horizontal' verticalAlign='bottom' align='center' wrapperStyle={{ position: 'relative' }} />*/}
 					</ComposedChart>
 				</ResponsiveContainer>
