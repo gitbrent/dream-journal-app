@@ -313,7 +313,8 @@ export default function TabExplore(props: Props) {
 						{filterDrmChtShowTaged && <Bar dataKey='totTaged' name='Tagged' stackId='a' fill='var(--app-tagged)' />}
 						{filterDrmChtShowStard && <Bar dataKey='totStard' name='Starred' stackId='a' fill='var(--app-star)' />}
 						<Bar yAxisId={0} dataKey='totLucid' name='Lucid Dream' stackId='a' fill='var(--app-lucid)' />
-						{!debouncedValue && <Line yAxisId={1} dataKey='avgTotal' name='Dreams/Month' dot={false} stroke='var(--app-dream)' strokeWidth={2} />}
+						<Line dataKey="avgTotal" strokeWidth={3} />
+						{/*!debouncedValue && <Line yAxisId={1} dataKey='avgTotal' name='Dreams/Month' dot={false} stroke='var(--app-dream)' strokeWidth={50} />*/}
 						{/*<Legend layout='horizontal' verticalAlign='bottom' align='center' wrapperStyle={{ position: 'relative' }} />*/}
 					</ComposedChart>
 				</ResponsiveContainer>
