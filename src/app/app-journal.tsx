@@ -27,17 +27,16 @@
  *  SOFTWARE.
  */
 
-import { useState, useMemo } from 'react'
-import { IDriveDataFile, IJournalEntry } from './app.types'
+import { useState, useMemo, useContext } from 'react'
+import { IJournalEntry } from './app.types'
 import { Braces, CalendarMonth, Calendar3, Tags } from 'react-bootstrap-icons'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
 import TableEntries from './components/table-entries'
+import { DataContext } from '../api-google/DataContext'
 // FUTURE: https://github.com/hypeserver/react-date-range
 
 export interface Props {
-	dataFile: IDriveDataFile
-	isBusyLoad: boolean
 	setShowModal: (show: boolean) => void
 	setCurrEntry: (entry: IJournalEntry) => void
 }
@@ -49,6 +48,8 @@ enum EntryType {
 }
 
 export default function TabJournal(props: Props) {
+	const { isLoading, driveDataFile } = useContext(DataContext)
+	//
 	const [filterEntryType, setFilterEntryType] = useState<EntryType>(EntryType.all)
 	const [filterText, setFilterText] = useState('')
 	const [filterYear, setFilterYear] = useState('')
@@ -57,7 +58,7 @@ export default function TabJournal(props: Props) {
 	const filteredEntries = useMemo(() => {
 		// A: filter entries
 		/*
-			let arrEntries = (props.dataFile && props.dataFile.entries ? props.dataFile.entries : []).filter((entry) => {
+			let arrEntries = (driveDataFile && driveDataFile.entries ? driveDataFile.entries : []).filter((entry) => {
 				let dateEntry = new Date(entry.entryDate + ' 00:00:00')
 				// FIXME: doesnt work if you select the day of an entry (eg: jan1 - jan3 works, nut select jan 2 and nothing)
 				if (dateRangeFrom && dateRangeTo && dateEntry >= dateRangeFrom && dateEntry <= dateRangeTo) return true
@@ -66,7 +67,7 @@ export default function TabJournal(props: Props) {
 				else return false
 			})
 		*/
-		return (props.dataFile && props.dataFile.entries ? props.dataFile.entries : []).filter(
+		return (driveDataFile?.entries || []).filter(
 			(entry) =>
 				(!filterText ||
 					entry.dreams
@@ -79,7 +80,7 @@ export default function TabJournal(props: Props) {
 				(!filterYear || entry.entryDate.substring(0, 4) === filterYear) &&
 				(!filterMon || Number(entry.entryDate.substring(5, 7)) === Number(filterMon))
 		)
-	}, [props.dataFile, filterEntryType, filterText, filterYear, filterMon])
+	}, [driveDataFile, filterEntryType, filterText, filterYear, filterMon])
 
 	// ------------------------------------------------------------------------
 
@@ -102,7 +103,7 @@ export default function TabJournal(props: Props) {
 									title='search tags'
 									className='form-control'
 									onChange={(event) => setFilterText(event.target.value)}
-									disabled={!props.dataFile ? true : false}
+									disabled={!driveDataFile ? true : false}
 								/>
 								<label htmlFor='floatingDreamtag'>Search Tags</label>
 							</div>
@@ -125,7 +126,7 @@ export default function TabJournal(props: Props) {
 									title='entry year (ex: "2022")'
 									className='form-control'
 									onChange={(event) => setFilterYear(event.target.value)}
-									disabled={!props.dataFile ? true : false}
+									disabled={!driveDataFile ? true : false}
 								/>
 								<label htmlFor='floatingEntryYear'>Entry Year</label>
 							</div>
@@ -148,7 +149,7 @@ export default function TabJournal(props: Props) {
 									title='entry month (0-11)'
 									className='form-control'
 									onChange={(event) => setFilterMon(event.target.value)}
-									disabled={!props.dataFile ? true : false}
+									disabled={!driveDataFile ? true : false}
 								/>
 								<label htmlFor='floatingEntryMon'>Entry Month</label>
 							</div>
@@ -185,15 +186,15 @@ export default function TabJournal(props: Props) {
 	}
 
 	// FUTURE: Flag/highlight days with dreams and/or with Lucid success (also show "starred" days) - maybe green and yellow colors?
-	return !props.dataFile || !props.dataFile.entries ? (
-		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
+	return !driveDataFile || !driveDataFile.entries ? (
+		<AlertGdriveStatus isBusyLoad={isLoading} />
 	) : (
 		<main className='m-2 m-md-4'>
-			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
+			<HeaderMetrics isBusyLoad={isLoading} showStats={true} />
 			<section className='be-box-dark'>
 				{renderFilters()}
 				<section className='be-sec-table'>
-					<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
+					<TableEntries entries={filteredEntries} isBusyLoad={isLoading} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 				</section>
 			</section>
 		</main>
