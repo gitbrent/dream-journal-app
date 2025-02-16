@@ -27,32 +27,31 @@
  *  SOFTWARE.
  */
 
-import { useState } from 'react'
-import { APP_VER, AuthState, IAuthState, IDriveDataFile, IJournalEntry, IS_LOCALHOST } from './app.types'
+import { useContext, useState } from 'react'
+import { APP_VER, IDriveDataFile, IJournalEntry } from './app.types'
+import { AuthContext } from '../api-google/AuthContext'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
-import { appdata } from './appdata'
 
 interface Props {
-	appdataSvc: appdata
-	authState: IAuthState
 	dataFile: IDriveDataFile
 	setShowModal: (show: boolean) => void
 	setCurrEntry: (entry: IJournalEntry | undefined) => void
 }
 
 export default function TabHome(props: Props) {
+	const { isSignedIn, userProfile } = useContext(AuthContext)
 	const [isBusy, setIsBusy] = useState(false)
 
 	async function doAuthSignIn() {
 		setIsBusy(true)
-		await props.appdataSvc.doAuthSignIn()
+		//await props.appdataSvc.doAuthSignIn()
 		setIsBusy(false)
 	}
 
 	async function doReadDataFile() {
 		setIsBusy(true)
-		await props.appdataSvc.doRefreshDataFile()
+		//await props.appdataSvc.doRefreshDataFile()
 		setIsBusy(false)
 	}
 
@@ -75,14 +74,13 @@ export default function TabHome(props: Props) {
 	function renderCardAuthUser(): JSX.Element {
 		let cardAuthUser: JSX.Element = <div />
 
-		if (IS_LOCALHOST && props.authState) console.log(props.authState)
-		if (props.authState && props.authState.status === AuthState.Authenticated) {
+		if (isSignedIn) {
 			cardAuthUser = (
 				<div>
 					<div className='row mb-3'>
 						<div className='col'>
 							<h6 className='card-title text-secondary'>User Name</h6>
-							<h3 className='fw-light mb-0'>{props.authState.userName || '(?)'}</h3>
+							<h3 className='fw-light mb-0'>{userProfile?.getName() || '(?)'}</h3>
 						</div>
 						<div className='col-auto text-end'>
 							<h6 className='card-title text-secondary'>App Version</h6>
@@ -96,20 +94,11 @@ export default function TabHome(props: Props) {
 							</button>
 						</div>
 						<div className='col'>
-							<button className='btn btn-outline-danger btn-lg w-100' onClick={() => props.appdataSvc.doAuthSignOut()}>
+							<button className='btn btn-outline-danger btn-lg w-100' onClick={() => alert('WIP:')}>
 								Sign Out
 							</button>
 						</div>
 					</div>
-				</div>
-			)
-		} else if (props.authState && props.authState.status === AuthState.Expired) {
-			cardAuthUser = (
-				<div>
-					<p className='card-text mb-4'>Your session has expired. Please re-authenticate to continue.</p>
-					<button className='btn btn-warning' onClick={() => doAuthSignIn()}>
-						Sign In
-					</button>
 				</div>
 			)
 		} else {
@@ -186,7 +175,7 @@ export default function TabHome(props: Props) {
 							Dream Journal
 						</h3>
 					</div>
-					{props.authState?.status === AuthState.Authenticated && <div className='col-auto'>
+					{isSignedIn && <div className='col-auto'>
 						<button className='btn btn-primary px-3 px-md-4 text-uppercase' type='button' disabled={!props.dataFile || isBusy} onClick={() => doShowNewEntryModal()}>
 							Create
 							<br />
@@ -199,12 +188,12 @@ export default function TabHome(props: Props) {
 
 				<h6 className='my-5'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</h6>
 
-				{props.authState?.status === AuthState.Authenticated ?
+				{isSignedIn ?
 					<div className='row g-5 row-cols-1 row-cols-md-2'>
 						<div className='col'>
 							<div className='card h-100'>
 								<div className='card-header bg-success'>
-									<h4 className='card-title text-white'>{props.authState?.status}</h4>
+									<h4 className='card-title text-white'>{isSignedIn ? 'Signed In' : 'Signed Out'}</h4>
 								</div>
 								<div className='card-body'>{renderCardAuthUser()}</div>
 							</div>

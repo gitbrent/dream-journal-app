@@ -91,11 +91,12 @@ export default function AppMain() {
 			? <ModalEntry appdataSvc={appdataSvc} currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
 			: <AlertGdriveStatus isBusyLoad={true} />
 	}
+	/*
 	const Home = () => {
 		return appdataSvc
 			? <TabHome appdataSvc={appdataSvc} dataFile={dataFile} authState={authState} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />
 			: <AlertGdriveStatus isBusyLoad={true} />
-	}
+	}*/
 	const Admin = () => {
 		return appdataSvc
 			? <TabAdmin dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />
@@ -224,7 +225,7 @@ export default function AppMain() {
 				{Nav()}
 				{Modal()}
 				<Routes>
-					<Route path='/' element={Home()} />
+					<Route path='/' element={<TabHome dataFile={dataFile} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />} />
 					<Route path='/bedtime' element={Bedtime()} />
 					<Route path='/explore' element={Explore()} />
 					<Route path='/journal' element={Journal()} />
