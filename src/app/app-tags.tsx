@@ -1,16 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { DateTime } from 'luxon'
-import { IDreamSignTagGroup, IDreamTagByCat, IDriveDataFile, IJournalDream, IJournalEntry } from './app.types'
+import { IDreamSignTagGroup, IDreamTagByCat, IJournalDream, IJournalEntry } from './app.types'
 import { BarChart, Bar, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Search, Tag, Tags } from 'react-bootstrap-icons'
+import { DataContext } from '../api-google/DataContext'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
 import BadgeEntries from './components/badge-entries'
 import TableEntries from './components/table-entries'
 
 interface IAppTagsProps {
-	dataFile: IDriveDataFile
-	isBusyLoad: boolean
 	setShowModal: (show: boolean) => void
 	setCurrEntry: (entry: IJournalEntry) => void
 }
@@ -44,6 +43,7 @@ interface IOnlyDream {
 
 export default function TabTags(props: IAppTagsProps) {
 	const TOP = 20 //15
+	const { isLoading, driveDataFile } = useContext(DataContext)
 	// TAB: Tag Timeline
 	const [chartDataTags, setChartDataTags] = useState<IChartData[]>([])
 	const [tagChartClickedIdx, setTagChartClickedIdx] = useState(0)
@@ -57,13 +57,13 @@ export default function TabTags(props: IAppTagsProps) {
 	 * @desc only parse datafile once
 	 */
 	const datafileEntries = useMemo(() => {
-		const tempEntries = props.dataFile && props.dataFile.entries ? props.dataFile.entries : []
+		const tempEntries = driveDataFile?.entries || []
 		return tempEntries.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
-	}, [props.dataFile])
+	}, [driveDataFile])
 
 	const dreamTagGroups = useMemo(() => {
-		return getGroupedTags(props.dataFile && props.dataFile.entries ? props.dataFile.entries : [])
-	}, [props.dataFile])
+		return getGroupedTags(driveDataFile && driveDataFile.entries ? driveDataFile.entries : [])
+	}, [driveDataFile])
 
 	const tagsByCat = useMemo(() => {
 		const tagByCats: IDreamTagByCat[] = []
@@ -92,7 +92,7 @@ export default function TabTags(props: IAppTagsProps) {
 		const delayDebounceFn = setTimeout(() => {
 			const tmpChartData: IChartData[] = []
 
-			if (!props.dataFile || !props.dataFile.entries) return
+			if (!driveDataFile || !driveDataFile.entries) return
 
 			// PERF: dont chart every dream, it causes super-slow page render
 			if (!textFilter || textFilter.length < 3) {
@@ -101,7 +101,7 @@ export default function TabTags(props: IAppTagsProps) {
 			}
 
 			// Tag Groups
-			props.dataFile.entries.forEach((entry) => {
+			driveDataFile.entries.forEach((entry) => {
 				const dateEntry = DateTime.fromISO(entry.entryDate)
 				let currChartData = tmpChartData.filter((data) => data.dateTime.hasSame(dateEntry, 'month') && data.dateTime.hasSame(dateEntry, 'year'))[0]
 				if (!currChartData) {
@@ -130,14 +130,14 @@ export default function TabTags(props: IAppTagsProps) {
 		}, 1000)
 
 		return () => clearTimeout(delayDebounceFn)
-	}, [textFilter, showAllMons])
+	}, [textFilter, showAllMons, driveDataFile])
 
 	/** Handle barchart click: tags */
 	useEffect(() => {
-		if (!isNaN(tagChartClickedIdx) && chartDataTags && chartDataTags[tagChartClickedIdx]) {
+		if (driveDataFile && !isNaN(tagChartClickedIdx) && chartDataTags && chartDataTags[tagChartClickedIdx]) {
 			const dateEntry = chartDataTags[tagChartClickedIdx].dateTime
 			setTagChartClkEntries(
-				props.dataFile.entries
+				driveDataFile.entries
 					.filter(
 						(entry) =>
 							!textFilter ||
@@ -152,7 +152,7 @@ export default function TabTags(props: IAppTagsProps) {
 		} else {
 			setTagChartClkEntries([])
 		}
-	}, [props.dataFile, tagChartClickedIdx])
+	}, [chartDataTags, driveDataFile, tagChartClickedIdx, textFilter])
 
 	// ------------------------------------------------------------------------
 
@@ -298,7 +298,7 @@ export default function TabTags(props: IAppTagsProps) {
 										placeholder='search tags'
 										className='form-control'
 										onChange={(event) => setTextFilter(event.target.value)}
-										disabled={!props.dataFile ? true : false}
+										disabled={!driveDataFile ? true : false}
 									/>
 									<label htmlFor='floatingDreamtag'>
 										<Tags /> {tagsByCat.length} cats / <Tag /> {dreamTagGroups.length} tags
@@ -347,7 +347,7 @@ export default function TabTags(props: IAppTagsProps) {
 				)}
 				{chartDataTags && chartDataTags.length > 0 && !isNaN(tagChartClickedIdx) && (
 					<section className='bg-black p-4'>
-						<TableEntries entries={tagChartClkEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
+						<TableEntries entries={tagChartClkEntries} isBusyLoad={isLoading} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 					</section>
 				)}
 			</section>
@@ -356,11 +356,11 @@ export default function TabTags(props: IAppTagsProps) {
 
 	// ------------------------------------------------------------------------
 
-	return !props.dataFile || !props.dataFile.entries ? (
-		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
+	return !driveDataFile?.entries ? (
+		<AlertGdriveStatus isBusyLoad={isLoading} />
 	) : (
 		<section className='m-2 m-md-4'>
-			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
+			<HeaderMetrics isBusyLoad={isLoading} showStats={true} />
 
 			<ul className='nav nav-tabs nav-fill' id='tagsTab' role='tablist'>
 				<li className='nav-item' role='presentation'>
@@ -400,7 +400,7 @@ export default function TabTags(props: IAppTagsProps) {
 					{renderTagsByYear()}
 				</div>
 				<div className='tab-pane' id='tab1' role='tabpanel' aria-labelledby='1-tab'>
-					<BadgeEntries dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
+					<BadgeEntries dataFile={driveDataFile} isBusyLoad={isLoading} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 				</div>
 				<div className='tab-pane' id='tab2' role='tabpanel' aria-labelledby='2-tab'>
 					{renderTabTags()}
