@@ -6,7 +6,7 @@
  */
 import { useContext, useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import { IDriveDataFile, IDriveConfFile, IAuthState, AuthState, IS_LOCALHOST, IJournalEntry } from './app.types'
+import { IDriveDataFile, IDriveConfFile, IAuthState, AuthState, IJournalEntry } from './app.types'
 import { AuthContext } from '../api-google/AuthContext'
 import { DataContext } from '../api-google/DataContext'
 import TabHome from '../app/app-home'
@@ -85,16 +85,10 @@ export default function AppMain() {
 		}
 	}, [appdataSvc, dataSvcLoadTime])
 	*/
-
+	/*
 	const Modal = () => {
 		return appdataSvc
 			? <ModalEntry appdataSvc={appdataSvc} currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
-			: <AlertGdriveStatus isBusyLoad={true} />
-	}
-	/*
-	const Home = () => {
-		return appdataSvc
-			? <TabHome appdataSvc={appdataSvc} dataFile={dataFile} authState={authState} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />
 			: <AlertGdriveStatus isBusyLoad={true} />
 	}*/
 	const Admin = () => {
@@ -223,9 +217,9 @@ export default function AppMain() {
 			:
 			<BrowserRouter>
 				{Nav()}
-				{Modal()}
+				{<ModalEntry currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />}
 				<Routes>
-					<Route path='/' element={<TabHome dataFile={dataFile} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />} />
+					<Route path='/' element={<TabHome setShowModal={setShowModal} setCurrEntry={setCurrEntry} />} />
 					<Route path='/bedtime' element={Bedtime()} />
 					<Route path='/explore' element={Explore()} />
 					<Route path='/journal' element={Journal()} />
