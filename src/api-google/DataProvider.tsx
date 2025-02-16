@@ -8,7 +8,7 @@ interface DataProviderProps {
 
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 	const [isLoading, setIsLoading] = useState<boolean>(false)
-
+	//
 	let accessToken = "";
 	let gapiConfFile: gapi.client.drive.File | undefined | null = null
 	let gapiDataFile: gapi.client.drive.File | undefined | null = null
@@ -30,16 +30,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
 			// STEP 3: Download the conf file
 			gapiConfFile = respFiles.filter(item => item.name === 'dream-journal-conf.json')[0]
-			log(2, `[refreshData] gapiConfFile id = '${gapiConfFile.id}'`)
-			driveConfFile = await downloadConfFile()
-			log(2, `[refreshData] driveConfFile.id = ${driveConfFile.id}`)
+			log(2, `[refreshData][conf] gapiConfFile id = ${gapiConfFile.id}`)
+			driveConfFile = await getConfFile()
+			log(2, `[refreshData][conf]  driveConfFile.id = ${driveConfFile.id}`)
 
 			// STEP 4: Download the data file
-			gapiDataFile = respFiles.filter(item => item.name === 'dream-journal-data.json')[0]
-			log(2, `[refreshData] gapiDataFile id = '${gapiDataFile.id}'`)
-			driveDataFile = await downloadDataFile()
-			log(2, `[refreshData] driveDataFile.id = ${driveDataFile.id}`)
-
+			gapiDataFile = respFiles.filter(item => item.name === 'dream-journal.json')[0]
+			log(2, `[refreshData][data] gapiDataFile id = ${gapiDataFile.id}`)
+			driveDataFile = await getDataFile()
+			log(2, `[refreshData][data] driveDataFile.id = ${driveDataFile.id}`)
 		} catch (error) {
 			console.error('Error refreshing data:', error);
 		} finally {
@@ -47,7 +46,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 		}
 	}
 
-	const downloadConfFile = async (): Promise<IDriveConfFile> => {
+	const getConfFile = async (): Promise<IDriveConfFile> => {
 		const response = await fetch(`https://www.googleapis.com/drive/v3/files/${gapiConfFile?.id}?alt=media`, {
 			method: 'GET',
 			headers: { Authorization: `Bearer ${accessToken}` },
@@ -88,7 +87,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 	 * @see https://developers.google.com/drive/api/v2/reference/files/get#javascript
 	 * @returns
 	 */
-	const downloadDataFile = async (): Promise<IDriveDataFile> => {
+	const getDataFile = async (): Promise<IDriveDataFile> => {
 		const response = await fetch(`https://www.googleapis.com/drive/v3/files/${gapiDataFile?.id}?alt=media`, {
 			method: 'GET',
 			headers: { Authorization: `Bearer ${accessToken}` },
@@ -120,7 +119,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 			size: gapiDataFile?.size?.toString() || '-1',
 		}
 	}
-
 
 	return (
 		<DataContext.Provider value={{ refreshData, isLoading }}>
