@@ -1,8 +1,9 @@
 import { createContext } from "react";
-import { IDriveDataFile, IJournalEntry } from "../app/app.types";
+import { IDriveConfFile, IDriveDataFile, IJournalEntry } from "../app/app.types";
 
 interface DataContextProps {
 	isLoading: boolean;
+	driveConfFile: IDriveConfFile | undefined | null;
 	driveDataFile: IDriveDataFile | undefined | null;
 	refreshData: () => void;
 	getUniqueDreamTags: () => string[];
@@ -14,6 +15,7 @@ interface DataContextProps {
 
 export const DataContext = createContext<DataContextProps>({
 	isLoading: false,
+	driveConfFile: null,
 	driveDataFile: null,
 	refreshData: () => { },
 	getUniqueDreamTags: () => [],

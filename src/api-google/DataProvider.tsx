@@ -8,8 +8,6 @@ interface DataProviderProps {
 
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const [gapiConfFile, setGapiConfFile] = useState<gapi.client.drive.File | undefined | null>(null)
-	const [gapiDataFile, setGapiDataFile] = useState<gapi.client.drive.File | undefined | null>(null)
 	const [driveConfFile, setDriveConfFile] = useState<IDriveConfFile | undefined | null>(null)
 	const [driveDataFile, setDriveDataFile] = useState<IDriveDataFile | undefined | null>(null)
 
@@ -29,7 +27,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
 			// STEP 3: Download the conf file
 			const confFile = respFiles.filter(item => item.name === 'dream-journal-conf.json')[0]
-			setGapiConfFile(confFile)
 			log(2, `[refreshData][conf] gapiConfFile id = ${confFile.id}`)
 			const confFileData = await getConfFile(confFile, token || "")
 			setDriveConfFile(confFileData)
@@ -37,7 +34,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
 			// STEP 4: Download the data file
 			const dataFile = respFiles.filter(item => item.name === 'dream-journal.json')[0]
-			setGapiDataFile(dataFile)
 			log(2, `[refreshData][data] gapiDataFile id = ${dataFile.id}`)
 			const dataFileData = await getDataFile(dataFile, token || "")
 			setDriveDataFile(dataFileData)
@@ -171,7 +167,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 	return (
 		<DataContext.Provider
 			value={{
-				refreshData, isLoading, driveDataFile,
+				refreshData, isLoading, driveConfFile, driveDataFile,
 				getUniqueDreamTags, doesEntryDateExist,
 				doEntryAdd, doEntryEdit, doEntryDelete,
 			}}>
