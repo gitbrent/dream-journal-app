@@ -9,7 +9,7 @@ import * as bootstrap from 'bootstrap' // Import all of Bootstrap's JS
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
 		<App />
-	</StrictMode>,
+	</StrictMode>
 )
 
 // Global error handling for uncaught errors

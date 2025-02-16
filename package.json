@@ -1,7 +1,7 @@
 {
   "name": "dream-journal-app",
   "private": true,
-  "version": "2.1.0",
+  "version": "2.1.0-beta.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,11 +12,8 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
-    "@types/gapi": "^0.0.47",
-    "@types/gapi.auth2": "^0.0.60",
-    "@types/gapi.drive": "^0.0.9",
-    "@types/google-one-tap": "^1.2.6",
     "bootstrap": "^5.3.3",
+    "gapi-script": "^1.2.0",
     "jose": "^5.7.0",
     "luxon": "^3.5.0",
     "react": "^18.3.1",
@@ -32,6 +29,10 @@
   "devDependencies": {
     "@eslint/js": "^9.9.0",
     "@types/bootstrap": "^5.2.10",
+    "@types/gapi": "^0.0.47",
+    "@types/gapi.auth2": "^0.0.61",
+    "@types/gapi.client.drive-v3": "^0.0.5",
+    "@types/google-one-tap": "^1.2.6",
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.5.0",
     "@types/react": "^18.3.3",

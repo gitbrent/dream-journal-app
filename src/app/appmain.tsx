@@ -4,9 +4,11 @@
  * @see https://developers.google.com/drive/api/guides/fields-parameter
  * @see https://developers.google.com/drive/api/v3/reference/files/get
  */
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
 import { IDriveDataFile, IDriveConfFile, IAuthState, AuthState, IS_LOCALHOST, IJournalEntry } from './app.types'
+import { AuthContext } from '../api-google/AuthContext'
+import { DataContext } from '../api-google/DataContext'
 import TabHome from '../app/app-home'
 import TabBedtime from '../app/app-bedtime'
 import TabExplore from '../app/app-explore'
@@ -25,6 +27,9 @@ import AlertGdriveStatus from './components/alert-gstat'
 // ....: then we can stop passing dataSvc around!
 
 export default function AppMain() {
+	const { isSignedIn, signIn, signOut } = useContext(AuthContext)
+	const { userProfile, refreshData } = useContext(DataContext)
+	//
 	const DEF_AUTH_STATE: IAuthState = {
 		status: AuthState.Unauthenticated,
 		userName: '',
@@ -60,10 +65,15 @@ export default function AppMain() {
 	// FIXME: ^^^ SATURDAY: WHAT? NO, the Modal itself has these vvv just pass the methods!
 
 	useEffect(() => {
+		if (isSignedIn) refreshData()
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isSignedIn])
+	/*
+	useEffect(() => {
 		const appInst = appdataSvc ?? new appdata(() => { setDataSvcLoadTime(new Date().toISOString()) });
 		setAppdataSvc(appInst)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [])
+	}, [])*/
 
 	useEffect(() => {
 		if (appdataSvc && dataSvcLoadTime) {
