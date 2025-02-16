@@ -1,15 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useState, useEffect } from 'react'
-import * as bootstrap from 'bootstrap'
+import { useState, useEffect, useContext } from 'react'
 import { IJournalDream, IJournalEntry, InductionTypes } from './app.types'
 import { Calendar3, ChatLeftText, Clock, PlusCircle, Save, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
 import { DateTime } from 'luxon'
-import { appdata } from './appdata'
-import Modal from 'bootstrap/js/dist/modal'
+import { DataContext } from '../api-google/DataContext'
+import * as bootstrap from 'bootstrap'
 import ModalReactTags from './components/modal-react-tags'
+import Modal from 'bootstrap/js/dist/modal'
 
 export interface IModalEntryProps {
-	appdataSvc: appdata
 	currEntry?: IJournalEntry
 	currDreamIdx?: number
 	showModal: boolean
@@ -17,6 +16,8 @@ export interface IModalEntryProps {
 }
 
 export default function ModalEntry(props: IModalEntryProps) {
+	const { getUniqueDreamTags, doesEntryDateExist, doEntryAdd, doEntryEdit, doEntryDelete } = useContext(DataContext)
+	//
 	const NEW_DREAM = {
 		title: '',
 		notes: '',
@@ -44,13 +45,13 @@ export default function ModalEntry(props: IModalEntryProps) {
 	/** Set/Clear Entry */
 	useEffect(() => {
 		setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY })
-		if (props.appdataSvc) setUniqueTags(props.appdataSvc.getUniqueDreamTags())
+		setUniqueTags(getUniqueDreamTags())
 
 		if (modal) {
 			if (props.showModal) modal.show()
 			else modal.hide()
 		}
-	}, [modal, props.appdataSvc, props.currEntry, props.showModal])
+	}, [modal, props.currEntry, props.showModal])
 
 	useEffect(() => setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry])
 
@@ -66,13 +67,13 @@ export default function ModalEntry(props: IModalEntryProps) {
 
 	function handleSave() {
 		if (props.currEntry) {
-			props.appdataSvc.doEntryEdit(currEntry, props.currEntry.entryDate)
+			doEntryEdit(currEntry, props.currEntry.entryDate)
 		} else {
-			if (props.appdataSvc.doesEntryDateExist(currEntry.entryDate)) {
+			if (doesEntryDateExist(currEntry.entryDate)) {
 				alert('Date already exists!')
 				return
 			}
-			props.appdataSvc.doEntryAdd(currEntry)
+			doEntryAdd(currEntry)
 		}
 
 		doSaveDataFile()
@@ -86,13 +87,13 @@ export default function ModalEntry(props: IModalEntryProps) {
 	function handleDelete() {
 		if (!confirm('PLEASE CONFIRM\n^^^^^^ ^^^^^^^\n\nYou are deleting this *entire journal entry*!')) return
 
-		props.appdataSvc.doEntryDelete(currEntry.entryDate)
+		doEntryDelete(currEntry.entryDate)
 		doSaveDataFile()
 	}
 
 	async function doSaveDataFile() {
 		setIsBusySave(true)
-		await props.appdataSvc.doSaveDataFile()
+		await doSaveDataFile()
 		handleClose()
 	}
 
@@ -118,7 +119,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 									const chgEntry = { ...currEntry }
 									chgEntry.entryDate = ev.currentTarget.value
 									setCurrEntry(chgEntry)
-									setIsDateDupe(props.appdataSvc.doesEntryDateExist(ev.currentTarget.value))
+									setIsDateDupe(doesEntryDateExist(ev.currentTarget.value))
 								}}
 								className={`form-control form-control-sm ${isDateDupe && 'is-invalid'}`}
 								required

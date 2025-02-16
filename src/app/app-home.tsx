@@ -27,33 +27,21 @@
  *  SOFTWARE.
  */
 
-import { useContext, useState } from 'react'
-import { APP_VER, IDriveDataFile, IJournalEntry } from './app.types'
+import { useContext } from 'react'
+import { APP_VER, IJournalEntry } from './app.types'
 import { AuthContext } from '../api-google/AuthContext'
+import { DataContext } from '../api-google/DataContext'
 import { Plus } from 'react-bootstrap-icons'
 import LogoBase64 from '../img/logo_base64'
 
 interface Props {
-	dataFile: IDriveDataFile
 	setShowModal: (show: boolean) => void
 	setCurrEntry: (entry: IJournalEntry | undefined) => void
 }
 
 export default function TabHome(props: Props) {
-	const { isSignedIn, userProfile } = useContext(AuthContext)
-	const [isBusy, setIsBusy] = useState(false)
-
-	async function doAuthSignIn() {
-		setIsBusy(true)
-		//await props.appdataSvc.doAuthSignIn()
-		setIsBusy(false)
-	}
-
-	async function doReadDataFile() {
-		setIsBusy(true)
-		//await props.appdataSvc.doRefreshDataFile()
-		setIsBusy(false)
-	}
+	const { isSignedIn, signIn, signOut, userProfile } = useContext(AuthContext)
+	const { isLoading, refreshData, driveDataFile } = useContext(DataContext)
 
 	function doShowNewEntryModal() {
 		props.setCurrEntry(undefined)
@@ -89,12 +77,12 @@ export default function TabHome(props: Props) {
 					</div>
 					<div className='row mt-4'>
 						<div className='col'>
-							<button className='btn btn-outline-warning btn-lg w-100' onClick={() => doReadDataFile()}>
+							<button className='btn btn-outline-warning btn-lg w-100' onClick={() => refreshData()}>
 								Reload Data
 							</button>
 						</div>
 						<div className='col'>
-							<button className='btn btn-outline-danger btn-lg w-100' onClick={() => alert('WIP:')}>
+							<button className='btn btn-outline-danger btn-lg w-100' onClick={() => signOut()}>
 								Sign Out
 							</button>
 						</div>
@@ -105,7 +93,7 @@ export default function TabHome(props: Props) {
 			cardAuthUser = (
 				<div>
 					<p className='card-text mb-4'>Please sign-in to allow access to Google Drive space.</p>
-					<button className='btn btn-primary' onClick={() => doAuthSignIn()}>
+					<button className='btn btn-primary' onClick={() => signIn()}>
 						Sign In/Authorize
 					</button>
 				</div>
@@ -116,33 +104,33 @@ export default function TabHome(props: Props) {
 	}
 
 	function renderCardDataFile(): JSX.Element {
-		return isBusy ? (
+		return isLoading ? (
 			<div className='text-center'>
 				<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
 					<span className='visually-hidden' />
 				</div>
 				<div>Loading/Saving...</div>
 			</div>
-		) : props.dataFile ? (
+		) : driveDataFile ? (
 			<section>
 				<div className='row mb-3'>
 					<div className='col'>
 						<h6 className='card-title text-secondary'>File Name</h6>
-						<h4 className='fw-light mb-0'>{props.dataFile?.name || '(?)'}</h4>
+						<h4 className='fw-light mb-0'>{driveDataFile?.name || '(?)'}</h4>
 					</div>
 					<div className='col-auto text-end'>
 						<h6 className='card-title text-secondary'>Entries</h6>
-						<h4 className='fw-light mb-0'>{props.dataFile?.entries ? props.dataFile.entries.length : '-'}</h4>
+						<h4 className='fw-light mb-0'>{driveDataFile?.entries ? driveDataFile.entries.length : '-'}</h4>
 					</div>
 				</div>
 				<div className='row mt-4'>
 					<div className='col'>
 						<h6 className='card-title text-secondary'>Last Saved</h6>
-						<h4 className='fw-light mb-0'>{props.dataFile?.modifiedTime ? new Date(props.dataFile.modifiedTime).toLocaleString() : '-'}</h4>
+						<h4 className='fw-light mb-0'>{driveDataFile?.modifiedTime ? new Date(driveDataFile.modifiedTime).toLocaleString() : '-'}</h4>
 					</div>
 					<div className='col-auto text-end'>
 						<h6 className='card-title text-secondary'>File Size</h6>
-						<h4 className='fw-light mb-0'>{props.dataFile?.size ? getReadableFileSizeString(Number(props.dataFile.size)) : '-'}</h4>
+						<h4 className='fw-light mb-0'>{driveDataFile?.size ? getReadableFileSizeString(Number(driveDataFile.size)) : '-'}</h4>
 					</div>
 				</div>
 			</section>
@@ -176,7 +164,7 @@ export default function TabHome(props: Props) {
 						</h3>
 					</div>
 					{isSignedIn && <div className='col-auto'>
-						<button className='btn btn-primary px-3 px-md-4 text-uppercase' type='button' disabled={!props.dataFile || isBusy} onClick={() => doShowNewEntryModal()}>
+						<button className='btn btn-primary px-3 px-md-4 text-uppercase' type='button' disabled={!driveDataFile || isLoading} onClick={() => doShowNewEntryModal()}>
 							Create
 							<br />
 							Entry
@@ -223,7 +211,7 @@ export default function TabHome(props: Props) {
 								</strong>{' '}
 								on your Google Drive. (This app cannot access your other Google Drive files)
 							</p>
-							<button className='btn btn-outline-primary btn-lg mt-3 w-100' onClick={() => doAuthSignIn()}>
+							<button className='btn btn-outline-primary btn-lg mt-3 w-100' onClick={() => signIn()}>
 								Sign In
 							</button>
 						</div>
