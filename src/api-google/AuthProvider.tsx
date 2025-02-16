@@ -1,6 +1,6 @@
 import React, { useState, useEffect, ReactNode } from 'react';
-import { gapi } from 'gapi-script';
 import { AuthContext } from './AuthContext';
+import { gapi } from 'gapi-script';
 
 interface AuthProviderProps {
 	children: ReactNode;
@@ -8,6 +8,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
+	const [userProfile, setUserProfile] = useState<gapi.auth2.BasicProfile | null>(null)
 
 	useEffect(() => {
 		try {
@@ -23,6 +24,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		}
 	}, []);
 
+	useEffect(() => {
+		if (isSignedIn) {
+			setUserProfile(fetchUserProfile())
+		}
+		else {
+			setUserProfile(null)
+		}
+	}, [isSignedIn]);
+
 	const signIn = () => {
 		gapi.auth2.getAuthInstance().signIn();
 	};
@@ -31,8 +41,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		gapi.auth2.getAuthInstance().signOut();
 	};
 
+	const fetchUserProfile = (): gapi.auth2.BasicProfile | null => {
+		const authInstance = gapi.auth2.getAuthInstance();
+		return authInstance ? authInstance.currentUser.get().getBasicProfile() : null;
+	};
+
 	return (
-		<AuthContext.Provider value={{ isSignedIn, signIn, signOut }}>
+		<AuthContext.Provider value={{ isSignedIn, signIn, signOut, userProfile }}>
 			{children}
 		</AuthContext.Provider>
 	);
