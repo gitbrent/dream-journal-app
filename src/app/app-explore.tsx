@@ -27,9 +27,10 @@
  *  SOFTWARE.
  */
 
-import { useState, useEffect, useMemo } from 'react'
-import { IDriveConfFile, IDriveDataFile, IJournalEntry, MetaType } from './app.types'
+import { useContext, useEffect, useMemo, useState } from 'react'
+import { IJournalEntry, MetaType } from './app.types'
 import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { DataContext } from '../api-google/DataContext'
 import { DateTime } from 'luxon'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
@@ -48,9 +49,6 @@ import TableEntries from './components/table-entries'
  */
 
 export interface Props {
-	confFile?: IDriveConfFile
-	dataFile: IDriveDataFile
-	isBusyLoad: boolean
 	setShowModal: (show: boolean) => void
 	setCurrEntry: (entry: IJournalEntry) => void
 }
@@ -80,6 +78,8 @@ type AvgDreamsPerMonth = {
 }
 
 export default function TabExplore(props: Props) {
+	const { isLoading, driveDataFile } = useContext(DataContext)
+	//
 	const [filterDrmChtMonths, setFilterDrmChtMonths] = useState(18)
 	const [filterDrmChtShowStard, setFilterDrmChtShowStard] = useState(true)
 	const [filterDrmChtShowNotag, setFilterDrmChtShowNotag] = useState(true)
@@ -90,13 +90,13 @@ export default function TabExplore(props: Props) {
 
 	const allTimeMonths = useMemo(() => {
 		let months = 1
-		if (props.dataFile) {
-			const ad1 = DateTime.fromISO(props.dataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
-			const ad2 = DateTime.fromISO(props.dataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
+		if (driveDataFile) {
+			const ad1 = DateTime.fromISO(driveDataFile.entries.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))[0].entryDate)
+			const ad2 = DateTime.fromISO(driveDataFile.entries.sort((a, b) => ((a.entryDate || '000') > (b.entryDate || '000') ? -1 : 1))[0].entryDate)
 			months = Math.round(ad2.diff(ad1, 'months').months) + 1
 		}
 		return months
-	}, [props.dataFile])
+	}, [driveDataFile])
 
 	const avgDreamsPerMonth = useMemo(() => {
 		interface SumByYear {
@@ -107,8 +107,8 @@ export default function TabExplore(props: Props) {
 		const sumByYear: SumByYear[] = []
 		const avgData: AvgDreamsPerMonth = {}
 
-		if (props.dataFile) {
-			props.dataFile.entries
+		if (driveDataFile) {
+			driveDataFile.entries
 				.sort((a, b) => ((a.entryDate || 'zzz') < (b.entryDate || 'zzz') ? -1 : 1))
 				.forEach((entry) => {
 					const entryDate = DateTime.fromISO(entry.entryDate)
@@ -133,7 +133,7 @@ export default function TabExplore(props: Props) {
 			})
 		}
 		return avgData
-	}, [props.dataFile])
+	}, [driveDataFile])
 
 	useEffect(() => {
 		const handler = setTimeout(() => setDebouncedValue(filterText), 500)
@@ -146,8 +146,8 @@ export default function TabExplore(props: Props) {
 			.minus({ months: filterDrmChtMonths - 1 })
 			.set({ day: 0, hour: 0, minute: 0, second: 0 })
 
-		if (props.dataFile && props.dataFile.entries && props.dataFile.entries.length > 0) {
-			tmpEntries = props.dataFile.entries.filter(
+		if (driveDataFile && driveDataFile.entries && driveDataFile.entries.length > 0) {
+			tmpEntries = driveDataFile.entries.filter(
 				(entry) =>
 					DateTime.fromISO(entry.entryDate) > dateMaxAge &&
 					(!debouncedValue ||
@@ -159,7 +159,7 @@ export default function TabExplore(props: Props) {
 		}
 
 		return tmpEntries
-	}, [props.dataFile, filterDrmChtMonths, debouncedValue])
+	}, [driveDataFile, filterDrmChtMonths, debouncedValue])
 
 	const chartDataDreams = useMemo(() => {
 		const tmpChartData: IChartData[] = []
@@ -211,7 +211,7 @@ export default function TabExplore(props: Props) {
 								title='search tags'
 								className='form-control'
 								onChange={(event) => setFilterText(event.target.value)}
-								disabled={!props.dataFile ? true : false}
+								disabled={!driveDataFile ? true : false}
 							/>
 							<label htmlFor='floatingDreamtagExp' className='text-nowrap'>
 								Search Tags
@@ -291,7 +291,7 @@ export default function TabExplore(props: Props) {
 	function renderMetrics(): JSX.Element {
 		return (
 			<section className='be-bg-darkest py-4 mb-4'>
-				<HeaderMetrics entries={filteredEntries} isBusyLoad={props.isBusyLoad} showStats={true} onlyMetrics={true} />
+				<HeaderMetrics entries={filteredEntries} isBusyLoad={isLoading} showStats={true} onlyMetrics={true} />
 			</section>
 		)
 	}
@@ -325,15 +325,15 @@ export default function TabExplore(props: Props) {
 	function renderTable(): JSX.Element {
 		return (
 			<section className='be-sec-table'>
-				<TableEntries entries={filteredEntries} isBusyLoad={props.isBusyLoad} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
+				<TableEntries entries={filteredEntries} isBusyLoad={isLoading} setShowModal={props.setShowModal} setCurrEntry={props.setCurrEntry} />
 			</section>
 		)
 	}
 
 	// -----------------------------------------------------------------------
 
-	return !props.dataFile || !props.dataFile.entries ? (
-		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
+	return !driveDataFile?.entries ? (
+		<AlertGdriveStatus isBusyLoad={isLoading} />
 	) : (
 		<section className='m-4'>
 			<div className='card'>

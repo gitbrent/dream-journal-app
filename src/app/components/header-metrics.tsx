@@ -28,11 +28,12 @@
  */
 
 import { useContext, useMemo } from 'react'
-import { IDreamSignTagGroup, MetaType } from '../app.types'
+import { IDreamSignTagGroup, IJournalEntry, MetaType } from '../app.types'
 import { DataContext } from '../../api-google/DataContext'
 import { DateTime } from 'luxon'
 
 interface Props {
+	entries?: IJournalEntry[]
 	isBusyLoad: boolean
 	showStats: boolean
 	onlyMetrics?: boolean
@@ -42,8 +43,8 @@ export default function HeaderMetrics(props: Props) {
 	const { driveDataFile } = useContext(DataContext)
 
 	const dataEntries = useMemo(() => {
-		return driveDataFile?.entries || []
-	}, [driveDataFile])
+		return props.entries || driveDataFile?.entries || []
+	}, [driveDataFile?.entries, props.entries])
 
 	const totalMonths = useMemo(() => {
 		if (!dataEntries || dataEntries.length === 0) return 0
