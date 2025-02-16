@@ -27,8 +27,8 @@ import AlertGdriveStatus from './components/alert-gstat'
 // ....: then we can stop passing dataSvc around!
 
 export default function AppMain() {
-	const { isSignedIn, signIn, signOut } = useContext(AuthContext)
-	const { userProfile, refreshData } = useContext(DataContext)
+	const { isSignedIn, signIn } = useContext(AuthContext)
+	const { refreshData } = useContext(DataContext)
 	//
 	const DEF_AUTH_STATE: IAuthState = {
 		status: AuthState.Unauthenticated,
@@ -53,7 +53,7 @@ export default function AppMain() {
 		size: '',
 	}
 	const [isBusyLoad, setIsBusyLoad] = useState(false) // TODO: get rid of this, stop passing to tabs, send an entire JSX `<AlertGdriveStatus />` if needed
-	const [dataSvcLoadTime, setDataSvcLoadTime] = useState('')
+	//const [dataSvcLoadTime, setDataSvcLoadTime] = useState('')
 	const [appdataSvc, setAppdataSvc] = useState<appdata>()
 	const [authState, setAuthState] = useState<IAuthState>(DEF_AUTH_STATE)
 	const [confFile, setConfFile] = useState<IDriveConfFile>(DEF_CONF_FILE)
@@ -74,7 +74,7 @@ export default function AppMain() {
 		setAppdataSvc(appInst)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])*/
-
+	/*
 	useEffect(() => {
 		if (appdataSvc && dataSvcLoadTime) {
 			if (IS_LOCALHOST) console.log(`[MAIN] appdataSvc.authState = ${appdataSvc.authState.status}`)
@@ -84,6 +84,7 @@ export default function AppMain() {
 			setIsBusyLoad(false)
 		}
 	}, [appdataSvc, dataSvcLoadTime])
+	*/
 
 	const Modal = () => {
 		return appdataSvc
@@ -179,20 +180,59 @@ export default function AppMain() {
 		)
 	}
 
+	// NEW: WIP:
+	function renderLogin(): JSX.Element {
+		return (
+			<section id="contHome" className="m-5">
+				<div id="loginCont" className="text-center bg-black p-5 rounded">
+					<img src="/google-drive.png" alt="GoogleDriveLogo" className="w-25" />
+					<div className="my-3">
+						<div className="display-6">Google Drive</div>
+						<div className="display-6">Media Viewer</div>
+					</div>
+					<button type="button" className='btn btn-lg bg-success w-100 mt-4' onClick={signIn}>Sign In with Google</button>
+				</div>
+
+				<div className='card'>
+					<div className='card-header bg-primary'>
+						<h5 className='card-title text-white'>Google Drive Cloud Integration</h5>
+					</div>
+					<div className='card-body p-4'>
+						<p className='card-text'>
+							This application uses your Google Drive to store dream journals so they are safe, secure, and accessible on any of your devices.
+						</p>
+						<p className='card-text'>
+							Click &quot;Sign In&quot;, select the Google account to use with this app, view the request permissions page asking to create and modify{' '}
+							<strong>
+								<u>only its own files</u>
+							</strong>{' '}
+							on your Google Drive. (This app cannot access your other Google Drive files)
+						</p>
+						<button className='btn btn-outline-primary btn-lg mt-3 w-100' onClick={signIn}>Sign In</button>
+					</div>
+				</div>
+
+			</section>
+		)
+	}
+
 	return (
-		<BrowserRouter>
-			{Nav()}
-			{Modal()}
-			<Routes>
-				<Route path='/' element={Home()} />
-				<Route path='/bedtime' element={Bedtime()} />
-				<Route path='/explore' element={Explore()} />
-				<Route path='/journal' element={Journal()} />
-				<Route path='/tags' element={Tags()} />
-				<Route path='/search' element={Search()} />
-				<Route path='/import' element={Import()} />
-				<Route path='/admin' element={Admin()} />
-			</Routes>
-		</BrowserRouter>
+		!isSignedIn ?
+			renderLogin()
+			:
+			<BrowserRouter>
+				{Nav()}
+				{Modal()}
+				<Routes>
+					<Route path='/' element={Home()} />
+					<Route path='/bedtime' element={Bedtime()} />
+					<Route path='/explore' element={Explore()} />
+					<Route path='/journal' element={Journal()} />
+					<Route path='/tags' element={Tags()} />
+					<Route path='/search' element={Search()} />
+					<Route path='/import' element={Import()} />
+					<Route path='/admin' element={Admin()} />
+				</Routes>
+			</BrowserRouter>
 	)
 }

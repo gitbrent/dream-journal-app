@@ -1,11 +1,6 @@
 import { IDriveConfFile, IDriveDataFile } from "../app/app.types"
 import { IGapiFile } from "../app/googlegsi.types"
 
-const gapiConfFile: IGapiFile | undefined | null = null
-const gapiDataFile: IGapiFile | undefined | null = null
-const driveConfFile: IDriveConfFile | undefined | null = null
-const driveDataFile: IDriveDataFile | undefined | null = null
-
 /*
 driveConfFile = {
 		id: '',
