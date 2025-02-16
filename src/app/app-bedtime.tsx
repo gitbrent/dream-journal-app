@@ -27,8 +27,8 @@
  *  SOFTWARE.
  */
 
-import { useState, useEffect, useMemo } from 'react'
-import { IConfMetaCats, IDriveConfFile, IDriveDataFile, IJournalEntry, ISearchMatch, SearchScopes } from './app.types'
+import { useState, useEffect, useMemo, useContext } from 'react'
+import { IConfMetaCats, IJournalEntry, ISearchMatch, SearchScopes } from './app.types'
 import {
 	ArrowDown,
 	ArrowUp,
@@ -56,30 +56,28 @@ import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
 import SearchResults from './components/search-results'
 //import LocalAdminBrent from './z.admin.local'
+import { DataContext } from '../api-google/DataContext'
 
 export interface Props {
-	confFile?: IDriveConfFile
-	dataFile?: IDriveDataFile
-	isBusyLoad: boolean
 	setShowModal: (show: boolean) => void
 	setCurrEntry: (entry: IJournalEntry) => void
 	setCurrDreamIdx: (idx: number) => void
 }
 
 export default function TabBedtime(props: Props) {
-	const isBusySave = false
-	//const [isBusySave, setIsBusySave] = useState(false)
+	const { isLoading, driveConfFile, driveDataFile } = useContext(DataContext)
 	const [lucidGoals, setLucidGoals] = useState<IConfMetaCats[]>()
+	const isBusySave = false
 
 	useEffect(() => {
-		if (props?.confFile?.lucidGoals) setLucidGoals(props.confFile.lucidGoals)
-	}, [props.confFile])
+		if (driveConfFile?.lucidGoals) setLucidGoals(driveConfFile.lucidGoals)
+	}, [driveConfFile])
 
 	const allLucids = useMemo(() => {
 		const allLucids: ISearchMatch[] = []
 
-		if (props.dataFile && props.dataFile.entries && props.dataFile.entries.length > 0) {
-			props.dataFile.entries.forEach((entry) => {
+		if (driveDataFile?.entries && driveDataFile?.entries.length > 0) {
+			driveDataFile.entries.forEach((entry) => {
 				entry.dreams.forEach((dream, idx) => {
 					if (dream.isLucidDream) allLucids.push({ entry: entry, dreamIdx: idx })
 				})
@@ -87,7 +85,7 @@ export default function TabBedtime(props: Props) {
 		}
 
 		return allLucids
-	}, [props.dataFile])
+	}, [driveDataFile])
 
 	const randLucids = useMemo(() => {
 		if (allLucids && allLucids.length > 0) {
@@ -105,8 +103,8 @@ export default function TabBedtime(props: Props) {
 		const tempDreams: ISearchMatch[] = []
 		const randDreams: ISearchMatch[] = []
 
-		if (props.dataFile && props.dataFile.entries && props.dataFile.entries.length > 0) {
-			props.dataFile.entries.forEach((entry) => {
+		if (driveDataFile?.entries && driveDataFile.entries.length > 0) {
+			driveDataFile.entries.forEach((entry) => {
 				entry.dreams.forEach((dream, idx) => {
 					if (!dream.isLucidDream) tempDreams.push({ entry: entry, dreamIdx: idx })
 				})
@@ -118,7 +116,7 @@ export default function TabBedtime(props: Props) {
 		}
 
 		return randDreams
-	}, [props.dataFile])
+	}, [driveDataFile])
 
 	// -----------------------------------------------------------------------
 
@@ -129,7 +127,7 @@ export default function TabBedtime(props: Props) {
 					<div className='card-header bg-primary h5 text-white'>Affirmations</div>
 					<div className='card-body p-4'>
 						<div className='row row-cols-2 g-4'>
-							{props.confFile?.mildAffirs.map((item, idx) => (
+							{driveConfFile?.mildAffirs.map((item, idx) => (
 								<div className='col' key={`goalTitle${idx}`}>
 									<h5 className='text-primary text-uppercase'>{item.title}</h5>
 									<ul className='mb-0'>
@@ -211,7 +209,7 @@ export default function TabBedtime(props: Props) {
 							<div className='card-header bg-success h5 text-white'>Visualize Success</div>
 							<div className='card-body'>
 								<div className='row row-cols-1 row-cols-md-3 g-4'>
-									{props.confFile?.dreamIdeas.map((item, idx) => (
+									{driveConfFile?.dreamIdeas.map((item, idx) => (
 										<section key={`ideaTitle${idx}`} className='col'>
 											<h6 className={`card-subtitle mb-2 ${item.headClass}`}>
 												{arrIcons[idx]}
@@ -638,12 +636,12 @@ export default function TabBedtime(props: Props) {
 		)
 	}
 
-	return !props.dataFile || !props.dataFile.entries ? (
-		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
+	return !driveDataFile?.entries ? (
+		<AlertGdriveStatus isBusyLoad={isLoading} />
 	) : (
 		<main className='m-4'>
-			<HeaderMetrics isBusyLoad={props.isBusyLoad} showStats={true} />
-			{/*<LocalAdminBrent confFile={props.confFile} />*/}
+			<HeaderMetrics isBusyLoad={isLoading} showStats={true} />
+			{/*<LocalAdminBrent confFile={driveConfFile} />*/}
 			<ul className='nav nav-tabs nav-fill' id='bedtimeTab' role='tablist'>
 				<li className='nav-item' role='presentation'>
 					<button
