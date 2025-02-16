@@ -642,7 +642,7 @@ export default function TabBedtime(props: Props) {
 		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
 	) : (
 		<main className='m-4'>
-			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
+			<HeaderMetrics isBusyLoad={props.isBusyLoad} showStats={true} />
 			{/*<LocalAdminBrent confFile={props.confFile} />*/}
 			<ul className='nav nav-tabs nav-fill' id='bedtimeTab' role='tablist'>
 				<li className='nav-item' role='presentation'>
