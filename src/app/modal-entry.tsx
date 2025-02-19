@@ -16,7 +16,9 @@ export interface IModalEntryProps {
 }
 
 export default function ModalEntry(props: IModalEntryProps) {
-	const { getUniqueDreamTags, doesEntryDateExist, doEntryAdd, doEntryEdit, doEntryDelete } = useContext(DataContext)
+	const {
+		getUniqueDreamTags, doesEntryDateExist, doEntryAdd, doEntryEdit, doEntryDelete, doSaveDataFile
+	} = useContext(DataContext)
 	//
 	const NEW_DREAM = {
 		title: '',
@@ -42,18 +44,21 @@ export default function ModalEntry(props: IModalEntryProps) {
 		if (!modal) setModal(new Modal(document.getElementById('myModal') as Element))
 	}, [])
 
-	/** Set/Clear Entry */
+	useEffect(() => {
+		if (modal) {
+			if (props.showModal) {
+				modal.show()
+			}
+			else {
+				modal.hide()
+			}
+		}
+	}, [modal, props.showModal])
+
 	useEffect(() => {
 		setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY })
 		setUniqueTags(getUniqueDreamTags())
-
-		if (modal) {
-			if (props.showModal) modal.show()
-			else modal.hide()
-		}
-	}, [modal, props.currEntry, props.showModal])
-
-	useEffect(() => setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry])
+	}, [props.currEntry])
 
 	useEffect(() => {
 		const someTabTriggerEl = document.getElementById(typeof props.currDreamIdx === 'number' ? `modalNav${props.currDreamIdx}` : 'modalNavNotes')
@@ -61,7 +66,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 			const tab = new bootstrap.Tab(someTabTriggerEl)
 			tab.show()
 		}
-	}, [props.currDreamIdx, props.currEntry, props.showModal])
+	}, [props.currEntry, props.showModal, props.currDreamIdx])
 
 	// -----------------------------------------------------------------------
 
@@ -81,6 +86,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 
 	function handleClose() {
 		setIsBusySave(false)
+		setIsDateDupe(false)
 		props.setShowModal(false)
 	}
 
@@ -88,10 +94,10 @@ export default function ModalEntry(props: IModalEntryProps) {
 		if (!confirm('PLEASE CONFIRM\n^^^^^^ ^^^^^^^\n\nYou are deleting this *entire journal entry*!')) return
 
 		doEntryDelete(currEntry.entryDate)
-		doSaveDataFile()
+		saveDataFile()
 	}
 
-	async function doSaveDataFile() {
+	async function saveDataFile() {
 		setIsBusySave(true)
 		await doSaveDataFile()
 		handleClose()

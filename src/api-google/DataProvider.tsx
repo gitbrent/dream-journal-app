@@ -121,12 +121,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
 	// WIP: TODO: copy old code
 	const getUniqueDreamTags = (): string[] => {
-		return [];
+		return []
 	}
 
-	// WIP: TODO: copy old code
 	const doesEntryDateExist = (date: string): boolean => {
-		return date ? true : false;
+		return driveDataFile && driveDataFile.entries.filter((item) => item.entryDate === date).length > 0 ? true : false
 	}
 
 	const doEntryAdd = async (entry: IJournalEntry) => {
