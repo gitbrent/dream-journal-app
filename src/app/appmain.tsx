@@ -6,7 +6,7 @@
  */
 import { useContext, useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import { IDriveDataFile, IDriveConfFile, IAuthState, AuthState, IJournalEntry } from './app.types'
+import { IJournalEntry } from './app.types'
 import { AuthContext } from '../api-google/AuthContext'
 import { DataContext } from '../api-google/DataContext'
 import TabHome from '../app/app-home'
@@ -20,8 +20,6 @@ import TabAdmin from '../app/app-admin'
 import TabImport from '../app/app-import'
 import ModalEntry from './modal-entry'
 import LogoBase64 from '../img/logo_base64'
-import { appdata } from './appdata'
-import AlertGdriveStatus from './components/alert-gstat'
 
 // TODO: create a modal here, then pass it everywhere (https://stackoverflow.com/a/65522446) also (https://stackoverflow.com/a/62503461)
 // ....: then we can stop passing dataSvc around!
@@ -30,34 +28,6 @@ export default function AppMain() {
 	const { isSignedIn, signIn } = useContext(AuthContext)
 	const { refreshData } = useContext(DataContext)
 	//
-	const DEF_AUTH_STATE: IAuthState = {
-		status: AuthState.Unauthenticated,
-		userName: '',
-		userPhoto: '',
-	}
-	const DEF_CONF_FILE: IDriveConfFile = {
-		id: '',
-		dreamIdeas: [],
-		lucidGoals: [],
-		mildAffirs: [],
-		tagTypeAW: [],
-		tagTypeCO: [],
-		tagTypeFO: [],
-		tagTypeAC: [],
-	}
-	const DEF_DATA_FILE: IDriveDataFile = {
-		id: '',
-		entries: [],
-		modifiedTime: '',
-		name: '',
-		size: '',
-	}
-	const [isBusyLoad, setIsBusyLoad] = useState(false) // TODO: get rid of this, stop passing to tabs, send an entire JSX `<AlertGdriveStatus />` if needed
-	//const [dataSvcLoadTime, setDataSvcLoadTime] = useState('')
-	const [appdataSvc, setAppdataSvc] = useState<appdata>()
-	//const [authState, setAuthState] = useState<IAuthState>(DEF_AUTH_STATE)
-	const [confFile, setConfFile] = useState<IDriveConfFile>(DEF_CONF_FILE)
-	const [dataFile, setDataFile] = useState<IDriveDataFile>(DEF_DATA_FILE)
 	const [showModal, setShowModal] = useState(false)
 	// WIP: VVVV
 	const [currEntry, setCurrEntry] = useState<IJournalEntry | undefined>()
@@ -91,23 +61,10 @@ export default function AppMain() {
 			? <ModalEntry appdataSvc={appdataSvc} currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
 			: <AlertGdriveStatus isBusyLoad={true} />
 	}*/
-	const Admin = () => {
-		return appdataSvc
-			? <TabAdmin setShowModal={setShowModal} setCurrEntry={setCurrEntry} />
-			: <AlertGdriveStatus isBusyLoad={true} />
-	}
-	const Import = () => {
-		return appdataSvc
-			? <TabImport dataFile={dataFile} appdataSvc={appdataSvc} />
-			: <AlertGdriveStatus isBusyLoad={true} />
-	}
-	const Bedtime = () => (<TabBedtime setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />)
-	const Explore = () => (<TabExplore setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
-	const Journal = () => (<TabJournal setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
 	const Search = () => (<TabSearch setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />)
 	const Tags = () => (<TabTags setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
 	const Nav = (): JSX.Element => {
-		const navLinkBaseClass = !dataFile ? 'nav-link disabled' : 'nav-link'
+		const navLinkBaseClass = !isSignedIn ? 'nav-link disabled' : 'nav-link'
 
 		return (
 			<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
@@ -220,13 +177,13 @@ export default function AppMain() {
 				{<ModalEntry currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />}
 				<Routes>
 					<Route path='/' element={<TabHome setShowModal={setShowModal} setCurrEntry={setCurrEntry} />} />
-					<Route path='/bedtime' element={Bedtime()} />
-					<Route path='/explore' element={Explore()} />
-					<Route path='/journal' element={Journal()} />
+					<Route path='/bedtime' element={<TabBedtime setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />} />
+					<Route path='/explore' element={<TabExplore setShowModal={setShowModal} setCurrEntry={setCurrEntry} />} />
+					<Route path='/journal' element={<TabJournal setShowModal={setShowModal} setCurrEntry={setCurrEntry} />} />
 					<Route path='/tags' element={Tags()} />
 					<Route path='/search' element={Search()} />
 					<Route path='/import' element={<TabImport />} />
-					<Route path='/admin' element={Admin()} />
+					<Route path='/admin' element={<TabAdmin setShowModal={setShowModal} setCurrEntry={setCurrEntry} />} />
 				</Routes>
 			</BrowserRouter>
 	)
