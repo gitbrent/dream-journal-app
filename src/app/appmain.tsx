@@ -55,7 +55,7 @@ export default function AppMain() {
 	const [isBusyLoad, setIsBusyLoad] = useState(false) // TODO: get rid of this, stop passing to tabs, send an entire JSX `<AlertGdriveStatus />` if needed
 	//const [dataSvcLoadTime, setDataSvcLoadTime] = useState('')
 	const [appdataSvc, setAppdataSvc] = useState<appdata>()
-	const [authState, setAuthState] = useState<IAuthState>(DEF_AUTH_STATE)
+	//const [authState, setAuthState] = useState<IAuthState>(DEF_AUTH_STATE)
 	const [confFile, setConfFile] = useState<IDriveConfFile>(DEF_CONF_FILE)
 	const [dataFile, setDataFile] = useState<IDriveDataFile>(DEF_DATA_FILE)
 	const [showModal, setShowModal] = useState(false)
@@ -93,7 +93,7 @@ export default function AppMain() {
 	}*/
 	const Admin = () => {
 		return appdataSvc
-			? <TabAdmin dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />
+			? <TabAdmin setShowModal={setShowModal} setCurrEntry={setCurrEntry} />
 			: <AlertGdriveStatus isBusyLoad={true} />
 	}
 	const Import = () => {
@@ -101,11 +101,11 @@ export default function AppMain() {
 			? <TabImport dataFile={dataFile} appdataSvc={appdataSvc} />
 			: <AlertGdriveStatus isBusyLoad={true} />
 	}
-	const Bedtime = () => (<TabBedtime confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />)
-	const Explore = () => (<TabExplore confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
-	const Journal = () => (<TabJournal dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
-	const Search = () => (<TabSearch dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />)
-	const Tags = () => (<TabTags dataFile={dataFile || null} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
+	const Bedtime = () => (<TabBedtime setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />)
+	const Explore = () => (<TabExplore setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
+	const Journal = () => (<TabJournal setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
+	const Search = () => (<TabSearch setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />)
+	const Tags = () => (<TabTags setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
 	const Nav = (): JSX.Element => {
 		const navLinkBaseClass = !dataFile ? 'nav-link disabled' : 'nav-link'
 
@@ -225,7 +225,7 @@ export default function AppMain() {
 					<Route path='/journal' element={Journal()} />
 					<Route path='/tags' element={Tags()} />
 					<Route path='/search' element={Search()} />
-					<Route path='/import' element={Import()} />
+					<Route path='/import' element={<TabImport />} />
 					<Route path='/admin' element={Admin()} />
 				</Routes>
 			</BrowserRouter>

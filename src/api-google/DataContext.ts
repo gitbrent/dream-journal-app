@@ -11,6 +11,7 @@ interface DataContextProps {
 	doEntryAdd: (entry: IJournalEntry) => void;
 	doEntryEdit: (entry: IJournalEntry, origEntryDate?: IJournalEntry['entryDate']) => void;
 	doEntryDelete: (entryDate: IJournalEntry['entryDate']) => void;
+	doSaveDataFile: () => Promise<boolean>;
 }
 
 export const DataContext = createContext<DataContextProps>({
@@ -23,4 +24,5 @@ export const DataContext = createContext<DataContextProps>({
 	doEntryAdd: () => { },
 	doEntryEdit: () => { },
 	doEntryDelete: () => { },
+	doSaveDataFile: async () => false,
 });

@@ -161,6 +161,51 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 		driveDataFile.entries.splice(delIdx, 1)
 	}
 
+	const doSaveDataFile = async (): Promise<boolean> => {
+		// DATA FIXES: (20191101):
+		/*
+			newState.entries.forEach(entry => {
+				entry.dreams.forEach(dream => {
+					// WORKED! if (typeof dream.dreamSigns === 'string') dream.dreamSigns = (dream.dreamSigns as string).split(',')
+					// WORKED! dream.dreamSigns = dream.dreamSigns.map(sign=>{ return sign.trim() })
+					// WORKED (20210127) dream.dreamSigns = dream.dreamSigns.map((sign) => sign.toLowerCase().trim())
+				})
+			})
+		*/
+
+		if (!driveDataFile) return Promise.resolve(false);
+
+		// A: fix [null] dates that can be created by import data/formatting, etc.
+		const entriesFix = driveDataFile.entries;
+		entriesFix.forEach((entry, idx) => (entry.entryDate = entry.entryDate ? entry.entryDate : `1999-01-0${idx + 1}`));
+
+		// B: sort all entries by `entryDate`
+		const jsonBody: object = {
+			entries: entriesFix.sort((a, b) => (a.entryDate > b.entryDate ? 1 : -1)),
+		};
+
+		// C: create file body
+		const reqHead = { name: 'dream-journal.json', description: 'Brain Cloud Dream Journal data file', mimeType: 'application/json' };
+		const reqBody: string = `--foo_bar_baz\nContent-Type: application/json; charset=UTF-8\n\n${JSON.stringify(reqHead)}\n` +
+			`--foo_bar_baz\nContent-Type: application/json\n\n${JSON.stringify(jsonBody, null, 2)}\n--foo_bar_baz--`;
+		const reqEnd = encodeURIComponent(reqBody).match(/%[89ABab]/g) || '';
+
+		// D: upload file
+		const token = gapi.auth.getToken()?.access_token;
+		const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveDataFile.id}?uploadType=multipart`, {
+			method: 'PATCH',
+			body: reqBody,
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'multipart/related; boundary=foo_bar_baz',
+				'Content-Length': `${reqBody.length + reqEnd.length}`,
+			},
+		});
+		log(3, `[uploadDataFile] response === ${response.status}`);
+
+		// LAST: Done
+		return response.ok
+	}
 
 	// ------------------------------------------------------------------------
 
@@ -169,7 +214,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 			value={{
 				refreshData, isLoading, driveConfFile, driveDataFile,
 				getUniqueDreamTags, doesEntryDateExist,
-				doEntryAdd, doEntryEdit, doEntryDelete,
+				doEntryAdd, doEntryEdit, doEntryDelete, doSaveDataFile
 			}}>
 			{children}
 		</DataContext.Provider>
