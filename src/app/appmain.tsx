@@ -135,35 +135,49 @@ export default function AppMain() {
 	// NEW: WIP:
 	function renderLogin(): JSX.Element {
 		return (
-			<section id="contHome" className="m-5">
-				<div id="loginCont" className="text-center bg-black p-5 rounded">
-					<img src="/google-drive.png" alt="GoogleDriveLogo" className="w-25" />
-					<div className="my-3">
-						<div className="display-6">Google Drive</div>
-						<div className="display-6">Media Viewer</div>
+			<section className='m-2 m-md-5'>
+				<div className='be-bg-darkest p-4 p-md-5'>
+					<div className='row align-items-center g-0 mb-4'>
+						<div className='col'>
+							<h1 className='display-4 text-primary mb-0 d-none d-md-none d-xl-block'>
+								<img src={LogoBase64} width='150' height='150' className='me-4' alt='Logo' />
+								Brain Cloud - Dream Journal
+							</h1>
+							<h3 className='text-primary mb-0 d-none d-md-none d-lg-block d-xl-none'>
+								<img src={LogoBase64} width='75' height='75' className='me-4' alt='Logo' />
+								Brain Cloud - Dream Journal
+							</h3>
+							<h2 className='text-primary mb-0 d-none d-md-block d-lg-none'>
+								Brain Cloud
+								<br />
+								Dream Journal
+							</h2>
+							<h3 className='text-primary mb-0 d-block d-md-none'>
+								Brain Cloud
+								<br />
+								Dream Journal
+							</h3>
+						</div>
 					</div>
-					<button type="button" className='btn btn-lg bg-success w-100 mt-4' onClick={signIn}>Sign In with Google</button>
+					<div className='card'>
+						<div className='card-header bg-primary'>
+							<h5 className='card-title text-white'>Google Drive Cloud Integration</h5>
+						</div>
+						<div className='card-body p-4'>
+							<p className='card-text'>
+								This application uses your Google Drive to store dream journals so they are safe, secure, and accessible on any of your devices.
+							</p>
+							<p className='card-text'>
+								Click &quot;Sign In&quot;, select the Google account to use with this app, view the request permissions page asking to create and modify{' '}
+								<strong>
+									<u>only its own files</u>
+								</strong>{' '}
+								on your Google Drive. (This app cannot access your other Google Drive files)
+							</p>
+							<button className='btn btn-primary btn-lg mt-3 w-100' onClick={signIn}>Sign In</button>
+						</div>
+					</div>
 				</div>
-
-				<div className='card'>
-					<div className='card-header bg-primary'>
-						<h5 className='card-title text-white'>Google Drive Cloud Integration</h5>
-					</div>
-					<div className='card-body p-4'>
-						<p className='card-text'>
-							This application uses your Google Drive to store dream journals so they are safe, secure, and accessible on any of your devices.
-						</p>
-						<p className='card-text'>
-							Click &quot;Sign In&quot;, select the Google account to use with this app, view the request permissions page asking to create and modify{' '}
-							<strong>
-								<u>only its own files</u>
-							</strong>{' '}
-							on your Google Drive. (This app cannot access your other Google Drive files)
-						</p>
-						<button className='btn btn-outline-primary btn-lg mt-3 w-100' onClick={signIn}>Sign In</button>
-					</div>
-				</div>
-
 			</section>
 		)
 	}

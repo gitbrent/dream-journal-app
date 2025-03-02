@@ -140,9 +140,9 @@ export default function TabHome(props: Props) {
 	}
 
 	return (
-		<section className='m-2 m-md-5' style={{ marginLeft: '10rem!important', marginRight: '10rem!important' }}>
+		<section className='m-2 m-md-5'>
 			<div className='be-bg-darkest p-4 p-md-5'>
-				<div className='row align-items-center g-0 mb-3'>
+				<div className='row align-items-center g-0 mb-4'>
 					<div className='col'>
 						<h1 className='display-4 text-primary mb-0 d-none d-md-none d-xl-block'>
 							<img src={LogoBase64} width='150' height='150' className='me-4' alt='Logo' />
@@ -164,24 +164,24 @@ export default function TabHome(props: Props) {
 						</h3>
 					</div>
 					{isSignedIn && <div className='col-auto'>
-						<button className='btn btn-primary px-3 px-md-4 text-uppercase' type='button' disabled={!driveDataFile || isLoading} onClick={() => doShowNewEntryModal()}>
-							Create
-							<br />
-							Entry
-							<Plus size='64' className='d-none  d-md-none d-lg-block' />
-							<Plus size='32' className='d-block d-lg-none mx-auto' />
+						<button className='btn btn-lg btn-success text-uppercase d-flex align-items-center' type='button' disabled={!driveDataFile || isLoading} onClick={() => doShowNewEntryModal()}>
+							<div className='text-start my-3 me-3'>
+								<Plus size='64' className='d-none  d-md-none d-lg-block' />
+								<Plus size='32' className='d-block d-lg-none mx-auto' />
+							</div>
+							<div className='text-start h3 my-3'>
+								<div>Create</div>
+								<div>Entry</div>
+							</div>
 						</button>
 					</div>}
 				</div>
-
-				<h6 className='my-5'>Record your daily dream journal entries into well-formatted JSON, enabling keyword searches, metrics and more.</h6>
-
 				{isSignedIn ?
 					<div className='row g-5 row-cols-1 row-cols-md-2'>
 						<div className='col'>
 							<div className='card h-100'>
-								<div className='card-header bg-success'>
-									<h4 className='card-title text-white'>{isSignedIn ? 'Signed In' : 'Signed Out'}</h4>
+								<div className='card-header bg-primary'>
+									<h5 className='card-title text-white'>{isSignedIn ? 'Signed In' : 'Signed Out'}</h5>
 								</div>
 								<div className='card-body'>{renderCardAuthUser()}</div>
 							</div>
