@@ -70,7 +70,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 
 	// -----------------------------------------------------------------------
 
-	function handleSave() {
+	async function handleSave() {
 		if (props.currEntry) {
 			doEntryEdit(currEntry, props.currEntry.entryDate)
 		} else {
@@ -81,7 +81,9 @@ export default function ModalEntry(props: IModalEntryProps) {
 			doEntryAdd(currEntry)
 		}
 
-		doSaveDataFile()
+		setIsBusySave(true)
+		await doSaveDataFile()
+		setIsBusySave(false)
 	}
 
 	function handleClose() {
@@ -91,8 +93,9 @@ export default function ModalEntry(props: IModalEntryProps) {
 	}
 
 	function handleDelete() {
+		// A: Verify
 		if (!confirm('PLEASE CONFIRM\n^^^^^^ ^^^^^^^\n\nYou are deleting this *entire journal entry*!')) return
-
+		// B: Delete
 		doEntryDelete(currEntry.entryDate)
 		saveDataFile()
 	}
@@ -100,6 +103,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 	async function saveDataFile() {
 		setIsBusySave(true)
 		await doSaveDataFile()
+		setIsBusySave(false)
 		handleClose()
 	}
 
