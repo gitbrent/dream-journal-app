@@ -14,11 +14,33 @@
 // @see https://support.google.com/cloud/answer/6158849?hl=en#zippy=%2Cstep-create-a-new-client-secret
 
 // APP
-export const APP_BLD = '20240921-1350'
-//export const APP_VER = `2.0.0-WIP ${APP_BLD}`
-export const APP_VER = '2.0.0'
+export const APP_BLD = '20250302-1212'
+//export const APP_VER = `2.1.0-WIP ${APP_BLD}`
+export const APP_VER = `2.1.0-WIP-NEW-API`
+//export const APP_VER = '2.1.0'
 export const IS_LOCALHOST = window.location.href.toLowerCase().indexOf('localhost') > -1
 export const VERBOSE_IMPORT = true
+
+// ============================================================================
+
+export const getLogLevel = (): number => {
+	const urlParams = new URLSearchParams(window.location.search)
+	const mode = urlParams.get('mode')
+
+	switch (mode) {
+		case 'debug': return 3
+		case 'api': return 2
+		case 'core': return 1
+		default: return 0
+	}
+}
+export const LOG_LEVEL = getLogLevel()
+
+export const log = (level: number, message: string) => {
+	if (level <= LOG_LEVEL) {
+		console.log(message)
+	}
+}
 
 // ============================================================================
 

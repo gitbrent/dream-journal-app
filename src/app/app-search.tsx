@@ -1,19 +1,20 @@
-import { useState } from 'react'
-import { IDriveDataFile, IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
+import { useContext, useState } from 'react'
+import { IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
 import { Search } from 'react-bootstrap-icons'
 import SearchResults from './components/search-results'
 import HeaderMetrics from './components/header-metrics'
 import AlertGdriveStatus from './components/alert-gstat'
+import { DataContext } from '../api-google/DataContext'
 
 export interface Props {
-	dataFile: IDriveDataFile
-	isBusyLoad: boolean
 	setShowModal: (show: boolean) => void
 	setCurrEntry: (entry: IJournalEntry) => void
 	setCurrDreamIdx: (idx: number) => void
 }
 
 export default function TabSearch(props: Props) {
+	const { isLoading, driveDataFile } = useContext(DataContext)
+	//
 	const localShowAlert = false // JSON.parse(localStorage.getItem('show-alert-search') || '')
 	//
 	const [showAlert, setShowAlert] = useState(typeof localShowAlert === 'boolean' ? localShowAlert : true)
@@ -52,9 +53,9 @@ export default function TabSearch(props: Props) {
 
 		if (searchOptMatchType === SearchMatchTypes.whole) regex = new RegExp('\\b' + searchTerm + '\\b', 'gi')
 		else if (searchOptMatchType === SearchMatchTypes.starts) regex = new RegExp('\\b' + searchTerm, 'gi')
-		if (!props.dataFile || props.dataFile.entries.length <= 0) return
+		if (!driveDataFile || driveDataFile.entries.length <= 0) return
 
-		props.dataFile.entries.forEach((entry) => {
+		driveDataFile.entries.forEach((entry) => {
 			(entry.dreams || []).forEach((dream, idx) => {
 				if (searchOptScope === SearchScopes.all) {
 					if (
@@ -95,11 +96,11 @@ export default function TabSearch(props: Props) {
 		setSearchMatches(arrFound)
 	}
 
-	return !props.dataFile || !props.dataFile.entries ? (
-		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
+	return !driveDataFile || !driveDataFile.entries ? (
+		<AlertGdriveStatus isBusyLoad={isLoading} />
 	) : (
-		<div className='container my-auto my-md-5'>
-			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
+		<section className='m-2 m-md-4'>
+			<HeaderMetrics isBusyLoad={isLoading} showStats={true} />
 
 			{showAlert && (
 				<div className='alert alert-secondary'>
@@ -152,13 +153,13 @@ export default function TabSearch(props: Props) {
 												setSearchTerm(event.target.value)
 												if (!event.target.value) setSearchMatches([])
 											}}
-											disabled={!props.dataFile ? true : false}
+											disabled={!driveDataFile ? true : false}
 										/>
 										<div className={searchTermInvalidMsg ? 'invalid-feedback d-block' : 'invalid-feedback'}>{searchTermInvalidMsg}</div>
 									</div>
 									<div className='col-auto'>
 										<label className='text-uppercase text-muted'>&nbsp;</label>
-										<button type='button' className='btn btn-outline-secondary w-100' onClick={doKeywordSearch} disabled={!props.dataFile ? true : false}>
+										<button type='button' className='btn btn-outline-secondary w-100' onClick={doKeywordSearch} disabled={!driveDataFile ? true : false}>
 											Search
 										</button>
 									</div>
@@ -213,6 +214,6 @@ export default function TabSearch(props: Props) {
 					</div>
 				</div>
 			</section>
-		</div>
+		</section>
 	)
 }

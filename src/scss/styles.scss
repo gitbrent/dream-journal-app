@@ -2,6 +2,12 @@
 :root {
 	--be-bg-darkest: #0a0b0c;
 	--be-bg-darker: #141618;
+	// for charts
+	--app-dream: #de3462;
+	--app-tagged: #4382cb;
+	--app-untagged: #52cbf1;
+	--app-star: #fbc600;
+	--app-lucid: #0b9c59;
 }
 
 // Core boostrap overrides
@@ -12,10 +18,11 @@ $pagination-color: #BDBDBD; // Softer text color
 $primary: #006cb3; // Deep blue
 
 // DESIGN PATTERN: rather than overload bootstrap `primary`, etc. create classes for each category in header/journal table
-$app-dream: #f82c6a; // "right red"
+$app-dream: #de3462; // "right red"
 $app-date: #93238d; // "pleasant purple"
 $app-tag: #1b968d; // "terrific teal"
 $app-tagged: #4382cb; // "beautiful light blue, perfect for bs-dark-mode"
+$app-untagged: #52cbf1; // Copied from chart color for "tagged"
 $app-star: #fbc600;
 $app-lucid: #0b9c59;
 
@@ -48,7 +55,7 @@ $nav-underline-link-active-color: var(--be-bg-darkest);
 // STEP 2: after overrides above
 // ============================================================================
 //@import "bootstrap";
-@import "node_modules/bootstrap/scss/bootstrap";
+@import "bootstrap/scss/bootstrap";
 
 // ============================================================================
 // STEP 3: add additional styles
@@ -130,6 +137,10 @@ label.required:after {
 // SECTION: my custom classes
 // ========================================================
 
+.cursor-link {
+	cursor: pointer;
+}
+
 .be-bg-darker {
 	background-color: var(--be-bg-darker);
 }
@@ -175,6 +186,14 @@ label.required:after {
 
 .bg-app-tagged {
 	background-color: $app-tagged;
+}
+
+.text-app-untagged {
+	color: $app-untagged;
+}
+
+.bg-app-untagged {
+	background-color: $app-untagged;
 }
 
 .text-app-date {

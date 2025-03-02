@@ -89,6 +89,15 @@ export default function DreamTagCard(props: Props) {
 			)}
 		</div>
 	) : (
+		<ul className="list-group list-group-flush">
+			<li className="list-group-item d-flex justify-content-between align-items-center">
+				<div className='cursor-link me-1' title='click to view dreams' onClick={() => setShowDreams(!showDreams)}>
+					{props.tagGrp.dreamSign}
+				</div>
+				<span className="badge text-bg-primary rounded-pill">{props.tagGrp.totalOccurs}</span>
+			</li>
+		</ul>)
+	{/*
 		<div className='col text-nowrap text-white user-select-none'>
 			<div className='row g-0 bg-info'>
 				<div className='col px-3 py-2 cursor-link' title='click to view dreams' onClick={() => setShowDreams(!showDreams)}>
@@ -100,5 +109,6 @@ export default function DreamTagCard(props: Props) {
 			</div>
 			{showDreams && <div className='bg-black-70 p-3'>{renderShowDreams()}</div>}
 		</div>
-	)
+		*/}
+
 }

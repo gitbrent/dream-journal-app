@@ -1,15 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useState, useEffect } from 'react'
-import * as bootstrap from 'bootstrap'
+import { useState, useEffect, useContext } from 'react'
 import { IJournalDream, IJournalEntry, InductionTypes } from './app.types'
 import { Calendar3, ChatLeftText, Clock, PlusCircle, Save, Trash, Trophy, TrophyFill } from 'react-bootstrap-icons'
 import { DateTime } from 'luxon'
-import { appdata } from './appdata'
-import Modal from 'bootstrap/js/dist/modal'
+import { DataContext } from '../api-google/DataContext'
+import * as bootstrap from 'bootstrap'
 import ModalReactTags from './components/modal-react-tags'
+import Modal from 'bootstrap/js/dist/modal'
 
 export interface IModalEntryProps {
-	appdataSvc: appdata
 	currEntry?: IJournalEntry
 	currDreamIdx?: number
 	showModal: boolean
@@ -17,6 +16,10 @@ export interface IModalEntryProps {
 }
 
 export default function ModalEntry(props: IModalEntryProps) {
+	const {
+		getUniqueDreamTags, doesEntryDateExist, doEntryAdd, doEntryEdit, doEntryDelete, doSaveDataFile
+	} = useContext(DataContext)
+	//
 	const NEW_DREAM = {
 		title: '',
 		notes: '',
@@ -41,18 +44,21 @@ export default function ModalEntry(props: IModalEntryProps) {
 		if (!modal) setModal(new Modal(document.getElementById('myModal') as Element))
 	}, [])
 
-	/** Set/Clear Entry */
+	useEffect(() => {
+		if (modal) {
+			if (props.showModal) {
+				modal.show()
+			}
+			else {
+				modal.hide()
+			}
+		}
+	}, [modal, props.showModal])
+
 	useEffect(() => {
 		setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY })
-		if (props.appdataSvc) setUniqueTags(props.appdataSvc.getUniqueDreamTags())
-
-		if (modal) {
-			if (props.showModal) modal.show()
-			else modal.hide()
-		}
-	}, [modal, props.appdataSvc, props.currEntry, props.showModal])
-
-	useEffect(() => setCurrEntry(props.currEntry ? props.currEntry : { ...NEW_ENTRY }), [props.currEntry])
+		setUniqueTags(getUniqueDreamTags())
+	}, [props.currEntry])
 
 	useEffect(() => {
 		const someTabTriggerEl = document.getElementById(typeof props.currDreamIdx === 'number' ? `modalNav${props.currDreamIdx}` : 'modalNavNotes')
@@ -60,39 +66,50 @@ export default function ModalEntry(props: IModalEntryProps) {
 			const tab = new bootstrap.Tab(someTabTriggerEl)
 			tab.show()
 		}
-	}, [props.currDreamIdx, props.currEntry, props.showModal])
+	}, [props.currEntry, props.showModal, props.currDreamIdx])
 
 	// -----------------------------------------------------------------------
 
-	function handleSave() {
+	async function handleSave() {
 		if (props.currEntry) {
-			props.appdataSvc.doEntryEdit(currEntry, props.currEntry.entryDate)
+			doEntryEdit(currEntry, props.currEntry.entryDate)
 		} else {
-			if (props.appdataSvc.doesEntryDateExist(currEntry.entryDate)) {
+			if (doesEntryDateExist(currEntry.entryDate)) {
 				alert('Date already exists!')
 				return
 			}
-			props.appdataSvc.doEntryAdd(currEntry)
+			doEntryAdd(currEntry)
 		}
 
-		doSaveDataFile()
+		setIsBusySave(true)
+		await doSaveDataFile()
+		setIsBusySave(false)
 	}
 
 	function handleClose() {
 		setIsBusySave(false)
+		setIsDateDupe(false)
 		props.setShowModal(false)
 	}
 
-	function handleDelete() {
-		if (!confirm('PLEASE CONFIRM\n^^^^^^ ^^^^^^^\n\nYou are deleting this *entire journal entry*!')) return
-
-		props.appdataSvc.doEntryDelete(currEntry.entryDate)
-		doSaveDataFile()
+	function handleAddEntry() {
+		const updEntry = { ...currEntry }
+		updEntry.dreams.push({ ...NEW_DREAM })
+		setCurrEntry(updEntry)
 	}
 
-	async function doSaveDataFile() {
+	function handleDeleteEntry() {
+		// A: Verify
+		if (!confirm('PLEASE CONFIRM\n^^^^^^ ^^^^^^^\n\nYou are deleting this *entire journal entry*!')) return
+		// B: Delete
+		doEntryDelete(currEntry.entryDate)
+		saveDataFile()
+	}
+
+	async function saveDataFile() {
 		setIsBusySave(true)
-		await props.appdataSvc.doSaveDataFile()
+		await doSaveDataFile()
+		setIsBusySave(false)
 		handleClose()
 	}
 
@@ -103,68 +120,58 @@ export default function ModalEntry(props: IModalEntryProps) {
 			<nav>
 				<div className='row align-items-center'>
 					<div className='col-6 col-lg-3 mb-4'>
-						<div className='input-group match-btn-group-sm'>
-							<div className='input-group-prepend' title='Entry Date'>
-								<span className='input-group-text px-2'>
-									<Calendar3 />
-								</span>
-							</div>
+						<div className='input-group'>
+							<span className='input-group-text' title='Entry Date'>
+								<Calendar3 />
+							</span>
 							<input
 								name='entryDate'
 								type='date'
 								title='(entry date)'
+								required
 								value={currEntry.entryDate}
 								onChange={(ev) => {
 									const chgEntry = { ...currEntry }
 									chgEntry.entryDate = ev.currentTarget.value
 									setCurrEntry(chgEntry)
-									setIsDateDupe(props.appdataSvc.doesEntryDateExist(ev.currentTarget.value))
+									setIsDateDupe(doesEntryDateExist(ev.currentTarget.value))
 								}}
-								className={`form-control form-control-sm ${isDateDupe && 'is-invalid'}`}
-								required
+								className={`form-control ${isDateDupe && 'is-invalid'}`}
 							/>
 						</div>
 					</div>
 					<div className='col-6 col-lg-3 mb-4'>
-						<div className='input-group match-btn-group-sm'>
-							<div className='input-group-prepend' title='Bed Time'>
-								<span className='input-group-text px-2'>
-									<Clock />
-								</span>
-							</div>
+						<div className='input-group'>
+							<span className='input-group-text' title='Bed Time'>
+								<Clock />
+							</span>
 							<input
 								name='bedTime'
 								type='time'
 								title='(bed time)'
+								required
 								value={currEntry.bedTime}
 								onChange={(ev) => {
 									const chgEntry = { ...currEntry }
 									chgEntry.bedTime = ev.currentTarget.value
 									setCurrEntry(chgEntry)
 								}}
-								className='form-control form-control-sm'
+								className='form-control'
 							/>
 						</div>
 					</div>
 					<div className='col mb-4'>
-						<div className='btn-group btn-group-sm my-auto w-100' role='group'>
-							<button
-								type='button'
-								onClick={() => {
-									const updEntry = { ...currEntry }
-									updEntry.dreams.push({ ...NEW_DREAM })
-									setCurrEntry(updEntry)
-								}}
-								className='btn btn-success w-100'>
-								<div className='row g-0 align-items-center'>
-									<div className='col-auto'>
-										<PlusCircle style={{ marginTop: '-2px' }} />
-									</div>
-									<div className='col'>Add Dream</div>
+						<div className='btn-group w-100' role='group'>
+							<button type='button' title='Add Dream' onClick={handleAddEntry} className='btn btn-success w-100'>
+								<div className='d-flex align-items-center'>
+									<PlusCircle className='me-2' />
+									<span>Add Dream</span>
 								</div>
 							</button>
-							<button type='button' onClick={() => handleDelete()} className='btn btn-danger w-25'>
-								<Trash size='1rem' style={{ marginTop: '-2px' }} />
+							<button type='button' title='Delete Entry' onClick={handleDeleteEntry} className='btn btn-danger w-auto'>
+								<div className='d-flex align-items-center'>
+									<Trash size={'1.25rem'} />
+								</div>
 							</button>
 						</div>
 					</div>
@@ -380,13 +387,13 @@ export default function ModalEntry(props: IModalEntryProps) {
 						<button type='button' className='btn btn-secondary' onClick={() => handleClose()}>
 							Close
 						</button>
-						<button type='submit' onClick={() => handleSave()} className='btn btn-primary px-5' disabled={isDateDupe}>
+						<button type='submit' onClick={() => handleSave()} className='btn btn-primary px-5' disabled={isBusySave || isDateDupe}>
 							{isBusySave ? (
 								<span className='spinner-border spinner-border-sm me-2' role='status' aria-hidden='true'></span>
 							) : (
 								<Save size='16' className='mt-n1 me-2' />
 							)}
-							Save
+							{isBusySave ? <span>Busy</span> : <span>Save</span>}
 						</button>
 					</div>
 				</div>

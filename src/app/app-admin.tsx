@@ -27,18 +27,15 @@
  *  SOFTWARE.
  */
 
-import { useState, useEffect } from 'react'
-import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDriveDataFile, IJournalEntry } from './app.types'
+import { useState, useEffect, useContext } from 'react'
+import { CardDreamSignGrpViewType, IDreamSignTagGroup, IJournalEntry } from './app.types'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
+import { DataContext } from '../api-google/DataContext'
 import DreamTagCard from './components/dreamtag-card'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'
-import { appdata } from './appdata'
 
 interface Props {
-	appdataSvc: appdata
-	dataFile: IDriveDataFile
-	isBusyLoad: boolean
 	setShowModal: (show: boolean) => void
 	setCurrEntry: (entry: IJournalEntry) => void
 }
@@ -50,6 +47,8 @@ enum FilterSortOrder {
 }
 
 export default function TabAdmin(props: Props) {
+	const { isLoading, driveDataFile, doEntryEdit, doSaveDataFile } = useContext(DataContext)
+	//
 	const [dreamTagGroups, setDreamTagGroups] = useState<IDreamSignTagGroup[]>([])
 	const [searchTerm, setSearchTerm] = useState('')
 	const [filterViewType, setFilterViewType] = useState<CardDreamSignGrpViewType>(CardDreamSignGrpViewType.md)
@@ -59,13 +58,13 @@ export default function TabAdmin(props: Props) {
 	const [badBedTimes, setBadBedTimes] = useState<IJournalEntry[]>([])
 
 	useEffect(() => {
-		if (!props.dataFile || !props.dataFile.entries) return
+		if (!driveDataFile || !driveDataFile.entries) return
 
 		const tagGroups: IDreamSignTagGroup[] = []
 		const dupeSigns: IJournalEntry[] = []
 		const bedTimes: IJournalEntry[] = []
 
-		props.dataFile.entries
+		driveDataFile.entries
 			.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 			.forEach((entry) => {
 				entry.dreams.forEach((dream) =>
@@ -104,34 +103,30 @@ export default function TabAdmin(props: Props) {
 		setDupeDreamSigns(dupeSigns)
 		// bedtime
 		setBadBedTimes(bedTimes)
-	}, [props.dataFile])
+	}, [driveDataFile])
 
 	// -----------------------------------------------------------------------
 
 	async function doMassUpdateTag(oldName: string, newName: string) {
 		let numUpdated = 0
 
-		props.dataFile.entries.forEach((entry) => {
-			const entryCopy = JSON.parse(JSON.stringify(entry)) as IJournalEntry
-			entryCopy.dreams.forEach((dream) =>
-				dream.dreamSigns?.forEach((sign, idx, arr) => {
-					if (sign === oldName) {
-						arr[idx] = newName.toLowerCase().trim()
-						props.appdataSvc.doEntryEdit(entryCopy)
-						numUpdated++
-					}
-				})
-			)
-		})
-
-		await props.appdataSvc.doSaveDataFile()
-		alert(`Updated ${numUpdated} dreams`)
-		/*
-		GDrive.doSaveDataFile()
-			.then(() => {
-				alert(`Updated ${numUpdated} dreams`)
+		if (driveDataFile) {
+			driveDataFile.entries.forEach((entry) => {
+				const entryCopy = JSON.parse(JSON.stringify(entry)) as IJournalEntry
+				entryCopy.dreams.forEach((dream) =>
+					dream.dreamSigns?.forEach((sign, idx, arr) => {
+						if (sign === oldName) {
+							arr[idx] = newName.toLowerCase().trim()
+							doEntryEdit(entryCopy)
+							numUpdated++
+						}
+					})
+				)
 			})
-			.catch((err) => alert(err))*/
+
+			await doSaveDataFile()
+			alert(`Updated ${numUpdated} dreams`)
+		}
 	}
 
 	function doMassUpdateBedtime() {
@@ -166,7 +161,7 @@ export default function TabAdmin(props: Props) {
 								value={searchTerm}
 								className='form-control'
 								onChange={(event) => setSearchTerm(event.target.value)}
-								disabled={!props.dataFile ? true : false}
+								disabled={!driveDataFile ? true : false}
 							/>
 							<label htmlFor='floatingDreamtag'>search {dreamTagGroups.length} unique tags</label>
 						</div>
@@ -176,7 +171,7 @@ export default function TabAdmin(props: Props) {
 							<select
 								id='floatingDisplay'
 								defaultValue={filterViewType}
-								disabled={!props.dataFile ? true : false}
+								disabled={!driveDataFile ? true : false}
 								onChange={(ev) => setFilterViewType(ev.currentTarget.value as CardDreamSignGrpViewType)}
 								className='form-select'>
 								{Object.keys(CardDreamSignGrpViewType).map((val) => (
@@ -312,11 +307,11 @@ export default function TabAdmin(props: Props) {
 		)
 	}
 
-	return !props.dataFile || !props.dataFile.entries ? (
-		<AlertGdriveStatus isBusyLoad={props.isBusyLoad} />
+	return !driveDataFile || !driveDataFile.entries ? (
+		<AlertGdriveStatus isBusyLoad={isLoading} />
 	) : (
-		<main className='container my-auto my-md-5'>
-			<HeaderMetrics dataFile={props.dataFile} isBusyLoad={props.isBusyLoad} showStats={true} />
+		<section className='m-2 m-md-4'>
+			<HeaderMetrics isBusyLoad={isLoading} showStats={true} />
 
 			<ul className='nav nav-tabs nav-fill' id='adminTab' role='tablist'>
 				<li className='nav-item' role='presentation'>
@@ -362,6 +357,6 @@ export default function TabAdmin(props: Props) {
 					{renderBadDates()}
 				</div>
 			</div>
-		</main>
+		</section>
 	)
 }

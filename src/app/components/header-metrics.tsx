@@ -27,12 +27,12 @@
  *  SOFTWARE.
  */
 
-import { useMemo } from 'react'
-import { IDreamSignTagGroup, IDriveDataFile, IJournalEntry, MetaType } from '../app.types'
+import { useContext, useMemo } from 'react'
+import { IDreamSignTagGroup, IJournalEntry, MetaType } from '../app.types'
+import { DataContext } from '../../api-google/DataContext'
 import { DateTime } from 'luxon'
 
 interface Props {
-	dataFile?: IDriveDataFile
 	entries?: IJournalEntry[]
 	isBusyLoad: boolean
 	showStats: boolean
@@ -40,9 +40,11 @@ interface Props {
 }
 
 export default function HeaderMetrics(props: Props) {
+	const { driveDataFile } = useContext(DataContext)
+
 	const dataEntries = useMemo(() => {
-		return (props.dataFile && props.dataFile.entries) || props.entries ? props.entries || props.dataFile?.entries : []
-	}, [props.dataFile, props.entries])
+		return props.entries || driveDataFile?.entries || []
+	}, [driveDataFile?.entries, props.entries])
 
 	const totalMonths = useMemo(() => {
 		if (!dataEntries || dataEntries.length === 0) return 0
@@ -149,10 +151,10 @@ export default function HeaderMetrics(props: Props) {
 					)}
 				</div>
 				<div className='col text-center d-none d-md-block' data-desc="untagged">
-					<h6 className='text-app-tagged text-uppercase mb-0'>Un-Tagged</h6>
-					<h1 className='text-app-tagged display-5 mb-0'>{totalUntagged || '-'}</h1>
+					<h6 className='text-app-untagged text-uppercase mb-0'>Un-Tagged</h6>
+					<h1 className='text-app-untagged display-5 mb-0'>{totalUntagged || '-'}</h1>
 					{props.showStats && (
-						<div className='badge rounded-pill bg-app-tagged w-100'>{totalDreams ? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
+						<div className='badge rounded-pill bg-app-untagged w-100'>{totalDreams ? ((totalUntagged / totalDreams) * 100).toFixed(2) + '%' : '0%'}</div>
 					)}
 				</div>
 				<div className='col text-center'>
@@ -173,5 +175,5 @@ export default function HeaderMetrics(props: Props) {
 		)
 	}
 
-	return <header>{(!props.entries && !props.dataFile) ? <div /> : props.onlyMetrics ? renderBody() : renderFull()}</header>
+	return <header>{(!driveDataFile) ? <div /> : props.onlyMetrics ? renderBody() : renderFull()}</header>
 }

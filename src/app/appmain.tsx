@@ -4,9 +4,11 @@
  * @see https://developers.google.com/drive/api/guides/fields-parameter
  * @see https://developers.google.com/drive/api/v3/reference/files/get
  */
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import { IDriveDataFile, IDriveConfFile, IAuthState, AuthState, IS_LOCALHOST, IJournalEntry } from './app.types'
+import { IJournalEntry } from './app.types'
+import { AuthContext } from '../api-google/AuthContext'
+import { DataContext } from '../api-google/DataContext'
 import TabHome from '../app/app-home'
 import TabBedtime from '../app/app-bedtime'
 import TabExplore from '../app/app-explore'
@@ -18,41 +20,14 @@ import TabAdmin from '../app/app-admin'
 import TabImport from '../app/app-import'
 import ModalEntry from './modal-entry'
 import LogoBase64 from '../img/logo_base64'
-import { appdata } from './appdata'
-import AlertGdriveStatus from './components/alert-gstat'
 
 // TODO: create a modal here, then pass it everywhere (https://stackoverflow.com/a/65522446) also (https://stackoverflow.com/a/62503461)
 // ....: then we can stop passing dataSvc around!
 
 export default function AppMain() {
-	const DEF_AUTH_STATE: IAuthState = {
-		status: AuthState.Unauthenticated,
-		userName: '',
-		userPhoto: '',
-	}
-	const DEF_CONF_FILE: IDriveConfFile = {
-		id: '',
-		dreamIdeas: [],
-		lucidGoals: [],
-		mildAffirs: [],
-		tagTypeAW: [],
-		tagTypeCO: [],
-		tagTypeFO: [],
-		tagTypeAC: [],
-	}
-	const DEF_DATA_FILE: IDriveDataFile = {
-		id: '',
-		entries: [],
-		modifiedTime: '',
-		name: '',
-		size: '',
-	}
-	const [isBusyLoad, setIsBusyLoad] = useState(false) // TODO: get rid of this, stop passing to tabs, send an entire JSX `<AlertGdriveStatus />` if needed
-	const [dataSvcLoadTime, setDataSvcLoadTime] = useState('')
-	const [appdataSvc, setAppdataSvc] = useState<appdata>()
-	const [authState, setAuthState] = useState<IAuthState>(DEF_AUTH_STATE)
-	const [confFile, setConfFile] = useState<IDriveConfFile>(DEF_CONF_FILE)
-	const [dataFile, setDataFile] = useState<IDriveDataFile>(DEF_DATA_FILE)
+	const { isSignedIn, signIn } = useContext(AuthContext)
+	const { refreshData } = useContext(DataContext)
+	//
 	const [showModal, setShowModal] = useState(false)
 	// WIP: VVVV
 	const [currEntry, setCurrEntry] = useState<IJournalEntry | undefined>()
@@ -60,11 +35,16 @@ export default function AppMain() {
 	// FIXME: ^^^ SATURDAY: WHAT? NO, the Modal itself has these vvv just pass the methods!
 
 	useEffect(() => {
+		if (isSignedIn) refreshData()
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isSignedIn])
+	/*
+	useEffect(() => {
 		const appInst = appdataSvc ?? new appdata(() => { setDataSvcLoadTime(new Date().toISOString()) });
 		setAppdataSvc(appInst)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [])
-
+	}, [])*/
+	/*
 	useEffect(() => {
 		if (appdataSvc && dataSvcLoadTime) {
 			if (IS_LOCALHOST) console.log(`[MAIN] appdataSvc.authState = ${appdataSvc.authState.status}`)
@@ -74,34 +54,17 @@ export default function AppMain() {
 			setIsBusyLoad(false)
 		}
 	}, [appdataSvc, dataSvcLoadTime])
-
+	*/
+	/*
 	const Modal = () => {
 		return appdataSvc
 			? <ModalEntry appdataSvc={appdataSvc} currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />
 			: <AlertGdriveStatus isBusyLoad={true} />
-	}
-	const Home = () => {
-		return appdataSvc
-			? <TabHome appdataSvc={appdataSvc} dataFile={dataFile} authState={authState} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />
-			: <AlertGdriveStatus isBusyLoad={true} />
-	}
-	const Admin = () => {
-		return appdataSvc
-			? <TabAdmin dataFile={dataFile} isBusyLoad={isBusyLoad} appdataSvc={appdataSvc} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />
-			: <AlertGdriveStatus isBusyLoad={true} />
-	}
-	const Import = () => {
-		return appdataSvc
-			? <TabImport dataFile={dataFile} appdataSvc={appdataSvc} />
-			: <AlertGdriveStatus isBusyLoad={true} />
-	}
-	const Bedtime = () => (<TabBedtime confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />)
-	const Explore = () => (<TabExplore confFile={confFile} dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
-	const Journal = () => (<TabJournal dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
-	const Search = () => (<TabSearch dataFile={dataFile} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />)
-	const Tags = () => (<TabTags dataFile={dataFile || null} isBusyLoad={isBusyLoad} setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
+	}*/
+	const Search = () => (<TabSearch setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />)
+	const Tags = () => (<TabTags setShowModal={setShowModal} setCurrEntry={setCurrEntry} />)
 	const Nav = (): JSX.Element => {
-		const navLinkBaseClass = !dataFile ? 'nav-link disabled' : 'nav-link'
+		const navLinkBaseClass = !isSignedIn ? 'nav-link disabled' : 'nav-link'
 
 		return (
 			<nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
@@ -169,20 +132,73 @@ export default function AppMain() {
 		)
 	}
 
+	// NEW: WIP:
+	function renderLogin(): JSX.Element {
+		return (
+			<section className='m-2 m-md-5'>
+				<div className='be-bg-darkest p-4 p-md-5'>
+					<div className='row align-items-center g-0 mb-4'>
+						<div className='col'>
+							<h1 className='display-4 text-primary mb-0 d-none d-md-none d-xl-block'>
+								<img src={LogoBase64} width='150' height='150' className='me-4' alt='Logo' />
+								Brain Cloud - Dream Journal
+							</h1>
+							<h3 className='text-primary mb-0 d-none d-md-none d-lg-block d-xl-none'>
+								<img src={LogoBase64} width='75' height='75' className='me-4' alt='Logo' />
+								Brain Cloud - Dream Journal
+							</h3>
+							<h2 className='text-primary mb-0 d-none d-md-block d-lg-none'>
+								Brain Cloud
+								<br />
+								Dream Journal
+							</h2>
+							<h3 className='text-primary mb-0 d-block d-md-none'>
+								Brain Cloud
+								<br />
+								Dream Journal
+							</h3>
+						</div>
+					</div>
+					<div className='card'>
+						<div className='card-header bg-primary'>
+							<h5 className='card-title text-white'>Google Drive Cloud Integration</h5>
+						</div>
+						<div className='card-body p-4'>
+							<p className='card-text'>
+								This application uses your Google Drive to store dream journals so they are safe, secure, and accessible on any of your devices.
+							</p>
+							<p className='card-text'>
+								Click &quot;Sign In&quot;, select the Google account to use with this app, view the request permissions page asking to create and modify{' '}
+								<strong>
+									<u>only its own files</u>
+								</strong>{' '}
+								on your Google Drive. (This app cannot access your other Google Drive files)
+							</p>
+							<button className='btn btn-primary btn-lg mt-3 w-100' onClick={signIn}>Sign In</button>
+						</div>
+					</div>
+				</div>
+			</section>
+		)
+	}
+
 	return (
-		<BrowserRouter>
-			{Nav()}
-			{Modal()}
-			<Routes>
-				<Route path='/' element={Home()} />
-				<Route path='/bedtime' element={Bedtime()} />
-				<Route path='/explore' element={Explore()} />
-				<Route path='/journal' element={Journal()} />
-				<Route path='/tags' element={Tags()} />
-				<Route path='/search' element={Search()} />
-				<Route path='/import' element={Import()} />
-				<Route path='/admin' element={Admin()} />
-			</Routes>
-		</BrowserRouter>
+		!isSignedIn ?
+			renderLogin()
+			:
+			<BrowserRouter>
+				{Nav()}
+				{<ModalEntry currEntry={currEntry} currDreamIdx={currDreamIdx} showModal={showModal} setShowModal={(show: boolean) => setShowModal(show)} />}
+				<Routes>
+					<Route path='/' element={<TabHome setShowModal={setShowModal} setCurrEntry={setCurrEntry} />} />
+					<Route path='/bedtime' element={<TabBedtime setShowModal={setShowModal} setCurrEntry={setCurrEntry} setCurrDreamIdx={setCurrDreamIdx} />} />
+					<Route path='/explore' element={<TabExplore setShowModal={setShowModal} setCurrEntry={setCurrEntry} />} />
+					<Route path='/journal' element={<TabJournal setShowModal={setShowModal} setCurrEntry={setCurrEntry} />} />
+					<Route path='/tags' element={Tags()} />
+					<Route path='/search' element={Search()} />
+					<Route path='/import' element={<TabImport />} />
+					<Route path='/admin' element={<TabAdmin setShowModal={setShowModal} setCurrEntry={setCurrEntry} />} />
+				</Routes>
+			</BrowserRouter>
 	)
 }
