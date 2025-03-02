@@ -119,9 +119,22 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 		}
 	}
 
-	// WIP: TODO: copy old code
 	const getUniqueDreamTags = (): string[] => {
-		return []
+		const arrTags: string[] = []
+
+		if (driveDataFile?.entries) {
+			driveDataFile.entries
+				.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
+				.forEach((entry) =>
+					entry.dreams.forEach((dream) =>
+						dream.dreamSigns?.forEach((tag) => {
+							if (arrTags.indexOf(tag) === -1) arrTags.push(tag)
+						})
+					)
+				)
+		}
+
+		return arrTags.sort()
 	}
 
 	const doesEntryDateExist = (date: string): boolean => {
