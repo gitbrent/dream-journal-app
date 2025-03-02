@@ -82,7 +82,8 @@ export default function ModalEntry(props: IModalEntryProps) {
 		}
 
 		setIsBusySave(true)
-		await doSaveDataFile()
+		const result = await doSaveDataFile()
+		if (!result) alert('Error saving data!')
 		setIsBusySave(false)
 	}
 
@@ -108,9 +109,14 @@ export default function ModalEntry(props: IModalEntryProps) {
 
 	async function saveDataFile() {
 		setIsBusySave(true)
-		await doSaveDataFile()
+		const result = await doSaveDataFile()
 		setIsBusySave(false)
-		handleClose()
+		if (!result) {
+			alert('Error saving data!')
+		}
+		else {
+			handleClose()
+		}
 	}
 
 	// -----------------------------------------------------------------------
@@ -305,7 +311,7 @@ export default function ModalEntry(props: IModalEntryProps) {
 						</div>
 					</div>
 				</div>
-				<div className='py-3'>
+				<div className='py-3' data-desc='tags'>
 					<ModalReactTags uniqueTags={uniqueTags} currEntry={currEntry} setCurrEntry={setCurrEntry} dreamIdx={dreamIdx} />
 				</div>
 				<div className='row' data-desc='details'>
