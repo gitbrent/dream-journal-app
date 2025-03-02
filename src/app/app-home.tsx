@@ -64,30 +64,24 @@ export default function TabHome(props: Props) {
 
 		if (isSignedIn) {
 			cardAuthUser = (
-				<div>
-					<div className='row mb-3'>
+				<section>
+					<div className='row mb-4'>
 						<div className='col'>
-							<h6 className='card-title text-secondary'>User Name</h6>
+							<h6 className='card-title text-primary-emphasis'>User Name</h6>
 							<h3 className='fw-light mb-0'>{userProfile?.getName() || '(?)'}</h3>
 						</div>
 						<div className='col-auto text-end'>
-							<h6 className='card-title text-secondary'>App Version</h6>
+							<h6 className='card-title text-primary-emphasis'>App Version</h6>
 							<h3 className='fw-light mb-0'>{APP_VER || '(?)'}</h3>
 						</div>
 					</div>
 					<div className='row mt-4'>
 						<div className='col'>
-							<button className='btn btn-outline-warning btn-lg w-100' onClick={() => refreshData()}>
-								Reload Data
-							</button>
-						</div>
-						<div className='col'>
-							<button className='btn btn-outline-danger btn-lg w-100' onClick={() => signOut()}>
-								Sign Out
-							</button>
+							<h6 className='card-title text-primary-emphasis'>User Email</h6>
+							<h3 className='fw-light mb-0'>{userProfile?.getEmail() || '(?)'}</h3>
 						</div>
 					</div>
-				</div>
+				</section>
 			)
 		} else {
 			cardAuthUser = (
@@ -105,32 +99,32 @@ export default function TabHome(props: Props) {
 
 	function renderCardDataFile(): JSX.Element {
 		return isLoading ? (
-			<div className='text-center'>
-				<div className='spinner-border spinner-border-lg text-primary mb-4' role='status'>
+			<div className='text-warning d-flex flex-column justify-content-center align-items-center h-100'>
+				<div className='spinner-border spinner-border-lg mb-4' role='status'>
 					<span className='visually-hidden' />
 				</div>
-				<div>Loading/Saving...</div>
+				<h3 className='mb-0 fw-light'>Loading/Saving...</h3>
 			</div>
 		) : driveDataFile ? (
 			<section>
 				<div className='row mb-3'>
 					<div className='col'>
-						<h6 className='card-title text-secondary'>File Name</h6>
-						<h4 className='fw-light mb-0'>{driveDataFile?.name || '(?)'}</h4>
+						<h6 className='card-title text-primary-emphasis'>File Name</h6>
+						<h3 className='fw-light mb-0'>{driveDataFile?.name || '(?)'}</h3>
 					</div>
 					<div className='col-auto text-end'>
-						<h6 className='card-title text-secondary'>Entries</h6>
-						<h4 className='fw-light mb-0'>{driveDataFile?.entries ? driveDataFile.entries.length : '-'}</h4>
+						<h6 className='card-title text-primary-emphasis'>File Size</h6>
+						<h3 className='fw-light mb-0'>{driveDataFile?.size ? getReadableFileSizeString(Number(driveDataFile.size)) : '-'}</h3>
 					</div>
 				</div>
 				<div className='row mt-4'>
 					<div className='col'>
-						<h6 className='card-title text-secondary'>Last Saved</h6>
-						<h4 className='fw-light mb-0'>{driveDataFile?.modifiedTime ? new Date(driveDataFile.modifiedTime).toLocaleString() : '-'}</h4>
+						<h6 className='card-title text-primary-emphasis'>Last Saved</h6>
+						<h3 className='fw-light mb-0'>{driveDataFile?.modifiedTime ? new Date(driveDataFile.modifiedTime).toLocaleString() : '-'}</h3>
 					</div>
 					<div className='col-auto text-end'>
-						<h6 className='card-title text-secondary'>File Size</h6>
-						<h4 className='fw-light mb-0'>{driveDataFile?.size ? getReadableFileSizeString(Number(driveDataFile.size)) : '-'}</h4>
+						<h6 className='card-title text-primary-emphasis'>Total Entries</h6>
+						<h3 className='fw-light mb-0'>{driveDataFile?.entries ? driveDataFile.entries.length : '-'}</h3>
 					</div>
 				</div>
 			</section>
@@ -142,7 +136,7 @@ export default function TabHome(props: Props) {
 	return (
 		<section className='m-2 m-md-5'>
 			<div className='be-bg-darkest p-4 p-md-5'>
-				<div className='row align-items-center g-0 mb-4'>
+				<div className='row align-items-center mb-5'>
 					<div className='col'>
 						<h1 className='display-4 text-primary mb-0 d-none d-md-none d-xl-block'>
 							<img src={LogoBase64} width='150' height='150' className='me-4' alt='Logo' />
@@ -165,11 +159,11 @@ export default function TabHome(props: Props) {
 					</div>
 					{isSignedIn && <div className='col-auto'>
 						<button className='btn btn-lg btn-success text-uppercase d-flex align-items-center' type='button' disabled={!driveDataFile || isLoading} onClick={() => doShowNewEntryModal()}>
-							<div className='text-start my-3 me-3'>
-								<Plus size='64' className='d-none  d-md-none d-lg-block' />
-								<Plus size='32' className='d-block d-lg-none mx-auto' />
+							<div className='text-start py-3 me-3'>
+								<Plus size='4rem' className='d-none  d-md-none d-lg-block' />
+								<Plus size='2rem' className='d-block d-lg-none mx-auto' />
 							</div>
-							<div className='text-start h3 my-3'>
+							<div className='text-start h3 mb-0 py-3'>
 								<div>Create</div>
 								<div>Entry</div>
 							</div>
@@ -179,19 +173,29 @@ export default function TabHome(props: Props) {
 				{isSignedIn ?
 					<div className='row g-5 row-cols-1 row-cols-md-2'>
 						<div className='col'>
-							<div className='card h-100'>
-								<div className='card-header bg-primary'>
-									<h5 className='card-title text-white'>{isSignedIn ? 'Signed In' : 'Signed Out'}</h5>
+							<div className='card text-bg-primary h-100'>
+								<div className='card-header'>
+									<h5 className='card-title'>Session Details</h5>
 								</div>
-								<div className='card-body'>{renderCardAuthUser()}</div>
+								<div className='card-body bg-primary-subtle'>{renderCardAuthUser()}</div>
+								<div className='card-footer bg-primary-subtle py-3'>
+									<button className='btn btn-outline-danger btn-lg w-100' onClick={signOut} disabled={isLoading}>
+										Sign Out
+									</button>
+								</div>
 							</div>
 						</div>
 						<div className='col'>
-							<div className='card h-100'>
-								<div className='card-header bg-primary'>
-									<h5 className='card-title text-white'>Dream Journal</h5>
+							<div className='card text-bg-primary h-100'>
+								<div className='card-header'>
+									<h5 className='card-title'>Dream Journal</h5>
 								</div>
-								<div className='card-body'>{renderCardDataFile()}</div>
+								<div className='card-body bg-primary-subtle'>{renderCardDataFile()}</div>
+								<div className='card-footer bg-primary-subtle py-3'>
+									<button className='btn btn-outline-warning btn-lg w-100' onClick={refreshData} disabled={isLoading}>
+										Reload Data
+									</button>
+								</div>
 							</div>
 						</div>
 					</div>
