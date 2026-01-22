@@ -21,8 +21,8 @@
     "react-contenteditable": "^3.3.7",
     "react-dom": "^18.3.1",
     "react-paginate": "^8.2.0",
-    "react-router": "^6.26.1",
-    "react-router-dom": "^6.26.1",
+    "react-router": "^6.30.3",
+    "react-router-dom": "^6.30.3",
     "react-tag-autocomplete": "^7.3.0",
     "recharts": "^2.12.7"
   },
