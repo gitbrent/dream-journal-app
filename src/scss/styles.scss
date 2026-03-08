@@ -65,6 +65,12 @@ $nav-underline-link-active-color: var(--be-bg-darkest);
 	background-color: var(--bs-dark-bg-subtle);
 }
 
+// Ensure pasted text in textareas and contenteditable areas always shows as white
+textarea.form-control,
+[contenteditable].form-control {
+	color: #fff !important;
+}
+
 .nav-tabs .nav-link {
 	border-bottom: none !important;
 }

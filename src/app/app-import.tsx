@@ -841,8 +841,13 @@ const TabImport: React.FC = () => {
 					}))
 					setTimeout(updateOptionResults, 100)
 				}} // handle innerHTML change
+				onPaste={(e: React.ClipboardEvent) => {
+					e.preventDefault()
+					const text = e.clipboardData.getData('text/plain')
+					document.execCommand('insertText', false, text)
+				}}
 				className='form-control mb-2'
-				style={{ minHeight: '300px', height: 'auto' }}
+				style={{ minHeight: '300px', height: 'auto', color: '#fff' }}
 			/>
 		</section>
 	)
@@ -1276,8 +1281,13 @@ const TabImport: React.FC = () => {
 						_importHTML: event.target.value,
 					}))
 				} // handle innerHTML change
+				onPaste={(e: React.ClipboardEvent) => {
+					e.preventDefault()
+					const text = e.clipboardData.getData('text/plain')
+					document.execCommand('insertText', false, text)
+				}}
 				className='form-control mb-2'
-				style={{ minHeight: '300px', height: 'auto' }}
+				style={{ minHeight: '300px', height: 'auto', color: '#fff' }}
 			/>
 			<div className='text-secondary'>({(state._importText || '').length} characters)</div>
 		</section>
