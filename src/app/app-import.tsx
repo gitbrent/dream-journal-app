@@ -29,11 +29,12 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect, useRef, type JSX } from 'react'
+import React, { useState, useEffect, useRef, useContext, type JSX } from 'react'
 import { IJournalDream, IJournalEntry, ImportTypes, InductionTypes, VERBOSE_IMPORT } from './app.types'
-import ContentEditable from 'react-contenteditable'
 import { ChevronRight, Cloud, Trash, Upload } from 'react-bootstrap-icons'
+import { DataContext } from '../api-google/DataContext'
 import { DateTime } from 'luxon'
+import ContentEditable from 'react-contenteditable'
 
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
 
@@ -80,6 +81,7 @@ interface IAppTabState {
 }
 
 const TabImport: React.FC = () => {
+	const { doesEntryDateExist, doEntryAdd, doSaveDataFile } = useContext(DataContext)
 	const refDemoData = useRef<HTMLDivElement>(null)
 	const refContentEditable = useRef<HTMLElement>(null)
 	const demoHtmlStr: string = `
@@ -189,7 +191,7 @@ const TabImport: React.FC = () => {
 		const currentYear = new Date().getFullYear();
 
 		// Try different date formats
-		const formats = ['MM/dd/yyyy', 'MM/dd', 'MMM dd', 'MMMM dd'];
+		const formats = ['yyyyMMdd', 'yyyy-MM-dd', 'MM/dd/yyyy', 'MM/dd', 'MMM dd', 'MMMM dd'];
 
 		let parsedDate = null;
 
@@ -467,6 +469,11 @@ const TabImport: React.FC = () => {
 		})
 	}
 
+	const handleClearAll = () => {
+		if (!confirm('Clear all staged entries? This cannot be undone.')) return
+		setState(prevState => ({ ...prevState, _parsedSections: [] }))
+	}
+
 	const handleDeleteEntry = (idx: number) => {
 
 		if (!confirm('Delete this Entry?')) return
@@ -514,9 +521,23 @@ const TabImport: React.FC = () => {
 			console.log(strImportText.split(strSecBreak))
 			console.log('--------------------------------------------------')
 		}
-		strImportText
-			.split(strSecBreak)
-			.filter((sect) => sect)
+		// Merge date-only sections with the following content section.
+		// This handles input like "20241015\n\nDREAM 1: ..." where the date sits alone on its own
+		// paragraph (separated from the content by a blank line).
+		const rawSections = strImportText.split(strSecBreak).filter((sect) => sect)
+		const mergedSections: string[] = []
+		for (let i = 0; i < rawSections.length; i++) {
+			const sect = rawSections[i]
+			if (parseDate(sect.trim()) !== null && i + 1 < rawSections.length) {
+				// date-only section — prepend it to the next section's content
+				mergedSections.push(sect.trim() + '\n' + rawSections[i + 1])
+				i++ // skip the next section since we just consumed it
+			} else {
+				mergedSections.push(sect)
+			}
+		}
+
+		mergedSections
 			.forEach((sect) => {
 				if (VERBOSE_IMPORT) console.log('IMPORT > ENTRY', sect)
 
@@ -735,9 +756,11 @@ const TabImport: React.FC = () => {
 			_invalidSections: [],
 		}))
 
-		// C: flag entries with duplicate `entryDate` (already exists in selected journal)
+		// C: flag entries with duplicate `entryDate` (already exists in selected journal or duplicated within batch)
 		state._parsedSections.forEach((sect) => {
-			if (state._parsedSections.filter((entry) => entry.entryDate === sect.entryDate).length > 0) {
+			const existsInJournal = doesEntryDateExist(sect.entryDate)
+			const duplicatedInBatch = state._parsedSections.filter((entry) => entry.entryDate === sect.entryDate).length > 1
+			if (existsInJournal || duplicatedInBatch) {
 				arrInvalidSects.push(sect)
 			}
 		})
@@ -746,11 +769,14 @@ const TabImport: React.FC = () => {
 		if (arrInvalidSects.length > 0) {
 			setState(prevState => ({ ...prevState, _invalidSections: arrInvalidSects }))
 		} else {
-			// STEP 1: Add all entry (this only adds entry to current JSON file)
-			state._parsedSections.forEach((sect) => console.log('Adding entry:', sect))
+			// STEP 1: Add all entries to the data file
+			state._parsedSections.forEach((sect) => doEntryAdd(sect))
 
 			// STEP 2: Write changes to cloud
-			console.log('All entries successfully added!');
+			doSaveDataFile().then((success) => {
+				if (success) console.log('All entries successfully saved to Drive!')
+				else console.error('Failed to save entries to Drive')
+			})
 
 			// B: Clear import text and parsed results
 			setState(prevState => ({
@@ -1263,7 +1289,10 @@ const TabImport: React.FC = () => {
 				<div className='col'>
 					<h3 className='text-success mb-0'>{'Parse Results: ' + state._parsedSections.length + ' daily entries'}</h3>
 				</div>
-				<div className='col-auto'>
+				<div className='col-auto d-flex gap-2'>
+					<button type='button' className='btn btn-outline-danger btn-lg' onClick={handleClearAll} disabled={state._parsedSections.length === 0}>
+						Clear All Entries
+					</button>
 					<button type='button' className='btn btn-success btn-lg' onClick={handleImport} disabled={state._parsedSections.length === 0}>
 						Import Journal Entries
 					</button>
