@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type JSX } from 'react'
 import { DateTime } from 'luxon'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IJournalEntry } from '../app.types'
 

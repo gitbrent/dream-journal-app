@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type JSX } from 'react'
 import { DateTime } from 'luxon'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IDreamTagByCat, IDriveDataFile, IJournalDream, IJournalEntry } from '../app.types'
 import { Search, Tag, Tags } from 'react-bootstrap-icons'
@@ -43,9 +43,9 @@ export default function BadgeEntries(props: Props) {
 	const [filterText, setFilterText] = useState('')
 	const [filterView, setFilterView] = useState(FilterView.group)
 	const [filterDate, setFilterDate] = useState(FilterDate.last30)
-	const [searchTerm, setSearchTerm] = useState('')
-	const [filterViewType, setFilterViewType] = useState<CardDreamSignGrpViewType>(CardDreamSignGrpViewType.sm)
-	const [filterSortOrder, setFilterSortOrder] = useState<FilterSortOrder>(FilterSortOrder.title)
+	const [searchTerm, _setSearchTerm] = useState('')
+	const [filterViewType, _setFilterViewType] = useState<CardDreamSignGrpViewType>(CardDreamSignGrpViewType.sm)
+	const [filterSortOrder, _setFilterSortOrder] = useState<FilterSortOrder>(FilterSortOrder.title)
 
 	useEffect(() => {
 		if (!props.dataFile || !props.dataFile.entries) return
@@ -105,7 +105,8 @@ export default function BadgeEntries(props: Props) {
 				})
 
 			// tagGroup
-			setDreamTagGroups(tagGroups)
+				// eslint-disable-next-line react-hooks/set-state-in-effect
+				setDreamTagGroups(tagGroups)
 		}
 		setOnlyDreams(tmpOnlyDreams)
 
@@ -210,7 +211,7 @@ export default function BadgeEntries(props: Props) {
 								setShowModal={(show: boolean) => props.setShowModal(show)}
 								tagGrp={tagGrp}
 								viewType={filterViewType}
-								doMassUpdateTag={(oldTag: string, newTag: string) => true}
+								doMassUpdateTag={(_oldTag: string, _newTag: string) => true}
 							/>
 						))}
 				</div>
@@ -262,7 +263,7 @@ export default function BadgeEntries(props: Props) {
 												setShowModal={(show: boolean) => props.setShowModal(show)}
 												tagGrp={tagGrp}
 												viewType={filterViewType}
-												doMassUpdateTag={(oldTag: string, newTag: string) => true}
+												doMassUpdateTag={(_oldTag: string, _newTag: string) => true}
 											/>
 										))}
 								</div>

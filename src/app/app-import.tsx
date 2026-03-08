@@ -29,7 +29,7 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, type JSX } from 'react'
 import { IJournalDream, IJournalEntry, ImportTypes, InductionTypes, VERBOSE_IMPORT } from './app.types'
 import ContentEditable from 'react-contenteditable'
 import { ChevronRight, Cloud, Trash, Upload } from 'react-bootstrap-icons'
@@ -804,7 +804,7 @@ const TabImport: React.FC = () => {
 		<section className='bg-black p-4 border border-dark'>
 			<h5 className='text-success text-uppercase mb-3'>Sample Journal Entry</h5>
 			<ContentEditable
-				innerRef={refDemoData}
+				innerRef={refDemoData as React.RefObject<HTMLElement>}
 				html={state._demoHTML} // innerHTML of the editable div
 				disabled={false} // use true to disable editing
 				onChange={(event) => {
@@ -1240,7 +1240,7 @@ const TabImport: React.FC = () => {
 				<li>Review the results, make any changes, then click Import to add them to your Brain Cloud journal</li>
 			</ul>
 			<ContentEditable
-				innerRef={refContentEditable}
+				innerRef={refContentEditable as React.RefObject<HTMLElement>}
 				html={state._importHTML} // innerHTML of the editable div
 				disabled={false} // use true to disable editing
 				onChange={(event) =>

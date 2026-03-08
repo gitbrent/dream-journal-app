@@ -93,15 +93,14 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 		})
 		const buffer = await response.arrayBuffer()
 		const decoded: string = new TextDecoder('utf-8').decode(buffer)
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		let json: Record<string, any> = {}
 		let entries: IJournalEntry[] = []
 
 		// A:
 		if (decoded && decoded.length > 0) {
 			try {
 				// NOTE: Initial dream-journal file is empty!
-				json = JSON.parse(decoded)
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				const json: Record<string, any> = JSON.parse(decoded)
 				entries = json['entries']
 			} catch (ex) {
 				alert(ex)

@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import { useContext } from 'react'
+import { useContext, type JSX } from 'react'
 import { APP_VER, IJournalEntry } from './app.types'
 import { AuthContext } from '../api-google/AuthContext'
 import { DataContext } from '../api-google/DataContext'
@@ -60,10 +60,8 @@ export default function TabHome(props: Props) {
 	}
 
 	function renderCardAuthUser(): JSX.Element {
-		let cardAuthUser: JSX.Element = <div />
-
 		if (isSignedIn) {
-			cardAuthUser = (
+			return (
 				<section>
 					<div className='row mb-4'>
 						<div className='col'>
@@ -83,18 +81,16 @@ export default function TabHome(props: Props) {
 					</div>
 				</section>
 			)
-		} else {
-			cardAuthUser = (
-				<div>
-					<p className='card-text mb-4'>Please sign-in to allow access to Google Drive space.</p>
-					<button className='btn btn-primary' onClick={() => signIn()}>
-						Sign In/Authorize
-					</button>
-				</div>
-			)
 		}
 
-		return cardAuthUser
+		return (
+			<div>
+				<p className='card-text mb-4'>Please sign-in to allow access to Google Drive space.</p>
+				<button className='btn btn-primary' onClick={() => signIn()}>
+					Sign In/Authorize
+				</button>
+			</div>
+		)
 	}
 
 	function renderCardDataFile(): JSX.Element {

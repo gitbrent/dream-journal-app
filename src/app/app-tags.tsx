@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState, type JSX } from 'react'
 import { DateTime } from 'luxon'
 import { IDreamSignTagGroup, IDreamTagByCat, IJournalDream, IJournalEntry } from './app.types'
 import { BarChart, Bar, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
@@ -61,6 +61,7 @@ export default function TabTags(props: IAppTagsProps) {
 		return tempEntries.sort((a, b) => (a.entryDate < b.entryDate ? -1 : 1))
 	}, [driveDataFile])
 
+	// eslint-disable-next-line react-hooks/preserve-manual-memoization
 	const dreamTagGroups = useMemo(() => {
 		return getGroupedTags(driveDataFile && driveDataFile.entries ? driveDataFile.entries : [])
 	}, [driveDataFile])
@@ -136,6 +137,7 @@ export default function TabTags(props: IAppTagsProps) {
 	useEffect(() => {
 		if (driveDataFile && !isNaN(tagChartClickedIdx) && chartDataTags && chartDataTags[tagChartClickedIdx]) {
 			const dateEntry = chartDataTags[tagChartClickedIdx].dateTime
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setTagChartClkEntries(
 				driveDataFile.entries
 					.filter(
@@ -334,7 +336,7 @@ export default function TabTags(props: IAppTagsProps) {
 						<ResponsiveContainer width='100%' height='100%'>
 							<BarChart
 								data={chartDataTags}
-								onClick={(data) => setTagChartClickedIdx(data?.activeTooltipIndex || 0)}>
+								onClick={(data) => setTagChartClickedIdx(Number(data?.activeTooltipIndex) || 0)}>
 								<XAxis dataKey='name' fontSize={'0.75rem'} interval='preserveStartEnd' />
 								<YAxis type='number' fontSize={'0.75rem'} />
 								<CartesianGrid stroke='#5c5c5c' strokeDasharray='6 2' vertical={false} />

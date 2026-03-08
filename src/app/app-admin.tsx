@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext, type JSX } from 'react'
 import { CardDreamSignGrpViewType, IDreamSignTagGroup, IJournalEntry } from './app.types'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
 import { DataContext } from '../api-google/DataContext'

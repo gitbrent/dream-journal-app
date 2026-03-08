@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import { useState, useEffect, useMemo, useContext } from 'react'
+import { useState, useEffect, useMemo, useContext, type JSX } from 'react'
 import { IConfMetaCats, IJournalEntry, ISearchMatch, SearchScopes } from './app.types'
 import {
 	ArrowDown,
@@ -92,6 +92,7 @@ export default function TabBedtime(props: Props) {
 			const randLucids: ISearchMatch[] = []
 
 			for (let idx = 0; idx < 3; idx++) {
+				// eslint-disable-next-line react-hooks/purity
 				randLucids.push(allLucids[Math.round(Math.random() * allLucids.length)])
 			}
 
@@ -112,6 +113,7 @@ export default function TabBedtime(props: Props) {
 		}
 
 		for (let idx = 0; idx < 3; idx++) {
+			// eslint-disable-next-line react-hooks/purity
 			randDreams.push(tempDreams[Math.round(Math.random() * tempDreams.length)])
 		}
 

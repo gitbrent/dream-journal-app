@@ -18,11 +18,11 @@ export default function TabSearch(props: Props) {
 	const localShowAlert = false // JSON.parse(localStorage.getItem('show-alert-search') || '')
 	//
 	const [showAlert, setShowAlert] = useState(typeof localShowAlert === 'boolean' ? localShowAlert : true)
-	const [totalDreams, setTotalDreams] = useState(0)
+	const [totalDreams, _setTotalDreams] = useState(0)
 	const [searchMatches, setSearchMatches] = useState<ISearchMatch[]>([])
 	const [searchOptScope, setSearchOptScope] = useState(SearchScopes.all)
 	const [searchTerm, setSearchTerm] = useState('')
-	const [searchTermInvalidMsg, setSearchTermInvalidMsg] = useState('')
+	const [searchTermInvalidMsg, _setSearchTermInvalidMsg] = useState('')
 	const [searchOptMatchType, setSearchOptMatchType] = useState(SearchMatchTypes.whole)
 
 	// ------------------------------------------------------------------------
