@@ -14,7 +14,7 @@
 // @see https://support.google.com/cloud/answer/6158849?hl=en#zippy=%2Cstep-create-a-new-client-secret
 
 // APP
-export const APP_BLD = '20260307-2012'
+export const APP_BLD = '20260308-2222'
 //export const APP_VER = `3.0.0-WIP ${APP_BLD}`
 export const APP_VER = `3.0.0-WIP`
 //export const APP_VER = '3.0.0'
