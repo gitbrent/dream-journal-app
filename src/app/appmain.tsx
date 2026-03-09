@@ -4,7 +4,7 @@
  * @see https://developers.google.com/drive/api/guides/fields-parameter
  * @see https://developers.google.com/drive/api/v3/reference/files/get
  */
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, type JSX } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
 import { IJournalEntry } from './app.types'
 import { AuthContext } from '../api-google/AuthContext'

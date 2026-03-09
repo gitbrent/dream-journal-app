@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import { useState, useMemo, useContext } from 'react'
+import { useState, useMemo, useContext, type JSX } from 'react'
 import { IJournalEntry } from './app.types'
 import { Braces, CalendarMonth, Calendar3, Tags } from 'react-bootstrap-icons'
 import AlertGdriveStatus from './components/alert-gstat'

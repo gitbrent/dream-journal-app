@@ -29,11 +29,12 @@
  *  SOFTWARE.
  */
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useContext, type JSX } from 'react'
 import { IJournalDream, IJournalEntry, ImportTypes, InductionTypes, VERBOSE_IMPORT } from './app.types'
-import ContentEditable from 'react-contenteditable'
 import { ChevronRight, Cloud, Trash, Upload } from 'react-bootstrap-icons'
+import { DataContext } from '../api-google/DataContext'
 import { DateTime } from 'luxon'
+import ContentEditable from 'react-contenteditable'
 
 const ENTRY_DATE_BREAK = 'SECTIONBREAK'
 
@@ -80,6 +81,7 @@ interface IAppTabState {
 }
 
 const TabImport: React.FC = () => {
+	const { doesEntryDateExist, doEntryAdd, doSaveDataFile } = useContext(DataContext)
 	const refDemoData = useRef<HTMLDivElement>(null)
 	const refContentEditable = useRef<HTMLElement>(null)
 	const demoHtmlStr: string = `
@@ -189,7 +191,7 @@ const TabImport: React.FC = () => {
 		const currentYear = new Date().getFullYear();
 
 		// Try different date formats
-		const formats = ['MM/dd/yyyy', 'MM/dd', 'MMM dd', 'MMMM dd'];
+		const formats = ['yyyyMMdd', 'yyyy-MM-dd', 'MM/dd/yyyy', 'MM/dd', 'MMM dd', 'MMMM dd'];
 
 		let parsedDate = null;
 
@@ -449,8 +451,8 @@ const TabImport: React.FC = () => {
 					// Type assertion to let TypeScript know that this key exists in IJournalDream
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					(dream as Record<string, any>)[name] = value
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					console.log((dream as Record<string, any>)[name]);
+					// //eslint-disable-next-line @typescript-eslint/no-explicit-any
+					// console.log((dream as Record<string, any>)[name]);
 				}
 			} else {
 				// Type guard to ensure `name` is a key of IJournalEntry and assign correctly
@@ -465,6 +467,11 @@ const TabImport: React.FC = () => {
 				_parsedSections: newParsedSections,
 			}
 		})
+	}
+
+	const handleClearAll = () => {
+		if (!confirm('Clear all staged entries? This cannot be undone.')) return
+		setState(prevState => ({ ...prevState, _parsedSections: [] }))
 	}
 
 	const handleDeleteEntry = (idx: number) => {
@@ -514,9 +521,31 @@ const TabImport: React.FC = () => {
 			console.log(strImportText.split(strSecBreak))
 			console.log('--------------------------------------------------')
 		}
-		strImportText
-			.split(strSecBreak)
-			.filter((sect) => sect)
+		// Build sections by scanning all lines when using 'first' date mode.
+		// This is robust against blank lines appearing anywhere within an entry
+		// (e.g. between PREP and DREAM sections), which would otherwise cause
+		// incorrect splits when relying on blank-line section breaks.
+		let mergedSections: string[]
+		if (state._selEntryType === 'first') {
+			mergedSections = []
+			let currentSection = ''
+			strImportText.split('\n').forEach((line) => {
+				if (parseDate(line.trim()) !== null) {
+					// This line is a date — start a new section
+					if (currentSection.trim()) mergedSections.push(currentSection)
+					currentSection = line + '\n'
+				} else {
+					currentSection += line + '\n'
+				}
+			})
+			if (currentSection.trim()) mergedSections.push(currentSection)
+		} else {
+			// For other modes, split on the section break and filter empty sections
+			const rawSections = strImportText.split(strSecBreak).filter((sect) => sect.trim())
+			mergedSections = rawSections
+		}
+
+		mergedSections
 			.forEach((sect) => {
 				if (VERBOSE_IMPORT) console.log('IMPORT > ENTRY', sect)
 
@@ -556,7 +585,7 @@ const TabImport: React.FC = () => {
 						// NOTE: As each of the Entry props have diff reqs, handle each one sep
 						if (idx === 0 && state._selEntryType === 'first') {
 							try {
-								const textParse = line.split('\n')[0]
+								const textParse = line.trim()
 								const parsedDate = parseDate(textParse)
 								objEntry.entryDate = parsedDate || '(HUH?)'
 							} catch (ex) {
@@ -630,7 +659,8 @@ const TabImport: React.FC = () => {
 							const keyVal = line.trim().split(new RegExp(state._title, 'g'))
 							if (keyVal[1]) objDream.title = keyVal[1].trim()
 						} else if (objDream.title && state._selDreamNotes === 'after' && line) {
-							objDream.notes += (line + '\n').replace(/\n\s*\n/g, '\n')
+							const cleanLine = line.replace(/^\s*[*•-]\s+/, '')
+							objDream.notes += (cleanLine + '\n').replace(/\n\s*\n/g, '\n')
 							//if (VERBOSE_IMPORT) console.log('dream.notes:\n' + objDream.notes)
 						} else if (state._selDreamNotes !== 'after') {
 							// TODO: look for regex
@@ -735,9 +765,11 @@ const TabImport: React.FC = () => {
 			_invalidSections: [],
 		}))
 
-		// C: flag entries with duplicate `entryDate` (already exists in selected journal)
+		// C: flag entries with duplicate `entryDate` (already exists in selected journal or duplicated within batch)
 		state._parsedSections.forEach((sect) => {
-			if (state._parsedSections.filter((entry) => entry.entryDate === sect.entryDate).length > 0) {
+			const existsInJournal = doesEntryDateExist(sect.entryDate)
+			const duplicatedInBatch = state._parsedSections.filter((entry) => entry.entryDate === sect.entryDate).length > 1
+			if (existsInJournal || duplicatedInBatch) {
 				arrInvalidSects.push(sect)
 			}
 		})
@@ -746,11 +778,14 @@ const TabImport: React.FC = () => {
 		if (arrInvalidSects.length > 0) {
 			setState(prevState => ({ ...prevState, _invalidSections: arrInvalidSects }))
 		} else {
-			// STEP 1: Add all entry (this only adds entry to current JSON file)
-			state._parsedSections.forEach((sect) => console.log('Adding entry:', sect))
+			// STEP 1: Add all entries to the data file
+			state._parsedSections.forEach((sect) => doEntryAdd(sect))
 
 			// STEP 2: Write changes to cloud
-			console.log('All entries successfully added!');
+			doSaveDataFile().then((success) => {
+				if (success) console.log('All entries successfully saved to Drive!')
+				else console.error('Failed to save entries to Drive')
+			})
 
 			// B: Clear import text and parsed results
 			setState(prevState => ({
@@ -804,7 +839,7 @@ const TabImport: React.FC = () => {
 		<section className='bg-black p-4 border border-dark'>
 			<h5 className='text-success text-uppercase mb-3'>Sample Journal Entry</h5>
 			<ContentEditable
-				innerRef={refDemoData}
+				innerRef={refDemoData as React.RefObject<HTMLElement>}
 				html={state._demoHTML} // innerHTML of the editable div
 				disabled={false} // use true to disable editing
 				onChange={(event) => {
@@ -815,8 +850,13 @@ const TabImport: React.FC = () => {
 					}))
 					setTimeout(updateOptionResults, 100)
 				}} // handle innerHTML change
+				onPaste={(e: React.ClipboardEvent) => {
+					e.preventDefault()
+					const text = e.clipboardData.getData('text/plain')
+					document.execCommand('insertText', false, text)
+				}}
 				className='form-control mb-2'
-				style={{ minHeight: '300px', height: 'auto' }}
+				style={{ minHeight: '300px', height: 'auto', color: '#fff' }}
 			/>
 		</section>
 	)
@@ -1240,7 +1280,7 @@ const TabImport: React.FC = () => {
 				<li>Review the results, make any changes, then click Import to add them to your Brain Cloud journal</li>
 			</ul>
 			<ContentEditable
-				innerRef={refContentEditable}
+				innerRef={refContentEditable as React.RefObject<HTMLElement>}
 				html={state._importHTML} // innerHTML of the editable div
 				disabled={false} // use true to disable editing
 				onChange={(event) =>
@@ -1250,8 +1290,13 @@ const TabImport: React.FC = () => {
 						_importHTML: event.target.value,
 					}))
 				} // handle innerHTML change
+				onPaste={(e: React.ClipboardEvent) => {
+					e.preventDefault()
+					const text = e.clipboardData.getData('text/plain')
+					document.execCommand('insertText', false, text)
+				}}
 				className='form-control mb-2'
-				style={{ minHeight: '300px', height: 'auto' }}
+				style={{ minHeight: '300px', height: 'auto', color: '#fff' }}
 			/>
 			<div className='text-secondary'>({(state._importText || '').length} characters)</div>
 		</section>
@@ -1263,7 +1308,10 @@ const TabImport: React.FC = () => {
 				<div className='col'>
 					<h3 className='text-success mb-0'>{'Parse Results: ' + state._parsedSections.length + ' daily entries'}</h3>
 				</div>
-				<div className='col-auto'>
+				<div className='col-auto d-flex gap-2'>
+					<button type='button' className='btn btn-outline-danger btn-lg' onClick={handleClearAll} disabled={state._parsedSections.length === 0}>
+						Clear All Entries
+					</button>
 					<button type='button' className='btn btn-success btn-lg' onClick={handleImport} disabled={state._parsedSections.length === 0}>
 						Import Journal Entries
 					</button>

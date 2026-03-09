@@ -27,7 +27,7 @@
  *  SOFTWARE.
  */
 
-import { useContext, useMemo } from 'react'
+import { useContext, useMemo, type JSX } from 'react'
 import { IDreamSignTagGroup, IJournalEntry, MetaType } from '../app.types'
 import { DataContext } from '../../api-google/DataContext'
 import { DateTime } from 'luxon'

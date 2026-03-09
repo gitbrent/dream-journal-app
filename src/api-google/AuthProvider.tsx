@@ -24,6 +24,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		}
 	}, []);
 
+	const fetchUserProfile = (): gapi.auth2.BasicProfile | null => {
+		const authInstance = gapi.auth2.getAuthInstance();
+		return authInstance ? authInstance.currentUser.get().getBasicProfile() : null;
+	};
+
 	useEffect(() => {
 		if (isSignedIn) {
 			setUserProfile(fetchUserProfile())
@@ -39,11 +44,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 	const signOut = () => {
 		gapi.auth2.getAuthInstance().signOut();
-	};
-
-	const fetchUserProfile = (): gapi.auth2.BasicProfile | null => {
-		const authInstance = gapi.auth2.getAuthInstance();
-		return authInstance ? authInstance.currentUser.get().getBasicProfile() : null;
 	};
 
 	return (
