@@ -451,8 +451,8 @@ const TabImport: React.FC = () => {
 					// Type assertion to let TypeScript know that this key exists in IJournalDream
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					(dream as Record<string, any>)[name] = value
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					console.log((dream as Record<string, any>)[name]);
+					// //eslint-disable-next-line @typescript-eslint/no-explicit-any
+					// console.log((dream as Record<string, any>)[name]);
 				}
 			} else {
 				// Type guard to ensure `name` is a key of IJournalEntry and assign correctly
@@ -521,20 +521,28 @@ const TabImport: React.FC = () => {
 			console.log(strImportText.split(strSecBreak))
 			console.log('--------------------------------------------------')
 		}
-		// Merge date-only sections with the following content section.
-		// This handles input like "20241015\n\nDREAM 1: ..." where the date sits alone on its own
-		// paragraph (separated from the content by a blank line).
-		const rawSections = strImportText.split(strSecBreak).filter((sect) => sect)
-		const mergedSections: string[] = []
-		for (let i = 0; i < rawSections.length; i++) {
-			const sect = rawSections[i]
-			if (parseDate(sect.trim()) !== null && i + 1 < rawSections.length) {
-				// date-only section — prepend it to the next section's content
-				mergedSections.push(sect.trim() + '\n' + rawSections[i + 1])
-				i++ // skip the next section since we just consumed it
-			} else {
-				mergedSections.push(sect)
-			}
+		// Build sections by scanning all lines when using 'first' date mode.
+		// This is robust against blank lines appearing anywhere within an entry
+		// (e.g. between PREP and DREAM sections), which would otherwise cause
+		// incorrect splits when relying on blank-line section breaks.
+		let mergedSections: string[]
+		if (state._selEntryType === 'first') {
+			mergedSections = []
+			let currentSection = ''
+			strImportText.split('\n').forEach((line) => {
+				if (parseDate(line.trim()) !== null) {
+					// This line is a date — start a new section
+					if (currentSection.trim()) mergedSections.push(currentSection)
+					currentSection = line + '\n'
+				} else {
+					currentSection += line + '\n'
+				}
+			})
+			if (currentSection.trim()) mergedSections.push(currentSection)
+		} else {
+			// For other modes, split on the section break and filter empty sections
+			const rawSections = strImportText.split(strSecBreak).filter((sect) => sect.trim())
+			mergedSections = rawSections
 		}
 
 		mergedSections
@@ -577,7 +585,7 @@ const TabImport: React.FC = () => {
 						// NOTE: As each of the Entry props have diff reqs, handle each one sep
 						if (idx === 0 && state._selEntryType === 'first') {
 							try {
-								const textParse = line.split('\n')[0]
+								const textParse = line.trim()
 								const parsedDate = parseDate(textParse)
 								objEntry.entryDate = parsedDate || '(HUH?)'
 							} catch (ex) {
@@ -651,7 +659,8 @@ const TabImport: React.FC = () => {
 							const keyVal = line.trim().split(new RegExp(state._title, 'g'))
 							if (keyVal[1]) objDream.title = keyVal[1].trim()
 						} else if (objDream.title && state._selDreamNotes === 'after' && line) {
-							objDream.notes += (line + '\n').replace(/\n\s*\n/g, '\n')
+							const cleanLine = line.replace(/^\s*[*•-]\s+/, '')
+							objDream.notes += (cleanLine + '\n').replace(/\n\s*\n/g, '\n')
 							//if (VERBOSE_IMPORT) console.log('dream.notes:\n' + objDream.notes)
 						} else if (state._selDreamNotes !== 'after') {
 							// TODO: look for regex
