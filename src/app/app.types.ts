@@ -15,9 +15,7 @@
 
 // APP
 export const APP_BLD = '20260308-2222'
-//export const APP_VER = `3.0.0-WIP ${APP_BLD}`
-export const APP_VER = `3.0.0-WIP`
-//export const APP_VER = '3.0.0'
+export const APP_VER = `2.1.0`
 export const IS_LOCALHOST = window.location.href.toLowerCase().indexOf('localhost') > -1
 export const VERBOSE_IMPORT = true
 
