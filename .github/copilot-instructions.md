@@ -25,8 +25,11 @@ src/
     DataProvider.tsx       # Fetches/saves conf+data files; provides CRUD methods
     google.types.ts        # IGapiFile interface
   app/
-    app.types.ts           # All shared types, enums, interfaces, constants
-    app.enums.tsx          # MILD affirmation enums
+    types/
+      app.constants.ts     # Constants & utilities: APP_VER, IS_LOCALHOST, log(), getLogLevel()
+      app.enums.ts         # All enums: AuthState, InductionTypes, SearchScopes, NightlyAffirmations, etc.
+      app.types.ts         # All interfaces: IJournalEntry, IDriveDataFile, ISearchMatch, etc.
+      index.ts             # Barrel re-export of all three files
     appmain.tsx            # App shell: routing, nav, modal wiring
     app-home.tsx           # Home tab: auth card, data file card, new entry button
     app-journal.tsx        # Journal tab: filterable entry table
@@ -47,7 +50,7 @@ src/
       search-results.tsx   # Search result display
 ```
 
-## Key Data Types (src/app/app.types.ts)
+## Key Data Types (src/app/types/)
 - `IDriveDataFile` — `{ id, entries: IJournalEntry[], modifiedTime, name, size }`
 - `IDriveConfFile` — `{ id, dreamIdeas, lucidGoals, mildAffirs, tagTypeAW/CO/FO/AC }`
 - `IJournalEntry` — `{ entryDate, bedTime, notesPrep, notesWake, dreams: IJournalDream[] }`
@@ -112,6 +115,6 @@ new Date(entry.modifiedTime).toLocaleString()  // display
 
 ## Notes
 - `appdata.ts` and `googlegsi.ts` are legacy classes; prefer `DataProvider`/`AuthProvider` for new features
-- `VERBOSE_IMPORT` and `IS_LOCALHOST` flags in `app.types.ts` control debug logging
+- `VERBOSE_IMPORT` and `IS_LOCALHOST` flags in `types/app.constants.ts` control debug logging
 - Log levels controlled via `?mode=debug|api|core` URL param using `log(level, message)`
 - Bootstrap modals are used for entry editing (`modal-entry.tsx`) and initialized via `useEffect`

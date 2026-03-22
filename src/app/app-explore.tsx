@@ -28,7 +28,7 @@
  */
 
 import { useContext, useEffect, useMemo, useState, type JSX } from 'react'
-import { IJournalEntry, MetaType } from './app.types'
+import { IJournalEntry, MetaType } from './types'
 import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { DataContext } from '../api-google/DataContext'
 import { DateTime } from 'luxon'

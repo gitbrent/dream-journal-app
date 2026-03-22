@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react'
 import { DateTime } from 'luxon'
-import { CardDreamSignGrpViewType, IDreamSignTagGroup, IJournalEntry } from '../app.types'
+import { CardDreamSignGrpViewType, IDreamSignTagGroup, IJournalEntry } from '../types'
 
 export interface Props {
 	setCurrEntry: (entry: IJournalEntry) => void

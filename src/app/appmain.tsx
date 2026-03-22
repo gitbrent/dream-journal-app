@@ -6,7 +6,7 @@
  */
 import { useContext, useEffect, useState, type JSX } from 'react'
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom'
-import { IJournalEntry } from './app.types'
+import { IJournalEntry } from './types'
 import { AuthContext } from '../api-google/AuthContext'
 import { DataContext } from '../api-google/DataContext'
 import TabHome from '../app/app-home'

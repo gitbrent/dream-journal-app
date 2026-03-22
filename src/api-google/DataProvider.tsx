@@ -1,5 +1,5 @@
 import React, { useState, ReactNode } from 'react'
-import { IDriveConfFile, IDriveDataFile, IJournalEntry, log } from '../app/app.types'
+import { IDriveConfFile, IDriveDataFile, IJournalEntry, log } from '../app/types'
 import { DataContext } from './DataContext'
 
 interface DataProviderProps {

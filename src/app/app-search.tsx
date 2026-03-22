@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react'
-import { IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './app.types'
+import { IJournalEntry, ISearchMatch, SearchMatchTypes, SearchScopes } from './types'
 import { Search } from 'react-bootstrap-icons'
 import SearchResults from './components/search-results'
 import HeaderMetrics from './components/header-metrics'

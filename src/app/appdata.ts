@@ -2,7 +2,7 @@
  * perform data engine functions
  * - acts as interface between app ("edit entry", "save data file") requests and googlegsi.ts
  */
-import { AuthState, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry } from './app.types'
+import { AuthState, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry } from './types'
 import { googlegsi } from './googlegsi'
 
 export class appdata {

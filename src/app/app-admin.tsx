@@ -28,7 +28,7 @@
  */
 
 import { useState, useEffect, useContext, type JSX } from 'react'
-import { CardDreamSignGrpViewType, IDreamSignTagGroup, IJournalEntry } from './app.types'
+import { CardDreamSignGrpViewType, IDreamSignTagGroup, IJournalEntry } from './types'
 import { InfoCircle, Search } from 'react-bootstrap-icons'
 import { DataContext } from '../api-google/DataContext'
 import DreamTagCard from './components/dreamtag-card'

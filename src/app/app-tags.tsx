@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useState, type JSX } from 'react'
 import { DateTime } from 'luxon'
-import { IDreamSignTagGroup, IDreamTagByCat, IJournalDream, IJournalEntry } from './app.types'
+import { IDreamSignTagGroup, IDreamTagByCat, IJournalDream, IJournalEntry } from './types'
 import { BarChart, Bar, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Search, Tag, Tags } from 'react-bootstrap-icons'
 import { DataContext } from '../api-google/DataContext'

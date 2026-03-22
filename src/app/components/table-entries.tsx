@@ -28,7 +28,7 @@
  */
 
 import { useState } from 'react'
-import { IJournalEntry, MetaType } from '../app.types'
+import { IJournalEntry, MetaType } from '../types'
 import { CheckCircleFill, Diagram3Fill, SortDownAlt, SortUpAlt, StarFill, TagFill } from 'react-bootstrap-icons'
 import ReactPaginate from 'react-paginate'
 

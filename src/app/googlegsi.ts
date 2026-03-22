@@ -16,7 +16,7 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference types="google-one-tap" />
 /// <reference types="gapi" />
-import { AuthState, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry, IS_LOCALHOST } from './app.types'
+import { AuthState, IAuthState, IDriveConfFile, IDriveDataFile, IJournalEntry, IS_LOCALHOST } from './types'
 import { TokenResponse, IGapiFile, TokenClientConfig } from './googlegsi.types'
 import { CredentialResponse } from 'google-one-tap'
 import { decodeJwt } from 'jose'

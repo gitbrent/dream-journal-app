@@ -28,7 +28,7 @@
  */
 
 import { useContext, useMemo, type JSX } from 'react'
-import { IDreamSignTagGroup, IJournalEntry, MetaType } from '../app.types'
+import { IDreamSignTagGroup, IJournalEntry, MetaType } from '../types'
 import { DataContext } from '../../api-google/DataContext'
 import { DateTime } from 'luxon'
 

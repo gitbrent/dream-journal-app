@@ -1,5 +1,5 @@
 import { TagFill } from 'react-bootstrap-icons'
-import { ISearchMatch, SearchScopes, SearchMatchTypes, MetaType, IJournalEntry } from '../app.types'
+import { ISearchMatch, SearchScopes, SearchMatchTypes, MetaType, IJournalEntry } from '../types'
 import { DateTime } from 'luxon'
 
 interface Props {

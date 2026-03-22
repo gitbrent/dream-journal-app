@@ -28,7 +28,7 @@
  */
 
 import { useContext, type JSX } from 'react'
-import { APP_VER, IJournalEntry } from './app.types'
+import { APP_VER, IJournalEntry } from './types'
 import { AuthContext } from '../api-google/AuthContext'
 import { DataContext } from '../api-google/DataContext'
 import { Plus } from 'react-bootstrap-icons'

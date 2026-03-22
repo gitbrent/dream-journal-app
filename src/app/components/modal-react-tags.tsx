@@ -2,7 +2,7 @@
  * @see https://github.com/i-like-robots/react-tag-autocomplete/blob/HEAD/migration-guide.md
  */
 import { useCallback } from 'react'
-import { IJournalEntry } from '../app.types'
+import { IJournalEntry } from '../types'
 import { ReactTags, TagSuggestion } from 'react-tag-autocomplete'
 
 interface Props {

@@ -28,7 +28,7 @@
  */
 
 import { useState, useEffect, useMemo, useContext, type JSX } from 'react'
-import { IConfMetaCats, IJournalEntry, ISearchMatch, SearchScopes } from './app.types'
+import { IConfMetaCats, IJournalEntry, ISearchMatch, SearchScopes } from './types'
 import {
 	ArrowDown,
 	ArrowUp,

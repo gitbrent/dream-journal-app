@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { IDriveConfFile, IDriveDataFile, IJournalEntry } from "../app/app.types";
+import { IDriveConfFile, IDriveDataFile, IJournalEntry } from "../app/types";
 
 interface DataContextProps {
 	isLoading: boolean;

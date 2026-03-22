@@ -28,7 +28,7 @@
  */
 
 import { useState, useMemo, useContext, type JSX } from 'react'
-import { IJournalEntry } from './app.types'
+import { IJournalEntry } from './types'
 import { Braces, CalendarMonth, Calendar3, Tags } from 'react-bootstrap-icons'
 import AlertGdriveStatus from './components/alert-gstat'
 import HeaderMetrics from './components/header-metrics'

@@ -30,7 +30,7 @@
  */
 
 import React, { useState, useEffect, useRef, useContext, type JSX } from 'react'
-import { IJournalDream, IJournalEntry, ImportTypes, InductionTypes, VERBOSE_IMPORT } from './app.types'
+import { IJournalDream, IJournalEntry, ImportTypes, InductionTypes, VERBOSE_IMPORT } from './types'
 import { ChevronRight, Cloud, Trash, Upload } from 'react-bootstrap-icons'
 import { DataContext } from '../api-google/DataContext'
 import { DateTime } from 'luxon'
